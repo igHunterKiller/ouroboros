@@ -75,6 +75,9 @@ size_t split_path(const char* path
 			*out_basename = nullptr;
 	}
 
+	if (!*out_root && !*out_basename && *out_ext)
+		*out_basename = path;
+
 	return len;
 }
 

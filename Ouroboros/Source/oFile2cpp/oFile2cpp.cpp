@@ -55,7 +55,7 @@ int main(int argc, const char* argv[])
 			s += buf;
 		}
 
-		snprintf(buf, oNEWLINE "}; // %s" oNEWLINE, Name.c_str());
+		snprintf(buf, oNEWLINE "}; // %s %u bytes" oNEWLINE, Name.c_str(), b.size());
 		s += buf;
 
 		filesystem::save(outfile, s.c_str(), s.length(), filesystem::save_option::binary_write);

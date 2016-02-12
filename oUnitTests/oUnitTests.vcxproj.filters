@@ -4,9 +4,6 @@
     <ClCompile Include="oUnitTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="oooii_icon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="unit_test_framework.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

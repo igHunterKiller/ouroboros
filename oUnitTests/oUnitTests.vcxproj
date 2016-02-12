@@ -180,7 +180,6 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="oooii_icon.cpp" />
     <ClCompile Include="oUnitTests.cpp" />
     <ClCompile Include="unit_test_framework.cpp" />
   </ItemGroup>

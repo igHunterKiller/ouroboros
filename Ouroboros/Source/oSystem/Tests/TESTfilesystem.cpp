@@ -16,6 +16,9 @@ using namespace ouro::filesystem;
 
 using namespace ouro;
 
+static const char* sTestFile = "ouro.ico";
+static const uint128 sExpectedTestFileHash(6836006664531726549ull, 10557781598736531897ull);
+
 static void TESTfilesystem_paths()
 {
 	auto path = current_path();
@@ -41,7 +44,7 @@ static void TESTfilesystem_read(unit_test::services& srv)
 	static const unsigned int kNumReads = 5;
 
 	path_t TestPath = srv.root_path();
-	TestPath /= "ouro.ico";
+	TestPath /= sTestFile;
 	oCHECK(exists(TestPath), "not found: %s", TestPath.c_str());
 
 	scoped_file ReadFile(TestPath, open_option::binary_read);
@@ -50,7 +53,7 @@ static void TESTfilesystem_read(unit_test::services& srv)
 	size_t BytesPerRead = static_cast<size_t>(FileSize) / kNumReads;
 	int ActualReadCount = kNumReads + (((FileSize % kNumReads) > 0) ? 1 : 0);
 
-	char TempFileBlob[1024 * 32];
+	char TempFileBlob[1024 * 100];
 	void* pHead = TempFileBlob;
 
 	size_t r = 0;
@@ -68,8 +71,8 @@ static void TESTfilesystem_read(unit_test::services& srv)
 	if (RemainingBytes > 0)
 		read(ReadFile, pHead, size_t((char*)pHead - TempFileBlob), RemainingBytes);
 
-	static const uint128 ExpectedFileHash(13254728276562583748ull, 8059648572410507760ull);
-	oCHECK(murmur3(TempFileBlob, static_cast<unsigned int>(FileSize)) == ExpectedFileHash, "Test failed to compute correct hash");
+	auto hash = murmur3(TempFileBlob, static_cast<unsigned int>(FileSize));
+	oCHECK(hash == sExpectedTestFileHash, "Test failed to compute correct hash");
 }
 
 static void TESTfilesystem_write()
@@ -155,7 +158,7 @@ void TESTfilesystem_async1(unit_test::services& srv)
 void TESTfilesystem_async2(unit_test::services& services)
 {
 	path_t TestPath = services.root_path();
-	TestPath /= "ouro.ico";
+	TestPath /= sTestFile;
 	if (!exists(TestPath))
 		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), std::string("not found: ") + TestPath.c_str());
 	blob p;
@@ -182,8 +185,8 @@ void TESTfilesystem_async2(unit_test::services& services)
 
 	e.wait_for(std::chrono::seconds(10));
 
-	static const uint128 kExpectedFileHash(13254728276562583748ull, 8059648572410507760ull);
-	oCHECK(murmur3(p, static_cast<unsigned int>(p.size())) == kExpectedFileHash, "Test failed to compute correct hash" );
+	auto hash = murmur3(p, static_cast<unsigned int>(p.size()));
+	oCHECK(hash == sExpectedTestFileHash, "Test failed to compute correct hash" );
 }
 
 void TESTfilesystem_async_save(unit_test::services& services)
