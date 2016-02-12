@@ -41,7 +41,7 @@ static void TESTfilesystem_read(unit_test::services& srv)
 	static const unsigned int kNumReads = 5;
 
 	path_t TestPath = srv.root_path();
-	TestPath /= "oooii.ico";
+	TestPath /= "ouro.ico";
 	oCHECK(exists(TestPath), "not found: %s", TestPath.c_str());
 
 	scoped_file ReadFile(TestPath, open_option::binary_read);
@@ -155,7 +155,7 @@ void TESTfilesystem_async1(unit_test::services& srv)
 void TESTfilesystem_async2(unit_test::services& services)
 {
 	path_t TestPath = services.root_path();
-	TestPath /= "oooii.ico";
+	TestPath /= "ouro.ico";
 	if (!exists(TestPath))
 		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), std::string("not found: ") + TestPath.c_str());
 	blob p;
