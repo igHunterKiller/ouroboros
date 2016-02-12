@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oGfx">
+      <UniqueIdentifier>{27b0fc5c-0f0b-460c-8f48-195292123217}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{1775e422-7373-4d7a-aa46-8537140a2263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oGfx\Needs Code Review">
+      <UniqueIdentifier>{9adf1f58-973f-4a5a-b34b-8cf48c536773}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Needs Code Review">
+      <UniqueIdentifier>{a2c56fc8-5e16-43e6-bd26-f9f5efbe0119}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oGfx\Resource Registries">
+      <UniqueIdentifier>{d3d6a868-4064-48b3-95c2-1068d138fde4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Resource Registries">
+      <UniqueIdentifier>{1b9af844-fa6e-4454-97a9-1d12dbde5d3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oGfx\Scene Elements">
+      <UniqueIdentifier>{a9ca1c9c-00a7-4da8-a243-c27058fc58d2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Scene Elements">
+      <UniqueIdentifier>{1630ab90-d7b4-4e27-81e2-cf917cdf8c1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oGfx\Shader Definitions">
+      <UniqueIdentifier>{68c8e74b-1d01-45d7-bd86-16cc4d2f8ea5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Shader Definitions">
+      <UniqueIdentifier>{732161b0-9f59-45ca-b89d-1afb546797ec}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="oGfxShaders.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="bytecode.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="shader_registries.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="techniques.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="gpu_fixed_state.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="gpu_pipeline_state.cpp">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClCompile>
+    <ClCompile Include="film.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="model_registry.cpp">
+      <Filter>Source\Resource Registries</Filter>
+    </ClCompile>
+    <ClCompile Include="texture_registries.cpp">
+      <Filter>Source\Resource Registries</Filter>
+    </ClCompile>
+    <ClCompile Include="scene.cpp">
+      <Filter>Source\Scene Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="pivot.cpp">
+      <Filter>Source\Scene Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="gpu_signature.cpp">
+      <Filter>Source\Shader Definitions</Filter>
+    </ClCompile>
+    <ClCompile Include="vertex_layouts.cpp">
+      <Filter>Source\Shader Definitions</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oGfx\oGfxHLSL.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\oGfxLightConstants.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\oGfxMaterialConstants.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\oGfxShaders.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\bytecode.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\camera.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\material.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\shader_registers.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\shader_registries.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode_util.h">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="techniques.h">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="gpu_fixed_state.h">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="gpu_pipeline_state.h">
+      <Filter>Source\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\texture_registries.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\film.h">
+      <Filter>oGfx\Needs Code Review</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\renderer.h">
+      <Filter>oGfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\device_resource_registry.h">
+      <Filter>oGfx\Resource Registries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\draw_constants.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\misc_constants.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\view_constants.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\model_registry.h">
+      <Filter>oGfx\Resource Registries</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\scene.h">
+      <Filter>oGfx\Scene Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\pivot.h">
+      <Filter>oGfx\Scene Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\prim_constants.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\vertex_layouts.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\gpu_signature.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\gpu_signature_slots.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="oGfxShaders.hlsl">
+      <Filter>Source\Shader Definitions</Filter>
+    </CustomBuild>
+    <CustomBuild Include="vertex_layouts_sig.hlsl">
+      <Filter>Source\Shader Definitions</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="oGfxShaders.txt">
+      <Filter>Source\Shader Definitions</Filter>
+    </None>
+    <None Include="vertex_layouts_sig.txt">
+      <Filter>Source\Shader Definitions</Filter>
+    </None>
+  </ItemGroup>
+</Project>

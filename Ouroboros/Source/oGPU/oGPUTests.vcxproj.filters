@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Tests\TESTGPUSpinningTriangle.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTexture1D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTexture1DMip.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTexture2D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTexture2DMip.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTexture3D.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTexture3DMip.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTextureCube.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTextureCubeMip.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUTriangle.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUQuery.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPULineList.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUInstancedTriangle.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUClear.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUDevice.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUWindowInWindow.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPURenderTarget.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\TESTGPUBuffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\gpu_pipeline_state.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\gpu_test_common.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source\Common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Tests\gpu_pipeline_state.h">
+      <Filter>Source\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests\gpu_test_common.h">
+      <Filter>Source\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests\gpu_test_constants.h">
+      <Filter>Source\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source\Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{fd19efdb-4f32-458a-98fd-f81c013d89eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Common">
+      <UniqueIdentifier>{bebed592-9644-4f7d-a892-7cdd36128032}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="oGPUTestsShaders.hlsl">
+      <Filter>Source\Common</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="oGPUTestsShaders.txt">
+      <Filter>Source\Common</Filter>
+    </None>
+  </ItemGroup>
+</Project>

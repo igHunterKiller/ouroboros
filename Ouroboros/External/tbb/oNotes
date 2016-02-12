@@ -1,0 +1,6 @@
+Stable release of TBB 4.2 update 2
+tbb42_20131118oss_win.zip
+https://www.threadingbuildingblocks.org/sites/default/files/software_releases/windows/tbb42_20131118oss_win.zip
+
+Libs were put in Ouroboros/Libs/... and dlls in the proper bin folders. Both 
+debug and release builds link to the release TBB.

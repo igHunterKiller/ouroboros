@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oMemory">
+      <UniqueIdentifier>{c5677553-a5ac-4a90-af6a-2edcef21ffeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{28ac2ce3-b491-4e94-9b74-f1fc30c45630}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Allocators">
+      <UniqueIdentifier>{b63502df-b6dc-4e12-90ab-c9d123d04eee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oMemory\Allocators">
+      <UniqueIdentifier>{5a97ce9b-6e45-4a58-bbef-6246fa857719}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oMemory\Hashes">
+      <UniqueIdentifier>{16dad314-b647-4400-b24c-9de569df0377}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Hashes">
+      <UniqueIdentifier>{e885df45-ae48-4d72-97ea-d8dd97d0d357}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Allocators\tlsf">
+      <UniqueIdentifier>{98ce568e-adf8-414b-a70f-ecb2cf9d5f5b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="memset8.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="rle_decode.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="rle_decoden.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="utfcmp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="dtoull.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="is_ascii.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memcmp4.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memmem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memnset.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memset2.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memset2d.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memset2d2.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memset2d4.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memset2d8.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="memset4.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="allocate.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="sbb.cpp">
+      <Filter>Source\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="sbb_allocator.cpp">
+      <Filter>Source\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="tlsf_allocator.cpp">
+      <Filter>Source\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="MurmurHash3.cpp">
+      <Filter>Source\Hashes</Filter>
+    </ClCompile>
+    <ClCompile Include="concurrent_pool.cpp">
+      <Filter>Source\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="pool.cpp">
+      <Filter>Source\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="small_block_allocator.cpp">
+      <Filter>Source\Allocators</Filter>
+    </ClCompile>
+    <ClCompile Include="xxhash.c">
+      <Filter>Source\Hashes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\tlsf\tlsf.c">
+      <Filter>Source\Allocators\tlsf</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="memduff.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\memory.h">
+      <Filter>oMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\all.h">
+      <Filter>oMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\allocate.h">
+      <Filter>oMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\fnv1a.h">
+      <Filter>oMemory\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\djb2.h">
+      <Filter>oMemory\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\murmur3.h">
+      <Filter>oMemory\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="MurmurHash3.h">
+      <Filter>Source\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\sbb_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\tlsf_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\sbb.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\object_pool.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\pool.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\concurrent_object_pool.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\concurrent_pool.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\concurrent_linear_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\linear_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\std_linear_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\std_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\small_block_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="xxhash.h">
+      <Filter>Source\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\xxhash.h">
+      <Filter>oMemory\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\wang.h">
+      <Filter>oMemory\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\spatial_hash.h">
+      <Filter>oMemory\Hashes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\concurrent_ring_allocator.h">
+      <Filter>oMemory\Allocators</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMemory\swizzle.h">
+      <Filter>oMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\tlsf\tlsfbits.h">
+      <Filter>Source\Allocators\tlsf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\tlsf\tlsf.h">
+      <Filter>Source\Allocators\tlsf</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\External\tlsf\tlsf_readme.txt">
+      <Filter>Source\Allocators\tlsf</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

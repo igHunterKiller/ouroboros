@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oSurface">
+      <UniqueIdentifier>{a1ffddc5-88d1-482c-8241-cdc9d085309f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{b2232d52-2b4a-4733-b54b-bf5c03daa24a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\codecs">
+      <UniqueIdentifier>{c10bd930-538b-4910-b68b-7ceae5aa0cb8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="fill.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="surface.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="codec.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="convert.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="bmp.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="libpng.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="libjpgturbo.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="tga.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="dds.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="psd.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="oimg.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="format.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tile.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="algo.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="subresource.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ies.cpp">
+      <Filter>Source\codecs</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\surface.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\codec.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\convert.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\fill.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\resize.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\all.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="psd.h">
+      <Filter>Source\codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="tga.h">
+      <Filter>Source\codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="bmp.h">
+      <Filter>Source\codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="dds.h">
+      <Filter>Source\codecs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\image.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\format.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\tile.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\algo.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\subresource.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSurface\box.h">
+      <Filter>oSurface</Filter>
+    </ClInclude>
+    <ClInclude Include="ies.h">
+      <Filter>Source\codecs</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

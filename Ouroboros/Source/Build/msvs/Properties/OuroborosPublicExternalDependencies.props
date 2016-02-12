@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <OuroborosExtDir>$(OuroborosSuiteDir)External\</OuroborosExtDir>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(OuroborosExtDir)bullet\vectormathlibrary\include;$(OuroborosExtDir)BC6HBC7EncoderDecoder11\;$(OuroborosExtDir)OpenEXR\Half;$(OuroborosExtDir)OpenSSL\openssl-1.0.0e\include\;$(OuroborosExtDir)tbb\include\;$(OuroborosExtDir)libjpegTurbo\;$(OuroborosExtDir)OFED_SDK\Inc\;$(OuroborosExtDir)ispc_texcomp\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FREEIMAGE_LIB;__TBB_NO_IMPLICIT_LINKAGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libjpegTurbo$(oBuildSuffix).lib;libpng$(oBuildSuffix).lib;lzma$(oBuildSuffix).lib;ispc_texcomp$(oBuildSuffix).lib;snappy$(oBuildSuffix).lib;tbb.lib;wininet.lib;zlib$(oBuildSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OuroborosSuiteDir)Lib\$(Platform)\$(oCompilerName);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <DelayLoadDLLs>tbb.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+    </Link>
+    <FXC>
+      <AdditionalDependencies>$(OuroborosSuiteDir)Include\oHLSL\oHLSLAtomics.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLBit.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLMacros.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLMath.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLStructs.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLSwizzlesOff.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLSwizzlesOn.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLTypes.h;$(OuroborosSuiteDir)Include\oHLSL\oHLSLTypesInternal.h;$(OuroborosSuiteDir)Include\oCompute\oComputeColor.h;$(OuroborosSuiteDir)Include\oCompute\oComputeConstants.h;$(OuroborosSuiteDir)Include\oCompute\oComputeFilter.h;$(OuroborosSuiteDir)Include\oCompute\oComputeGBuffer.h;$(OuroborosSuiteDir)Include\oCompute\oComputeMorton.h;$(OuroborosSuiteDir)Include\oCompute\oComputePhong.h;$(OuroborosSuiteDir)Include\oCompute\oComputeProcedural.h;$(OuroborosSuiteDir)Include\oCompute\oComputeRaycast.h;$(OuroborosSuiteDir)Include\oCompute\oComputeSimplex.h;$(OuroborosSuiteDir)Include\oCompute\oComputeUtil.h;$(OuroborosSuiteDir)Include\oCompute\oQuaternion.h;$(OuroborosSuiteDir)Include\oGfx\oGfxHLSL.h;$(OuroborosSuiteDir)Include\oGfx\oGfxDrawConstants.h;$(OuroborosSuiteDir)Include\oGfx\oGfxLightConstants.h;$(OuroborosSuiteDir)Include\oGfx\oGfxMaterialConstants.h;$(OuroborosSuiteDir)Include\oGfx\oGfxVertexElements.h;$(OuroborosSuiteDir)Include\oGfx\oGfxViewConstants.h</AdditionalDependencies>
+    </FXC>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <BuildMacro Include="OuroborosExtDir">
+      <Value>$(OuroborosExtDir)</Value>
+      <EnvironmentVariable>true</EnvironmentVariable>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

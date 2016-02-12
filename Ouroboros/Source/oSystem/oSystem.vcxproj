@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oSystem\adapter.h" />
+    <ClInclude Include="..\..\Include\oSystem\all.h" />
+    <ClInclude Include="..\..\Include\oSystem\camera.h" />
+    <ClInclude Include="..\..\Include\oSystem\cpu.h" />
+    <ClInclude Include="..\..\Include\oSystem\debugger.h" />
+    <ClInclude Include="..\..\Include\oSystem\display.h" />
+    <ClInclude Include="..\..\Include\oSystem\filesystem.h" />
+    <ClInclude Include="..\..\Include\oSystem\filesystem_monitor.h" />
+    <ClInclude Include="..\..\Include\oSystem\filesystem_util.h" />
+    <ClInclude Include="..\..\Include\oSystem\golden_image.h" />
+    <ClInclude Include="..\..\Include\oSystem\module.h" />
+    <ClInclude Include="..\..\Include\oSystem\page_allocator.h" />
+    <ClInclude Include="..\..\Include\oSystem\peripherals.h" />
+    <ClInclude Include="..\..\Include\oSystem\process.h" />
+    <ClInclude Include="..\..\Include\oSystem\process_heap.h" />
+    <ClInclude Include="..\..\Include\oSystem\process_killer.h" />
+    <ClInclude Include="..\..\Include\oSystem\process_stats_monitor.h" />
+    <ClInclude Include="..\..\Include\oSystem\reporting.h" />
+    <ClInclude Include="..\..\Include\oSystem\serial_port.h" />
+    <ClInclude Include="..\..\Include\oSystem\system.h" />
+    <ClInclude Include="..\..\Include\oSystem\thread_traits.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_com.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_crt_heap.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_crt_leak_tracker.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_error.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_exception_handler.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_iocp.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_registry.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_skeleton.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_util.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_version.h" />
+    <ClInclude Include="..\..\Include\oSystem\windows\win_winsock.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="adapter.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="cpu.cpp" />
+    <ClCompile Include="debugger.cpp" />
+    <ClCompile Include="display.cpp" />
+    <ClCompile Include="filesystem.cpp" />
+    <ClCompile Include="filesystem_monitor.cpp" />
+    <ClCompile Include="golden_image.cpp" />
+    <ClCompile Include="keyboard.cpp" />
+    <ClCompile Include="module.cpp" />
+    <ClCompile Include="module_dependencies.cpp" />
+    <ClCompile Include="mouse.cpp" />
+    <ClCompile Include="pad.cpp" />
+    <ClCompile Include="page_allocator.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="process.cpp" />
+    <ClCompile Include="process_heap.cpp" />
+    <ClCompile Include="process_killer.cpp" />
+    <ClCompile Include="reporting.cpp" />
+    <ClCompile Include="serial_port.cpp" />
+    <ClCompile Include="system.cpp" />
+    <ClCompile Include="thread_traits.cpp" />
+    <ClCompile Include="winmain.cpp" />
+    <ClCompile Include="win_com.cpp" />
+    <ClCompile Include="win_crt_heap.cpp" />
+    <ClCompile Include="win_crt_leak_tracker.cpp" />
+    <ClCompile Include="win_error.cpp" />
+    <ClCompile Include="win_exception_handler.cpp" />
+    <ClCompile Include="win_gsreport.cpp" />
+    <ClCompile Include="win_iocp.cpp" />
+    <ClCompile Include="win_registry.cpp" />
+    <ClCompile Include="win_skeleton.cpp" />
+    <ClCompile Include="win_version.cpp" />
+    <ClCompile Include="win_winsock.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7DC758B0-32CF-4BBC-ABDE-0EB53B9EF93C}</ProjectGuid>
+    <RootNamespace>oSystem</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+    <ProjectName>oSystem</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

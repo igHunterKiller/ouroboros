@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<oUI version="1.0">
+  <Control Type="Tab" Text="Computer Name|Hardware|Advanced|System Protection|Remote" Pos="6 7" Size="398 393" ID="ID_TAB">
+    <RefPoint Name="Computer Name Page" Pos="-6 -7" Visible="true">
+      <Control Type="Label" Text="Windows uses the following information to identify your computer on the network." Pos="64 37" Size="310 30" ID="ID_COMPUTER_LABEL" />
+      <Control Type="Label" Text="Computer description:" Pos="15 79" Size="106 16" ID="ID_COMPUTER_DESC_LABEL" />
+      <Control Type="Textbox" Text="" Pos="139 76" Size="233 20" ID="ID_COMPUTER_DESC_TEXTBOX" />
+      <Control Type="Label" Text="For example: &quot;Kitchen Computer&quot; or &quot;Mary&apos;s Computer&quot;." Pos="139 103" Size="220 30" ID="ID_COMPUTER_DESC_EXAMPLE" />
+      <Control Type="Label" Text="Full computer name:" Pos="15 136" Size="106 16" ID="ID_COMPUTER_NAME_LABEL" />
+      <Control Type="Label" Text="" Pos="139 136" Size="106 16" ID="ID_COMPUTER_NAME_VALUE" />
+      <Control Type="Label" Text="Workgroup:" Pos="15 160" Size="106 16" ID="ID_COMPUTER_WORKGROUP_LABEL" />
+      <Control Type="Label" Text="" Pos="139 160" Size="106 16" ID="ID_COMPUTER_WORKGROUP_VALUE" />
+
+      <Control Type="Label" Text="To use a wizard to join a domain or workgroup, click Network ID." Pos="15 194" Size="252 30" ID="ID_COMPUTER_NETWORK_ID_LABEL" />
+      <Control Type="Button" Text="Network ID..."  Pos="282 194" Size="90 23" ID="ID_COMPUTER_NETWORK_ID_BUTTON" />
+      <Control Type="Label" Text="To rename this computer or change its domain or workgroup, click Change."  Pos="15 245" Size="240 30" ID="ID_COMPUTER_WORKGROUP_RENAME_LABEL" />
+      <Control Type="Button" Text="Change..."  Pos="282 245" Size="90 23" ID="ID_COMPUTER_WORKGROUP_RENAME_BUTTON" />
+    </RefPoint>
+    <RefPoint Name="Hardware Page" Pos="-6 -7" Visible="false">
+      <Control Type="Group" Text="Device Manager" Pos="15 42" Size="363 101" ID="ID_HARDWARE_DEVICE_MANAGER_GROUP">
+        <Control Type="Icon" Pos="-5 -32" ID="ID_HARDWARE_DEVICE_MANAGER_ICON" Visible="false" />
+        <Control Type="Label" Text="The Device Manager lists all the hardware devices installed on your computer. Use the Device Manager to change the properties of any device." Pos="42 -23" Size="280 38" ID="ID_HARDWARE_DEVICE_MANAGER_LABEL" />
+        <Control Type="Button" Text="Device Manager" Align="bottom_right" Pos="-26 -54" Size="177 23" ID="ID_HARDWARE_DEVICE_MANAGER_BUTTON" />
+      </Control>
+      <Control Type="Group" Text="Device Installation Settings" Pos="15 150" Size="363 106" ID="ID_HARDWARE_DEVICE_INSTALL_GROUP">
+        <Control Type="Label" Text="Choose whether Windows downloads driver software for your devices and detailed information about them." Pos="42 -130" Size="290 38" ID="ID_HARDWARE_DEVICE_INSTALL_LABEL" />
+        <Control Type="Button" Text="Device Installation Settings" Align="bottom_right" Pos="-26 -161" Size="177 23" ID="ID_HARDWARE_DEVICE_INSTALL_BUTTON" />
+      </Control>
+    </RefPoint>
+    <RefPoint Name="Advanced Page" Pos="-6 -7" Visible="false">
+      <Control Type="Label" Text="You must be logged on as an Administrator to make most of these changes." Pos="19 35" Size="360 14" ID="ID_ADVANCED_ADMIN_LOGON" />
+      <Control Type="Group" Text="Performance" Pos="15 58" Size="363 86" ID="ID_ADVANCED_PERFORMANCE_GROUP">
+        <RefPoint Name="Correction" Pos="-15 -58" Visible="false">
+          <Control Type="Label" Text="Visual effects, processor scheduling, memory usage, and virtual memory" Pos="10 19" Size="340 17" ID="ID_ADVANCED_PERFORMANCE_LABEL"/>
+          <Control Type="Button" Text="Settings..." Align="bottom_right" Pos="-10 -11" Size="74 23" ID="ID_ADVANCED_PERFORMANCE_SETTINGS" />
+        </RefPoint>
+      </Control>
+      <Control Type="Group" Text="User Profiles" Pos="15 150" Size="363 86" ID="ID_ADVANCED_USER_PROFILES_GROUP">
+        <RefPoint Name="Correction" Pos="-15 -150" Visible="false">
+          <Control Type="Label" Text="Desktop settings related to your logon" Pos="10 20" Size="340 17" ID="ID_ADVANCED_USER_PROFILES_LABEL"/>
+          <Control Type="Button" Text="Settings..." Align="bottom_right" Pos="-10 -11" Size="74 23" ID="ID_ADVANCED_USER_PROFILES_SETTINGS" />
+        </RefPoint>
+      </Control>
+      <Control Type="Group" Text="Startup and Recovery" Pos="15 243" Size="363 86" ID="ID_ADVANCED_STARTUP_GROUP">
+        <RefPoint Name="Correction" Pos="-15 -243" Visible="false">
+          <Control Type="Label" Text="System startup, system failure, and debugging information" Pos="10 20" Size="340 17" ID="ID_ADVANCED_STARTUP_LABEL"/>
+          <Control Type="Button" Text="Settings..." Align="bottom_right" Pos="-10 -11" Size="74 23" ID="ID_ADVANCED_STARTUP_SETTINGS" />
+        </RefPoint>
+      </Control>
+      <Control Type="Button" Text="Environment Variables..." Align="bottom_right" Pos="-20 -29" Size="128 23" ID="ID_ADVANCED_ENVIRONMENT_VARIABLES" />
+    </RefPoint>
+    <RefPoint Name="System Protection Page" Pos="-6 -7" Visible="false">
+      <Control Type="Hyperlabel" Text="Use system protection to undo unwanted system changes and restore previous versions of files. &lt;a id=&quot;ID_SYSPROT_LABEL&quot;&gt;What is system protection?&lt;/a&gt;" Pos="57 33" Size="300 30" ID="ID_SYSPROT_LABEL" />
+      <Control Type="Label" Text="System Restore" Pos="15 89" Size="300 30" ID="ID_SYSPROT_RESTORE_TITLE" />
+      <Control Type="Label" Text="You can undo system changes by reverting your computer to a previous restore point." Pos="19 116" Size="205 30" ID="ID_SYSPROT_RESTORE_LABEL" />
+      <Control Type="Button" Text="System Restore..." Pos="231 118" Size="158 23" ID="ID_SYSPROT_RESTORE_BUTTON" />
+      <Control Type="Label" Text="Protection Settings" Pos="15 185" Size="300 30" ID="ID_SYSPROT_SETTINGS_TITLE" />
+
+      <Control Type="Label" Text="Configure restore settings, manage disk space, and delete restore points." Pos="25 298" Size="222 30" ID="ID_SYSPROT_CONFIG_RESTORE_LABEL" />
+      <Control Type="Button" Text="Configure..." Pos="262 298" Size="104 23" ID="ID_SYSPROT_CONFIG_RESTORE_BUTTON" />
+      <Control Type="Label" Text="Create a restore point right now for the drives that have system protection turned on." Pos="25 344" Size="232 30" ID="ID_SYSPROT_RESTORE_POINT_LABEL" />
+      <Control Type="Button" Text="Create..." Pos="262 344" Size="104 23" ID="ID_SYSPROT_RESTORE_POINT_BUTTON" />
+    </RefPoint>
+    <RefPoint Name="Remote Tab Page" Pos="-6 -7" Visible="false">
+      <Control Type="Group" Text="Remote Assistance" Pos="13 32" Size="366 124" ID="ID_REMOTE_ASSISTANCE_GROUP">
+        <RefPoint Name="Correction" Pos="-13 -32" Visible="false">
+          <Control Type="Checkbox" Text="Allow Remote Assistance connections to this computer" Pos="9 29" Size="300 20" ID="ID_ALLOW_REMOTE_ASSISTANCE" />
+          <Control Type="Hyperlabel" Text="&lt;a id=&quot;ID_REMOTE_ASSISTANCE_WHAT_HAPPENS&quot;&gt;What happens when I enable Remote Assistance?&lt;/a&gt;" Pos="9 63" Size="300 20" ID="ID_REMOTE_ASSISTANCE_WHAT_HAPPENS"/>
+          <Control Type="Button" Text="Advanced..." Align="bottom_right" Pos="-11 -13" Size="92 23" ID="ID_REMOTE_ADVANCED"/>
+        </RefPoint>
+      </Control>
+      <Control Type="Group" Text="Remote Desktop" Pos="13 173" Size="366 202" ID="ID_REMOTE_DESKTOP_GROUP">
+        <RefPoint Name="Correction" Pos="-13 -173" Visible="false">
+          <Control Type="Label" Text="Click an option, and then specify who can connect, if needed." Pos="9 29" Size="300 20" ID="ID_REMOTE_DESKTOP_CLICK"/>
+          <Control Type="Radio" Text="Don&apos;t allow connections to this computer" Pos="9 60" Size="300 20" ID="ID_REMOTE_DESKTOP_RADIO1" StartNewGroup="true" />
+          <Control Type="Radio" Text="Allow connections from computers running any version of Remote Desktop (less secure)" Pos="9 90" Size="300 30" ID="ID_REMOTE_DESKTOP_RADIO2" />
+          <Control Type="Radio" Text="Allow connections only from computers running Remote Desktop with Network Level Authentication (more secure)" Pos="9 129" Size="300 30" ID="ID_REMOTE_DESKTOP_RADIO3" />
+          <Control Type="Hyperlabel" Text="&lt;a ID=&quot;ID_REMOTE_DESKTOP_HELP_ME_CHOOSE&quot;&gt;Help me choose&lt;/a&gt;" Align="bottom_left" Pos="9 -8" Size="100 20" ID="ID_REMOTE_DESKTOP_HELP_ME_CHOOSE" StartNewGroup="true" />
+          <Control Type="Button" Text="Select Users..." Align="bottom_right" Pos="-10 -11" Size="93 23" ID="ID_REMOTE_DESKTOP_SELECT_USERS" />
+        </RefPoint>
+      </Control>
+    </RefPoint>
+  </Control>
+  <RefPoint Name="Bottom Buttons">
+    <Control Type="Button" Text="OK" Align="bottom_right" Pos ="-168 -7" ID="ID_OK" />
+    <Control Type="Button" Text="Cancel" Align="bottom_right" Pos ="-87 -7" ID="ID_CANCEL" />
+    <Control Type="Button" Text="Apply" Enabled="false" Align="bottom_right" Pos ="-6 -7" ID="ID_APPLY" />
+  </RefPoint>
+</oUI>

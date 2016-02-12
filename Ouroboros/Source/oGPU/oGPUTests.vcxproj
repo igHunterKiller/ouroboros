@@ -1,0 +1,190 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{4A47DD9B-03E2-4F97-AB66-1222148F9AF1}</ProjectGuid>
+    <RootNamespace>oGPUTests</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+    <ProjectName>oGPUTests</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Tests\gpu_pipeline_state.h" />
+    <ClInclude Include="Tests\gpu_test_common.h" />
+    <ClInclude Include="Tests\gpu_test_constants.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Tests\gpu_pipeline_state.cpp" />
+    <ClCompile Include="Tests\gpu_test_common.cpp" />
+    <ClCompile Include="Tests\TESTGPUBuffer.cpp" />
+    <ClCompile Include="Tests\TESTGPUClear.cpp" />
+    <ClCompile Include="Tests\TESTGPUDevice.cpp" />
+    <ClCompile Include="Tests\TESTGPUInstancedTriangle.cpp" />
+    <ClCompile Include="Tests\TESTGPULineList.cpp" />
+    <ClCompile Include="Tests\TESTGPUQuery.cpp" />
+    <ClCompile Include="Tests\TESTGPURenderTarget.cpp" />
+    <ClCompile Include="Tests\TESTGPUSpinningTriangle.cpp" />
+    <ClCompile Include="Tests\TESTGPUTexture1D.cpp" />
+    <ClCompile Include="Tests\TESTGPUTexture1DMip.cpp" />
+    <ClCompile Include="Tests\TESTGPUTexture2D.cpp" />
+    <ClCompile Include="Tests\TESTGPUTexture2DMip.cpp" />
+    <ClCompile Include="Tests\TESTGPUTexture3D.cpp" />
+    <ClCompile Include="Tests\TESTGPUTexture3DMip.cpp" />
+    <ClCompile Include="Tests\TESTGPUTextureCube.cpp" />
+    <ClCompile Include="Tests\TESTGPUTextureCubeMip.cpp" />
+    <ClCompile Include="Tests\TESTGPUTriangle.cpp" />
+    <ClCompile Include="Tests\TESTGPUWindowInWindow.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="oGPUTestsShaders.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectDir)$(ProjectName)Shaders.hlsl $(ProjectDir)$(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include /I$(ProjectDir)Tests</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectDir)$(ProjectName)Shaders.hlsl $(ProjectDir)$(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include /I$(ProjectDir)Tests</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectDir)$(ProjectName)Shaders.hlsl $(ProjectDir)$(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include /I$(ProjectDir)Tests</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectDir)$(ProjectName)Shaders.hlsl $(ProjectDir)$(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include /I$(ProjectDir)Tests</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building $(ProjectName) Shaders...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(oSuiteDir)Include/oCompute/oComputeConstants.h;$(ProjectDir)Tests/oGPUTestHLSL.h</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(oSuiteDir)Include/oCompute/oComputeConstants.h;$(ProjectDir)Tests/oGPUTestHLSL.h</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(oSuiteDir)Include/oCompute/oComputeConstants.h;$(ProjectDir)Tests/oGPUTestHLSL.h</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(oSuiteDir)Include/oCompute/oComputeConstants.h;$(ProjectDir)Tests/oGPUTestHLSL.h</AdditionalInputs>
+    </CustomBuild>
+    <None Include="oGPUTestsShaders.txt" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

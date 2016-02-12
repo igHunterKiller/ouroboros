@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oMesh">
+      <UniqueIdentifier>{919c4b20-e89f-4c1b-b1c9-a1c3bd8c019a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{f52a9ac2-686c-4526-b3b5-1f56be88d54e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="obj.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="primitive.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="face.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="codec.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="obj_codec.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="omdl.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="element.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\all.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\mesh.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh_template.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\obj.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\primitive.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\model.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\face.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\codec.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMesh\element.h">
+      <Filter>oMesh</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

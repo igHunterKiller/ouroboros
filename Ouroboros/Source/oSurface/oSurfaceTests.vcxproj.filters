@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{16b96004-43ad-4578-812d-94aa7fc0b191}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tests\TESTsurface.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTsurface_codec.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTsurface_resize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTsurface_fill.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTsurface_generate_mips.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTsurface_bccodec.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,123 @@
+=== Roadmap ===
+
+This document is the ramblings and notes I make as I'm thinking about what to do 
+next, or random ideas I get from work that I want to explore more.
+
+
+=== Ultimate Goal ===
+
+I want some decent rendering from stuff I can get for free off the web (I've got 
+no art budget!) and to build this system in isolated widgets as much as possible. 
+The overall effort is a bonzai-tree that's meant to pick apart a piece of a modern 
+engine and explore it so I learn it thoroughly. The goal is not to push through to 
+some final completed game - I do that professionally. This is to tear off one engine
+nugget at a time and explore it.
+
+
+=== Tasklist ===
+
+ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
+      1 SpecViz       oSurface    toksvig     Need a version of generate_mips that toksvig-izes specular maps
+      2               oSurface    noise       Make a CPU-side noise fill so terrain maps can be generated in a tool
+      3 Queries       oBase       #pixels     Integrate internet trick to estimate pixels of a rendered sphere
+     11               oApp        exhandle    Put a final try-catch so that we never fall to the unhandled handler
+     12               oGUI        owinreview  Review oWinWindowing towards using exceptions and simplifying it.
+     16               oMesh       creasing    Incorporate a crease threshold in calculating normals
+     22               oMath       primitives  Add outlines unit test
+     23               oMath       skydome     Add hemisphere/skydome primitive
+     24               oUnitTest   devmode     Add a dev/interactive mode cmdline option so working with graphics tests is easier
+     25               oMesh       texgen      Apply all texgens: planar, spherical, tri-lateral, toroidal, etc.
+     26               oGfx        texgen      Apply all texgens in shaders
+     27               oGfx        dependency  There's something up with dependencies in oGfx... might be two .hlsl compiles that depend on each other.
+     28               oCore       review      Review this: "typedef ouro::process_heap::std_allocator<std::function<void()>> allocator_t;"
+     31               oCompute    remove      Remove oCompute: generate tasks/deps here. Most of this should live somewhere else.
+     32               oCore       socket      Do something with socket.h socket_listener.h
+     34               ???         ???         Find graphics_state and find a place for it (or delete it).
+     50               Testing     refactor    Where should golden_path go? Are there more elements coming that need an oTest lib?
+     53               oGPU        hotkeymenu  Is there a way to automatically attach a hotkey to a menu entry?
+     59               Testing     tests       oCore_win_crt_leak_tracker (sometimes succeeds)
+     60               oString     deps        Try to remove path_t's dependency on fixed_string
+     74               oCore       refactor    is macros.h worth having? Review and remove if appropriate.
+	 76               oMath       gizmo       Something happens between r637 and r638 that makes the gizmo misbehave while manipulating camera: investigate
+	 80               oGfx        renderer    Move btt_test elements into main renderer - start terrain rendering.
+	 81               oGfx        renderer    Why break up film separately? Why not have pov be a member of the renderer? These things aren't really separable or reusable.
+	 82               oGfx        renderer    Replace placeholder lines-based grid with something that mips into the distance better - resurrect grid shader.
+	 83               oGfx        renderer    Add stippling to gizmo rendering.
+	 84               oGfx        renderer    Use the btt stuff to create a 0.1v of a terrain thing
+	 85               oGfx        renderer    Implement trivially basic model rendering
+	 86               oCore       hash_map    Replace std::function deps with templated function pattern
+	 88               oGfx        renderer    Get a model loading from obj (no material)
+	 89 88            oGfx        renderer    Get some geometry-based debug viz defined
+	 90               oGfx        renderer    See about getting a font/text rendering method up. Prepare for menus (i.e. background color/text hilight).
+	 91 89            oGfxView    ui          File Open, any simple mesh operations, debug viz exposed, etc.
+	 92               oGfx        debug menu  See about adding some listing of texture registry and allow triggering of loading the texture with stats
+	 93 82?           oGfx        renderer    Tinker with some default shaders: noise-based, resurrect 'draft' shader (3d grid shader?)
+	 94               oGfx        renderer    Get some kind of light geometry going, be able to transform it
+	 95               oGfx        renderer    Be able to select and gizmo-ize one of several models loaded into a scene
+	 96               oGfx        renderer    figure out a load/save for a file format for a scene (how can it be future-proof?)
+	 97               oGfx        renderer    get a trivial lighting shader going: phong, spot
+	 98               oGfx        renderer    spot shadow
+	 99 98            oGfx        renderer    csm
+	100               oGfx        renderer    research & implement 'splitting planes'
+	101 99            oGfx        renderer    sdsm
+	102 101           oGfx        renderer    soft-contact shadows
+	103               oGfx        renderer    ensure all light type basics in prep for shadow casting
+	104 98            oGfx        renderer    cube shadows? or just right into dual-parabloid?
+	105 98            oGfx        renderer    revisit TSM - it's obtusely difficult math-wise so it'd be good practice and still seems like a promising applicable effect
+	106               oGfx        renderer    define notion of material: analytical? or sample-based?
+	107               oGUI        ui          property sheet based on some lightweight osc-like thing
+	108 107           oGfxView    ui          Make the window bigger for the render space and the UI
+	109               ?           ?           Move wang hash to HLSL-compile. Does that mean it needs to be in 2 places?
+	110               Ouroboros   all         Move code to GitHub
+	111 110           Externals               Update Ouroboros website/issues site once moved to GitHub
+	112               Externals               Update bullet source - code.google.com is gone.
+	113               Externals               Update snappy source - code.google.com is gone.
+	114               Externals               Add lz4 to the compression pantheon
+	115               Externals               I hear-tell there's better than lz4 out there... add it to the pantheon
+
+
+=== Notes ===
+
+This section contains observations in various domains.
+
+
+= Error Reporting =
+
+Consider specific exceptions, or some enumeration of common errors:
+  - improper_lock (when a non-recursive mutex is relocked)
+  - container_not_empty (when a container is destroyed and should be empty, but isn't)
+  - not_joinable (when join is called on something that is not joinable)
+
+
+= Text Document Parsing =
+
+Add reporting of line number of error for text file parsing in a way that supports line continuations?
+- Copy original file. ** this is the big issue: 2x memory, but for text files does it matter?
+- Pre-process to remove line continuations.
+  - If an error is detected, determine the post-processed line number.
+  - Find line numbers for each occurrance of the surrounding characters in the original.
+  - Choose first orig line greater than pp line
+
+
+= gpu window =
+
+A simpler gpu window would need 80% of the existing window functionality. The idea is 
+to avoid coupling oGPU and oGUI. Ideas that would make it simpler: 
+
+Put the vast majority of the logic in some win32 helper code and use that natively, so
+duplicate the classes almost, but most of the meat will be shared.
+
+Remove the concepts that make ouro::window so complicated:
+1. remove status bar type as a 1st-class citizen; wrap up syntactic sugar for statusbar and that's it.
+2. Remove IsRenderTarget flag for a window. Change it to 'erase bg' since parent needs it as much as gpu does.
+
+
+= gfx renderer =
+
+Rendering involves rendering all offscreen textures, then the main texture that uses them.
+But that means that a renderer could render to a texture, then the same renderer reset to a view from there.
+If the renderer is truly decoupled and submits just continue along, then though the view and resolve texture change are important.
+
+What does 'split-screen' support mean practically? What scope are the large buffers of a typical renderer? per split-screen? per monitor? per-view?
+
+Why do I have a vertex_scale in draw_constants when that could be combined in the transform matrix?

@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="bytecode.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="film.cpp" />
+    <ClCompile Include="gpu_fixed_state.cpp" />
+    <ClCompile Include="gpu_pipeline_state.cpp" />
+    <ClCompile Include="gpu_signature.cpp" />
+    <ClCompile Include="model_registry.cpp" />
+    <ClCompile Include="oGfxShaders.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="pivot.cpp" />
+    <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="scene.cpp" />
+    <ClCompile Include="shader_registries.cpp" />
+    <ClCompile Include="techniques.cpp" />
+    <ClCompile Include="texture_registries.cpp" />
+    <ClCompile Include="vertex_layouts.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oGfx\bytecode.h" />
+    <ClInclude Include="..\..\Include\oGfx\camera.h" />
+    <ClInclude Include="..\..\Include\oGfx\device_resource_registry.h" />
+    <ClInclude Include="..\..\Include\oGfx\draw_constants.h" />
+    <ClInclude Include="..\..\Include\oGfx\film.h" />
+    <ClInclude Include="..\..\Include\oGfx\gpu_signature.h" />
+    <ClInclude Include="..\..\Include\oGfx\gpu_signature_slots.h" />
+    <ClInclude Include="..\..\Include\oGfx\material.h" />
+    <ClInclude Include="..\..\Include\oGfx\misc_constants.h" />
+    <ClInclude Include="..\..\Include\oGfx\model_registry.h" />
+    <ClInclude Include="..\..\Include\oGfx\oGfxHLSL.h" />
+    <ClInclude Include="..\..\Include\oGfx\oGfxLightConstants.h" />
+    <ClInclude Include="..\..\Include\oGfx\oGfxMaterialConstants.h" />
+    <ClInclude Include="..\..\Include\oGfx\oGfxShaders.h" />
+    <ClInclude Include="..\..\Include\oGfx\pivot.h" />
+    <ClInclude Include="..\..\Include\oGfx\prim_constants.h" />
+    <ClInclude Include="..\..\Include\oGfx\renderer.h" />
+    <ClInclude Include="..\..\Include\oGfx\scene.h" />
+    <ClInclude Include="..\..\Include\oGfx\shader_registers.h" />
+    <ClInclude Include="..\..\Include\oGfx\shader_registries.h" />
+    <ClInclude Include="..\..\Include\oGfx\texture_registries.h" />
+    <ClInclude Include="..\..\Include\oGfx\vertex_layouts.h" />
+    <ClInclude Include="..\..\Include\oGfx\view_constants.h" />
+    <ClInclude Include="bytecode_util.h" />
+    <ClInclude Include="gpu_fixed_state.h" />
+    <ClInclude Include="gpu_pipeline_state.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="techniques.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="oGfxShaders.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectName)Shaders.hlsl $(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building $(ProjectName) Shaders...</Message>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(oSuiteDir)Include/oCompute/oComputeUtil.h;$(oSuiteDir)Include/oGfx/gpu_signature_slots.h;$(oSuiteDir)Include/oGfx/draw_constants.h;$(oSuiteDir)Include/oGfx/misc_constants.h;$(oSuiteDir)Include/oGfx/view_constants.h;$(oSuiteDir)Include/oGfx/vertex_layouts.h;$(oSuiteDir)Source/oGfx/oGfxShaders.txt</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(oSuiteDir)Include/oCompute/oComputeUtil.h;$(oSuiteDir)Include/oGfx/gpu_signature_slots.h;$(oSuiteDir)Include/oGfx/draw_constants.h;$(oSuiteDir)Include/oGfx/misc_constants.h;$(oSuiteDir)Include/oGfx/view_constants.h;$(oSuiteDir)Include/oGfx/vertex_layouts.h;$(oSuiteDir)Source/oGfx/oGfxShaders.txt</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(oSuiteDir)Include/oCompute/oComputeUtil.h;$(oSuiteDir)Include/oGfx/gpu_signature_slots.h;$(oSuiteDir)Include/oGfx/draw_constants.h;$(oSuiteDir)Include/oGfx/misc_constants.h;$(oSuiteDir)Include/oGfx/view_constants.h;$(oSuiteDir)Include/oGfx/vertex_layouts.h;$(oSuiteDir)Source/oGfx/oGfxShaders.txt</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(oSuiteDir)Include/oCompute/oComputeUtil.h;$(oSuiteDir)Include/oGfx/gpu_signature_slots.h;$(oSuiteDir)Include/oGfx/draw_constants.h;$(oSuiteDir)Include/oGfx/misc_constants.h;$(oSuiteDir)Include/oGfx/view_constants.h;$(oSuiteDir)Include/oGfx/vertex_layouts.h;$(oSuiteDir)Source/oGfx/oGfxShaders.txt</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)$(ProjectName)Shaders.h</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building $(ProjectName) Shaders...</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectName)Shaders.hlsl $(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectName)Shaders.hlsl $(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)$(ProjectName)Shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd $(ProjectName)Shaders.hlsl $(ProjectName)Shaders.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+    </CustomBuild>
+    <None Include="oGfxShaders.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="vertex_layouts_sig.hlsl">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)vertex_layouts_sig_shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd vertex_layouts_sig.hlsl vertex_layouts_sig.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)vertex_layouts_sig_shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd vertex_layouts_sig.hlsl vertex_layouts_sig.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)vertex_layouts_sig_shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd vertex_layouts_sig.hlsl vertex_layouts_sig.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">echo // Satisfy Visual Studio Output Requirements &gt;&gt; $(IntDir)vertex_layouts_sig_shaders.h
+$(oSuiteDir)Source/Build/CompileShaders.cmd vertex_layouts_sig.hlsl vertex_layouts_sig.txt $(IntDir) /I$(oSuiteDir)Include</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building $(ProjectName) Shaders...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building $(ProjectName) Shaders...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)vertex_layouts_sig_shaders.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)vertex_layouts_sig_shaders.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)vertex_layouts_sig_shaders.h</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)vertex_layouts_sig_shaders.h</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(oSuiteDir)Include/oGfx/vertex_layouts.h</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(oSuiteDir)Include/oGfx/vertex_layouts.h</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(oSuiteDir)Include/oGfx/vertex_layouts.h</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(oSuiteDir)Include/oGfx/vertex_layouts.h</AdditionalInputs>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="vertex_layouts_sig.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{72EE4284-DF31-4D9F-B796-5DE7E2521D5D}</ProjectGuid>
+    <RootNamespace>oGfx</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\pch.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

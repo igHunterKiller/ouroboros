@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oMath">
+      <UniqueIdentifier>{a7768e95-5ed8-45ce-ae9a-9ae6405c65bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{8c316d0a-36a2-44d8-9d49-39847d62de18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oMath\intersection">
+      <UniqueIdentifier>{95e06ffa-2cf0-41c7-a53a-0f121fe3743e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\intersection">
+      <UniqueIdentifier>{8b0a041c-e003-4cca-8c03-fdcb774867af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oMath\matrix">
+      <UniqueIdentifier>{e7f73cd0-d586-417a-8930-6232183dff64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oMath\misc">
+      <UniqueIdentifier>{40bcff88-4035-40ff-b874-94c58b1dc63d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\misc">
+      <UniqueIdentifier>{0a8f282f-29b1-48a9-9136-1e1624e45b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\matrix">
+      <UniqueIdentifier>{43407c46-9a2d-4505-b93a-c00beb4b0a72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oMath\geometry">
+      <UniqueIdentifier>{1bcc20e5-b804-485d-9762-a5203d65d4ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\geometry">
+      <UniqueIdentifier>{a0171277-3ec6-440b-b6a1-affc463c7f41}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oMath\seg_v_seg.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\hlsl.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
+    <ClInclude Include="slab.h">
+      <Filter>Source\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_v_aabb.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\hlslx.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\floats.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\plane_v_plane_v_plane.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_v_plane.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\quat.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_v_sphere.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_closest_points.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\clip_convex.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_v_torus.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\quantize.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\projection.h">
+      <Filter>oMath\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\pov.h">
+      <Filter>oMath\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\matrix.h">
+      <Filter>oMath\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\easing.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\cdf97.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\trilaterate.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\moving_average.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\morton.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\hlsl_swizzles_off.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\hlsl_swizzles_on.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\simplex.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\texgen.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\coord.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\area_and_centroid.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\equal.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\equal_eps.h">
+      <Filter>oMath\misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_v_obb.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\seg_v_cylinder.h">
+      <Filter>oMath\intersection</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\polynomial.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\cube_topology.h">
+      <Filter>oMath\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\btt.h">
+      <Filter>oMath\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\primitive.h">
+      <Filter>oMath\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\subdivide.h">
+      <Filter>oMath\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\arcball.h">
+      <Filter>oMath\matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\gizmo.h">
+      <Filter>oMath\matrix</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="seg_v_seg.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="slab.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="plane_v_plane_v_plane.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_v_plane.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_v_aabb.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_v_sphere.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_closest_points.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="clip_convex.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_v_torus.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="quantize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="area_and_centroid.cpp">
+      <Filter>Source\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="cdf97.cpp">
+      <Filter>Source\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="trilaterate.cpp">
+      <Filter>Source\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="matrix.cpp">
+      <Filter>Source\matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="pov.cpp">
+      <Filter>Source\matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="projection.cpp">
+      <Filter>Source\matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_v_obb.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="seg_v_cylinder.cpp">
+      <Filter>Source\intersection</Filter>
+    </ClCompile>
+    <ClCompile Include="subdivide.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="primitive.cpp">
+      <Filter>Source\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="btt.cpp">
+      <Filter>Source\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="gizmo.cpp">
+      <Filter>Source\matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="arcball.cpp">
+      <Filter>Source\matrix</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

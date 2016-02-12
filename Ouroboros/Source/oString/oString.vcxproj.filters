@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oString">
+      <UniqueIdentifier>{9593b708-4960-40b4-8021-80b37ea0f685}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{9190535a-e72a-4221-b0a6-8bb1ff0ce000}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\strlcpy">
+      <UniqueIdentifier>{3888a5ff-a647-4a8f-ab7b-f375c028f2f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\encoding">
+      <UniqueIdentifier>{7a84ad9c-47d4-45a5-8b84-70c81e8fc137}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oString\File Formats">
+      <UniqueIdentifier>{5a92c8de-db2a-42af-886d-88fe240f5489}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oString\string_traits.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\opttok.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\string.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\string_codec.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\string_fast_scan.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\string_path.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\string_source.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\all.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\stringize.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\atof.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\fixed_string.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\csv.h">
+      <Filter>oString\File Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\ini.h">
+      <Filter>oString\File Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\json.h">
+      <Filter>oString\File Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\xml.h">
+      <Filter>oString\File Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\text_document.h">
+      <Filter>oString\File Formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\path_traits.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\uri.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\uri_traits.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\path.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\argtok.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ordinal.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="prev_matching.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="relativize_path.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="replace.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="rstrcspn.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="rstrstr.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="search_path.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="split_path.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="strbitmask.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="strtok.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="to_lower.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="to_upper.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="trim.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="type_name.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="wcmnroot.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="wcselipsize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="wcsltombs.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="wsplit_path.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="zero_block_comments.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="zero_ifdefs.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="zero_line_comments.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="argtok.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="clean_path.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="clean_whitespace.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="cmnroot.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="codify_data.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="elipsize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="format_bytes.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="format_commas.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="format_duration.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="insert.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="matches_wildcard.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="mbsltowcs.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="next_matching.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="opttok.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ampersand_decode.cpp">
+      <Filter>Source\encoding</Filter>
+    </ClCompile>
+    <ClCompile Include="ampersand_encode.cpp">
+      <Filter>Source\encoding</Filter>
+    </ClCompile>
+    <ClCompile Include="json_escape_decode.cpp">
+      <Filter>Source\encoding</Filter>
+    </ClCompile>
+    <ClCompile Include="json_escape_encode.cpp">
+      <Filter>Source\encoding</Filter>
+    </ClCompile>
+    <ClCompile Include="percent_decode.cpp">
+      <Filter>Source\encoding</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\wcslcpy.c">
+      <Filter>Source\strlcpy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\strlcat.c">
+      <Filter>Source\strlcpy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\strlcpy.c">
+      <Filter>Source\strlcpy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\wcslcat.c">
+      <Filter>Source\strlcpy</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="text_document.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="uri.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="strcasestr.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="strnstr.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="strncasestr.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="percent_encode.cpp">
+      <Filter>Source\encoding</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

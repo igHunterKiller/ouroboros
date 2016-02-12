@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="scc.cpp">
+      <Filter>Source\scc</Filter>
+    </ClCompile>
+    <ClCompile Include="scc_svn.cpp">
+      <Filter>Source\scc</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor.cpp">
+      <Filter>Source\types</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="date.cpp">
+      <Filter>Source\types</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\External\calfaq\calfaq.cpp">
+      <Filter>Source\types</Filter>
+    </ClCompile>
+    <ClCompile Include="type_id.cpp">
+      <Filter>Source\traits</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="lzma.cpp">
+      <Filter>Source\compression</Filter>
+    </ClCompile>
+    <ClCompile Include="snappy.cpp">
+      <Filter>Source\compression</Filter>
+    </ClCompile>
+    <ClCompile Include="gzip.cpp">
+      <Filter>Source\compression</Filter>
+    </ClCompile>
+    <ClCompile Include="concurrent_growable_pool.cpp">
+      <Filter>Source\allocator</Filter>
+    </ClCompile>
+    <ClCompile Include="gpu_api.cpp">
+      <Filter>Source\types</Filter>
+    </ClCompile>
+    <ClCompile Include="osc.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ip4.cpp">
+      <Filter>Source\types</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize_hlsl.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="plan.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="resource_registry.cpp">
+      <Filter>Source\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="mime.cpp">
+      <Filter>Source\types</Filter>
+    </ClCompile>
+    <ClCompile Include="leak_tracker.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="unit_test.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize_peripherals.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize_version.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="compression.cpp">
+      <Filter>Source\compression</Filter>
+    </ClCompile>
+    <ClCompile Include="lz4.cpp">
+      <Filter>Source\compression</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oBase\fixed_vector.h">
+      <Filter>oBase\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\unordered_map.h">
+      <Filter>oBase\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\all.h">
+      <Filter>oBase</Filter>
+    </ClInclude>
+    <ClInclude Include="scc_svn.h">
+      <Filter>Source\scc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\vendor.h">
+      <Filter>oBase\types</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\External\calfaq\calfaq.h">
+      <Filter>Source\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\container_support.h">
+      <Filter>oBase\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\type_info.h">
+      <Filter>oBase\traits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\type_id.h">
+      <Filter>oBase\traits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\callable.h">
+      <Filter>oBase\c++ support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\all_libc.h">
+      <Filter>oBase\c++ support</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\scc.h">
+      <Filter>oBase\scc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\concurrent_growable_object_pool.h">
+      <Filter>oBase\allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\concurrent_growable_pool.h">
+      <Filter>oBase\allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\gpu_api.h">
+      <Filter>oBase\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\ip4.h">
+      <Filter>oBase\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\leak_tracker.h">
+      <Filter>oBase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\plan.h">
+      <Filter>oBase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\resource_registry.h">
+      <Filter>oBase\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\mime.h">
+      <Filter>oBase\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\scoped_timer.h">
+      <Filter>oBase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\atomic_type_traits.h">
+      <Filter>oBase\___for_promotion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\growable_hash_map.h">
+      <Filter>oBase\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\unit_test.h">
+      <Filter>oBase</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\osc.h">
+      <Filter>oBase\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\file_format.h">
+      <Filter>oBase\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\sss.h">
+      <Filter>oBase\serialization</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\date.h">
+      <Filter>oBase\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\input.h">
+      <Filter>oBase\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\compression.h">
+      <Filter>oBase</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{9eb95642-ff91-42cd-8c84-4ca4de26ae7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase">
+      <UniqueIdentifier>{d637e98e-1add-49e9-95e0-bd1b71955a2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\scc">
+      <UniqueIdentifier>{faf8a815-382c-4877-ac89-9124ec38fd94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\types">
+      <UniqueIdentifier>{c27deb6f-a0b6-4c75-a1d1-93fb595d0465}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\containers">
+      <UniqueIdentifier>{f6f94d2f-b3e2-4c61-b2e5-8a7fbbe8f2db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\types">
+      <UniqueIdentifier>{50ae8ce8-bcf2-4d43-b130-18d954a2237d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\allocator">
+      <UniqueIdentifier>{9190ebc5-6f1d-4b15-b235-6b392510c3bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\allocator">
+      <UniqueIdentifier>{9894e0ad-b396-4c37-9e08-db792ce0fd10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\traits">
+      <UniqueIdentifier>{13c70c7a-a442-4046-bcd7-01d043f5d2dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\traits">
+      <UniqueIdentifier>{e6234b8f-0d23-4f87-bacd-8e5839e35563}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\compression">
+      <UniqueIdentifier>{cd00d521-6e43-4d90-ab21-c3e5eb16894e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\c++ support">
+      <UniqueIdentifier>{d6ae7f6e-a634-407b-a944-6e28f8923385}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\scc">
+      <UniqueIdentifier>{dedc6645-18e5-4b85-b45b-e6d9aafc9ace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\containers">
+      <UniqueIdentifier>{1898cd4f-ca80-45c7-910a-31a29fdf3867}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\serialization">
+      <UniqueIdentifier>{654e46c0-d2ce-4af7-bd25-f00655dba264}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

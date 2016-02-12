@@ -1,0 +1,221 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oString\all.h" />
+    <ClInclude Include="..\..\Include\oString\argtok.h" />
+    <ClInclude Include="..\..\Include\oString\atof.h" />
+    <ClInclude Include="..\..\Include\oString\csv.h" />
+    <ClInclude Include="..\..\Include\oString\fixed_string.h" />
+    <ClInclude Include="..\..\Include\oString\ini.h" />
+    <ClInclude Include="..\..\Include\oString\json.h" />
+    <ClInclude Include="..\..\Include\oString\opttok.h" />
+    <ClInclude Include="..\..\Include\oString\path.h" />
+    <ClInclude Include="..\..\Include\oString\path_traits.h" />
+    <ClInclude Include="..\..\Include\oString\string.h" />
+    <ClInclude Include="..\..\Include\oString\stringize.h" />
+    <ClInclude Include="..\..\Include\oString\string_codec.h" />
+    <ClInclude Include="..\..\Include\oString\string_fast_scan.h" />
+    <ClInclude Include="..\..\Include\oString\string_path.h" />
+    <ClInclude Include="..\..\Include\oString\string_source.h" />
+    <ClInclude Include="..\..\Include\oString\string_traits.h" />
+    <ClInclude Include="..\..\Include\oString\text_document.h" />
+    <ClInclude Include="..\..\Include\oString\uri.h" />
+    <ClInclude Include="..\..\Include\oString\uri_traits.h" />
+    <ClInclude Include="..\..\Include\oString\xml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\strlcat.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\strlcpy.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\wcslcat.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\wcslcpy.c">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">CompileAsCpp</CompileAs>
+    </ClCompile>
+    <ClCompile Include="ampersand_decode.cpp" />
+    <ClCompile Include="ampersand_encode.cpp" />
+    <ClCompile Include="argtok.cpp" />
+    <ClCompile Include="clean_path.cpp" />
+    <ClCompile Include="clean_whitespace.cpp" />
+    <ClCompile Include="cmnroot.cpp" />
+    <ClCompile Include="codify_data.cpp" />
+    <ClCompile Include="elipsize.cpp" />
+    <ClCompile Include="format_bytes.cpp" />
+    <ClCompile Include="format_commas.cpp" />
+    <ClCompile Include="format_duration.cpp" />
+    <ClCompile Include="insert.cpp" />
+    <ClCompile Include="json_escape_decode.cpp" />
+    <ClCompile Include="json_escape_encode.cpp" />
+    <ClCompile Include="matches_wildcard.cpp" />
+    <ClCompile Include="mbsltowcs.cpp" />
+    <ClCompile Include="next_matching.cpp" />
+    <ClCompile Include="opttok.cpp" />
+    <ClCompile Include="ordinal.cpp" />
+    <ClCompile Include="percent_decode.cpp" />
+    <ClCompile Include="percent_encode.cpp" />
+    <ClCompile Include="prev_matching.cpp" />
+    <ClCompile Include="relativize_path.cpp" />
+    <ClCompile Include="replace.cpp" />
+    <ClCompile Include="rstrcspn.cpp" />
+    <ClCompile Include="rstrstr.cpp" />
+    <ClCompile Include="search_path.cpp" />
+    <ClCompile Include="split_path.cpp" />
+    <ClCompile Include="strbitmask.cpp" />
+    <ClCompile Include="strcasestr.cpp" />
+    <ClCompile Include="stringize.cpp" />
+    <ClCompile Include="strncasestr.cpp" />
+    <ClCompile Include="strnstr.cpp" />
+    <ClCompile Include="strtok.cpp" />
+    <ClCompile Include="text_document.cpp" />
+    <ClCompile Include="to_lower.cpp" />
+    <ClCompile Include="to_upper.cpp" />
+    <ClCompile Include="trim.cpp" />
+    <ClCompile Include="type_name.cpp" />
+    <ClCompile Include="uri.cpp" />
+    <ClCompile Include="wcmnroot.cpp" />
+    <ClCompile Include="wcselipsize.cpp" />
+    <ClCompile Include="wcsltombs.cpp" />
+    <ClCompile Include="wsplit_path.cpp" />
+    <ClCompile Include="zero_block_comments.cpp" />
+    <ClCompile Include="zero_ifdefs.cpp" />
+    <ClCompile Include="zero_line_comments.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{45860521-7DC9-456B-9813-AC6A10569FAB}</ProjectGuid>
+    <RootNamespace>oString</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

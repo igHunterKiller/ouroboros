@@ -1,0 +1,59 @@
+# 3ds Max Wavefront OBJ Exporter v0.94b - (c)2007 guruware
+# File Created: 07.10.2009 22:38:45
+
+newmtl 00000000_dds
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.7000 0.7000 0.7000
+	Ks 0.1000 0.1000 0.1000
+	Ke 0.0000 0.0000 0.0000
+
+newmtl 39b84898_dds
+	Ns 43.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.7000 0.7000 0.7000
+	Ks 0.1000 0.1000 0.1000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka hunter_textures\360ffeb9.dds
+	map_Kd hunter_textures\360ffeb9.dds
+	map_bump -bm 0.6000 hunter_textures\Map__60_Normal_Bump.tga
+
+newmtl fe91d974_dds
+	Ns 10.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.7000 0.7000 0.7000
+	Ks 0.1000 0.1000 0.1000
+	Ke 0.0000 0.0000 0.0000
+	map_Ka hunter_textures\b8348b83.dds
+	map_Kd hunter_textures\b8348b83.dds
+	map_bump -bm 0.6000 hunter_textures\Map__58_Normal_Bump.tga
+
+newmtl df765394_dds
+	Ns 19.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 1.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.7000 0.7000 0.7000
+	Ks 0.4300 0.4300 0.4300
+	Ke 0.0000 0.0000 0.0000
+	map_Ka hunter_textures\df765394.dds
+	map_Kd hunter_textures\df765394.dds
+	map_bump -bm 0.6000 hunter_textures\Map__57_Normal_Bump.tga

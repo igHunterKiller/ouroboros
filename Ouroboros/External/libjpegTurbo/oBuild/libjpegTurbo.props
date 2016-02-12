@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutDir>..\..\lib\$(Platform)\$(oCompilerName)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IntDir>..\..\..\tmp\$(Platform)\$(oCompilerName)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile />
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <PreprocessorDefinitions>WITH_SIMD;oSTATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <YASM />
+    <YASM />
+    <YASM>
+      <IncludePaths>..\win</IncludePaths>
+      <Defines>WIN$(PlatformArchitecture) -D  __x86_$(PlatformArchitecture)__</Defines>
+      <Debug>false</Debug>
+    </YASM>
+  </ItemDefinitionGroup>
+</Project>

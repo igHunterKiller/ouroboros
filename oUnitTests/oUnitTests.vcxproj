@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{42F867E9-C145-466B-8515-C9633E1E7C6F}</ProjectGuid>
+    <RootNamespace>oUnitTests</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Release32.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Common.props" />
+    <Import Project="oUnitTestsSuite.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\OuroborosPublicExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Debug32.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Common.props" />
+    <Import Project="oUnitTestsSuite.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\OuroborosPublicExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Release64.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Common.props" />
+    <Import Project="oUnitTestsSuite.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\OuroborosPublicExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Debug64.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\Common.props" />
+    <Import Project="oUnitTestsSuite.props" />
+    <Import Project="..\Ouroboros\Source\Build\msvs\Properties\OuroborosPublicExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+      <Inputs>%(Inputs)</Inputs>
+      <Outputs>%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <PreprocessorDefinitions>oSTATICLIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link />
+    <PostBuildEvent />
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+      <Inputs>%(Inputs)</Inputs>
+      <Outputs>%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <PreprocessorDefinitions>oSTATICLIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link />
+    <PostBuildEvent />
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+      <Inputs>%(Inputs)</Inputs>
+      <Outputs>%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <ClCompile>
+      <PreprocessorDefinitions>oSTATICLIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link />
+    <PostBuildEvent />
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PreBuildEvent />
+    <CustomBuildStep>
+      <Message>
+      </Message>
+      <Command>
+      </Command>
+      <Inputs>%(Inputs)</Inputs>
+      <Outputs>%(Outputs)</Outputs>
+    </CustomBuildStep>
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <PreprocessorDefinitions>oSTATICLIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <Link />
+    <PostBuildEvent />
+    <Link />
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="oooii_icon.cpp" />
+    <ClCompile Include="oUnitTests.cpp" />
+    <ClCompile Include="unit_test_framework.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="unit_test_framework.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ouroboros\Source\oBase\oBase.vcxproj">
+      <Project>{b13f3cbd-b601-4196-bf6f-2eaa8cdfedc3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oBase\oBaseTests.vcxproj">
+      <Project>{f02df42c-54f3-4d80-b233-1d310b41917c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oCompute\oCompute.vcxproj">
+      <Project>{64e65a9e-fd6c-4b17-8fa7-a7d686ccea42}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oCompute\oComputeTests.vcxproj">
+      <Project>{1638b61e-994a-4398-9126-08e0ad134fb9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oConcurrency\oConcurrency.vcxproj">
+      <Project>{22787a33-41a0-4e87-8115-daa82ac40cdf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oConcurrency\oConcurrencyTests.vcxproj">
+      <Project>{729e2c10-5e7b-409b-a881-ad62606a7827}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oGfx\oGfx.vcxproj">
+      <Project>{72ee4284-df31-4d9f-b796-5de7e2521d5d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oGPU\oGPU.vcxproj">
+      <Project>{0be2fc58-3f40-41a7-b734-cb99d978e7c3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oGPU\oGPUTests.vcxproj">
+      <Project>{4a47dd9b-03e2-4f97-ab66-1222148f9af1}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oGUI\oGUI.vcxproj">
+      <Project>{5461da23-f040-4979-a492-e23b26d87163}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oGUI\oGUITests.vcxproj">
+      <Project>{3982ddf0-20f5-4181-97b7-cd20212ecdf4}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oMath\oMath.vcxproj">
+      <Project>{f860c4d6-ed6f-40b3-bc78-b3d7bf48cb71}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oMath\oMathTests.vcxproj">
+      <Project>{d9b07c1d-e06c-4dda-a61e-99df52f5b0a8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oMemory\oMemory.vcxproj">
+      <Project>{995587d3-b1d0-4c01-bb52-a4b84a2dcb27}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oMemory\oMemoryTests.vcxproj">
+      <Project>{e07c7934-d923-4ba1-afbb-38930867ab89}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oMesh\oMesh.vcxproj">
+      <Project>{8a76ff30-f5e2-4127-b86e-c5ae324961fb}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oMesh\oMeshTests.vcxproj">
+      <Project>{4672a7ef-e55c-4746-8ccd-97abf0713d83}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oString\oString.vcxproj">
+      <Project>{45860521-7dc9-456b-9813-ac6a10569fab}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oString\oStringTests.vcxproj">
+      <Project>{1e4005d5-1431-4ed0-b0b4-63d61134189d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oSurface\oSurface.vcxproj">
+      <Project>{ec39f58b-4343-4884-9bae-5d5a8d101440}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oSurface\oSurfaceTests.vcxproj">
+      <Project>{76618711-9e0a-4efd-8d9e-b41215e0ab78}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oSystem\oConcurrencyTBB.vcxproj">
+      <Project>{d368fe7a-1375-4402-bdc6-955275b5e939}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oSystem\oSystem.vcxproj">
+      <Project>{7dc758b0-32cf-4bbc-abde-0eb53b9ef93c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Ouroboros\Source\oSystem\oSystemTests.vcxproj">
+      <Project>{66f90091-fa93-48b2-80ec-2cdd5488b453}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="oUnitTests.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Data\oooii.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

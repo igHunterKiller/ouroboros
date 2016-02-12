@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(oSuiteExtDir)bullet\vectormathlibrary\include\;$(oSuiteExtDir)BC6HBC7EncoderDecoder11\;$(oSuiteExtDir)DXSDK\Include\;$(oSuiteExtDir)OpenSSL\openssl-1.0.0e\include\;$(oSuiteExtDir)tbb\include\;$(oSuiteExtDir)ispc_texcomp\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FREEIMAGE_LIB;__TBB_NO_IMPLICIT_LINKAGE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libjpegTurbo$(oBuildSuffix).lib;libpng$(oBuildSuffix).lib;ispc_texcomp$(oBuildSuffix).lib;wininet.lib;snappy$(oBuildSuffix).lib;lzma$(oBuildSuffix).lib;tbb.lib;zlib$(oBuildSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <DelayLoadDLLs>tbb.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+    </Link>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(oSuiteDir)Source\Build\msvc100\ResourceScripts;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <FXC>
+      <AdditionalDependencies>$(oSuiteIncDir)oHLSL\oHLSLAtomics.h;$(oSuiteIncDir)oHLSL\oHLSLBit.h;$(oSuiteIncDir)oHLSL\oHLSLMacros.h;$(oSuiteIncDir)oHLSL\oHLSLMath.h;$(oSuiteIncDir)oHLSL\oHLSLStructs.h;$(oSuiteIncDir)oHLSL\oHLSLSwizzlesOff.h;$(oSuiteIncDir)oHLSL\oHLSLSwizzlesOn.h;$(oSuiteIncDir)oHLSL\oHLSLTypes.h;$(oSuiteIncDir)oHLSL\oHLSLTypesInternal.h;$(oSuiteIncDir)oCompute\oComputeColor.h;$(oSuiteIncDir)oCompute\oComputeConstants.h;$(oSuiteIncDir)oCompute\oComputeFilter.h;$(oSuiteIncDir)oCompute\oComputeGBuffer.h;$(oSuiteIncDir)oCompute\oComputeMorton.h;$(oSuiteIncDir)oCompute\oComputePhong.h;$(oSuiteIncDir)oCompute\oComputeProcedural.h;$(oSuiteIncDir)oCompute\oComputeRaycast.h;$(oSuiteIncDir)oCompute\oComputeSimplex.h;$(oSuiteIncDir)oCompute\oComputeUtil.h;$(oSuiteIncDir)oCompute\oQuaternion.h;$(oSuiteIncDir)oGfx\oGfxHLSL.h;$(oSuiteIncDir)oGfx\oGfxDrawConstants.h;$(oSuiteIncDir)oGfx\oGfxLightConstants.h;$(oSuiteIncDir)oGfx\oGfxMaterialTextures.h;$(oSuiteIncDir)oGfx\oGfxVertexElements.h;$(oSuiteIncDir)oGfx\oGfxViewConstants.h</AdditionalDependencies>
+    </FXC>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

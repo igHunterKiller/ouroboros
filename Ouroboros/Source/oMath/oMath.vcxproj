@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oMath\arcball.h" />
+    <ClInclude Include="..\..\Include\oMath\area_and_centroid.h" />
+    <ClInclude Include="..\..\Include\oMath\btt.h" />
+    <ClInclude Include="..\..\Include\oMath\cdf97.h" />
+    <ClInclude Include="..\..\Include\oMath\clip_convex.h" />
+    <ClInclude Include="..\..\Include\oMath\coord.h" />
+    <ClInclude Include="..\..\Include\oMath\cube_topology.h" />
+    <ClInclude Include="..\..\Include\oMath\easing.h" />
+    <ClInclude Include="..\..\Include\oMath\equal.h" />
+    <ClInclude Include="..\..\Include\oMath\equal_eps.h" />
+    <ClInclude Include="..\..\Include\oMath\floats.h" />
+    <ClInclude Include="..\..\Include\oMath\gizmo.h" />
+    <ClInclude Include="..\..\Include\oMath\hlsl.h" />
+    <ClInclude Include="..\..\Include\oMath\hlslx.h" />
+    <ClInclude Include="..\..\Include\oMath\hlsl_swizzles_off.h" />
+    <ClInclude Include="..\..\Include\oMath\hlsl_swizzles_on.h" />
+    <ClInclude Include="..\..\Include\oMath\matrix.h" />
+    <ClInclude Include="..\..\Include\oMath\morton.h" />
+    <ClInclude Include="..\..\Include\oMath\moving_average.h" />
+    <ClInclude Include="..\..\Include\oMath\plane_v_plane_v_plane.h" />
+    <ClInclude Include="..\..\Include\oMath\polynomial.h" />
+    <ClInclude Include="..\..\Include\oMath\pov.h" />
+    <ClInclude Include="..\..\Include\oMath\primitive.h" />
+    <ClInclude Include="..\..\Include\oMath\projection.h" />
+    <ClInclude Include="..\..\Include\oMath\quantize.h" />
+    <ClInclude Include="..\..\Include\oMath\quat.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_closest_points.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_aabb.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_cylinder.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_obb.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_plane.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_seg.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_sphere.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_torus.h" />
+    <ClInclude Include="..\..\Include\oMath\simplex.h" />
+    <ClInclude Include="..\..\Include\oMath\subdivide.h" />
+    <ClInclude Include="..\..\Include\oMath\texgen.h" />
+    <ClInclude Include="..\..\Include\oMath\trilaterate.h" />
+    <ClInclude Include="slab.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="arcball.cpp" />
+    <ClCompile Include="area_and_centroid.cpp" />
+    <ClCompile Include="btt.cpp" />
+    <ClCompile Include="cdf97.cpp" />
+    <ClCompile Include="clip_convex.cpp" />
+    <ClCompile Include="gizmo.cpp" />
+    <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="plane_v_plane_v_plane.cpp" />
+    <ClCompile Include="pov.cpp" />
+    <ClCompile Include="primitive.cpp" />
+    <ClCompile Include="projection.cpp" />
+    <ClCompile Include="quantize.cpp" />
+    <ClCompile Include="seg_closest_points.cpp" />
+    <ClCompile Include="seg_v_aabb.cpp" />
+    <ClCompile Include="seg_v_cylinder.cpp" />
+    <ClCompile Include="seg_v_obb.cpp" />
+    <ClCompile Include="seg_v_plane.cpp" />
+    <ClCompile Include="seg_v_seg.cpp" />
+    <ClCompile Include="seg_v_sphere.cpp" />
+    <ClCompile Include="seg_v_torus.cpp" />
+    <ClCompile Include="slab.cpp" />
+    <ClCompile Include="subdivide.cpp" />
+    <ClCompile Include="trilaterate.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F860C4D6-ED6F-40B3-BC78-B3D7BF48CB71}</ProjectGuid>
+    <RootNamespace>oMath</RootNamespace>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug32.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Release64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\Build\msvs\Properties\Debug64.props" />
+    <Import Project="..\Build\msvs\Properties\Common.props" />
+    <Import Project="..\Build\msvs\Properties\lib.props" />
+    <Import Project="..\Build\msvs\Properties\OuroborosPrivateExternalDependencies.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile />
+    <Lib />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile />
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
+    <ClCompile />
+    <ClCompile />
+    <ClCompile>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

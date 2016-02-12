@@ -1,1 +1,0 @@
-This is an update of the readme. The real one is coming and that right soon. This is a test of git stuff.

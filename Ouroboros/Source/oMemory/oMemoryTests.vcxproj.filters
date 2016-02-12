@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{c396489b-c6c7-406f-8719-baf6947671b5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tests\TESTsbb.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTtlsf_allocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTconcurrent_pool.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTpool.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTconcurrent_linear_allocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTsmall_block_allocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oConcurrency">
+      <UniqueIdentifier>{b08a9c89-6c21-438a-be54-cafeaff91825}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{bd30192b-ce0c-44a8-9701-4e716f91bad4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oConcurrency\all.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\backoff.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\concurrency.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\concurrent_stack.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\coroutine.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\countdown_latch.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\event.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\lock_free_queue.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\tagged_pointer.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\threadpool.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\concurrent_queue.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\concurrent_queue_opt.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\concurrent_hash_map.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\mutex.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\future.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oConcurrency\plan_thread.h">
+      <Filter>oConcurrency</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="concurrent_hash_map.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="mutex.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="future.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="plan_thread.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

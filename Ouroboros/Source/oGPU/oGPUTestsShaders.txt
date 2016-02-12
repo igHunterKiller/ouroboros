@@ -1,0 +1,15 @@
+VStest_buffer
+PStest_buffer
+PStest_color
+VStest_pass_through_color
+VStest_color
+VStest_pos
+PStest_texcoords_as_color
+VStest_texture1d
+PStest_texture1d
+VStest_texture2d
+PStest_texture2d
+VStest_texture3d
+PStest_texture3d
+VStest_texturecube
+PStest_texturecube

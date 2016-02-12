@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="oGUI">
+      <UniqueIdentifier>{f293e392-eed8-404f-b6b8-34b19eb664b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{738fd2f4-8442-49be-a036-f8420af8850b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oGUI\Windows">
+      <UniqueIdentifier>{9349255d-99ed-4a49-b288-6c010172bb17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\Windows">
+      <UniqueIdentifier>{3fc1f6df-cb31-422d-bf48-98bd6f02fa02}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oGUI\Windows\oWinControlSet.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\oWinDialog.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\oWinRect.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\oWinStatusBar.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\oWinWindowing.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\all.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\console.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\progress_bar.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\window.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\notification_area.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\mru.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\msgbox.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\about.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\win_as_string.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\oGUI.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\msgbox_reporting.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\win_gdi.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\win_common_dialog.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\win_gdi_bitmap.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\win_gdi_selection_box.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\Windows\win_gdi_draw.h">
+      <Filter>oGUI\Windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\menu.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\enum_radio_handler.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGUI\cursor.h">
+      <Filter>oGUI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="oWinWindowing.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="oWinControlSet.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="oWinDialog.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="oWinRect.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="oWinStatusBar.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="console.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="window.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="progress_bar.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="mru.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="msgbox.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="notification_area.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="about.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="win_as_string.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="oGUI.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="msgbox_reporting.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="win_gdi.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_common_dialog.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_gdi_bitmap.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_gdi_selection_box.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_gdi_draw.cpp">
+      <Filter>Source\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="enum_radio_handler.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="menu.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="cursor.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

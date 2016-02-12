@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{6f488aed-9739-4cac-b4ae-422244e33bf4}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="tests\TESTequal.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTperspective.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTconsistency.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTfrustum.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTdecompose.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTmath.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTeasing.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TESTprimitives.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

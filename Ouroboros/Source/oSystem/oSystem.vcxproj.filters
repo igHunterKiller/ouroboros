@@ -1,0 +1,225 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{32c14ac9-03be-4703-8322-80cc06f18ef6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\windows">
+      <UniqueIdentifier>{a8c7da9a-ea8f-4014-95d4-ba7e8e3e9ee1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oSystem">
+      <UniqueIdentifier>{edef4b9c-3e2b-4a84-8124-bac935324076}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oSystem\windows">
+      <UniqueIdentifier>{86d9acb6-e693-4455-baa1-c8089a3c7e7b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\peripherals">
+      <UniqueIdentifier>{345e5b89-a2b8-4220-a64e-d54840205bc2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Include\oSystem\adapter.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\all.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\camera.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\cpu.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\debugger.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\display.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\filesystem.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\filesystem_monitor.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\filesystem_util.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\golden_image.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\module.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\page_allocator.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\process.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\process_heap.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\process_killer.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\process_stats_monitor.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\reporting.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\serial_port.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\system.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\thread_traits.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_com.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_crt_heap.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_crt_leak_tracker.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_error.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_exception_handler.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_iocp.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_registry.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_skeleton.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_util.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_version.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\windows\win_winsock.h">
+      <Filter>oSystem\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oSystem\peripherals.h">
+      <Filter>oSystem</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="win_gsreport.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_crt_heap.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="winmain.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_winsock.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_registry.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_crt_leak_tracker.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_iocp.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_skeleton.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_exception_handler.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_version.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_com.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="win_error.cpp">
+      <Filter>Source\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="thread_traits.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="filesystem_monitor.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="golden_image.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="module.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="module_dependencies.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="page_allocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="process.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="process_heap.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="process_killer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="reporting.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="serial_port.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="system.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="adapter.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="camera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="display.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="filesystem.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="pad.cpp">
+      <Filter>Source\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="mouse.cpp">
+      <Filter>Source\peripherals</Filter>
+    </ClCompile>
+    <ClCompile Include="keyboard.cpp">
+      <Filter>Source\peripherals</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
