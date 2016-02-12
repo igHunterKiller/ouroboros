@@ -1091,7 +1091,8 @@ bool window_impl::handle_lifetime(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
 			trigger_generic_event(event_type::closed);
 			hWnd = nullptr;
 
-			for (size_t i = 0; i < HotkeySets.size(); i++)
+			int n = (int)HotkeySets.size();
+			for (int i = 0; i < n; i++)
 				HotkeySets.remove(i);
 
 			*out_lresult = 0;
