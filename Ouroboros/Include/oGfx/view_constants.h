@@ -20,13 +20,12 @@
 #include <oMath/pov.h>
 namespace ouro { namespace gfx {
 #else
-#define oALIGNAS(x)
 #ifndef oGFX_DECLARE_VIEW_CONSTANTS
 #error oGFX_DECLARE_VIEW_CONSTANTS(name) must be defined, i.e. define oGFX_DECLARE_VIEW_CONSTANTS(name) cbuffer cbuffer_view : register(b0) { view_constants name; }
 #endif
 #endif
 
-struct oALIGNAS(16) view_constants
+struct view_constants
 {
 #ifndef oHLSL
 	view_constants() { set(kIdentity4x4, kIdentity4x4, 0, 0, 0); }
@@ -53,6 +52,9 @@ protected:
 };
 
 #ifndef oHLSL
+
+static_assert((sizeof(view_constants) & 0xf) == 0, "sizeof(view_constants) must be 16-byte aligned");
+
 inline void view_constants::set(const float4x4& view, const float4x4& projection, uint32_t target_width, uint32_t target_height, uint32_t array_index)
 {
 	this->view = view;

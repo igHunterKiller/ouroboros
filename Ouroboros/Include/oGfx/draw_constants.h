@@ -38,7 +38,6 @@ struct draw_constants
 	uint     flags;                 // bitmask of oDRAW_FLAGS*
 	uint     slice;                 // index into a texture array
 	uint     pada;
-	uint     padb;
 
 	// Note: slice will be like a 4-bit or 8-bit number, so maybe combine with draw_id, flags, or vertex offset?
 
@@ -57,7 +56,6 @@ struct draw_constants
 		flags         = 0;
 		slice         = 0;
 		pada          = 0;
-		padb          = 0;
 	}
 
 	inline void set_default()
@@ -76,6 +74,7 @@ struct draw_constants
 };
 
 #ifndef oHLSL
+static_assert((sizeof(draw_constants) & 0xf) == 0, "sizeof(draw_constants) must be 16-byte aligned");
 }}
 #else
 	// HLSL accessors to data
