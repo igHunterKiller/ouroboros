@@ -10,13 +10,13 @@ namespace ouro {
 class scc_svn : public scc
 {
 public:
-	scc_svn(const scc_spawn& _Spawn, unsigned int _SpawnTimeoutMS = 10000) : Spawn(_Spawn), SpawnTimeoutMS(_SpawnTimeoutMS) {}
+	scc_svn(scc_spawn_fn& _Spawn, void* _User, unsigned int _SpawnTimeoutMS = 10000) : Spawn(_Spawn), User(_User), SpawnTimeoutMS(_SpawnTimeoutMS) {}
 
 	scc_protocol::value protocol() const override { return scc_protocol::svn; }
 	bool available() const override;
 	char* root(const char* _Path, char* _StrDestination, size_t _SizeofStrDestination) const override;
 	unsigned int revision(const char* _Path) const override;
-	void status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, const scc_file_enumerator& _Enumerator) const override;
+	void status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, scc_file_enumerator_fn _Enumerator, void* _User) const override;
 	scc_revision change(const char* _Path, unsigned int _Revision) const override;
 	void sync(const char* _Path, unsigned int _Revision, bool _Force = false) override;
 	void sync(const char* _Path, const ntp_date& _Date, bool _Force = false) override;
@@ -25,14 +25,15 @@ public:
 	void edit(const char* _Path) override;
 	void revert(const char* _Path) override;
 private:
-	scc_spawn Spawn;
+	scc_spawn_fn Spawn;
+	void* User;
 	unsigned int SpawnTimeoutMS;
 private:
-	void spawn(const char* _Command, const scc_get_line& _GetLine) const;
+	void spawn(const char* _Command, scc_get_line_fn _GetLine, void* _User) const;
 	void spawn(const char* _Command, ouro::xlstring& _Stdout) const;
 };
 
-std::shared_ptr<scc> make_scc_svn(const scc_spawn& _Spawn, unsigned int _TimeoutMS);
+std::shared_ptr<scc> make_scc_svn(scc_spawn_fn _Spawn, void* _User, unsigned int _TimeoutMS);
 
 	} // namespace detail
 }

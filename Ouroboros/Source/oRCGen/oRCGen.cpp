@@ -108,7 +108,18 @@ int main(int argc, const char* argv[])
 		unsigned int Revision = opt.Revision;
 		if (opt.AutoRevision)
 		{
-			auto scc = make_scc(scc_protocol::svn, std::bind(system::spawn_for, std::placeholders::_1, std::placeholders::_2, false, std::placeholders::_3));
+			typedef std::function<int(const char* _Commandline
+				, scc_get_line_fn get_line
+				, void* user
+				, unsigned int _TimeoutMS)> scc_spawn;
+
+			auto scc = make_scc(scc_protocol::svn, 
+			[](const char* cmdline, scc_get_line_fn get_line, void* user, uint32_t timeout_ms)->int
+			{
+				return system::spawn_for(cmdline, get_line, user, false, timeout_ms);
+
+			}, nullptr);
+
 			path_t DevPath = filesystem::dev_path();
 			printf("scc");
 			lstring RevStr;

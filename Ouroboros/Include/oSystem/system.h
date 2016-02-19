@@ -4,11 +4,11 @@
 
 #pragma once
 #include <oBase/date.h>
-#include <functional>
+#include <cstdint>
 
 namespace ouro { namespace system {
 
-enum privilege
+enum class privilege
 {
 	may_debug,
 	may_shutdown,
@@ -21,41 +21,41 @@ enum privilege
 
 struct heap_info
 {
-	unsigned long long total_used;
-	unsigned long long avail_physical;
-	unsigned long long total_physical;
-	unsigned long long avail_virtual_process;
-	unsigned long long total_virtual_process;
-	unsigned long long avail_paged;
-	unsigned long long total_paged;
+	uint64_t total_used;
+	uint64_t avail_physical;
+	uint64_t total_physical;
+	uint64_t avail_virtual_process;
+	uint64_t total_virtual_process;
+	uint64_t avail_paged;
+	uint64_t total_paged;
 };
 
 heap_info get_heap_info();
 
-// Get the system's impression of current date/time in UTC (GMT).
-template<typename dateT> void now(dateT* _pDate);
+// get the system's impression of current date/time in UTC (GMT).
+template<typename dateT> void now(dateT* out_date);
 
-// Convert from a local timezone-specific time to UTC (GMT) time.
-date from_local(const date& _LocalDate);
+// convert from a local timezone-specific time to UTC (GMT) time.
+date from_local(const date& local);
 
-// Convert from UTC (GMT) time to a local timezone-specific time.
-date to_local(const date& _UTCDate);
+// convert from UTC (GMT) time to a local timezone-specific time.
+date to_local(const date& utc);
 
-template<typename date1T, typename date2T> bool from_local(const date1T& _LocalDate, date2T* _pUTCDate)
+template<typename date1T, typename date2T> bool from_local(const date1T& local, date2T* out_utc)
 {
-	date local, utc;
-	local = date_cast<date>(_LocalDate);
-	if (!from_local(local, &utc)) return false;
-	*_pUTCDate = date_cast<date2T>(utc);
+	date loc, utc;
+	loc = date_cast<date>(local);
+	if (!from_local(loc, &utc)) return false;
+	*out_utc = date_cast<date2T>(utc);
 	return true;
 }
 
-template<typename date1T, typename date2T> bool to_local(const date1T& _UTCDate, date2T* _pLocalDate)
+template<typename date1T, typename date2T> bool to_local(const date1T& utc, date2T* out_local)
 {
-	date local, utc;
-	utc = date_cast<date>(_UTCDate);
-	if (!to_local(utc, &local)) return false;
-	*_pLocalDate = date_cast<date2T>(local);
+	date local, utc_date;
+	utc_date = date_cast<date>(utc);
+	if (!to_local(utc_date, &local)) return false;
+	*out_local = date_cast<date2T>(local);
 	return true;
 }
 
@@ -65,8 +65,10 @@ void reboot();
 void shutdown();
 void sleep();
 void kill_file_browser();
-void allow_sleep(bool _Allow = true);
-void schedule_wakeup(time_t _Time, const std::function<void()>& _OnWake);
+void allow_sleep(bool allow = true);
+
+typedef void (*on_wake_fn)(void* user);
+void schedule_wakeup(time_t time, on_wake_fn on_wake, void* user);
 
 // Poll system for all processes to be relatively idle (i.e. <3% CPU usage). 
 // This is primarily intended to determine heuristically when a computer is 
@@ -75,13 +77,14 @@ void schedule_wakeup(time_t _Time, const std::function<void()>& _OnWake);
 // application at the time needed to be a startup app and go into fullscreen.
 // Randomly, another startup app/service would steal focus, knocking our app out
 // of fullscreen mode.)
-// _ContinueWaiting is an optional function called while waiting. If it returns 
+// continue_waiting is an optional function called while waiting. If it returns 
 // false the wait will terminate.
-void wait_idle(const std::function<bool()>& _ContinueWaiting = nullptr);
-bool wait_for_idle(unsigned int _TimeoutMS, const std::function<bool()>& _ContinueWaiting = nullptr);
+typedef bool (*continue_waiting_fn)(void* user);
+void wait_idle(continue_waiting_fn continue_waiting = nullptr, void* user = nullptr);
+bool wait_for_idle(uint32_t timeout_ms, continue_waiting_fn continue_waiting = nullptr, void* user = nullptr);
 
 bool uses_gpu_compositing();
-void enable_gpu_compositing(bool _Enable = true, bool _Force = false);
+void enable_gpu_compositing(bool enable = true, bool force = false);
 
 // Returns true if the system is running in a mode similar to Window's 
 // Remote Desktop. Use this when interacting with displays or feature set that
@@ -92,35 +95,35 @@ bool is_remote_session();
 // If the system is logged out, GUI draw commands will fail
 bool gui_is_drawable();
 
-char* operating_system_name(char* _StrDestination, size_t _SizeofStrDestination);
-template<size_t size> char* operating_system_name(char (&_StrDestination)[size]) { return operating_system_name(_StrDestination, size); }
-template<size_t capacity> char* operating_system_name(fixed_string<char, capacity>& _StrDestination) { return operating_system_name(_StrDestination, _StrDestination.capacity()); }
+char* operating_system_name(char* dst, size_t dst_size);
+template<size_t size> char* operating_system_name(char (&dst)[size]) { return operating_system_name(dst, size); }
+template<size_t capacity> char* operating_system_name(fixed_string<char, capacity>& dst) { return operating_system_name(dst, dst.capacity()); }
 
-char* host_name(char* _StrDestination, size_t _SizeofStrDestination);
-template<size_t size> char* host_name(char (&_StrDestination)[size]) { return host_name(_StrDestination, size); }
-template<size_t capacity> char* host_name(fixed_string<char, capacity>& _StrDestination) { return host_name(_StrDestination, _StrDestination.capacity()); }
+char* host_name(char* dst, size_t dst_size);
+template<size_t size> char* host_name(char (&dst)[size]) { return host_name(dst, size); }
+template<size_t capacity> char* host_name(fixed_string<char, capacity>& dst) { return host_name(dst, dst.capacity()); }
 
-char* workgroup_name(char* _StrDestination, size_t _SizeofStrDestination);
-template<size_t size> char* workgroup_name(char (&_StrDestination)[size]) { return workgroup_name(_StrDestination, size); }
-template<size_t capacity> char* workgroup_name(fixed_string<char, capacity>& _StrDestination) { return workgroup_name(_StrDestination, _StrDestination.capacity()); }
+char* workgroup_name(char* dst, size_t dst_size);
+template<size_t size> char* workgroup_name(char (&dst)[size]) { return workgroup_name(dst, size); }
+template<size_t capacity> char* workgroup_name(fixed_string<char, capacity>& dst) { return workgroup_name(dst, dst.capacity()); }
 
 // fills destination with the string "[<hostname>.process_id.thread_id]"
-char* exec_path(char* _StrDestination, size_t _SizeofStrDestination);
-template<size_t size> char* exec_path(char (&_StrDestination)[size]) { return exec_path(_StrDestination, size); }
-template<size_t capacity> char* exec_path(fixed_string<char, capacity>& _StrDestination) { return exec_path(_StrDestination, _StrDestination.capacity()); }
+char* exec_path(char* dst, size_t dst_size);
+template<size_t size> char* exec_path(char (&dst)[size]) { return exec_path(dst, size); }
+template<size_t capacity> char* exec_path(fixed_string<char, capacity>& dst) { return exec_path(dst, dst.capacity()); }
 
-void setenv(const char* _EnvVarName, const char* _Value);
-char* getenv(char* _Value, size_t _SizeofValue, const char* _EnvVarName);
-template<size_t size> char* getenv(char (&_Value)[size], const char* _EnvVarName) { return getenv(_Value, size, _EnvVarName); }
-template<size_t capacity> char* getenv(fixed_string<char, capacity>& _Value, const char* _EnvVarName) { return getenv(_Value, _Value.capacity(), _EnvVarName); }
+void setenv(const char* envvar_name, const char* value);
+char* getenv(char* value, size_t value_size, const char* envvar_name);
+template<size_t size> char* getenv(char (&value)[size], const char* envvar_name) { return getenv(value, size, envvar_name); }
+template<size_t capacity> char* getenv(fixed_string<char, capacity>& value, const char* envvar_name) { return getenv(value, value.capacity(), envvar_name); }
 
 // retrieve entire environment string
-char* envstr(char* _StrEnvironment, size_t _SizeofStrEnvironment);
-template<size_t size> char* envstr(char (&_StrEnvironment)[size]) { return envstr(_StrEnvironment, size); }
-template<size_t capacity> char* envstr(fixed_string<char, capacity>& _StrEnvironment) { return envstr(_StrEnvironment, _StrEnvironment.capacity()); }
+char* envstr(char* env_string, size_t env_string_size);
+template<size_t size> char* envstr(char (&env_string)[size]) { return envstr(env_string, size); }
+template<size_t capacity> char* envstr(fixed_string<char, capacity>& env_string) { return envstr(env_string, env_string.capacity()); }
 
 // Set the specified privilege for this process, if allowed by the system.
-void set_privilege(privilege _Privilege, bool _Enabled = true);
+void set_privilege(privilege privilege, bool enabled = true);
 
 // Spawns a child process to execute the specified command line. For each line
 // emitted to stdout by the process, _GetLine is called so this calling process
@@ -128,28 +131,34 @@ void set_privilege(privilege _Privilege, bool _Enabled = true);
 // or if the timeout is reached, this will return std::errc::timed_out. This 
 // can also return std::errc::operation_in_process if the process did not time 
 // out but still is not ready to return an exit code.
-int spawn_for(const char* _CommandLine
-	, const std::function<void(char* _Line)>& _GetLine
-	, bool _ShowWindow
-	, unsigned int _ExecutionTimeout);
+
+typedef void (*get_line_fn)(char* line, void* user);
+
+int spawn_for(const char* cmdline
+	, get_line_fn get_line
+	, void* user
+	, bool show_window
+	, uint32_t execution_timeout_ms);
 
 template<typename Rep, typename Period>
-int spawn_for(const char* _CommandLine
-	, const std::function<void(char* _Line)>& _GetLine
-	, bool _ShowWindow
-	, const std::chrono::duration<Rep, Period>& _Timeout)
+int spawn_for(const char* cmdline
+	, get_line_fn get_line
+	, void* user
+	, bool show_window
+	, const std::chrono::duration<Rep, Period>& _timeout)
 {
-	std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(_Timeout);
-	return spawn_for(_CommandLine, _GetLine, _ShowWindow, static_cast<unsigned int>(ms.count()));
+	std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(_timeout);
+	return spawn_for(cmdline, _GetLine, show_window, static_cast<uint32_t>(ms.count()));
 }
 
 // Same as above, but no timeout
-int spawn(const char* _CommandLine
-	, const std::function<void(char* _Line)>& _GetLine
-	, bool _ShowWindow);
+int spawn(const char* cmdline
+	, get_line_fn get_line
+	, void* user
+	, bool show_window);
 
-// Spawns the application associated with the specified _DocumentName by the 
+// Spawns the application associated with the specified document_name by the 
 // operating system and opens or edits that document.
-void spawn_associated_application(const char* _DocumentName, bool _ForEdit = false);
+void spawn_associated_application(const char* document_path, bool for_edit = false);
 
 }}

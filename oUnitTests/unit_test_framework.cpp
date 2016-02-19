@@ -67,7 +67,13 @@ static void print_header(const unit_test::info_t& info, unit_test::services& srv
 		srv.printf(unit_test::print_type::info, "Video Driver: %s v%s\n", adapter_info.description.c_str(), to_string(buf, adapter_info.version));
 	}
 
-	auto scc = make_scc(scc_protocol::svn, std::bind(system::spawn_for, std::placeholders::_1, std::placeholders::_2, false, std::placeholders::_3));
+	auto scc = make_scc(scc_protocol::svn, 
+	[](const char* cmdline, scc_get_line_fn get_line, void* user, uint32_t timeout_ms)->int
+	{
+		return system::spawn_for(cmdline, get_line, user, false, timeout_ms);
+
+	}, nullptr);
+
 	path_t dev = filesystem::dev_path();
 	lstring CLStr;
 	uint CL = 0;//scc->revision(dev); //@tony  this takes too long
@@ -266,15 +272,24 @@ static bool scc_push_modified(std::vector<scc_file>& modified)
 {
 	modified.clear();
 	modified.reserve(128);
-	auto scc = make_scc(scc_protocol::svn, std::bind(system::spawn_for, std::placeholders::_1, std::placeholders::_2, false, std::placeholders::_3));
+
+	auto scc = make_scc(scc_protocol::svn, 
+	[](const char* cmdline, scc_get_line_fn get_line, void* user, uint32_t timeout_ms)->int
+	{
+		return system::spawn_for(cmdline, get_line, user, false, timeout_ms);
+
+	}, nullptr);
+
 	path_t branch_path = filesystem::dev_path();
 
 	try
 	{ 
-		scc->status(branch_path, 0, scc_visit_option::modified_only, [&](const scc_file& file)
+		scc->status(branch_path, 0, scc_visit_option::modified_only, [](const scc_file& file, void* user)
 		{
+			auto& modified = *(std::vector<scc_file>*)user;
+
 			modified.push_back(file);
-		});
+		}, &modified);
 	}
 
 	catch (std::system_error& e)

@@ -98,13 +98,9 @@ struct scc_revision
 	xlstring what;
 };
 
-typedef std::function<void(char* _Line)> scc_get_line;
-
-typedef std::function<int(const char* _Commandline
-	, const scc_get_line& _GetLine
-	, unsigned int _TimeoutMS)> scc_spawn;
-
-typedef std::function<void(const scc_file& _File)> scc_file_enumerator;
+typedef void (*scc_get_line_fn)(char* line, void* user);
+typedef int (*scc_spawn_fn)(const char* _Commandline, scc_get_line_fn get_line, void* _User, unsigned int _TimeoutMS);
+typedef void (*scc_file_enumerator_fn)(const scc_file& file, void* user);
 
 class scc
 {
@@ -128,7 +124,7 @@ public:
 
 	// Visits each file that matches the search under the specified path and given 
 	// the specified option.
-	virtual void status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, const scc_file_enumerator& _Visitor) const = 0;
+	virtual void status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, scc_file_enumerator_fn _Visitor, void* _User) const = 0;
 
 	// Returns true if all files under the specified path are unmodified and at 
 	// their latest revisions up to the specified revision so this can be used 
@@ -137,11 +133,13 @@ public:
 	inline bool is_up_to_date(const char* _Path, unsigned int _AtRevision = 0) const
 	{
 		bool UpToDate = true;
-		status(_Path, _AtRevision, scc_visit_option::modified_only, [&](const scc_file& _File)
+		status(_Path, _AtRevision, scc_visit_option::modified_only, [](const scc_file& _File, void* _User)
 		{
+			bool& UpToDate = *(bool*)_User;
+
 			if (_File.status == scc_status::out_of_date || _File.status == scc_status::modified)
 				UpToDate = false;
-		});
+		}, &UpToDate);
 
 		return UpToDate;
 	}
@@ -165,6 +163,6 @@ public:
 	virtual void revert(const char* _Path) = 0;
 };
 
-std::shared_ptr<scc> make_scc(scc_protocol::value _Protocol, const scc_spawn& _Spawn, unsigned int _TimeoutMS = 5000);
+std::shared_ptr<scc> make_scc(scc_protocol::value _Protocol, scc_spawn_fn _Spawn, void* _User = nullptr, unsigned int _TimeoutMS = 5000);
 
 }

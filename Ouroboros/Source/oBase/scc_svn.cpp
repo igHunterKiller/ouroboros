@@ -25,9 +25,9 @@ namespace ouro {
 #define SVN_THROWO(_ExitCode, _StdOut) throw scc_exception(scc_error::scc_exe_error, stringf("svn exited with code %d\n  stdout: %s", _ExitCode, _StdOut.c_str()))
 #define SVN_THROWF(_SCCError, _Format, ...) throw scc_exception(scc_error::_SCCError, stringf(_Format, ## __VA_ARGS__ ) )
 
-std::shared_ptr<scc> make_scc_svn(const scc_spawn& _Spawn, unsigned int _TimeoutMS)
+std::shared_ptr<scc> make_scc_svn(scc_spawn_fn _Spawn, void* _User, unsigned int _TimeoutMS)
 {
-	return std::make_shared<scc_svn>(_Spawn, _TimeoutMS);
+	return std::make_shared<scc_svn>(_Spawn, _User, _TimeoutMS);
 }
 
 static bool svn_is_error(const char* _StdOut)
@@ -50,23 +50,24 @@ static bool svn_is_error(const char* _StdOut)
 	return false;
 }
 
-void scc_svn::spawn(const char* _Command, const scc_get_line& _GetLine) const
+void scc_svn::spawn(const char* _Command, scc_get_line_fn _GetLine, void* _User) const
 {
-	int ec = Spawn(_Command, _GetLine, SpawnTimeoutMS);
+	int ec = Spawn(_Command, _GetLine, _User, SpawnTimeoutMS);
 	if (ec)
 		SVN_THROWE(ec);
+}
+
+void get_line_xl(char* _Line, void* _User)
+{
+	auto& std_out = *(xlstring*)_User;
+	strlcat(std_out, _Line, std_out.capacity());
+	strlcat(std_out, "\n",  std_out.capacity());
 }
 
 void scc_svn::spawn(const char* _Command, xlstring& _StdOut) const
 {
 	_StdOut.clear();
-	scc_get_line GetLine = [&](char* _Line)
-	{
-		strlcat(_StdOut, _Line, _StdOut.capacity());
-		strlcat(_StdOut, "\n", _StdOut.capacity());
-	};
-
-	int ec = Spawn(_Command, GetLine, SpawnTimeoutMS);
+	int ec = Spawn(_Command, get_line_xl, &_StdOut, SpawnTimeoutMS);
 	if (ec || svn_is_error(_StdOut))
 		SVN_THROWO(ec, _StdOut);
 }
@@ -74,13 +75,7 @@ void scc_svn::spawn(const char* _Command, xlstring& _StdOut) const
 bool scc_svn::available() const
 {
 	xlstring StdOut;
-	scc_get_line GetLine = [&](char* _Line)
-	{
-		strlcat(StdOut, _Line, StdOut.capacity());
-		strlcat(StdOut, "\n", StdOut.capacity());
-	};
-
-	int ec = Spawn("svn", GetLine, SpawnTimeoutMS);
+	int ec = Spawn("svn", get_line_xl, &StdOut, SpawnTimeoutMS);
 	if (ec)
 		SVN_THROWE(ec);
 	return !!strstr(StdOut, "Type 'svn help'");
@@ -195,7 +190,17 @@ static char* svn_parse_status_line(char* _StatusBuffer, unsigned int _UpToRevisi
 	return s;
 }
 
-void scc_svn::status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, const scc_file_enumerator& _Enumerator) const
+struct status_context
+{
+	xlstring line;
+	scc_error::value errc;
+	std::string errline;
+	scc_file_enumerator_fn file_enumerator;
+	void* user;
+	unsigned int up_to_revisition;
+};
+
+void scc_svn::status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, scc_file_enumerator_fn _Enumerator, void* _User) const
 {
 	char cmd[512];
 	
@@ -212,29 +217,33 @@ void scc_svn::status(const char* _Path, unsigned int _UpToRevision, scc_visit_op
 	if (-1 == snprintf(cmd, "svn status -u%s \"%s\"", opt, _Path))
 		throw scc_exception(scc_error::command_string_too_long);
 
-	xlstring line;
-	scc_error::value errc = scc_error::none;
-	std::string errline;
-	spawn(cmd, [&](char* _Line)
+	status_context ctx;
+	ctx.errc = scc_error::none;
+	ctx.file_enumerator = _Enumerator;
+	ctx.user = _User;
+	ctx.up_to_revisition = _UpToRevision;
+	spawn(cmd, [](char* _Line, void* _User)
 	{
-		if (errc == scc_error::none)
+		auto& ctx = *(status_context*)_User;
+
+		if (ctx.errc == scc_error::none)
 		{
 			if (svn_is_error(_Line))
 			{
-				errc = scc_error::scc_exe_error;
-				errline = _Line;
+				ctx.errc = scc_error::scc_exe_error;
+				ctx.errline = _Line;
 			}
 			else
 			{
 				scc_file file;
-				svn_parse_status_line(_Line, _UpToRevision, file);
-				_Enumerator(file);
+				svn_parse_status_line(_Line, ctx.up_to_revisition, file);
+				ctx.file_enumerator(file, ctx.user);
 			}
 		}
-	});
+	}, &ctx);
 
-	if (errc != scc_error::none)
-		throw scc_exception(errc, errline);
+	if (ctx.errc != scc_error::none)
+		throw scc_exception(ctx.errc, ctx.errline);
 }
 
 static bool svn_from_string(ntp_date* _pDate, const char* _String)

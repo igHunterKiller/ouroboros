@@ -15,10 +15,7 @@
 #include <PowrProf.h>
 #include <Shellapi.h>
 
-using namespace std;
-
-namespace ouro {
-	namespace system {
+namespace ouro { namespace system {
 
 heap_info get_heap_info()
 {
@@ -36,37 +33,37 @@ heap_info get_heap_info()
 	return hi;
 }
 
-static void now(FILETIME* _pFileTime, bool _IsUTC)
+static void now(FILETIME* out_filetime, bool is_utc)
 {
-	if (_IsUTC)
-		GetSystemTimeAsFileTime(_pFileTime);
+	if (is_utc)
+		GetSystemTimeAsFileTime(out_filetime);
 	else
 	{
 		SYSTEMTIME st;
 		GetLocalTime(&st);
-		SystemTimeToFileTime(&st, _pFileTime);
+		SystemTimeToFileTime(&st, out_filetime);
 	}
 }
 
-void now(ntp_timestamp* _pNTPTimestamp)
+void now(ntp_timestamp* out_ntp_timestamp)
 {
 	FILETIME ft;
 	now(&ft, true);
-	*_pNTPTimestamp = date_cast<ntp_timestamp>(ft);
+	*out_ntp_timestamp = date_cast<ntp_timestamp>(ft);
 }
 
-void now(ntp_date* _pNTPDate)
+void now(ntp_date* out_ntp_date)
 {
 	FILETIME ft;
 	now(&ft, true);
-	*_pNTPDate = date_cast<ntp_date>(ft);
+	*out_ntp_date = date_cast<ntp_date>(ft);
 }
 
-void now(date* _pDate)
+void now(date* out_date)
 {
 	FILETIME ft;
 	now(&ft, true);
-	*_pDate = date_cast<date>(ft);
+	*out_date = date_cast<date>(ft);
 }
 
 static date to_date(const SYSTEMTIME& system_time)
@@ -94,31 +91,31 @@ static void from_date(const date& _date, SYSTEMTIME* out_system_time)
 	out_system_time->wMilliseconds = (WORD)_date.millisecond;
 }
 
-date from_local(const date& _local_date)
+date from_local(const date& local)
 {
-	SYSTEMTIME In, Out;
-	from_date(_local_date, &In);
-	oVB(!SystemTimeToTzSpecificLocalTime(nullptr, &In, &Out));
-	return to_date(Out);
+	SYSTEMTIME in, out;
+	from_date(local, &in);
+	oVB(!SystemTimeToTzSpecificLocalTime(nullptr, &in, &out));
+	return to_date(out);
 }
 
-date to_local(const date& _UTCDate)
+date to_local(const date& utc)
 {
-	SYSTEMTIME In, Out;
-	from_date(_UTCDate, &In);
-	oVB(!SystemTimeToTzSpecificLocalTime(nullptr, &In, &Out));
-	return to_date(Out);
+	SYSTEMTIME in, out;
+	from_date(utc, &in);
+	oVB(!SystemTimeToTzSpecificLocalTime(nullptr, &in, &out));
+	return to_date(out);
 }
 
 void reboot()
 {
-	set_privilege(may_shutdown);
+	set_privilege(privilege::may_shutdown);
 	oVB(ExitWindowsEx(EWX_REBOOT, SHTDN_REASON_FLAG_PLANNED));
 }
 
 void shutdown()
 {
-	set_privilege(may_shutdown);
+	set_privilege(privilege::may_shutdown);
 	oVB(ExitWindowsEx(EWX_POWEROFF, SHTDN_REASON_FLAG_PLANNED));
 }
 
@@ -136,7 +133,7 @@ void sleep()
 	oVB(SetSuspendState(FALSE, TRUE, FALSE));
 }
 
-void allow_sleep(bool _Allow)
+void allow_sleep(bool allow)
 {
 	switch (windows::get_version())
 	{
@@ -150,167 +147,185 @@ void allow_sleep(bool _Allow)
 			break;
 	}
 
-	EXECUTION_STATE next = _Allow ? ES_CONTINUOUS : (ES_CONTINUOUS|ES_SYSTEM_REQUIRED|ES_AWAYMODE_REQUIRED);
+	EXECUTION_STATE next = allow ? ES_CONTINUOUS : (ES_CONTINUOUS|ES_SYSTEM_REQUIRED|ES_AWAYMODE_REQUIRED);
 	oVB(!SetThreadExecutionState(next));
 }
 
+typedef void (*on_timer_fn)(void* user);
+
 struct SCHEDULED_FUNCTION_CONTEXT
 {
-	HANDLE hTimer;
-	std::function<void()> OnTimer;
-	time_t ScheduledTime;
-	sstring DebugName;
+	HANDLE      htimer;
+	on_timer_fn on_timer;
+	void*       user;
+	time_t      scheduled_time;
+	sstring     debug_name;
 };
 
-static void CALLBACK ExecuteScheduledFunctionAndCleanup(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue)
+static void CALLBACK execute_scheduled_function_and_cleanup(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue)
 {
-	SCHEDULED_FUNCTION_CONTEXT& Context = *(SCHEDULED_FUNCTION_CONTEXT*)lpArgToCompletionRoutine;
-	if (Context.OnTimer)
+	SCHEDULED_FUNCTION_CONTEXT& ctx = *(SCHEDULED_FUNCTION_CONTEXT*)lpArgToCompletionRoutine;
+	if (ctx.on_timer)
 	{
 		#ifdef _DEBUG
 			sstring diff;
-			format_duration(diff, (double)(time(nullptr) - Context.ScheduledTime));
-			oTRACE("Running scheduled function '%s' %s after it was scheduled", oSAFESTRN(Context.DebugName), diff.c_str());
+			format_duration(diff, (double)(time(nullptr) - ctx.scheduled_time));
+			oTRACE("Running scheduled function '%s' %s after it was scheduled", ctx.debug_name.empty() ? "(null)" : ctx.debug_name.c_str(), diff.c_str());
 		#endif
 
-		Context.OnTimer();
-		oTRACE("Finished scheduled function '%s'", oSAFESTRN(Context.DebugName));
+		ctx.on_timer(ctx.user);
+		oTRACE("Finished scheduled function '%s'", ctx.debug_name.empty() ? "(null)" : ctx.debug_name.c_str());
 	}
-	oVB(CloseHandle(Context.hTimer));
-	delete &Context;
+	oVB(CloseHandle(ctx.htimer));
+	delete &ctx;
 }
 
-static void schedule_task(const char* _DebugName
-	, time_t _AbsoluteTime
-	, bool _Alertable
-	, const std::function<void()>& _Task)
+static void schedule_task(const char* debug_name
+	, time_t absolute_time
+	, bool alertable
+	, on_timer_fn on_timer, void* user)
 {
-	SCHEDULED_FUNCTION_CONTEXT& Context = *new SCHEDULED_FUNCTION_CONTEXT();
-	Context.hTimer = CreateWaitableTimer(nullptr, TRUE, nullptr);
-	if (!Context.hTimer)
+	SCHEDULED_FUNCTION_CONTEXT& ctx = *new SCHEDULED_FUNCTION_CONTEXT();
+	ctx.htimer = CreateWaitableTimer(nullptr, TRUE, nullptr);
+	if (!ctx.htimer)
 		throw windows::error();
-	Context.OnTimer = _Task;
-	Context.ScheduledTime = _AbsoluteTime;
+	ctx.on_timer = on_timer;
+	ctx.user = user;
+	ctx.scheduled_time = absolute_time;
 
-	if (oSTRVALID(_DebugName))
-		strlcpy(Context.DebugName, _DebugName);
+	if (oSTRVALID(debug_name))
+		strlcpy(ctx.debug_name, debug_name);
 	
 	#ifdef _DEBUG
 		date then;
-		char StrTime[64];
-		char StrDiff[64];
-		try { then = date_cast<date>(_AbsoluteTime); }
-		catch (std::exception&) { strlcpy(StrTime, "(out-of-time_t-range)"); }
-		strftime(StrTime, sortable_date_format, then);
-		format_duration(StrDiff, (double)(time(nullptr) - Context.ScheduledTime));
-		oTRACE("Setting timer to run function '%s' at %s (%s from now)", oSAFESTRN(Context.DebugName), StrTime, StrDiff);
+		char str_time[64];
+		char str_diff[64];
+		try { then = date_cast<date>(absolute_time); }
+		catch (std::exception&) { strlcpy(str_time, "(out-of-time_t-range)"); }
+		strftime(str_time, sortable_date_format, then);
+		format_duration(str_diff, (double)(time(nullptr) - ctx.scheduled_time));
+		oTRACE("Setting timer to run function '%s' at %s (%s from now)", oSAFESTRN(ctx.debug_name), str_time, str_diff);
 	#endif
 
-	FILETIME ft = date_cast<FILETIME>(_AbsoluteTime);
+	FILETIME ft = date_cast<FILETIME>(absolute_time);
 	LARGE_INTEGER liDueTime;
 	liDueTime.LowPart = ft.dwLowDateTime;
 	liDueTime.HighPart = ft.dwHighDateTime;
-	oVB(!SetWaitableTimer(Context.hTimer, &liDueTime, 0, ExecuteScheduledFunctionAndCleanup, (LPVOID)&Context, _Alertable ? TRUE : FALSE));
+	oVB(!SetWaitableTimer(ctx.htimer, &liDueTime, 0, execute_scheduled_function_and_cleanup, (LPVOID)&ctx, alertable ? TRUE : FALSE));
 }
 
-void schedule_wakeup(time_t _Time, const std::function<void()>& _OnWake)
+void schedule_wakeup(time_t time, on_wake_fn on_wake, void* user)
 {
-	schedule_task("Ouroboros.Wakeup", _Time, true, _OnWake);
+	schedule_task("Ouroboros.Wakeup", time, true, on_wake, user);
 }
 
-void wait_idle(const std::function<bool()>& _ContinueWaiting)
+void wait_idle(continue_waiting_fn continue_waiting, void* user)
 {
-	wait_for_idle(INFINITE, _ContinueWaiting);
+	wait_for_idle(INFINITE, continue_waiting, user);
 }
 
-void windows_enumerate_services(const std::function<bool(SC_HANDLE _hSCManager, const ENUM_SERVICE_STATUS_PROCESS& _Status)>& _Enumerator)
+typedef bool (*service_enumerator_fn)(SC_HANDLE hscmanager, const ENUM_SERVICE_STATUS_PROCESS& status, void* user);
+void windows_enumerate_services(service_enumerator_fn enumerator, void* user)
 {
-	SC_HANDLE hSCManager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
-	oVB(hSCManager);
-	oFinally { oVB(CloseServiceHandle(hSCManager)); };
+	SC_HANDLE hscmanager = OpenSCManager(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
+	oVB(hscmanager);
+	oFinally { oVB(CloseServiceHandle(hscmanager)); };
 
-	DWORD requiredBytes = 0;
-	DWORD nServices = 0;
-	EnumServicesStatusEx(hSCManager, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, nullptr, 0, &requiredBytes, &nServices, nullptr, nullptr);
+	DWORD req_bytes = 0;
+	DWORD nservices = 0;
+	EnumServicesStatusEx(hscmanager, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, nullptr, 0, &req_bytes, &nservices, nullptr, nullptr);
 	oVB(GetLastError() == ERROR_MORE_DATA);
 
-	ENUM_SERVICE_STATUS_PROCESS* lpServices = (ENUM_SERVICE_STATUS_PROCESS*)malloc(requiredBytes);
-	oFinally { free(lpServices); };
+	ENUM_SERVICE_STATUS_PROCESS* services = (ENUM_SERVICE_STATUS_PROCESS*)malloc(req_bytes);
+	oFinally { free(services); };
 	
-	oVB(EnumServicesStatusEx(hSCManager, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, (LPBYTE)lpServices, requiredBytes, &requiredBytes, &nServices, nullptr, nullptr));
-	for (DWORD i = 0; i < nServices; i++)
-		if (!_Enumerator(hSCManager, lpServices[i]))
+	oVB(EnumServicesStatusEx(hscmanager, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_STATE_ALL, (LPBYTE)services, req_bytes, &req_bytes, &nservices, nullptr, nullptr));
+	for (DWORD i = 0; i < nservices; i++)
+		if (!enumerator(hscmanager, services[i], user))
 			break;
 }
 
 static bool windows_all_services_steady()
 {
-	bool NonSteadyStateFound = false;
-	windows_enumerate_services([&](SC_HANDLE _hSCManager, const ENUM_SERVICE_STATUS_PROCESS& _Status)->bool
+	bool non_steady_state_found = false;
+
+	windows_enumerate_services([](SC_HANDLE hscmanager, const ENUM_SERVICE_STATUS_PROCESS& status, void* user)->bool
 	{
-		if (SERVICE_PAUSED != _Status.ServiceStatusProcess.dwCurrentState && SERVICE_RUNNING != _Status.ServiceStatusProcess.dwCurrentState && SERVICE_STOPPED != _Status.ServiceStatusProcess.dwCurrentState)
+		bool& non_steady_state_found = *(bool*)user;
+
+		switch (status.ServiceStatusProcess.dwCurrentState)
 		{
-			NonSteadyStateFound = true;
-			return false;
+			case SERVICE_PAUSED:
+			case SERVICE_RUNNING:
+			case SERVICE_STOPPED:
+				break;
+			default:
+			{
+				non_steady_state_found = true;
+				return false;
+			}
 		}
+
 		return true;
-	});
-	return !NonSteadyStateFound;
+	}, &non_steady_state_found);
+
+	return !non_steady_state_found;
 }
 
-static double windows_cpu_usage(unsigned long long* _pPreviousIdleTime, unsigned long long* _pPreviousSystemTime)
+static double windows_cpu_usage(uint64_t* out_prev_idle_time, uint64_t* out_prev_system_time)
 {
 	double CPUUsage = 0.0;
 
-	unsigned long long idleTime, kernelTime, userTime;
-	oVB(GetSystemTimes((LPFILETIME)&idleTime, (LPFILETIME)&kernelTime, (LPFILETIME)&userTime));
-	unsigned long long systemTime = kernelTime + userTime;
+	uint64_t idle_time, kernel_time, user_time;
+	oVB(GetSystemTimes((LPFILETIME)&idle_time, (LPFILETIME)&kernel_time, (LPFILETIME)&user_time));
+	uint64_t systemTime = kernel_time + user_time;
 	
-	if (*_pPreviousIdleTime && *_pPreviousSystemTime)
+	if (*out_prev_idle_time && *out_prev_system_time)
 	{
-		unsigned long long idleDelta = idleTime - *_pPreviousIdleTime;
-		unsigned long long systemDelta = systemTime - *_pPreviousSystemTime;
+		uint64_t idleDelta = idle_time - *out_prev_idle_time;
+		uint64_t systemDelta = systemTime - *out_prev_system_time;
 		CPUUsage = (systemDelta - idleDelta) * 100.0 / (double)systemDelta;
 	}		
 
-	*_pPreviousIdleTime = idleTime;
-	*_pPreviousSystemTime = systemTime;
+	*out_prev_idle_time = idle_time;
+	*out_prev_system_time = systemTime;
 	return CPUUsage; 
 }
 
-bool wait_for_idle(unsigned int _TimeoutMS, const std::function<bool()>& _ContinueWaiting)
+bool wait_for_idle(uint32_t timeout_ms, continue_waiting_fn continue_waiting, void* user)
 {
-	bool IsSteady = false;
-	auto TimeStart = chrono::high_resolution_clock::now();
-	auto TimeCurrent = TimeStart;
-	unsigned long long PreviousIdleTime = 0, PreviousSystemTime = 0;
 	static const double kLowCPUUsage = 5.0;
-	static const unsigned int kNumSamplesAtLowCPUUsageToBeSteady = 10;
-	unsigned int nSamplesAtLowCPUUsage = 0;
+	static const uint32_t kNumSamplesAtLowCPUUsageToBeSteady = 10;
+
+	bool is_steady = false;
+	auto time_start = std::chrono::high_resolution_clock::now();
+	auto time_current = time_start;
+	uint64_t prev_idle_time = 0, prev_system_time = 0;
+	uint32_t num_samples_at_low_cpu_usage = 0;
 	
 	while (true)
 	{
-		if (_TimeoutMS != INFINITE && (chrono::seconds((TimeCurrent - TimeStart).count()) >= chrono::milliseconds(_TimeoutMS)))
+		if (timeout_ms != INFINITE && (std::chrono::seconds((time_current - time_start).count()) >= std::chrono::milliseconds(timeout_ms)))
 			break;
 		
 		if (windows_all_services_steady())
 		{
-			double CPUUsage = windows_cpu_usage(&PreviousIdleTime, &PreviousSystemTime);
+			double CPUUsage = windows_cpu_usage(&prev_idle_time, &prev_system_time);
 			if (CPUUsage < kLowCPUUsage)
-				nSamplesAtLowCPUUsage++;
+				num_samples_at_low_cpu_usage++;
 			else
-				nSamplesAtLowCPUUsage = 0;
+				num_samples_at_low_cpu_usage = 0;
 
-			if (nSamplesAtLowCPUUsage > kNumSamplesAtLowCPUUsageToBeSteady)
+			if (num_samples_at_low_cpu_usage > kNumSamplesAtLowCPUUsageToBeSteady)
 				return true;
 
-			if (_ContinueWaiting && !_ContinueWaiting())
+			if (continue_waiting && !continue_waiting(user))
 				break;
 
-			this_thread::sleep_for(chrono::milliseconds(200));
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		}
 
-		TimeCurrent = chrono::high_resolution_clock::now();
+		time_current = std::chrono::high_resolution_clock::now();
 	}
 
 	return false;
@@ -323,16 +338,16 @@ bool uses_gpu_compositing()
 	return !!enabled;
 }
 
-void enable_gpu_compositing(bool _Enable, bool _Force)
+void enable_gpu_compositing(bool enable, bool force)
 {
 	#if NTDDI_VERSION < _WIN32_WINNT_WIN8
-		if (_Enable && _Force && !uses_gpu_compositing())
+		if (enable && force && !uses_gpu_compositing())
 		{
 			::system("%SystemRoot%\\system32\\rundll32.exe %SystemRoot%\\system32\\shell32.dll,Control_RunDLL %SystemRoot%\\system32\\desk.cpl desk,@Themes /Action:OpenTheme /file:\"C:\\Windows\\Resources\\Themes\\aero.theme\"");
 			std::this_thread::sleep_for(std::chrono::seconds(31)); // Windows takes about 30 sec to settle after doing this.
 		}
 		else	
-			oVB(DwmEnableComposition(_Enable ? DWM_EC_ENABLECOMPOSITION : DWM_EC_DISABLECOMPOSITION));
+			oVB(DwmEnableComposition(enable ? DWM_ECenableCOMPOSITION : DWM_EC_DISABLECOMPOSITION));
 	#else
 		throw std::system_error(std::errc::function_not_supported, std::system_category(), "No programatic control of GPU compositing in Windows 8 and beyond.");
 	#endif
@@ -348,22 +363,22 @@ bool gui_is_drawable()
 	return !!GetForegroundWindow();
 }
 
-char* operating_system_name(char* _StrDestination, size_t _SizeofStrDestination)
+char* operating_system_name(char* dst, size_t dst_size)
 {
 	const char* OSName = as_string(windows::get_version());
-	if (strlcpy(_StrDestination, OSName, _SizeofStrDestination) >= _SizeofStrDestination)
+	if (strlcpy(dst, OSName, dst_size) >= dst_size)
 		throw std::system_error(std::errc::no_buffer_space, std::system_category());
-	return _StrDestination;
+	return dst;
 }
 
-char* host_name(char* _StrDestination, size_t _SizeofStrDestination)
+char* host_name(char* dst, size_t dst_size)
 {
-	DWORD nElements = (DWORD)_SizeofStrDestination;
-	oVB(GetComputerNameExA(ComputerNameDnsHostname, _StrDestination, &nElements));
-	return _StrDestination;
+	DWORD nElements = (DWORD)dst_size;
+	oVB(GetComputerNameExA(ComputerNameDnsHostname, dst, &nElements));
+	return dst;
 }
 
-char* workgroup_name(char* _StrDestination, size_t _SizeofStrDestination)
+char* workgroup_name(char* dst, size_t dst_size)
 {
 	LPWKSTA_INFO_102 pInfo = nullptr;
 	NET_API_STATUS nStatus;
@@ -373,37 +388,37 @@ char* workgroup_name(char* _StrDestination, size_t _SizeofStrDestination)
 	oFinally { if (pInfo) NetApiBufferFree(pInfo); };
 	oVB(nStatus == NERR_Success);
 	
-	WideCharToMultiByte(CP_ACP, 0, pInfo->wki102_langroup, -1, _StrDestination, static_cast<int>(_SizeofStrDestination), 0, 0);
-	return _StrDestination;
+	WideCharToMultiByte(CP_ACP, 0, pInfo->wki102_langroup, -1, dst, static_cast<int>(dst_size), 0, 0);
+	return dst;
 }
 
-char* exec_path(char* _StrDestination, size_t _SizeofStrDestination)
+char* exec_path(char* dst, size_t dst_size)
 {
 	sstring hostname;
-	if (-1 == snprintf(_StrDestination, _SizeofStrDestination, "[%s.%u.%u]", host_name(hostname), ouro::this_process::get_id(), asdword(std::this_thread::get_id())))
+	if (-1 == snprintf(dst, dst_size, "[%s.%u.%u]", host_name(hostname), ouro::this_process::get_id(), asdword(std::this_thread::get_id())))
 		throw std::system_error(std::errc::no_buffer_space, std::system_category());
-	return _StrDestination;
+	return dst;
 }
 
-void setenv(const char* _EnvVarName, const char* _Value)
+void setenv(const char* envvar_name, const char* value)
 {
-	oVB(SetEnvironmentVariableA(_EnvVarName, _Value));
+	oVB(SetEnvironmentVariableA(envvar_name, value));
 }
 
-char* getenv(char* _Value, size_t _SizeofValue, const char* _EnvVarName)
+char* getenv(char* value, size_t value_size, const char* envvar_name)
 {
-	size_t len = GetEnvironmentVariableA(_EnvVarName, _Value, (int)_SizeofValue);
-	return (len && len < _SizeofValue) ? _Value : nullptr;
+	size_t len = GetEnvironmentVariableA(envvar_name, value, (int)value_size);
+	return (len && len < value_size) ? value : nullptr;
 }
 
-char* envstr(char* _StrEnvironment, size_t _SizeofStrEnvironment)
+char* envstr(char* env_string, size_t env_string_size)
 {
 	char* pEnv = GetEnvironmentStringsA();
 	oFinally { if (pEnv) { FreeEnvironmentStringsA(pEnv); } };
 
 	// nuls -> newlines to make parsing this mega-string a bit less obtuse
 	char* c = pEnv;
-	char* d = _StrEnvironment;
+	char* d = env_string;
 	size_t len = strlen(pEnv);
 	while (len)
 	{
@@ -412,51 +427,30 @@ char* envstr(char* _StrEnvironment, size_t _SizeofStrEnvironment)
 		len = strlen(c);
 	}
 
-	if (strlcpy(_StrEnvironment, pEnv, _SizeofStrEnvironment) >= _SizeofStrEnvironment)
+	if (strlcpy(env_string, pEnv, env_string_size) >= env_string_size)
 		throw std::system_error(std::errc::no_buffer_space, std::system_category());
-	return _StrEnvironment;
+	return env_string;
 }
 
-// This moves any leftovers to the front of the buffer and returns the offset
-// where a new write should start.
-static size_t line_enumerator(char* _Buffer, size_t _ReadSize
-	, const std::function<void(char* _Line)>& _GetLine)
+static const char* privilege_name(privilege privilege)
 {
-	_Buffer[_ReadSize] = '\0';
-	char* line = _Buffer;
-	size_t eol = strcspn(line, oNEWLINE);
-
-	while (line[eol] != '\0')
+	switch (privilege)
 	{
-		line[eol] = '\0';
-		_GetLine(line);
-		line += eol + 1;
-		line += strspn(line, oNEWLINE);
-		eol = strcspn(line, oNEWLINE);
-	}
-
-	return strlcpy(_Buffer, line, _ReadSize);
-}
-
-static const char* privilege_name(privilege _Privilege)
-{
-	switch (_Privilege)
-	{
-		case may_debug: return SE_DEBUG_NAME;
-		case may_shutdown: return SE_SHUTDOWN_NAME;
-		case may_lock_memory: return SE_LOCK_MEMORY_NAME;
-		case may_profile_process: return SE_PROF_SINGLE_PROCESS_NAME;
-		case may_load_driver: return SE_LOAD_DRIVER_NAME;
-		case may_increase_working_set: return SE_INC_WORKING_SET_NAME;
-		case may_increase_process_priority: return SE_INC_BASE_PRIORITY_NAME;
+		case privilege::may_debug: return SE_DEBUG_NAME;
+		case privilege::may_shutdown: return SE_SHUTDOWN_NAME;
+		case privilege::may_lock_memory: return SE_LOCK_MEMORY_NAME;
+		case privilege::may_profile_process: return SE_PROF_SINGLE_PROCESS_NAME;
+		case privilege::may_load_driver: return SE_LOAD_DRIVER_NAME;
+		case privilege::may_increase_working_set: return SE_INC_WORKING_SET_NAME;
+		case privilege::may_increase_process_priority: return SE_INC_BASE_PRIORITY_NAME;
 		default: break;
 	}
 	return "?";
 }
 
-void set_privilege(privilege _Privilege, bool _Enabled)
+void set_privilege(privilege privilege, bool enabled)
 {
-	const char* p = privilege_name(_Privilege);
+	const char* p = privilege_name(privilege);
 
 	HANDLE hT;
 	TOKEN_PRIVILEGES tkp;
@@ -464,7 +458,7 @@ void set_privilege(privilege _Privilege, bool _Enabled)
 	windows::scoped_handle hToken(hT);
 	oVB(!LookupPrivilegeValue(nullptr, p, &tkp.Privileges[0].Luid));
 	tkp.PrivilegeCount = 1;      
-	tkp.Privileges[0].Attributes = _Enabled ? SE_PRIVILEGE_ENABLED : 0; 
+	tkp.Privileges[0].Attributes = enabled ? SE_PRIVILEGE_ENABLED : 0; 
 	oVB(!AdjustTokenPrivileges(hToken, FALSE, &tkp, 0, nullptr, 0));
 	// AdjustTokenPrivileges only fails for invalid parameters. If it fails 
 	// because the app did not have permissions, then it succeeds (result will be 
@@ -472,30 +466,51 @@ void set_privilege(privilege _Privilege, bool _Enabled)
 	oVB(GetLastError() == ERROR_SUCCESS);
 }
 
+// This moves any leftovers to the front of the buffer and returns the offset
+// where a new write should start.
+static size_t line_enumerator(char* buffer, size_t read_size, get_line_fn get_line, void* user)
+{
+	buffer[read_size] = '\0';
+	char* line = buffer;
+	size_t eol = strcspn(line, oNEWLINE);
+
+	while (line[eol] != '\0')
+	{
+		line[eol] = '\0';
+		get_line(line, user);
+		line += eol + 1;
+		line += strspn(line, oNEWLINE);
+		eol = strcspn(line, oNEWLINE);
+	}
+
+	return strlcpy(buffer, line, read_size);
+}
+
 // starting suspended can BSOD the machine, be careful
 //#define DEBUG_EXECUTED_PROCESS
-int spawn_for(const char* _CommandLine
-	, const std::function<void(char* _Line)>& _GetLine
-	, bool _ShowWindow
-	, unsigned int _ExecutionTimeout)
+int spawn_for(const char* cmdline
+	, get_line_fn get_line
+	, void* user
+	, bool show_window
+	, uint32_t execution_timeout_ms)
 {
 	std::vector<char> buffer;
 	buffer.resize(100 * 1024);
 	std::shared_ptr<process> P;
 	{
 		process::info process_info;
-		process_info.command_line = _CommandLine;
+		process_info.command_line = cmdline;
 		process_info.environment = nullptr;
 		process_info.initial_directory = nullptr;
 		process_info.stdout_buffer_size = buffer.size() - 1;
-		process_info.show = _ShowWindow ? process::show : process::hide;
+		process_info.show = show_window ? process::show : process::hide;
 		#ifdef DEBUG_EXECUTED_PROCESS
 			process_info.suspended = true;
 		#endif
 		P = std::move(process::make(process_info));
 	}
 
-	oTRACEA("spawn: >>> %s <<<", oSAFESTRN(_CommandLine));
+	oTRACEA("spawn: >>> %s <<<", oSAFESTRN(cmdline));
 	#ifdef DEBUG_EXECUTED_PROCESS
 		process->start();
 	#endif
@@ -504,64 +519,64 @@ int spawn_for(const char* _CommandLine
 	// redirecting output
 	bool once = false;
 
-	static const unsigned int kTimeoutPerFlushMS = 50;
-	double Timeout = _ExecutionTimeout == INFINITE ? DBL_MAX : (1000.0 * static_cast<double>(_ExecutionTimeout));
-	double TimeSoFar = 0.0;
+	static const uint32_t ktimeoutPerFlushMS = 50;
+	double timeout = execution_timeout_ms == INFINITE ? DBL_MAX : (1000.0 * static_cast<double>(execution_timeout_ms));
+	double timeout_so_far = 0.0;
 	timer t;
 	do
 	{
 		if (!once)
 		{
-			oTRACEA("spawn stdout: >>> %s <<<", oSAFESTRN(_CommandLine));
+			oTRACEA("spawn stdout: >>> %s <<<", oSAFESTRN(cmdline));
 			once = true;
 		}
 		
-		size_t ReadSize = P->from_stdout((void*)buffer.data(), buffer.size() - 1);
-		while (ReadSize && _GetLine)
+		size_t read_size = P->from_stdout((void*)buffer.data(), buffer.size() - 1);
+		while (read_size && get_line)
 		{
-			size_t offset = line_enumerator(buffer.data(), ReadSize, _GetLine);
-			ReadSize = P->from_stdout((uint8_t*)buffer.data() + offset, buffer.size() - 1 - offset);
+			size_t offset = line_enumerator(buffer.data(), read_size, get_line, user);
+			read_size = P->from_stdout((uint8_t*)buffer.data() + offset, buffer.size() - 1 - offset);
 		}
 
-		TimeSoFar = t.seconds();
+		timeout_so_far = t.seconds();
 
-	} while (TimeSoFar < Timeout && !P->wait_for(chrono::milliseconds(kTimeoutPerFlushMS)));
+	} while (timeout_so_far < timeout && !P->wait_for(std::chrono::milliseconds(ktimeoutPerFlushMS)));
 	
 	// get any remaining text from stdout
 	size_t offset = 0;
-	size_t ReadSize = P->from_stdout((void*)buffer.data(), buffer.size() - 1);
-	while (ReadSize && _GetLine)
+	size_t read_size = P->from_stdout((void*)buffer.data(), buffer.size() - 1);
+	while (read_size && get_line)
 	{
-		offset = line_enumerator(buffer.data(), ReadSize, _GetLine);
-		ReadSize = P->from_stdout((uint8_t*)buffer.data() + offset, buffer.size() - 1 - offset);
+		offset = line_enumerator(buffer.data(), read_size, get_line, user);
+		read_size = P->from_stdout((uint8_t*)buffer.data() + offset, buffer.size() - 1 - offset);
 	}
 
-	if (offset && _GetLine)
-		_GetLine(buffer.data());
+	if (offset && get_line)
+		get_line(buffer.data(), user);
 
-	if (TimeSoFar >= Timeout)
+	if (timeout_so_far >= timeout)
 		return std::errc::timed_out;
 
-	int ExitCode = 0;
-	if (!P->exit_code(&ExitCode))
-		ExitCode = std::errc::operation_in_progress;
+	int exit_code = 0;
+	if (!P->exit_code(&exit_code))
+		exit_code = std::errc::operation_in_progress;
 	
-	return ExitCode;
+	return exit_code;
 }
 
-int spawn(const char* _CommandLine
-	, const std::function<void(char* _Line)>& _GetLine
-	, bool _ShowWindow)
+int spawn(const char* cmdline
+	, get_line_fn get_line
+	, void* user
+	, bool show_window)
 {
-	return spawn_for(_CommandLine, _GetLine, _ShowWindow, INFINITE);
+	return spawn_for(cmdline, get_line, user, show_window, INFINITE);
 }
 
-void spawn_associated_application(const char* _DocumentName, bool _ForEdit)
+void spawn_associated_application(const char* document_path, bool for_edit)
 {
-	int hr = (int)ShellExecuteA(nullptr, _ForEdit ? "edit" : "open", _DocumentName, nullptr, nullptr, SW_SHOW);
+	int hr = (int)ShellExecuteA(nullptr, for_edit ? "edit" : "open", document_path, nullptr, nullptr, SW_SHOW);
 	if (hr < 32)
 		throw std::system_error(std::errc::no_buffer_space, std::system_category(), "The operating system is out of memory or resources.");
 }
 
-	} // namespace system
-}
+}}
