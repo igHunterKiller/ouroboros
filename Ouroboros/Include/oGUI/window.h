@@ -390,11 +390,11 @@ public:
 	virtual void stop_timer(uintptr_t context) = 0;
 };
 
-const window::create_event& window::basic_event::as_create() const { oASSERT(type == event_type::creating, "wrong type"); return *static_cast<const create_event*>(this); }
-const window::shape_event& window::basic_event::as_shape() const { oASSERT(is_shape_event(type), "wrong type"); return *static_cast<const shape_event*>(this); }
-const window::timer_event& window::basic_event::as_timer() const { oASSERT(type == event_type::timer, "wrong type"); return *static_cast<const timer_event*>(this); }
-const window::drop_event& window::basic_event::as_drop() const { oASSERT(type == event_type::drop_files, "wrong type"); return *static_cast<const drop_event*>(this); }
-const window::input_device_event& window::basic_event::as_input_device() const { oASSERT(type == event_type::input_device_changed, "wrong type"); return *static_cast<const input_device_event*>(this); }
-const window::custom_event& window::basic_event::as_custom() const { oASSERT(type == event_type::custom_event, "wrong type"); return *static_cast<const custom_event*>(this); }
+const window::create_event& window::basic_event::as_create() const { oAssert(type == event_type::creating, "wrong type"); return *static_cast<const create_event*>(this); }
+const window::shape_event& window::basic_event::as_shape() const { oAssert(is_shape_event(type), "wrong type"); return *static_cast<const shape_event*>(this); }
+const window::timer_event& window::basic_event::as_timer() const { oAssert(type == event_type::timer, "wrong type"); return *static_cast<const timer_event*>(this); }
+const window::drop_event& window::basic_event::as_drop() const { oAssert(type == event_type::drop_files, "wrong type"); return *static_cast<const drop_event*>(this); }
+const window::input_device_event& window::basic_event::as_input_device() const { oAssert(type == event_type::input_device_changed, "wrong type"); return *static_cast<const input_device_event*>(this); }
+const window::custom_event& window::basic_event::as_custom() const { oAssert(type == event_type::custom_event, "wrong type"); return *static_cast<const custom_event*>(this); }
 
 }

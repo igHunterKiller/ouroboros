@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oBase/compression.h>
 #include <zlib/zlib.h>
 
@@ -48,8 +49,7 @@ size_t compress_gzip(void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT
 	if (dst)
 	{
 		const size_t EstSize = compress_gzip(nullptr, 0, nullptr, src_size);
-		if (dst && dst_size < EstSize)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oCheck(!dst || dst_size >= EstSize, std::errc::no_buffer_space, "");
 
 		GZIP_HDR h;
 		h.ID1 = GZipID1;
@@ -67,14 +67,11 @@ size_t compress_gzip(void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT
 	
 		uLongf bytesWritten = (uLongf)dst_size;
 		int result = compress2(static_cast<Bytef*>(dst), &bytesWritten, static_cast<const Bytef*>(src), static_cast<uint32_t>(src_size), 9);
-		if (result != Z_OK)
-			throw std::system_error(std::errc::protocol_error, std::system_category(), "compression failed");
+		oCheck(result == Z_OK, std::errc::protocol_error, "compression failed");
 
 		dst_size -= bytesWritten;
 		dst = (uint8_t*)dst + bytesWritten;
-
-		if (dst_size < GZipFooterSize)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oCheck(dst_size >= GZipFooterSize, std::errc::no_buffer_space, "");
 
 		uint32_t& CRC32 = *(uint32_t*)dst;
 		CRC32 = crc32(0, Z_NULL, 0);
@@ -97,10 +94,7 @@ size_t decompress_gzip(void* oRESTRICT dst, size_t dst_size, const void* oRESTRI
 {
 	const void* src = in_src;
 	const GZIP_HDR& h = *(const GZIP_HDR*)src;
-
-	if (h.ID1 != GZipID1 || h.ID2 != GZipID2 || h.CM != GZipCM)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), "Not a valid GZip stream");
-
+	oCheck(h.ID1 == GZipID1 && h.ID2 == GZipID2 && h.CM == GZipCM, std::errc::protocol_error, "Not a valid GZip stream");
 	src = (const uint8_t*)src + sizeof(GZIP_HDR);
 
 	// we don't generate optional fields but we need to skip over them if someone 
@@ -132,19 +126,13 @@ size_t decompress_gzip(void* oRESTRICT dst, size_t dst_size, const void* oRESTRI
 
 	if (dst)
 	{
-		if (dst && dst_size < UncompressedSize)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
-
+		oCheck(!dst || dst_size >= UncompressedSize, std::errc::no_buffer_space, "");
 		uLongf bytesWritten = (uLongf)dst_size;
-		if (Z_OK != uncompress(static_cast<Bytef*>(dst), &bytesWritten, static_cast<const Bytef*>(src), compressedSize))
-			throw std::system_error(std::errc::protocol_error, std::system_category(), "decompression error");
-
+		oCheck(Z_OK == uncompress(static_cast<Bytef*>(dst), &bytesWritten, static_cast<const Bytef*>(src), compressedSize), std::errc::protocol_error, "decompression error");
 		uint32_t expectedCRC32 = crc32(0, Z_NULL, 0);
 		expectedCRC32 = crc32(expectedCRC32, static_cast<const Bytef*>(dst), UncompressedSize);
-
 		uint32_t CRC32 = *(uint32_t*)((const uint8_t*)in_src + sizeof(h) + compressedSize);
-		if (expectedCRC32 != CRC32)
-			throw std::system_error(std::errc::protocol_error, std::system_category(), "CRC mismatch in GZip stream");
+		oCheck(expectedCRC32 == CRC32, std::errc::protocol_error, "CRC mismatch in GZip stream");
 	}
 
 	return UncompressedSize;

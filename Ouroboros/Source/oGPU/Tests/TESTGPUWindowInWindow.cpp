@@ -149,7 +149,7 @@ oTEST(oGPU_window_in_window)
 	if (srv.is_remote_session())
 	{
 		srv.trace("Detected remote session: differing text anti-aliasing will cause bad image compares");
-		throw std::system_error(std::errc::not_supported, std::system_category(), "Detected remote session: differing text anti-aliasing will cause bad image compares");
+		oThrow(std::errc::not_supported, "Detected remote session: differing text anti-aliasing will cause bad image compares");
 	}
 
 	// Turn display power on, otherwise the test will fail

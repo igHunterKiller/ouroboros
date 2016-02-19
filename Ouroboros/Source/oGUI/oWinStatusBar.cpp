@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oGUI/Windows/oWinStatusBar.h>
 #include <oGUI/Windows/oWinRect.h>
 #include <oGUI/Windows/oWinWindowing.h>
@@ -85,7 +84,7 @@ static int oWinStatusBarGetStyle(ouro::border_style::value _Style)
 		case ouro::border_style::sunken: return 0;
 		case ouro::border_style::flat: return SBT_NOBORDERS;
 		case ouro::border_style::raised: return SBT_POPOUT;
-		default: throw std::invalid_argument(stringf("unexpected style %d", _Style));
+		default: oThrow(std::errc::invalid_argument, "unexpected style %d", _Style);
 	}
 }
 
@@ -98,10 +97,8 @@ void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style::
 	if (!SendMessage(_hStatusBar, SB_SETTEXT, w, (LPARAM)s.c_str()))
 	{
 		int nParts = (int)SendMessage(_hStatusBar, SB_GETPARTS, INT_MAX, 0);
-		if (_ItemIndex >= nParts)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("The specified status bar item index %d is out of range (number of items %d)", _ItemIndex, nParts));
-		else
-			oVB(false);
+		oCheck(_ItemIndex < nParts, std::errc::no_buffer_space, "The specified status bar item index %d is out of range (number of items %d)", _ItemIndex, nParts);
+		oVB(false);
 	}
 }
 
@@ -109,8 +106,7 @@ char* oWinStatusBarGetText(char* _StrDestination, size_t _SizeofStrDestination, 
 {
 	LRESULT lResult = SendMessage(_hStatusBar, SB_GETTEXTLENGTH, (WPARAM)_ItemIndex, 0);
 	size_t len = LOWORD(lResult);
-	if (len >= _SizeofStrDestination)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(len < _SizeofStrDestination, std::errc::no_buffer_space, "");
 	SendMessage(_hStatusBar, SB_GETTEXT, (WPARAM)_ItemIndex, (LPARAM)_StrDestination);
 	return _StrDestination;
 }

@@ -46,7 +46,7 @@ static void init_console()
 	catch (std::exception& e)
 	{
 		e;
-		oTRACEA("console::set_info failed: %s", e.what());
+		oTraceA("console::set_info failed: %s", e.what());
 	}
 
 #if defined(WIN64) || defined(WIN32)
@@ -260,7 +260,7 @@ int main(int argc, const char* argv[])
 		::system("pause");
 	}
 
-	oTRACEA("Unit test exiting with result: %s", as_string(result));
+	oTraceA("Unit test exiting with result: %s", as_string(result));
 
 	::_flushall();
 	return (int)result;

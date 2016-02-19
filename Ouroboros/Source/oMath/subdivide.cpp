@@ -34,7 +34,7 @@ uint16_t midpoint(growable_hash_map<uint64_t, uint16_t>& cache, uint16_t a, uint
 	// add a new index to the cache
 	idx = inout_num_vertices;
 	if (!cache.add(key, idx))
-		throw std::invalid_argument("failed to add new index to cache");
+		oThrow(std::errc::invalid_argument, "failed to add new index to cache");
 
 	// add a new vertex midway between the vertices
 	float* vo = vertices + 3 * inout_num_vertices;
@@ -56,14 +56,14 @@ uint16_t midpoint(growable_hash_map<uint64_t, uint16_t>& cache, uint16_t a, uint
 void subdivide(uint16_t divide, uint16_t* indices, uint32_t& inout_num_indices, float* vertices, uint16_t& inout_num_vertices, void (*new_vertex)(uint16_t new_index, uint16_t a, uint16_t b, void* user), void* user)
 {
 	if (divide > 6)
-		throw std::invalid_argument("large subdivide would take too long to calculate");
+		oThrow(std::errc::invalid_argument, "large subdivide would take too long to calculate");
 
 	uint16_t pow2_divide = 1 << (divide    );
 	uint16_t pow4_divide = 1 << (divide * 2);
 
 	const uint32_t max_verts32 = (uint32_t)inout_num_vertices * pow2_divide;
 	if (max_verts32 > 65535)
-		throw std::invalid_argument("subdivision would require 32-bit indices");
+		oThrow(std::errc::invalid_argument, "subdivision would require 32-bit indices");
 
 	const uint16_t max_verts = (uint16_t)max_verts32;
 	const uint32_t max_indices = inout_num_indices * pow4_divide;

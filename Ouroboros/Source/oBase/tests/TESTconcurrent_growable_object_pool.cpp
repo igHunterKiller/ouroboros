@@ -65,7 +65,7 @@ oTEST(oBase_concurrent_growable_object_pool)
 		Allocator.shrink(2);
 		oCHECK(Allocator.num_chunks() == currentNumChunks, "Unexpected number of chunks allocated (after false shrink try)"); // shouldn't modify because there is 100% allocation
 
-		oTRACE("ouro::parallel_for { Allocator.destroy }");
+		oTrace("ouro::parallel_for { Allocator.destroy }");
 
 		ouro::parallel_for(0, NumBlocks, [&](size_t _Index)
 		{
@@ -81,7 +81,7 @@ oTEST(oBase_concurrent_growable_object_pool)
 		Allocator.shrink(0);
 		oCHECK(Allocator.num_chunks() == 0, "Unexpected number of chunks allocated (after 2nd shrink)");
 
-		oTRACE("ouro::parallel_for { if (odd) destroy }");
+		oTrace("ouro::parallel_for { if (odd) destroy }");
 
 		ouro::parallel_for(0, NumBlocks, [&](size_t _Index)
 		{
@@ -91,7 +91,7 @@ oTEST(oBase_concurrent_growable_object_pool)
 				Allocator.destroy(tests[_Index]);
 		});
 
-		oTRACE("ouro::parallel_for { Destroy remaining evens }");
+		oTrace("ouro::parallel_for { Destroy remaining evens }");
 
 		for (size_t i = 0; i < NumBlocks; i++)
 		{

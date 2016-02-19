@@ -135,17 +135,17 @@ void view_begin(technique_context_t& ctx)
 
 void view_end(technique_context_t& ctx)
 {
-	oASSERT(ctx.num_tasks == 1, "");
+	oAssert(ctx.num_tasks == 1, "");
 }
 
 void pass_begin(technique_context_t& ctx)
 {
-	oASSERT(ctx.num_tasks == 1, "");
+	oAssert(ctx.num_tasks == 1, "");
 }
 
 void pass_end(technique_context_t& ctx)
 {
-	oASSERT(ctx.num_tasks == 1, "");
+	oAssert(ctx.num_tasks == 1, "");
 }
 
 void draw_prim(technique_context_t& ctx)
@@ -216,7 +216,7 @@ void draw_prim(technique_context_t& ctx)
 
 void draw_axis(technique_context_t& ctx)
 {
-	oASSERT(ctx.num_tasks == 1, "");
+	oAssert(ctx.num_tasks == 1, "");
 
 	auto& cl  = *ctx.gcl;
 	auto& pov = *ctx.pov;
@@ -334,14 +334,14 @@ void draw_lines(technique_context_t& ctx)
 
 		else
 		{
-			oTRACE("draw_lines out of transient vertices");
+			oTrace("draw_lines out of transient vertices");
 		}
 	}
 }
 
 void draw_gizmo(technique_context_t& ctx)
 {
-	oASSERT(ctx.num_tasks == 1, "");
+	oAssert(ctx.num_tasks == 1, "");
 
 	auto& cl  = *ctx.gcl;
 	auto& pov = *ctx.pov;
@@ -442,7 +442,7 @@ void draw_grid(technique_context_t& ctx)
 
 		else
 		{
-			oTRACE("draw_grid out of transient vertices");
+			oTrace("draw_grid out of transient vertices");
 		}
 	}
 }
@@ -532,7 +532,7 @@ void renderer_t::initialize(const renderer_init_t& init, window* win)
 		{
 			static uint16_t s_max_depth = 7;
 			uint32_t n = btt_initialize_vbv_ibvs("terrain patches", dev_, s_max_depth, nullptr, nullptr);
-			oASSERT(n == btt_patch_indices_.size(), "size mismatch");
+			oAssert(n == btt_patch_indices_.size(), "size mismatch");
 			btt_initialize_vbv_ibvs("terrain patches", dev_, s_max_depth, &btt_verts_, btt_patch_indices_.data(), default_allocator);
 		}
 	}
@@ -643,11 +643,11 @@ void* renderer_t::consolidate_master_tasklist(uint32_t* out_num_tasks)
 			max_global_taskslists = kMaxGlobalTasklists;
 
 			if (global_overflow)
-				throw std::invalid_argument("overflow handler itself overflowed, make it simpler");
+				oThrow(std::errc::invalid_argument, "overflow handler itself overflowed, make it simpler");
 		}
 
 		else
-			throw std::invalid_argument("frame overflow with no overflow handler");
+			oThrow(std::errc::invalid_argument, "frame overflow with no overflow handler");
 #endif
 
 		return nullptr;
@@ -737,7 +737,7 @@ void renderer_t::trace_master_tasklist(const void* master_tasks, uint32_t num_ta
 				break;
 		}
 
-		oTRACE("[RENDER] %05d %-20s %-20s %s", i, as_string(pass), as_string(technique), extra);
+		oTrace("[RENDER] %05d %-20s %-20s %s", i, as_string(pass), as_string(technique), extra);
 	}
 }
 
@@ -838,7 +838,7 @@ void renderer_t::internal_submit(uint64_t priority, const uint8_t pass, const ui
 {
 	// validate input
 	if ((priority & priority_mask) != priority)
-		throw std::invalid_argument("invalid priority, must match priority_mask");
+		oThrow(std::errc::invalid_argument, "invalid priority, must match priority_mask");
 
 	tasklist_t* tasklist = (tasklist_t*)local_tasklist_;
 

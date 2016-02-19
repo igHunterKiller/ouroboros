@@ -145,9 +145,9 @@ static result run(framework_services& fw, const info_t& info, const registered* 
 	}
 
 	// prepare formatting used to print results
-	char fmtname  [64]; if (64 < snprintf(fmtname,   "%%-%us", info.name_col_width  )) throw std::invalid_argument("name col width too wide");
-	char fmtstatus[64]; if (64 < snprintf(fmtstatus, "%%-%us", info.status_col_width)) throw std::invalid_argument("status col width too wide");
-	char fmttime  [64]; if (64 < snprintf(fmttime,   "%%-%us", info.time_col_width  )) throw std::invalid_argument("time col width too wide");
+	char fmtname  [64]; if (64 < snprintf(fmtname,   "%%-%us", info.name_col_width  )) oThrow(std::errc::invalid_argument, "name col width too wide");
+	char fmtstatus[64]; if (64 < snprintf(fmtstatus, "%%-%us", info.status_col_width)) oThrow(std::errc::invalid_argument, "status col width too wide");
+	char fmttime  [64]; if (64 < snprintf(fmttime,   "%%-%us", info.time_col_width  )) oThrow(std::errc::invalid_argument, "time col width too wide");
 	char fmtmsg   [64];          snprintf(fmtmsg,    "%%s\n"                        );
 
 	uint32_t nsucceeded = 0;

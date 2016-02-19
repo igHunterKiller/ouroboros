@@ -23,12 +23,12 @@ namespace ouro {
 
 }
 
-#define oOPT_CASE(_ShortNameConstant, _Value, _Dest) case _ShortNameConstant: { if (!from_string(&(_Dest), value)) { throw std::invalid_argument("-%c %s cannot be interpreted as a(n) %s", (_ShortNameConstant), (_Value), typeid(_Dest).name()); } break; }
+#define oOPT_CASE(_ShortNameConstant, _Value, _Dest) case _ShortNameConstant: { if (!from_string(&(_Dest), value)) { oThrow(std::errc::invalid_argument, "-%c %s cannot be interpreted as a(n) %s", (_ShortNameConstant), (_Value), typeid(_Dest).name()); } break; }
 #define oOPT_CASE_DEFAULT(_ShortNameVariable, _Value, _NthOption) \
-	case ' ': { throw std::invalid_argument("There should be no parameters that aren't switches passed"); break; } \
-	case '?': { throw std::invalid_argument("Parameter %d is not recognized", (_NthOption)); break; } \
-	case ':': { throw std::invalid_argument("Parameter %d is missing a value", (_NthOption)); break; } \
-	default: { oTRACE("Unhandled option -%c %s", (_ShortNameVariable), oSAFESTR(_Value)); break; }
+	case ' ': { oThrow(std::errc::invalid_argument, "There should be no parameters that aren't switches passed"); break; } \
+	case '?': { oThrow(std::errc::invalid_argument, "Parameter %d is not recognized", (_NthOption)); break; } \
+	case ':': { oThrow(std::errc::invalid_argument, "Parameter %d is missing a value", (_NthOption)); break; } \
+	default: { oTrace("Unhandled option -%c %s", (_ShortNameVariable), oSAFESTR(_Value)); break; }
 #if 0
 void oParseCmdLine(int argc, const char* argv[], oVERSIONED_LAUNCH_DESC* _pDesc, bool* _pShowHelp)
 {
@@ -75,7 +75,7 @@ static void oLauncherMain(int argc, const char* argv[])
 
 int main(int argc, const char* argv[])
 {
-	throw std::system_error(std::errc::not_supported, std::system_category(), "Disabled until version update is resurrected");
+	oThrow(std::errc::not_supported, "Disabled until version update is resurrected");
 
 #if 0
 

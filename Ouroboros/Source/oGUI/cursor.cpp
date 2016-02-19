@@ -9,7 +9,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#define oWINV() if (!::IsWindow((HWND)window)) throw std::invalid_argument(stringf("Invalid HWND %p specified", window));
+#define oWINV() if (!::IsWindow((HWND)window)) oThrow(std::errc::invalid_argument, "Invalid HWND %p specified", window);
 
 namespace ouro { namespace cursor {
 

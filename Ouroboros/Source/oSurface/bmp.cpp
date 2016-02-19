@@ -42,7 +42,7 @@ blob encode_bmp(const image& img, const allocator& file_alloc, const allocator& 
 {
 	auto info = img.info();
 	if (info.format != surface::format::b8g8r8a8_unorm && info.format != surface::format::b8g8r8_unorm)
-		throw std::invalid_argument("source must be b8g8r8a8_unorm or b8g8r8_unorm");
+		oThrow(std::errc::invalid_argument, "source must be b8g8r8a8_unorm or b8g8r8_unorm");
 
 	const uint32_t src_byte_count = element_size(info.format);
 
@@ -112,7 +112,7 @@ image decode_bmp(const void* buffer, size_t size, const allocator& texel_alloc, 
 	info_t bmp_info = get_info_bmp(buffer, size);
 	
 	if (bmp_info.format == format::unknown)
-		throw std::invalid_argument("invalid bmp buffer");
+		oThrow(std::errc::invalid_argument, "invalid bmp buffer");
 
 	info_t info = bmp_info;
 	info.mip_layout = layout;

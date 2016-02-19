@@ -6,6 +6,7 @@
 // https://en.wikipedia.org/wiki/Linear_probing
 
 #pragma once
+#include <oCore/assert.h>
 #include <oCore/bit.h> // nextpow2
 #include <functional>  // std::function
 #include <cstring>     // memset
@@ -37,7 +38,7 @@ public:
 	// constructs an empty hash map, use initialize() to set it up later
 	hash_map() : keys_(nullptr), vals_(nullptr), size_(0), wrap_(0) {}
 
-	~hash_map() { if (deinitialize()) throw std::exception("deinitializing hash_map with unfreed memory"); }
+	~hash_map() { oAssertA(!deinitialize(), "deinitializing hash_map with unfreed memory"); }
 	
 	// use calc_size() to determine memory size
 	hash_map(void* memory, size_type capacity) { initialize(memory, capacity); }
@@ -276,7 +277,7 @@ public:
 	{
 		size_type i = find_existing(key);
 		if (i == nullidx)
-			throw std::invalid_argument("key not found");
+			oThrow(std::errc::invalid_argument, "key not found");
 		return vals_[i];
 	}
 
@@ -285,7 +286,7 @@ public:
 	{
 		size_type i = find_existing(key);
 		if (i == nullidx)
-			throw std::invalid_argument("key not found");
+			oThrow(std::errc::invalid_argument, "key not found");
 		return &vals_[i];
 	}
 

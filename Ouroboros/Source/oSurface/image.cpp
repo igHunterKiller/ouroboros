@@ -1,14 +1,11 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oSurface/image.h>
 #include <oSurface/algo.h>
 #include <oSurface/box.h>
 #include <oSurface/convert.h>
 #include <oMemory/memory.h>
 #include <mutex>
-
-#define oSURF_CHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(stringf(format, ## __VA_ARGS__)); } while(false)
 
 namespace ouro { namespace surface {
 
@@ -58,8 +55,8 @@ void image::initialize_array(const image* const* sources, uint32_t num_sources, 
 {
 	deinitialize();
 	info_t si = sources[0]->info();
-	oSURF_CHECK(si.mip_layout == mip_layout::none, "all images in the specified array must be simple types and the same 2D dimensions");
-	oSURF_CHECK(si.dimensions.z == 1, "all images in the specified array must be simple types and the same 2D dimensions");
+	oCheck(si.mip_layout == mip_layout::none, std::errc::invalid_argument, "all images in the specified array must be simple types and the same 2D dimensions");
+	oCheck(si.dimensions.z == 1, std::errc::invalid_argument, "all images in the specified array must be simple types and the same 2D dimensions");
 	si.mip_layout = mips ? mip_layout::tight : mip_layout::none;
 	si.array_size = static_cast<int>(num_sources);
 	initialize(si);
@@ -81,9 +78,9 @@ void image::initialize_3d(const image* const* sources, uint32_t num_sources, boo
 {
 	deinitialize();
 	info_t si = sources[0]->info();
-	oSURF_CHECK(si.mip_layout == mip_layout::none, "all images in the specified array must be simple types and the same 2D dimensions");
-	oSURF_CHECK(si.dimensions.z == 1, "all images in the specified array must be simple types and the same 2D dimensions");
-	oSURF_CHECK(si.array_size == 0, "arrays of 3d surfaces not yet supported");
+	oCheck(si.mip_layout == mip_layout::none, std::errc::invalid_argument, "all images in the specified array must be simple types and the same 2D dimensions");
+	oCheck(si.dimensions.z == 1,              std::errc::invalid_argument, "all images in the specified array must be simple types and the same 2D dimensions");
+	oCheck(si.array_size == 0,                std::errc::invalid_argument, "arrays of 3d surfaces not yet supported");
 	si.mip_layout = mips ? mip_layout::tight : mip_layout::none;
 	si.dimensions.z = static_cast<int>(num_sources);
 	si.array_size = 0;
@@ -146,15 +143,14 @@ void image::fill(uint32_t argb)
       }
 
       default:
-        throw std::invalid_argument("unsupported default texture format");
+        oThrow(std::errc::invalid_argument, "unsupported default texture format");
     }
   }
 }
 
 void image::flatten()
 {
-	if (is_block_compressed(info_.format))
-		throw std::system_error(std::errc::not_supported, std::system_category(), "block compressed formats not handled yet");
+	oCheck(!is_block_compressed(info_.format), std::errc::not_supported, "block compressed formats not handled yet");
 
 	int rp = row_pitch(info_);
 	size_t sz = size();
@@ -174,7 +170,7 @@ void image::update_subresource(uint32_t subresource, const const_mapped_subresou
 void image::update_subresource(uint32_t subresource, const box_t& box, const const_mapped_subresource& src, const copy_option& option)
 {
 	if (is_block_compressed(info_.format) || info_.format == format::r1_unorm)
-		throw std::invalid_argument("block compressed and bit formats not supported");
+		oThrow(std::errc::invalid_argument, "block compressed and bit formats not supported");
 
 	uint2 bd;
 	mapped_subresource Dest = map_subresource(info_, subresource, bits_, &bd);
@@ -245,7 +241,7 @@ image image::convert(const info_t& dst_info) const
 image image::convert(const info_t& dst_info, const allocator& alloc) const
 {
 	if (any(dst_info.dimensions != info_.dimensions))
-		throw std::invalid_argument("dimensions mismatch, implement a resize here");
+		oThrow(std::errc::invalid_argument, "dimensions mismatch, implement a resize here");
 
 	image converted(dst_info, alloc);
 	shared_lock slock(this);
@@ -338,12 +334,12 @@ float calc_rms(const image& b1, const image& b2, image* out_diffs, int diff_scal
 	info_t si1 = b1.info();
 	info_t si2 = b2.info();
 
-	if (any(si1.dimensions != si2.dimensions)) throw std::invalid_argument("mismatched dimensions");
-	if (si1.format != si2.format) throw std::invalid_argument("mismatched format");
-	if (si1.array_size != si2.array_size) throw std::invalid_argument("mismatched array_size");
+	if (any(si1.dimensions != si2.dimensions)) oThrow(std::errc::invalid_argument, "mismatched dimensions");
+	if (si1.format != si2.format) oThrow(std::errc::invalid_argument, "mismatched format");
+	if (si1.array_size != si2.array_size) oThrow(std::errc::invalid_argument, "mismatched array_size");
 	int n1 = num_subresources(si1);
 	int n2 = num_subresources(si2);
-	if (n1 != n2) throw std::invalid_argument("incompatible layouts");
+	if (n1 != n2) oThrow(std::errc::invalid_argument, "incompatible layouts");
 
 	info_t dsi;
 	if (out_diffs)

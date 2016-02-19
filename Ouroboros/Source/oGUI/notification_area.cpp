@@ -115,7 +115,7 @@ private:
 		{
 			xlstring buf;
 			mstring exec;
-			oTRACE("Cleaning up tray icons");
+			oTrace("Cleaning up tray icons");
 		}
 
 		for (size_t i = 0; i < Removes.size(); i++)
@@ -215,8 +215,7 @@ static bool icon_rect_internal(ouro::window_handle _hWnd, unsigned int _ID, RECT
 void icon_rect(ouro::window_handle _hWnd, unsigned int _ID, int* _pX, int* _pY, int* _pWidth, int* _pHeight)
 {
 	RECT r;
-	if (!icon_rect_internal(_hWnd, _ID, &r))
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(icon_rect_internal(_hWnd, _ID, &r), std::errc::no_such_device, "");
 	*_pX = r.left;
 	*_pY = r.top;
 	*_pWidth = r.right - r.left;
@@ -259,7 +258,7 @@ void show_icon(ouro::window_handle _hWnd, unsigned int _ID, unsigned int _Callba
 static void hide_icon(ouro::window_handle _hWnd, unsigned int _ID, unsigned int _TimeoutMS)
 {
 	Sleep(_TimeoutMS);
-	oTRACE("Auto-closing tray icon HWND=0x%p ID=%u", _hWnd, _ID);
+	oTrace("Auto-closing tray icon HWND=0x%p ID=%u", _hWnd, _ID);
 	show_icon(_hWnd, _ID, 0, 0, false);
 	cleanup::singleton().unregister_thread(this_thread::get_id());
 	windows::crt_leak_tracker::release_delay();

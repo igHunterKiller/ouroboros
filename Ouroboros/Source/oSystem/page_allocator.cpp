@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oSystem/page_allocator.h>
 #include <oSystem/windows/win_error.h>
 
@@ -16,7 +15,7 @@ static status get_status(DWORD state)
 		case MEM_COMMIT: return status::committed;
 		case MEM_FREE: return status::free;
 		case MEM_RESERVE: return status::reserved;
-		default: throw std::invalid_argument(stringf("unexpected status %u", state));
+		default: oThrow(std::errc::invalid_argument, "unexpected status %u", state);
 	}
 }
 
@@ -27,7 +26,7 @@ static DWORD get_access(access access)
 		case access::none: return PAGE_NOACCESS;
 		case access::read_only: return PAGE_EXECUTE_READ;
 		case access::read_write: return PAGE_EXECUTE_READWRITE;
-		default: throw std::invalid_argument(stringf("unexpected access %u", access));
+		default: oThrow(std::errc::invalid_argument, "unexpected access %u", access);
 	}
 }
 
@@ -50,7 +49,7 @@ range get_range(void* base)
 		size_t returnSize = 
 	#endif
 	VirtualQuery(base, &mbi, sizeof(mbi));
-	oASSERT(sizeof(mbi) == returnSize, "");
+	oAssert(sizeof(mbi) == returnSize, "");
 	range r;
 	r.base = mbi.BaseAddress;
 	r.size = mbi.RegionSize;
@@ -80,7 +79,7 @@ static void get_allocation_type(const allocation_type& allocation_type, void* ba
 	if (use_large_page_size)
 	{
 		if (base_address && (allocation_type == allocation_type::reserve || allocation_type == allocation_type::reserve_read_write))
-			throw std::invalid_argument("large page memory cannot be reserved");
+			oThrow(std::errc::invalid_argument, "large page memory cannot be reserved");
 
 		*out_flAllocationType |= MEM_LARGE_PAGES;
 		*out_size = align(*out_size, large_pagesize());
@@ -114,7 +113,7 @@ static void* allocate(const allocation_type& allocation_type, void* base_address
 	if (base_address && p != base_address)
 	{
 		deallocate(p, allocation_type >= allocation_type::reserve_and_commit);
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	}
 	return p;
 }

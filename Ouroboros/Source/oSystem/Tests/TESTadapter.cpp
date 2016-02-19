@@ -26,7 +26,7 @@ oTEST(oSystem_adapter)
 		version_t min_ver = adapter::minimum_version(info.vendor);
 		if (!ctx.n)
 			ctx.services.trace("%s v%s%s", info.description.c_str(), to_string(str_ver, info.version), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
-		oTRACE("%s v%s%s", info.description.c_str(), to_string(str_ver, info.version), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
+		oTrace("%s v%s%s", info.description.c_str(), to_string(str_ver, info.version), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
 		ctx.n++;
 		return true;
 	}, &ctx);

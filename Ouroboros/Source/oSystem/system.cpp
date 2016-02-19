@@ -123,7 +123,7 @@ void kill_file_browser()
 {
 	if (process::exists("explorer.exe"))
 	{
-		oTRACE("Terminating explorer.exe because the taskbar can interfere with cooperative fullscreen");
+		oTrace("Terminating explorer.exe because the taskbar can interfere with cooperative fullscreen");
 		::system("TASKKILL /F /IM explorer.exe");
 	}
 }
@@ -142,7 +142,7 @@ void allow_sleep(bool allow)
 		case windows::version::xp_pro_64bit:
 		case windows::version::server_2003:
 		case windows::version::server_2003r2:
-			throw std::system_error(std::errc::operation_not_supported, std::system_category(), std::string("allow_sleep not supported on ") + as_string(windows::get_version()));
+			oThrow(std::errc::operation_not_supported, "allow_sleep not supported on %s", as_string(windows::get_version()));
 		default:
 			break;
 	}
@@ -170,11 +170,11 @@ static void CALLBACK execute_scheduled_function_and_cleanup(LPVOID lpArgToComple
 		#ifdef _DEBUG
 			sstring diff;
 			format_duration(diff, (double)(time(nullptr) - ctx.scheduled_time));
-			oTRACE("Running scheduled function '%s' %s after it was scheduled", ctx.debug_name.empty() ? "(null)" : ctx.debug_name.c_str(), diff.c_str());
+			oTrace("Running scheduled function '%s' %s after it was scheduled", ctx.debug_name.empty() ? "(null)" : ctx.debug_name.c_str(), diff.c_str());
 		#endif
 
 		ctx.on_timer(ctx.user);
-		oTRACE("Finished scheduled function '%s'", ctx.debug_name.empty() ? "(null)" : ctx.debug_name.c_str());
+		oTrace("Finished scheduled function '%s'", ctx.debug_name.empty() ? "(null)" : ctx.debug_name.c_str());
 	}
 	oVB(CloseHandle(ctx.htimer));
 	delete &ctx;
@@ -204,7 +204,7 @@ static void schedule_task(const char* debug_name
 		catch (std::exception&) { strlcpy(str_time, "(out-of-time_t-range)"); }
 		strftime(str_time, sortable_date_format, then);
 		format_duration(str_diff, (double)(time(nullptr) - ctx.scheduled_time));
-		oTRACE("Setting timer to run function '%s' at %s (%s from now)", oSAFESTRN(ctx.debug_name), str_time, str_diff);
+		oTrace("Setting timer to run function '%s' at %s (%s from now)", oSAFESTRN(ctx.debug_name), str_time, str_diff);
 	#endif
 
 	FILETIME ft = date_cast<FILETIME>(absolute_time);
@@ -349,7 +349,7 @@ void enable_gpu_compositing(bool enable, bool force)
 		else	
 			oVB(DwmEnableComposition(enable ? DWM_ECenableCOMPOSITION : DWM_EC_DISABLECOMPOSITION));
 	#else
-		throw std::system_error(std::errc::function_not_supported, std::system_category(), "No programatic control of GPU compositing in Windows 8 and beyond.");
+		oThrow(std::errc::function_not_supported, "No programatic control of GPU compositing in Windows 8 and beyond.");
 	#endif
 }
 
@@ -366,8 +366,7 @@ bool gui_is_drawable()
 char* operating_system_name(char* dst, size_t dst_size)
 {
 	const char* OSName = as_string(windows::get_version());
-	if (strlcpy(dst, OSName, dst_size) >= dst_size)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(strlcpy(dst, OSName, dst_size) < dst_size, std::errc::no_buffer_space, "");
 	return dst;
 }
 
@@ -395,8 +394,7 @@ char* workgroup_name(char* dst, size_t dst_size)
 char* exec_path(char* dst, size_t dst_size)
 {
 	sstring hostname;
-	if (-1 == snprintf(dst, dst_size, "[%s.%u.%u]", host_name(hostname), ouro::this_process::get_id(), asdword(std::this_thread::get_id())))
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(-1 != snprintf(dst, dst_size, "[%s.%u.%u]", host_name(hostname), ouro::this_process::get_id(), asdword(std::this_thread::get_id())), std::errc::no_buffer_space, "");
 	return dst;
 }
 
@@ -427,8 +425,7 @@ char* envstr(char* env_string, size_t env_string_size)
 		len = strlen(c);
 	}
 
-	if (strlcpy(env_string, pEnv, env_string_size) >= env_string_size)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(strlcpy(env_string, pEnv, env_string_size) < env_string_size, std::errc::no_buffer_space, "");
 	return env_string;
 }
 
@@ -510,7 +507,7 @@ int spawn_for(const char* cmdline
 		P = std::move(process::make(process_info));
 	}
 
-	oTRACEA("spawn: >>> %s <<<", oSAFESTRN(cmdline));
+	oTraceA("spawn: >>> %s <<<", oSAFESTRN(cmdline));
 	#ifdef DEBUG_EXECUTED_PROCESS
 		process->start();
 	#endif
@@ -527,7 +524,7 @@ int spawn_for(const char* cmdline
 	{
 		if (!once)
 		{
-			oTRACEA("spawn stdout: >>> %s <<<", oSAFESTRN(cmdline));
+			oTraceA("spawn stdout: >>> %s <<<", oSAFESTRN(cmdline));
 			once = true;
 		}
 		
@@ -576,7 +573,7 @@ void spawn_associated_application(const char* document_path, bool for_edit)
 {
 	int hr = (int)ShellExecuteA(nullptr, for_edit ? "edit" : "open", document_path, nullptr, nullptr, SW_SHOW);
 	if (hr < 32)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), "The operating system is out of memory or resources.");
+		oThrow(std::errc::no_buffer_space, "The operating system is out of memory or resources.");
 }
 
 }}

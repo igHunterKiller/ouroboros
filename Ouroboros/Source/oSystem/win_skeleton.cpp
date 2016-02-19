@@ -33,7 +33,7 @@ public:
 		shared_lock<shared_mutex> lock(Mutex);
 		auto it = Sources.find(_hSkeleton);
 		if (it == Sources.end())
-			throw std::invalid_argument("");
+			oThrow(std::errc::invalid_argument, "");
 		it->second(_pSkeleton);
 		return true;
 	}
@@ -49,7 +49,7 @@ private:
 	context() {}
 	~context()
 	{
-		oASSERT(Sources.empty(), "");
+		oAssert(Sources.empty(), "");
 	}
 };
 

@@ -2,7 +2,6 @@
 
 #include "gpu_pipeline_state.h"
 #include <oCore/countof.h>
-#include <oCore/stringf.h>
 #include <oMesh/element.h>
 
 #include <VStest_buffer.h>

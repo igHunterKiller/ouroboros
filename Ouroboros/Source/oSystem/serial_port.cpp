@@ -68,8 +68,7 @@ serial_port_impl::serial_port_impl(const info& _Info)
 	, hFile(INVALID_HANDLE_VALUE)
 {
 	HANDLE hNewFile = CreateFile(as_string(_Info.com_port), GENERIC_READ|GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
-	if (hNewFile == INVALID_HANDLE_VALUE)
-		throw std::system_error(std::errc::no_such_device, std::system_category(), as_string(_Info.com_port) + std::string(" does not exist"));
+	oCheck(hNewFile != INVALID_HANDLE_VALUE, std::errc::no_such_device, "%s does not exist", as_string(_Info.com_port));
 	oFinally { if (hNewFile != INVALID_HANDLE_VALUE) CloseHandle(hNewFile); };
 
 	DCB dcb = {0};
@@ -121,7 +120,7 @@ void serial_port_impl::send(const void* _pBuffer, size_t _SizeofBuffer)
 		sstring b1, b2;
 		format_bytes(b1, _SizeofBuffer, 2);
 		format_bytes(b2, written, 2);
-		throw std::system_error(std::errc::io_error, std::system_category(), std::string("requested send of ") + b1.c_str() + ", but sent " + b2.c_str());
+		oThrow(std::errc::io_error, "requested send of %s, but sent %d", b1.c_str(), b2.c_str());
 	}
 }
 

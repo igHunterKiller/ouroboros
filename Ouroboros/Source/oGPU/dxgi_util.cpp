@@ -3,7 +3,6 @@
 #include "dxgi_util.h"
 
 #include <oCore/countof.h>
-#include <oCore/stringf.h>
 #include <oString/fixed_string.h>
 #include <oSystem/windows/win_error.h>
 #include <oSystem/windows/win_util.h>
@@ -206,7 +205,7 @@ bool is_block_compressed(DXGI_FORMAT format)
 
 uint32_t get_size(DXGI_FORMAT format, uint32_t plane)
 {
-	oASSERT(plane == 0, "other planes not implemented yet");
+	oAssert(plane == 0, "other planes not implemented yet");
 	static const uint32_t sSizes[] = 
 	{
 		0, // DXGI_FORMAT_UNKNOWN
@@ -336,8 +335,7 @@ ref<IDXGIAdapter> get_adapter(const adapter::id& adapter_id)
 	oV(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&Factory));
 
 	ref<IDXGIAdapter> Adapter;
-	if (DXGI_ERROR_NOT_FOUND == Factory->EnumAdapters(*(int*)&adapter_id, &Adapter))
-		throw std::system_error(std::errc::no_such_device, std::system_category(), stringf("adapter id=%d not found", *(int*)&adapter_id));
+	oCheck(DXGI_ERROR_NOT_FOUND != Factory->EnumAdapters(*(int*)&adapter_id, &Adapter), std::errc::no_such_device, "adapter id=%d not found", *(int*)&adapter_id);
 	return Adapter;
 }
 
@@ -383,7 +381,7 @@ ref<IDXGISwapChain> make_swap_chain(IUnknown* device
 	, bool enable_gdi_compatibility)
 {
 	if (!device)
-		throw std::invalid_argument("a valid device must be specified");
+		oThrow(std::errc::invalid_argument, "a valid device must be specified");
 
 	DXGI_SWAP_CHAIN_DESC d;
 	d.BufferDesc.Width = width;
@@ -427,13 +425,12 @@ ref<IDXGISwapChain> make_swap_chain(IUnknown* device
 void resize_buffers(IDXGISwapChain* swapchain, const int2& new_size)
 {
 	if (any(new_size <= int2(0,0)))
-		throw std::invalid_argument("resize to a 0 dimension is not supported");
+		oThrow(std::errc::invalid_argument, "resize to a 0 dimension is not supported");
 
 	DXGI_SWAP_CHAIN_DESC d;
 	swapchain->GetDesc(&d);
-	HRESULT HR = swapchain->ResizeBuffers(d.BufferCount, new_size.x, new_size.y, d.BufferDesc.Format, d.Flags);
-	if (HR == DXGI_ERROR_INVALID_CALL)
-		throw std::system_error(std::errc::permission_denied, std::system_category(), "Cannot resize DXGISwapChain buffers because there still are dependent resources in client code. Ensure all dependent resources are freed before resize occurs.");
+	HRESULT hr = swapchain->ResizeBuffers(d.BufferCount, new_size.x, new_size.y, d.BufferDesc.Format, d.Flags);
+	oCheck(hr != DXGI_ERROR_INVALID_CALL, std::errc::permission_denied, "Cannot resize DXGISwapChain buffers because there still are dependent resources in client code. Ensure all dependent resources are freed before resize occurs.");
 }
 
 HDC acquire_dc(IDXGISwapChain* swapchain)
@@ -442,7 +439,7 @@ HDC acquire_dc(IDXGISwapChain* swapchain)
 	oV(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT));
 	ref<IDXGISurface1> DXGISurface;
 	oV(RT->QueryInterface(&DXGISurface));
-	//oTRACE("GetDC() exception below (if it happens) cannot be try-catch caught, so ignore it or don't use GDI drawing.");
+	//oTrace("GetDC() exception below (if it happens) cannot be try-catch caught, so ignore it or don't use GDI drawing.");
 	HDC hDC = nullptr;
 	oV(DXGISurface->GetDC(false, &hDC));
 	return hDC;
@@ -454,7 +451,7 @@ void release_dc(IDXGISwapChain* swapchain, RECT* _pDirtyRect)
 	oV(swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&RT));
 	ref<IDXGISurface1> DXGISurface;
 	oV(RT->QueryInterface(&DXGISurface));
-	//oTRACE("ReleaseDC() exception below (if it happens) cannot be try-catch caught, so ignore it or don't use GDI drawing.");
+	//oTrace("ReleaseDC() exception below (if it happens) cannot be try-catch caught, so ignore it or don't use GDI drawing.");
 	oV(DXGISurface->ReleaseDC(_pDirtyRect));
 }
 
@@ -528,15 +525,14 @@ void get_compatible_formats(DXGI_FORMAT desired_format, DXGI_FORMAT* out_texture
 
 void set_fullscreen_exclusive(IDXGISwapChain* swapchain, bool fullscreen_exclusive)
 {
-	//#define oTRACE_FS(msg, ...) oTRACE(msg, ## __VA_ARGS__)
+	//#define oTRACE_FS(msg, ...) oTrace(msg, ## __VA_ARGS__)
 	#define oTRACE_FS(msg, ...) __noop;
 
 	oTRACE_FS("[set_fullscreen_exclusive] start");
 
 	DXGI_SWAP_CHAIN_DESC SCD;
 	swapchain->GetDesc(&SCD);
-	if (GetParent(SCD.OutputWindow))
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category(), "child windows cannot go full screen exclusive");
+	oCheck(!GetParent(SCD.OutputWindow), std::errc::operation_not_permitted, "child windows cannot go full screen exclusive");
 
 	oTRACE_FS("[set_fullscreen_exclusive] asking if fullscreen...");
 
@@ -548,17 +544,17 @@ void set_fullscreen_exclusive(IDXGISwapChain* swapchain, bool fullscreen_exclusi
 		// This can throw an exception for some reason, but there's no DXGI error, and everything seems just fine.
 		// so ignore?
 
-		try {
-
-		oTRACE_FS("[set_fullscreen_exclusive] trying swapchain->SetFullscreenState(%s, nullptr);", fullscreen_exclusive ? "true" : "false");
-		swapchain->SetFullscreenState(fullscreen_exclusive, nullptr);
-		oTRACE_FS("[set_fullscreen_exclusive] out of fn call");
+		try
+		{
+			oTRACE_FS("[set_fullscreen_exclusive] trying swapchain->SetFullscreenState(%s, nullptr);", fullscreen_exclusive ? "true" : "false");
+			swapchain->SetFullscreenState(fullscreen_exclusive, nullptr);
+			oTRACE_FS("[set_fullscreen_exclusive] out of fn call");
 		}
 
 		catch (std::exception& e)
 		{
 			e;
-			oTRACEA("Exception: %s", e.what());
+			oTraceA("Exception: %s", e.what());
 		}
 	}
 
@@ -572,8 +568,7 @@ void present(IDXGISwapChain* swapchain, uint32_t interval)
 
 	std::thread::id tid = astid(GetWindowThreadProcessId(SCD.OutputWindow, nullptr));
 
-	if (tid != std::this_thread::get_id())
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category(), "Present() must be called from the window thread");
+	oCheck(tid == std::this_thread::get_id(), std::errc::operation_not_permitted, "Present() must be called from the window thread");
 
 	// This seems like a driver bug. Present() should fail gracefully when I log
 	// out or any Ctrl-Alt-Del situation, but it fails. So use this trick to
@@ -582,9 +577,7 @@ void present(IDXGISwapChain* swapchain, uint32_t interval)
 	if (!!GetForegroundWindow())
 	{
 		HRESULT hr = swapchain->Present(interval, 0);
-		if (FAILED(hr))
-			throw std::system_error(std::errc::no_such_device, std::system_category(), "GPU device has been reset or removed");
-	
+		oCheck(SUCCEEDED(hr), std::errc::no_such_device, "GPU device has been reset or removed");
 		BOOL FS = FALSE;
 		swapchain->GetFullscreenState(&FS, nullptr);
 	}

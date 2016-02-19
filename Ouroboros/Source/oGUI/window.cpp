@@ -65,7 +65,7 @@ static bool handle_control(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, co
 		case WM_NOTIFY:
 		{
 			const NMHDR& nmhdr = *(const NMHDR*)lparam;
-			oASSERT((nmhdr.idFrom & 0xffff) == nmhdr.idFrom, "losing info");
+			oAssert((nmhdr.idFrom & 0xffff) == nmhdr.idFrom, "losing info");
 			control_status status = control_status::count;
 
 			control_type::value type = oWinControlGetType(nmhdr.hwndFrom);
@@ -433,8 +433,7 @@ private:
 			cap *= 2;
 		}
 
-		if (len < 0)
-			throw std::invalid_argument(std::string("formatting failed for string \")") + format + "\"");
+		oCheck(len >= 0, std::errc::invalid_argument, "formatting failed for string \"%s\"", format);
 		return s;
 	}
 
@@ -462,7 +461,7 @@ void window_impl::init_window(const init_t& i)
 
 	if (i.debug)
 	{
-		oTRACE("HWND 0x%x '%s' running on thread %d (0x%x)"
+		oTrace("HWND 0x%x '%s' running on thread %d (0x%x)"
 			, hWnd
 			, oSAFESTRN(i.title)
 			, asdword(std::this_thread::get_id())
@@ -571,7 +570,7 @@ void window_impl::shape(const window_shape& _Shape)
 	{
 		try { oWinSetShape(hWnd, _Shape); }
 		catch (std::exception& e)
-		{ e; oTRACEA("ERROR: oWinSetShape: %s", e.what()); }
+		{ e; oTraceA("ERROR: oWinSetShape: %s", e.what()); }
 	}));
 }
 
@@ -675,7 +674,7 @@ char* window_impl::get_status_text(char* _StrDestination, size_t _SizeofStrDesti
 			len = strlen(_StrDestination);
 	}));
 
-	oTRACE("get_status_text");
+	oTrace("get_status_text");
 	SendMessage(hWnd, oWM_DISPATCH, 0, (LPARAM)pTask);
 	return (len && len <= _SizeofStrDestination) ? _StrDestination : nullptr;
 }
@@ -695,7 +694,7 @@ void window_impl::parent(const std::shared_ptr<basic_window>& _Parent)
 	dispatch_internal(std::move([=]
 	{
 		if (Owner)
-			throw std::invalid_argument("Can't have owner at same time as parent");
+			oThrow(std::errc::invalid_argument, "Can't have owner at same time as parent");
 		Parent = _Parent;
 		oWinSetParent(hWnd, Parent ? (HWND)Parent->native_handle() : nullptr);
 	}));
@@ -711,7 +710,7 @@ void window_impl::owner(const std::shared_ptr<basic_window>& owner)
 	dispatch_internal(std::move([=]
 	{
 		if (Parent)
-			throw std::invalid_argument("Can't have parent at same time as owner");
+			oThrow(std::errc::invalid_argument, "Can't have parent at same time as owner");
 
 		Owner = owner;
 		oWinSetOwner(hWnd, Owner ? (HWND)Owner->native_handle() : nullptr);
@@ -906,7 +905,7 @@ void window_impl::post(int custom_event_code, uintptr_t context)
 void window_impl::dispatch(const std::function<void()>& task)
 {
 	std::function<void()>* pTask = new_object<std::function<void()>>(task);
-	oTRACE("dispatch");
+	oTrace("dispatch");
 	PostMessage(hWnd, oWM_DISPATCH, 0, (LPARAM)pTask);
 }
 
@@ -938,9 +937,9 @@ future<surface::image> window_impl::snapshot(int frame, bool include_border) con
 		{
 			window_shape s = oWinGetShape(hWnd);
 			if (is_visible(s.state))
-				throw std::invalid_argument(""); // pass through verification of wait
+				oThrow(std::errc::invalid_argument, ""); // pass through verification of wait
 			else
-				throw std::invalid_argument("A non-hidden window timed out waiting to become opaque");
+				oThrow(std::errc::invalid_argument, "A non-hidden window timed out waiting to become opaque");
 		}
 
 		surface::image snap;
@@ -1053,7 +1052,7 @@ bool window_impl::handle_lifetime(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
 			CREATESTRUCTA* cs = (CREATESTRUCTA*)lparam;
 			oWIN_CREATESTRUCT* wcs = (oWIN_CREATESTRUCT*)cs->lpCreateParams;
 			const init_t* pInit = (const init_t*)wcs->pInit;
-			oASSERT(pInit, "invalid init struct");
+			oAssert(pInit, "invalid init struct");
 
 			for (uint8_t i = 0; i < countof(pads); i++)
 				pads[i] = pad_t(i);
@@ -1185,7 +1184,7 @@ bool window_impl::handle_sizing(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
 
 		case WM_MOVE:
 		{
-			//oTRACE("HWND 0x%x WM_MOVE: %dx%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+			//oTrace("HWND 0x%x WM_MOVE: %dx%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
 
 			window_shape s;
 			trigger_generic_event(event_type::moved, &s);
@@ -1195,7 +1194,7 @@ bool window_impl::handle_sizing(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
 
 		case WM_SIZE:
 		{
-			//oTRACE("WM_SIZE: %dx%d", GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
+			//oTrace("WM_SIZE: %dx%d", GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam));
 
 			if (!oWinIsTempChange(hwnd))
 			{
@@ -1292,7 +1291,7 @@ bool window_impl::handle_input(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam
 			window_shape Shape;
 			Shape.client_position = int2(p.x, p.y) - int2(MouseAtCaptureX, MouseAtCaptureY);
 			try { oWinSetShape(hwnd, Shape); }
-			catch (std::exception& e) { e; oTRACEA("ERROR: oWinSetShape: %s", e.what()); }
+			catch (std::exception& e) { e; oTraceA("ERROR: oWinSetShape: %s", e.what()); }
 		}
 	}
 
@@ -1379,7 +1378,7 @@ LRESULT window_impl::WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	if ((Debug || kForceDebug))
 	{
 		xlstring s;
-		oTRACE("%s", windows::parse_wm_message(s, s.capacity(), hwnd, msg, wparam, lparam));
+		oTrace("%s", windows::parse_wm_message(s, s.capacity(), hwnd, msg, wparam, lparam));
 	}
 
 	LRESULT lResult = -1;

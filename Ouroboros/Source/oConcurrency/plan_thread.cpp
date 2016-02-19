@@ -74,7 +74,7 @@ void plan_thread::deinitialize()
 	consumer.join();
 
 	if (state != uninitialized)
-		throw std::invalid_argument("consumer thread failed to shut down");
+		oThrow(std::errc::invalid_argument, "consumer thread failed to shut down");
 
 	// tear down compoenents
 	void* p = tasklists.deinitialize();

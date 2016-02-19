@@ -104,14 +104,14 @@ lock_free_queue<T>::~lock_free_queue()
 		throw std::length_error("container not empty");
 
 	if (deinitialize())
-		throw std::invalid_argument("container not empty");
+		oThrow(std::errc::invalid_argument, "container not empty");
 }
 
 template<typename T>
 void lock_free_queue<T>::initialize(size_type capacity, const char* label, const allocator& a)
 {
 	if (capacity & (capacity-1))
-		throw std::invalid_argument("capacity must be a power of two");
+		oThrow(std::errc::invalid_argument, "capacity must be a power of two");
 	alloc = a;
 	elements = alloc.allocate(calc_size(capacity), memory_alignment::align_default, label);
 	read = write = 0;	
@@ -122,7 +122,7 @@ template<typename T>
 void lock_free_queue<T>::initialize(void* memory, size_type capacity)
 {
 	if (capacity & (capacity-1))
-		throw std::invalid_argument("capacity must be a power of two");
+		oThrow(std::errc::invalid_argument, "capacity must be a power of two");
 	elements = memory;
 	read = write = 0;	
 	wrap_mask = capacity - 1;

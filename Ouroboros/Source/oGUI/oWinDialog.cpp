@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oGUI/Windows/oWinDialog.h>
 #include <oGUI/Windows/oWinRect.h>
 #include <oGUI/msgbox.h>
@@ -19,7 +18,7 @@ static WORD oDlgGetClass(oWINDOWS_DIALOG_ITEM_TYPE _Type)
 		case oDLG_LISTBOX: return 0x0083;
 		case oDLG_SCROLLBAR: return 0x0084;
 		case oDLG_COMBOBOX: return 0x0085;
-		default: throw std::invalid_argument(ouro::stringf("unexpected oWINDOWS_DIALOG_ITEM_TYPE %d", _Type));
+		default: oThrow(std::errc::invalid_argument, "unexpected oWINDOWS_DIALOG_ITEM_TYPE %d", _Type);
 	}
 }
 

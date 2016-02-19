@@ -86,7 +86,7 @@ model decode_omdl(const void* buffer, size_t size
 	auto chk = hdr->find_chunk(omdl_info_signature);
 
 	if (!chk)
-		throw std::invalid_argument("invalid omdl: no info section");
+		oThrow(std::errc::invalid_argument, "invalid omdl: no info section");
 
 	auto info = *chk->data<info_t>();
 	
@@ -95,14 +95,14 @@ model decode_omdl(const void* buffer, size_t size
 	chk = chk->next();
 	
 	if (chk->fourcc != omdl_subsets_signature)
-		throw std::invalid_argument("invalid omdl: no subsets section");
+		oThrow(std::errc::invalid_argument, "invalid omdl: no subsets section");
 
 	memcpy(mdl.subsets(), chk->data<subset_t>(), chk->uncompressed_bytes);
 
 	chk = chk->next();
 
 	if (chk->fourcc != omdl_indices_signature)
-		throw std::invalid_argument("invalid omdl: no indices section");
+		oThrow(std::errc::invalid_argument, "invalid omdl: no indices section");
 
 	memcpy(mdl.indices(), chk->data<uint16_t>(), chk->uncompressed_bytes);
 
@@ -112,7 +112,7 @@ model decode_omdl(const void* buffer, size_t size
 		chk = chk->next();
 
 		if (chk->fourcc != omdl_vertex_slot_signature)
-			throw std::invalid_argument("invalid omdl: no vertices slot section");
+			oThrow(std::errc::invalid_argument, "invalid omdl: no vertices slot section");
 
 		memcpy(mdl.vertices(slot), chk->data<void>(), chk->uncompressed_bytes);
 	}

@@ -227,7 +227,7 @@ static HMODULE init_dbghelp(HANDLE hprocess
 			EnumerateLoadedModules64(hprocess, &load_module, hprocess);
 		}
 		else
-			throw std::system_error(std::errc::io_error, std::system_category());
+			oThrow(std::errc::io_error, "");
 	}
 
 	return hDbgHelp;

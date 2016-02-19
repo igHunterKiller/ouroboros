@@ -3,7 +3,6 @@
 #include <oCore/countof.h>
 #include <oCore/finally.h>
 #include <oCore/macros.h>
-#include <oCore/stringf.h>
 #include <oMesh/obj.h>
 #include <oBase/unordered_map.h>
 #include <oString/atof.h>
@@ -151,7 +150,7 @@ static const char* parse_vline(const char* vline
 			atof(&vline, &temp.z); if (flip_handedness) temp.z = -temp.z;
 			normals.push_back(temp);
 			break;
-		default: throw std::invalid_argument(stringf("invalid token '%c'", *vline));
+		default: oThrow(std::errc::invalid_argument, "invalid token '%c'", *vline);
 	}
 
 	return vline;
@@ -451,7 +450,7 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 		{
 			mstring reserved, additional;
 			const char* n = oSAFESTRN(obj_path); // passing the macro directly causes win32 to throw an exception
-			oTRACE("obj: %s index map allocated %s additional indices beyond the initial est_num_vertices=%s", n, format_commas(additional, (uint32_t)(IndexMapMallocBytes / sizeof(uint32_t))), format_commas(reserved, init.est_num_vertices));
+			oTrace("obj: %s index map allocated %s additional indices beyond the initial est_num_vertices=%s", n, format_commas(additional, (uint32_t)(IndexMapMallocBytes / sizeof(uint32_t))), format_commas(reserved, init.est_num_vertices));
 		}
 	#endif
 
@@ -460,26 +459,26 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 		bool CalcNormals = false;
 		if (data_.normals.empty())
 		{
-			oTRACE("obj: No normals found in %s...", obj_path);
+			oTrace("obj: No normals found in %s...", obj_path);
 			CalcNormals = true;
 		}
 
 		else if (!DegenerateNormals.empty())
 		{
 			// @tony: Is there a way to calculate only the degenerates?
-			oTRACE("oOBJ: %u degenerate normals in %s...", DegenerateNormals.size(), obj_path);
+			oTrace("oOBJ: %u degenerate normals in %s...", DegenerateNormals.size(), obj_path);
 			CalcNormals = true;
 		}
 
 		if (CalcNormals)
 		{
-			oTRACE("Calculating vertex normals... (%s)", oSAFESTRN(obj_path));
+			oTrace("Calculating vertex normals... (%s)", oSAFESTRN(obj_path));
 			sstring StrTime;
 			timer t;
 			data_.normals.resize(data_.positions.size());
 			calc_vertex_normals(data_.normals.data(), indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), (uint32_t)data_.positions.size(), init.counter_clockwise_faces, true);
 			format_duration(StrTime, t.seconds(), true, true);
-			oTRACE("Calculating vertex normals done in %s. (%s)", StrTime.c_str(), oSAFESTRN(obj_path));
+			oTrace("Calculating vertex normals done in %s. (%s)", StrTime.c_str(), oSAFESTRN(obj_path));
 		}
 	}
 
@@ -488,13 +487,13 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 		bool CalcTexcoords = false;
 		if (data_.texcoords.empty())
 		{
-			oTRACE("oOBJ: No texcoords found in %s...", oSAFESTRN(obj_path));
+			oTrace("oOBJ: No texcoords found in %s...", oSAFESTRN(obj_path));
 			CalcTexcoords = true;
 		}
 
 		else if (!DegenerateTexcoords.empty())
 		{
-			oTRACE("oOBJ: %u degenerate texcoords in %s...", DegenerateTexcoords.size(), oSAFESTRN(obj_path));
+			oTrace("oOBJ: %u degenerate texcoords in %s...", DegenerateTexcoords.size(), oSAFESTRN(obj_path));
 			CalcTexcoords = true;
 		}
 
@@ -503,17 +502,17 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 			data_.texcoords.resize(data_.positions.size());
 			sstring StrTime;
 			double SolverTime = 0.0;
-			oTRACE("Calculating texture coordinates... (%s)", oSAFESTRN(obj_path));
+			oTrace("Calculating texture coordinates... (%s)", oSAFESTRN(obj_path));
 			try { calc_texcoords(data_.aabb_min, data_.aabb_max, indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), data_.texcoords.data(), (uint32_t)data_.texcoords.size(), &SolverTime); }
 			catch (std::exception& e)
 			{
 				e;
 				data_.texcoords.clear();
-				oTRACEA("Calculating texture coordinates failed. %s (%s)", obj_path, e.what());
+				oTraceA("Calculating texture coordinates failed. %s (%s)", obj_path, e.what());
 			}
 
 			format_duration(StrTime, SolverTime, true, true);
-			oTRACE("Calculating texture coordinates done in %s. (%s)", StrTime.c_str(), oSAFESTRN(obj_path));
+			oTrace("Calculating texture coordinates done in %s. (%s)", StrTime.c_str(), oSAFESTRN(obj_path));
 		}
 	}
 }
@@ -713,7 +712,7 @@ static texture_info parse_texture_info(const char* _TextureLine)
 		}
 	}
 
-	throw std::system_error(std::errc::io_error, std::system_category(), "error parsing obj texture info");
+	oThrow(std::errc::io_error, "error parsing obj texture info");
 }
 
 static void parse_materials(std::vector<material_info>& materials, const path_t& mtl_path, const char* mtl_string)
@@ -773,8 +772,7 @@ static void parse_materials(std::vector<material_info>& materials, const path_t&
 				sscanf_s(r + strcspn(r, "\t "), "%[^\r|^\n]", buf, countof(buf));
 
 				#define oOBJTEX(_Name) do \
-				{	if (!parse_texture_info(buf + 1, &materials.back()._Name)) \
-						throw std::system_error(std::errc::io_error, "Failed to parse \"%s\"", r); \
+				{	oCheck(parse_texture_info(buf + 1, &materials.back()._Name), std::errc::io_error, "Failed to parse \"%s\"", r); \
 				} while(false)
 				
 				if (!_memicmp("map_Ka", r, 6)) materials.back().ambient = parse_texture_info(buf + 1);

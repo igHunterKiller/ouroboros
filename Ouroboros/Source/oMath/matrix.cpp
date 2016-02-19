@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oMath/matrix.h>
 #include <oMath/hlslx.h>
 #include <oMath/equal.h>
@@ -173,7 +174,7 @@ float3x3 orthonormalize(const float3x3& m)
 	// This is described as for a right-handed matrix. Can I just flip Z and be done with it for a left-hander? Does that even 
 	// make sense for a generic affine matrix?
 	if (1)
-		throw std::invalid_argument("unreliable implementation");
+		oThrow(std::errc::invalid_argument, "unreliable implementation");
 
 	// modified Gram-Schmidt
 	float3x3 n;
@@ -198,7 +199,7 @@ float4x4 remove_shear(const float4x4& m)
 {
 	float3 s, sh, r, t; float4 p;
 	if (!decompose(m, &s, &sh, &r,&t, &p))
-		throw std::invalid_argument("decompose failed");
+		oThrow(std::errc::invalid_argument, "decompose failed");
 	return scale(s) * rotate(r) * translate(t);
 }
 
@@ -206,7 +207,7 @@ float4x4 remove_scale_shear(const float4x4& m)
 {
 	float3 s, sh, r, t; float4 p;
 	if (!decompose(m, &s, &sh, &r,&t, &p))
-		throw std::invalid_argument("decompose failed");
+		oThrow(std::errc::invalid_argument, "decompose failed");
 
 	return rotate(r) * translate(t);
 }
@@ -296,7 +297,7 @@ float3 rotation(const float4x4& m)
 {
 	float3 s, sh, r, t; float4 p;
 	if (!decompose(m, &s, &sh, &r,&t, &p))
-		throw std::invalid_argument("decompose failed");
+		oThrow(std::errc::invalid_argument, "decompose failed");
 	return r;
 }
 

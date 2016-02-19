@@ -75,8 +75,7 @@ void* model_registry::create(const char* name, blob& compiled)
 	const allocator& temp_allocator = default_allocator;
 
 	auto fformat = mesh::get_file_format(compiled);
-	if (fformat == mesh::file_format::unknown)
-		throw std::invalid_argument(std::string("Unknown file format: ") + name);
+	oCheck(fformat != mesh::file_format::unknown, std::errc::invalid_argument, "Unknown file format: %s", name ? name : "(null)");
 
 	auto mdl = pool_.create();
 

@@ -116,10 +116,10 @@ static uint32_t calc_serialized_size(const void* src, const char* topology)
 uint32_t serialize(void* dst, size_t dst_size, const void* src, const char* topology)
 {
 	if (!src)
-		throw std::invalid_argument("invalid source");
+		oThrow(std::errc::invalid_argument, "invalid source");
 
 	if (!topology || *topology != ',')
-		throw std::invalid_argument("invalid topology string");
+		oThrow(std::errc::invalid_argument, "invalid topology string");
 
 	if (!dst)
 		return calc_serialized_size(src, topology);
@@ -181,13 +181,13 @@ uint32_t serialize(void* dst, size_t dst_size, const void* src, const char* topo
 void deserialize(void* dst, size_t dst_size, const void* src, const char* topology, allocator& alloc)
 {
 	if (!dst)
-		throw std::invalid_argument("invalid destination");
+		oThrow(std::errc::invalid_argument, "invalid destination");
 
 	if (!src)
-		throw std::invalid_argument("invalid source");
+		oThrow(std::errc::invalid_argument, "invalid source");
 
 	if (!topology || *topology !+ ',')
-		throw std::invalid_argument("invalid topology string");
+		oThrow(std::errc::invalid_argument, "invalid topology string");
 
 	auto d = (uint8_t*)dst;
 	auto s = (const uint8_t*)src;

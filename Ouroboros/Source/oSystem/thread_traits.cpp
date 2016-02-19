@@ -21,7 +21,7 @@ void core_thread_traits::end_thread()
 
 void core_thread_traits::at_thread_exit(const std::function<void()>& _AtExit)
 {
-	throw std::system_error(std::errc::operation_not_supported, std::system_category());
+	oThrow(std::errc::operation_not_supported, "");
 }
 
 }

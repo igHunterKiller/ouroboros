@@ -1,8 +1,8 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oCore/countof.h>
 #include <oCore/ref.h>
-#include <oCore/stringf.h>
 #include <oSystem/camera.h>
 #include <oSystem/module.h>
 #include <oConcurrency/mutex.h>
@@ -386,7 +386,7 @@ void directshow_camera::recreate_output(const mode& _Mode)
 		}
 	}
 	if (!connectedFilters)
-		throw std::system_error(std::errc::function_not_supported, std::system_category(), "Could not connect VideoOutput filter");
+		oThrow(std::errc::function_not_supported, "Could not connect VideoOutput filter");
 
 	// Now get it as a SampleGrabber and set up its parameters
 	oV(VideoOutput->QueryInterface(IID_PPV_ARGS(&SampleGrabber)));
@@ -397,7 +397,7 @@ void directshow_camera::recreate_output(const mode& _Mode)
 	outputType.majortype = (const GUID&)GUID_MEDIATYPE_Video;
 	outputType.subtype = media_subtype(_Mode.format);
 	if (outputType.subtype == GUID_NULL)
-		throw std::system_error(std::errc::not_supported, std::system_category(), std::string("Unsupported format: ") + as_string(_Mode.format));
+		oThrow(std::errc::not_supported, "Unsupported format: %s", as_string(_Mode.format));
 
 	oV(SampleGrabber->SetMediaType(&outputType));
 }
@@ -427,12 +427,12 @@ camera::mode directshow_camera::get_mode() const
 void directshow_camera::set_mode(const mode& _Mode)
 {
 	if (GUID_NULL == media_subtype(_Mode.format))
-		throw std::system_error(std::errc::not_supported, std::system_category(), std::string("Unsupported format: ") + as_string(_Mode.format));
+		oThrow(std::errc::not_supported, "Unsupported format: %s", as_string(_Mode.format));
 
 	mode closest = find_closest_matching(_Mode);
 
 	if (memcmp(&closest, &_Mode, sizeof(mode)))
-		throw std::system_error(std::errc::not_supported, std::system_category(), stringf("Unsupported mode specified: %s %dx%d", as_string(_Mode.format), _Mode.dimensions.x, _Mode.dimensions.y));
+		oThrow(std::errc::not_supported, "Unsupported mode specified: %s %dx%d", as_string(_Mode.format), _Mode.dimensions.x, _Mode.dimensions.y);
 
 	lock_t lock(Mutex);
 
@@ -600,10 +600,8 @@ void directshow_camera::get_set_mode_list(unsigned int* _pNumModes, mode* _pMode
 	int nCapabilities = 0;
 	int sizeofConfigStruct = 0;
 	oV(StreamConfig->GetNumberOfCapabilities(&nCapabilities, &sizeofConfigStruct));
-	oASSERT(sizeofConfigStruct == sizeof(VIDEO_STREAM_CONFIG_CAPS), "");
-
-	if (!nCapabilities)
-		throw std::system_error(std::errc::not_supported, std::system_category());
+	oAssert(sizeofConfigStruct == sizeof(VIDEO_STREAM_CONFIG_CAPS), "");
+	oCheck(nCapabilities, std::errc::not_supported, "");
 
 	mode testMode;
 	VIDEO_STREAM_CONFIG_CAPS scc;
@@ -640,7 +638,7 @@ void directshow_camera::get_set_mode_list(unsigned int* _pNumModes, mode* _pMode
 		std::sort(_pModes, _pModes + *_pNumModes);
 
 	if (_pNewMode)
-		throw std::system_error(std::errc::not_supported, std::system_category(), stringf("Mode not valid %s %dx%d", as_string(_pNewMode->format), _pNewMode->dimensions.x, _pNewMode->dimensions.y));
+		oThrow(std::errc::not_supported, "Mode not valid %s %dx%d", as_string(_pNewMode->format), _pNewMode->dimensions.x, _pNewMode->dimensions.y);
 }
 
 bool directshow_camera::map_const(const_mapped* _pMapped) const
@@ -688,7 +686,7 @@ bool directshow_camera::BufferCB(double _SampleTime, void* _pBuffer, size_t _Siz
 	
 		frame& f = RingBuffer[WriteIndex];
 		if (_SizeofBuffer != f.Data.size())
-			throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("Mismatched buffer size. Got %u bytes, expected %u bytes", _SizeofBuffer, f.Data.size()));
+			oThrow(std::errc::no_buffer_space, "Mismatched buffer size. Got %u bytes, expected %u bytes", _SizeofBuffer, f.Data.size());
 		
 		if (_SizeofBuffer != f.Data.size())
 			return false;
@@ -729,7 +727,7 @@ static void moniker_enumerate(unsigned int _Index, IMoniker** _ppMoniker)
 	if (S_OK != hr)
 	{
 		module::info mi = this_module::get_info();
-		throw std::system_error(std::errc::no_such_device, std::system_category(), std::string("No video input devices found") + (mi.is_64bit_binary ? " (might be because of a 32-bit driver on 64-bit Windows)" : ""));
+		oThrow(std::errc::no_such_device, "No video input devices found%s", mi.is_64bit_binary ? " (might be because of a 32-bit driver on 64-bit Windows)" : "");
 	}
 
 	std::vector<ref<IMoniker>> Monikers;
@@ -737,7 +735,7 @@ static void moniker_enumerate(unsigned int _Index, IMoniker** _ppMoniker)
 
 	ULONG nFetched = 0;
 	if (FAILED(EnumMoniker->Next(static_cast<unsigned int>(Monikers.size()), &Monikers[0], &nFetched)) || (nFetched <= _Index))
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+		oThrow(std::errc::no_such_device, "");
 
 	*_ppMoniker = Monikers[_Index];
 	(*_ppMoniker)->AddRef();
@@ -752,7 +750,7 @@ void get_string_property(char* _StrDestination, size_t _SizeofStrDestination, IM
 	lwstring PropertyName = _Property;
 	oV(PropertyBag->Read(PropertyName.c_str(), &varName, 0));
 	if (wcsltombs(_StrDestination, varName.bstrVal, _SizeofStrDestination) >= _SizeofStrDestination)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	VariantClear(&varName);
 }
 
@@ -761,7 +759,7 @@ void get_display_name(char* _StrDestination, size_t _SizeofStrDestination, IMoni
 	LPOLESTR lpDisplayName = nullptr;
 	oV(_pMoniker->GetDisplayName(nullptr, nullptr, &lpDisplayName));
 	if (wcsltombs(_StrDestination, lpDisplayName, _SizeofStrDestination) >= _SizeofStrDestination)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	ref<IMalloc> Malloc;
 	oV(CoGetMalloc(1, &Malloc));
 	Malloc->Free(lpDisplayName);
@@ -794,11 +792,11 @@ static bool make(unsigned int _Index, std::shared_ptr<camera>& _Camera)
 
 	ref<IBaseFilter> BaseFilter;
 	if (FAILED(Moniker->BindToObject(nullptr, nullptr, (const GUID&)GUID_IID_IBaseFilter, (void**)&BaseFilter)))
-		throw std::system_error(std::errc::function_not_supported, std::system_category(), stringf("Found device \"%s\" (ID=0x%x), but could not bind an interface for it", Name.c_str(), MonikerID));
+		oThrow(std::errc::function_not_supported, "Found device \"%s\" (ID=0x%x), but could not bind an interface for it", Name.c_str(), MonikerID);
 
 	//bool running = Moniker->IsRunning(nullptr, nullptr, nullptr) == S_OK;
 
-	oTRACE("Found device \"%s\" (ID=0x%x), continuing...", Name.c_str(), MonikerID);
+	oTrace("Found device \"%s\" (ID=0x%x), continuing...", Name.c_str(), MonikerID);
 
 	ref<ICaptureGraphBuilder2> CaptureGraphBuilder;
 	ref<IGraphBuilder> GraphBuilder;
@@ -819,7 +817,7 @@ void camera::enumerate(const std::function<bool(std::shared_ptr<camera> _Camera)
 #if 0
 	module::info mi = this_module::get_info();
 	if (mi.is_64bit_binary)
-		throw std::system_error(std::errc::not_supported, 
+		oThrow(std::errc::not_supported, 
 			"camera is not supported in 64-bit builds because of the lack of valid "
 			"64-bit camera drivers or a way of reliably determining if a camera returned "
 			"uses 32- or 64-bit drivers.");

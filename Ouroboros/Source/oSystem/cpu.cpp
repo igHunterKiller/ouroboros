@@ -88,7 +88,7 @@ info_t get_info()
 {
 	DWORD size_ex = 0;
 	GetLogicalProcessorInformationEx(RelationNumaNode, 0, &size_ex);
-	oASSERT(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "");
+	oAssert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "");
 	
 	SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX* lpi_ex = static_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*>(alloca(size_ex));
 	memset(lpi_ex, 0xff, size_ex);
@@ -100,8 +100,7 @@ info_t get_info()
 	for (int cpu = 0; cpu < _CPUIndex; cpu++)
 	{
 		offset_ex += lpi_ex->Size;
-		if (offset_ex >= size_ex)
-			throw std::system_error(std::errc::protocol_error, std::system_category());
+		oCheck(offset_ex < size_ex, std::errc::protocol_error, "");
 		lpi_ex = (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)((uint8_t*)lpi_ex + lpi_ex->Size);
 	}
 
@@ -120,7 +119,7 @@ info_t get_info()
 
 	DWORD size = 0;
 	GetLogicalProcessorInformation(0, &size);
-	oASSERT(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "");
+	oAssert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "");
 	SYSTEM_LOGICAL_PROCESSOR_INFORMATION* lpi = static_cast<SYSTEM_LOGICAL_PROCESSOR_INFORMATION*>(alloca(size));
 	memset(lpi, 0xff, size);
 	oVB(GetLogicalProcessorInformation(lpi, &size));

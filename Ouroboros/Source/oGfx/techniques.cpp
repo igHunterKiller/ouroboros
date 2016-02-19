@@ -16,7 +16,7 @@ ctx_technique ctx;
 
 void init_context(const plan_task* tasks, uint32_t num_tasks)
 {
-	oASSERT(num_tasks == 1, "only one init task allowed");
+	oAssert(num_tasks == 1, "only one init task allowed");
 	auto context = (ctx_technique*)tasks->data;
 	
 	// assign the context shared by all techniques
@@ -25,7 +25,7 @@ void init_context(const plan_task* tasks, uint32_t num_tasks)
 
 void init_view_constants(const plan_task* tasks, uint32_t num_tasks)
 {
-	oASSERT(num_tasks == 1, "only one init view task allowed");
+	oAssert(num_tasks == 1, "only one init view task allowed");
 
 	auto cl = ctx.cl;
 	auto core = ctx.core;

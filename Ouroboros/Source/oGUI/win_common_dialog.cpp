@@ -64,17 +64,13 @@ static bool open_or_save_path(path_t& _Path, const char* _DialogTitle, const cha
 
 	// removes trailing separator which confuses win GetOpenFileName
 	if (kHasFilename)
-	{
-		if (!_Path.empty() && !clean_path(StrPath, _Path, '\\'))
-			throw std::invalid_argument(std::string("bad path: ") + _Path.c_str());
-	}
+		oCheck(_Path.empty() || clean_path(StrPath, _Path, '\\'), std::errc::invalid_argument, "bad path: %s", _Path.c_str());
 
 	else
 	{
 		path_t copy(_Path);
 		copy.remove_filename(); // removes trailing separators
-		if (!copy.empty() && !clean_path(InitDir, copy, '\\'))
-			throw std::invalid_argument(std::string("bad path: %s") +  _Path.c_str());
+		oCheck(copy.empty() || clean_path(InitDir, copy, '\\'), std::errc::invalid_argument, "bad path: %s", _Path.c_str());
 	}
 
 	std::string filters;
@@ -135,7 +131,7 @@ static bool open_or_save_path(path_t& _Path, const char* _DialogTitle, const cha
 		DWORD err = CommDlgExtendedError();
 		if (err == CDERR_GENERALCODES)
 			return false;
-		throw std::system_error(std::errc::protocol_error, std::system_category(), as_string_CD_err(err));
+		oThrow(std::errc::protocol_error, "%s", as_string_CD_err(err));
 	}
 
 	_Path = StrPath;
@@ -172,7 +168,7 @@ bool pick_color(uint32_t* inout_argb, HWND hparent)
 		DWORD err = CommDlgExtendedError();
 		if (err == CDERR_GENERALCODES)
 			return false;
-		throw std::system_error(std::errc::protocol_error, std::system_category(), as_string_CD_err(err));
+		oThrow(std::errc::protocol_error, "%s", as_string_CD_err(err));
 	}
 
 	ch.r = GetRValue(cc.rgbResult);
@@ -210,7 +206,7 @@ bool pick_font(LOGFONT* _pLogicalFont, uint32_t* inout_argb, HWND _hParent)
 		DWORD err = CommDlgExtendedError();
 		if (err == CDERR_GENERALCODES)
 			return false;
-		throw std::system_error(std::errc::protocol_error, std::system_category(), as_string_CD_err(err));
+		oThrow(std::errc::protocol_error, "%s", as_string_CD_err(err));
 	}
 
 	if (inout_argb)

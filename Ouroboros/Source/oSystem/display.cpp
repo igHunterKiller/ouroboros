@@ -22,8 +22,7 @@ id primary_id()
 		return true;
 	});
 
-	if (ID == id())
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(ID != id(), std::errc::no_such_device, "");
 	return ID;
 }
 
@@ -40,8 +39,7 @@ id get_id(void* _NativeHandle)
 		return true;
 	});
 
-	if (ID == id())
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(ID != id(), std::errc::no_such_device, "");
 
 	return ID;
 }
@@ -55,8 +53,7 @@ id find(int _ScreenX, int _ScreenY)
 {
 	POINT p = { _ScreenX, _ScreenY };
 	HMONITOR hMonitor = MonitorFromPoint(p, MONITOR_DEFAULTTONULL);
-	if (!hMonitor)
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(hMonitor, std::errc::no_such_device, "");
 
 	id ID;
 	enumerate([&](const info& _Info)->bool
@@ -69,8 +66,7 @@ id find(int _ScreenX, int _ScreenY)
 		return true;
 	});
 
-	if (ID == id())
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(ID != id(), std::errc::no_such_device, "");
 	return ID;
 }
 
@@ -126,8 +122,7 @@ info get_info(id _ID)
 {
 	DISPLAY_DEVICE dev;
 	dev.cb = sizeof(dev);
-	if (!EnumDisplayDevices(0, *(int*)&_ID, &dev, 0))
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(EnumDisplayDevices(0, *(int*)&_ID, &dev, 0), std::errc::no_such_device, "");
 	return get_info(*(int*)&_ID, dev);
 }
 
@@ -150,8 +145,7 @@ void enumerate(const std::function<bool(const info& _Info)>& _Enumerator)
 static void set_mode(const char* _DeviceName, const mode_info& _Mode)
 {
 	DEVMODE dm;
-	if (!EnumDisplaySettings(_DeviceName, ENUM_CURRENT_SETTINGS, &dm))
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(EnumDisplaySettings(_DeviceName, ENUM_CURRENT_SETTINGS, &dm), std::errc::no_such_device, "");
 
 	// ensure only what we want to set is set
 	dm.dmFields = DM_PELSWIDTH|DM_PELSHEIGHT|DM_BITSPERPEL|DM_DISPLAYFREQUENCY;
@@ -173,7 +167,7 @@ static void set_mode(const char* _DeviceName, const mode_info& _Mode)
 		case DISP_CHANGE_FAILED: 
 		case DISP_CHANGE_NOTUPDATED: 
 		case DISP_CHANGE_RESTART:
-			throw std::invalid_argument("invalid mode");
+			oThrow(std::errc::invalid_argument, "invalid mode");
 		default: 
 		case DISP_CHANGE_SUCCESSFUL:
 			ChangeDisplaySettingsEx(_DeviceName, &dm, 0, CDS_FULLSCREEN, 0);
@@ -185,8 +179,7 @@ void set_mode(id _ID, const mode_info& _Mode)
 {
 	DISPLAY_DEVICE dev;
 	dev.cb = sizeof(dev);
-	if (!EnumDisplayDevices(0, *(int*)&_ID, &dev, 0))
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(EnumDisplayDevices(0, *(int*)&_ID, &dev, 0), std::errc::no_such_device, "");
 	set_mode(dev.DeviceName, _Mode);
 }
 
@@ -199,8 +192,7 @@ void reset_mode(id _ID)
 {
 	DISPLAY_DEVICE dev;
 	dev.cb = sizeof(dev);
-	if (!EnumDisplayDevices(0, *(int*)&_ID, &dev, 0))
-		throw std::system_error(std::errc::no_such_device, std::system_category());
+	oCheck(EnumDisplayDevices(0, *(int*)&_ID, &dev, 0), std::errc::no_such_device, "");
 	reset_mode(dev.DeviceName);
 }
 

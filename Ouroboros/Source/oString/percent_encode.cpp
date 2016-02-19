@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oArch/compiler.h>
+#include <oCore/assert.h>
 #include <oString/string.h>
 #include <system_error>
 
@@ -19,20 +20,20 @@ char* percent_encode(char* oRESTRICT dst, size_t dst_size, const char* oRESTRICT
 		if ((*s & 0x80) != 0)
 		{
 			// TODO: Support UTF-8 
-			throw std::system_error(std::errc::function_not_supported, std::system_category(), "UTF-8 not yet supported");
+			oThrow(std::errc::function_not_supported, "UTF-8 not yet supported");
 		}
 
 		if (strchr(reserved_chars, *s))
 		{
 			if ((d+3) > end)
-				throw std::system_error(std::errc::no_buffer_space, std::system_category());
+				oThrow(std::errc::no_buffer_space, "");
 			*d++ = '%';
 			snprintf(d, std::distance(d, end), "%02x", *s++); // use lower-case escaping http://www.textuality.com/tag/uri-comp-2.html
 			d += 2;
 		}
 
 		else if (d >= end)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+			oThrow(std::errc::no_buffer_space, "");
 		else
 			*d++ = *s++;
 	}

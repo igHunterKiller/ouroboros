@@ -39,13 +39,13 @@ public:
 		try
 		{
 			blob bytecode = gpu::compile_shader(include_paths, defines, source_path, stage, entry_point, shader_source);
-			oTRACEA("[%s registry] insert \"%s\" from %s", as_string(stage), entry_point, source_path.c_str());
+			oTraceA("[%s registry] insert \"%s\" from %s", as_string(stage), entry_point, source_path.c_str());
 			insert(entry_point, bytecode, true);
 		}
 			
 		catch (std::exception& e)
 		{
-			oTRACEA("[%s registry] insert \"%s\" as error", as_string(stage), entry_point, e.what());
+			oTraceA("[%s registry] insert \"%s\" as error", as_string(stage), entry_point, e.what());
 			blob empty;
 			insert(entry_point, empty, true);
 		}

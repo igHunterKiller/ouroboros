@@ -5,6 +5,7 @@
 
 #pragma once
 #include <oArch/arch.h>
+#include <oCore/assert.h>
 #include <atomic>
 #include <stdexcept>
 
@@ -47,7 +48,7 @@ public:
 	{
 		#ifdef _DEBUG
 		if (((uintptr_t)ptr & tag_mark_mask) != 0)
-			throw std::invalid_argument("tagged_pointer pointers must be aligned to 16-bytes allow room for the tag and mark");
+			oThrow(std::errc::invalid_argument, "tagged_pointer pointers must be aligned to 16-bytes allow room for the tag and mark");
 		#endif
 		tag_and_pointer = uintptr_t(ptr) | uintptr_t((_tag & tag_mask) << tag_shift);
 	}
@@ -56,7 +57,7 @@ public:
 	{
 		#ifdef _DEBUG
 		if (((uintptr_t)ptr & tag_mark_mask) != 0)
-			throw std::invalid_argument("tagged_pointer pointers must be aligned to 16-bytes allow room for the tag and mark");
+			oThrow(std::errc::invalid_argument, "tagged_pointer pointers must be aligned to 16-bytes allow room for the tag and mark");
 		#endif
 		tag_and_pointer = uintptr_t(ptr) | uintptr_t((_tag & tag_mask) << tag_shift) | uintptr_t(mark_mask);
 	}

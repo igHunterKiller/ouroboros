@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oBase/compression.h>
 #include <Lzma/C/LzmaLib.h>
 
@@ -59,8 +60,7 @@ size_t compress_lzma(void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT
 	if (dst)
 	{
 		const size_t EstSize = compress_lzma(nullptr, 0, nullptr, src_size);
-		if (dst && dst_size < EstSize)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oCheck(!dst || dst_size >= EstSize, std::errc::no_buffer_space, "");
 
 		((HDR*)dst)->UncompressedSize = src_size;
 		CompressedSize = dst_size;
@@ -81,8 +81,7 @@ size_t compress_lzma(void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT
 			, LZMADEFAULT_fb
 			, LZMADEFAULT_numThreads);
 
-		if (LZMAError)
-			throw std::system_error(std::errc::protocol_error, std::system_category(), std::string("compression failed: ") + as_string_lzma_error(LZMAError));
+		oCheck(!LZMAError, std::errc::protocol_error, "compression failed: %s", as_string_lzma_error(LZMAError));
 	}
 
 	else
@@ -94,8 +93,7 @@ size_t compress_lzma(void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT
 size_t decompress_lzma(void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT src, size_t src_size)
 {
 	size_t UncompressedSize = ((const HDR*)src)->UncompressedSize;
-		if (dst && dst_size < UncompressedSize)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(!dst || dst_size >= UncompressedSize, std::errc::no_buffer_space, "");
 
 	size_t destLen = dst_size;
 	size_t srcLen = src_size;
@@ -107,8 +105,7 @@ size_t decompress_lzma(void* oRESTRICT dst, size_t dst_size, const void* oRESTRI
 		, LZMADEFAULT_Props
 		, LZMA_PROPS_SIZE);
 
-	if (LZMAError)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), std::string("decompression failed: ") + as_string_lzma_error(LZMAError));
+	oCheck(!LZMAError, std::errc::protocol_error, "decompression failed: %s", as_string_lzma_error(LZMAError));
 
 	return UncompressedSize;
 }

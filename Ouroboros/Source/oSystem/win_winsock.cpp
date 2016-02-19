@@ -4,7 +4,6 @@
 #include <oCore/finally.h>
 #include <oCore/guid.h>
 #include <oCore/macros.h>
-#include <oCore/stringf.h>
 #include <oSystem/windows/win_winsock.h>
 
 namespace ouro { namespace windows { namespace winsock {
@@ -169,7 +168,7 @@ char* addr_to_hostname(char* _StrDestination, size_t _SizeofStrDestination, cons
 		, "%u.%u.%u.%u:%u"
 		, (addr&0xFF000000)>>24, (addr&0xFF0000)>>16, (addr&0xFF00)>>8, addr&0xFF
 		, port))
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	return _StrDestination;
 }
 
@@ -194,8 +193,7 @@ static void get_name_base(char* _StrOutHostname, size_t _SizeofStrOutHostname, c
 	if (_StrOutIPAddress)
 	{
 		const char* ip = inet_ntoa(saddr.sin_addr);
-		if (strlcpy(_StrOutIPAddress, ip, _SizeofStrOutIPAddress) >= _SizeofStrOutIPAddress)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oCheck(strlcpy(_StrOutIPAddress, ip, _SizeofStrOutIPAddress) < _SizeofStrOutIPAddress, std::errc::no_buffer_space, "");
 	}
 }
 
@@ -425,7 +423,7 @@ void set_keepalive(SOCKET _hSocket, unsigned int _TimeoutMS, unsigned int _Inter
 	}
 }
 
-#define FD_TRACE(TracePrefix, TraceName, FDEvent) oTRACE("%s%s%s: %s (%s)", oSAFESTR(TracePrefix), _TracePrefix ? " " : "", oSAFESTR(TraceName), #FDEvent, get_desc(_pNetworkEvents->iErrorCode[FDEvent##_BIT]))
+#define FD_TRACE(TracePrefix, TraceName, FDEvent) oTrace("%s%s%s: %s (%s)", oSAFESTR(TracePrefix), _TracePrefix ? " " : "", oSAFESTR(TraceName), #FDEvent, get_desc(_pNetworkEvents->iErrorCode[FDEvent##_BIT]))
 //#define FD_TRACE(TracePrefix, TraceName, FDEvent)
 
 // Assumes WSANETWORKEVENTS ne; int err;
@@ -444,8 +442,8 @@ static void wsatrace(const char* _TracePrefix, const char* _TraceName, const WSA
 	{
 		// http://www.mombu.com/microsoft/alt-winsock-programming/t-wsaenumnetworkevents-returns-no-event-how-is-this-possible-1965867.html
 		// (spurious wakeup)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("%s%s%s: WSAEVENT, but no lNetworkEvent: \"spurious wakeup\". You should ignore the event as if it never happened by testing for _pNetworkEvents->lNetworkEvents == 0 in calling code."
-			, oSAFESTR(_TracePrefix), _TracePrefix ? " " : "", oSAFESTR(_TraceName)));
+		oThrow(std::errc::protocol_error, "%s%s%s: WSAEVENT, but no lNetworkEvent: \"spurious wakeup\". You should ignore the event as if it never happened by testing for _pNetworkEvents->lNetworkEvents == 0 in calling code."
+			, oSAFESTR(_TracePrefix), _TracePrefix ? " " : "", oSAFESTR(_TraceName));
 	}
 	
 	FD_CHECK(FD_READ); FD_CHECK(FD_WRITE); FD_CHECK(FD_OOB); FD_CHECK(FD_CONNECT); 
@@ -483,7 +481,7 @@ static bool wait(SOCKET _hSocket, WSAEVENT _hEvent, WSANETWORKEVENTS* _pNetEvent
 
 void send(SOCKET _hSocket, const void* _pSource, size_t _SizeofSource, const sockaddr_in* _pDestination)
 {
-	oASSERT(_SizeofSource <= INT_MAX, "Underlying implementation uses 32-bit signed int for buffer size.");
+	oAssert(_SizeofSource <= INT_MAX, "Underlying implementation uses 32-bit signed int for buffer size.");
 	int bytesSent = 0;
 	if (_pDestination)
 		bytesSent = sendto(_hSocket, (const char*)_pSource, static_cast<int>(_SizeofSource), 0, (const sockaddr*)_pDestination, sizeof(sockaddr_in));
@@ -497,13 +495,13 @@ void send(SOCKET _hSocket, const void* _pSource, size_t _SizeofSource, const soc
 size_t receive(SOCKET _hSocket, WSAEVENT _hEvent, void* _pDestination, size_t _SizeofDestination, unsigned int _TimeoutMS, std::atomic<int>* _pInOutCanReceive, sockaddr_in* _pSource)
 {
 	if (!_pInOutCanReceive)
-		throw std::invalid_argument("_pInOutCanReceive must be specified");
+		oThrow(std::errc::invalid_argument, "_pInOutCanReceive must be specified");
 
 	if (_SizeofDestination >= INT_MAX)
-		throw std::invalid_argument("Underlying implementation uses 32-bit signed int for buffer size.");
+		oThrow(std::errc::invalid_argument, "Underlying implementation uses 32-bit signed int for buffer size.");
 
 	if (!_pDestination)
-		throw std::invalid_argument("Must specify a destination buffer");
+		oThrow(std::errc::invalid_argument, "Must specify a destination buffer");
 
 	int err = 0;
 	WSANETWORKEVENTS ne;
@@ -559,10 +557,10 @@ size_t receive(SOCKET _hSocket, WSAEVENT _hEvent, void* _pDestination, size_t _S
 size_t receive_nonblocking(SOCKET _hSocket, WSAEVENT _hEvent, void* _pDestination, size_t _SizeofDestination, sockaddr_in* _pSource)
 {
 	if (_SizeofDestination >= INT_MAX)
-		throw std::invalid_argument("Underlying implementation uses 32-bit signed int for buffer size.");
+		oThrow(std::errc::invalid_argument, "Underlying implementation uses 32-bit signed int for buffer size.");
 
 	if (!_pDestination)
-		throw std::invalid_argument("Must specify a destination buffer");
+		oThrow(std::errc::invalid_argument, "Must specify a destination buffer");
 
 	timeval waitTime;
 	waitTime.tv_sec = 0;
@@ -590,7 +588,7 @@ size_t receive_nonblocking(SOCKET _hSocket, WSAEVENT _hEvent, void* _pDestinatio
 		oWSATHROWLAST();
 
 	else if (!bytesReceived)
-		throw std::system_error(std::errc::connection_reset, std::system_category()); // ESHUTDOWN
+		oThrow(std::errc::connection_reset, ""); // ESHUTDOWN
 
 	//else if ((ne.lNetworkEvents & FD_CLOSE) || ((ne.lNetworkEvents & FD_CONNECT) && err))
 	//{
@@ -622,7 +620,7 @@ async_result accept_async(SOCKET _ListenSocket, SOCKET _AcceptSocket, void* _Out
 	unsigned long bytesRead = 0;
 	if (!pAcceptEx(_ListenSocket, _AcceptSocket, _OutputBuffer, 0, sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &bytesRead, _pOverlapped))
 		return WSAGetLastError() == ERROR_IO_PENDING ? scheduled : failed;
-	oASSERT(bytesRead == accept_buffer_size, "Should have read back the 2 addresses");
+	oAssert(bytesRead == accept_buffer_size, "Should have read back the 2 addresses");
 	return completed;
 }
 

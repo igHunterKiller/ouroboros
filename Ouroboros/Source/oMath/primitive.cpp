@@ -98,7 +98,7 @@ info_t first_tri_info(const tessellation_type& type)
 {
 	// todo: add textured
 	if (type == tessellation_type::textured || type == tessellation_type::cubemapped)
-		throw std::invalid_argument("textured and cubemapped are unsupported");
+		oThrow(std::errc::invalid_argument, "textured and cubemapped are unsupported");
 
 	info_t i;
 	i.nindices  = type == tessellation_type::lines ? 6 : 3;
@@ -111,7 +111,7 @@ info_t first_tri_info(const tessellation_type& type)
 cmesh_t first_tri_mesh(const tessellation_type& type)
 {
 	if (type == tessellation_type::textured || type == tessellation_type::cubemapped)
-		throw std::invalid_argument("textured and cubemapped are unsupported");
+		oThrow(std::errc::invalid_argument, "textured and cubemapped are unsupported");
 
 	cmesh_t m;
 	m.indices   = type == tessellation_type::lines ? first_tri_line_indices : first_tri_face_indices;
@@ -266,14 +266,14 @@ static const float dodecahedron_positions[] =
 	}                                                                                                   \
 	void name##_tessellate(mesh_t* out_mesh, const tessellation_type& type)                             \
 	{ if (type == tessellation_type::lines)                                                             \
-			throw std::invalid_argument("lines not supported for " #name);                                  \
+			oThrow(std::errc::invalid_argument, "lines not supported for " #name);                                  \
 		if (out_mesh->indices) memcpy(out_mesh->indices, name##_indices, sizeof(name##_indices));         \
 		if (out_mesh->positions) memcpy(out_mesh->positions, name##_positions, sizeof(name##_positions)); \
 		if (out_mesh->texcoords && (type == tessellation_type::textured || type == tessellation_type::cubemapped)) \
 		{	info_t   info   = name##_info(tessellation_type::solid);                                        \
 			uint16_t nverts = info.nvertices;                                                               \
 			apply_cylindrical_texgen(out_mesh->indices, info.nindices, out_mesh->positions, out_mesh->texcoords, nverts, false); \
-			oTRACE("Actual verts: %u", nverts);                                                             \
+			oTrace("Actual verts: %u", nverts);                                                             \
 		}                                                                                                 \
 	}
 
@@ -464,7 +464,7 @@ info_t circle_info(const tessellation_type& type, uint16_t facet)
 static info_t cyltube_info(const tessellation_type& type, uint16_t facet)
 {
 	if (type == tessellation_type::cubemapped)
-		throw std::invalid_argument("cubemapped texcoords not supported for cylinder");
+		oThrow(std::errc::invalid_argument, "cubemapped texcoords not supported for cylinder");
 
 	clamp_facet(facet);
 
@@ -487,7 +487,7 @@ info_t cone_info(const tessellation_type& type, uint16_t facet)
 	if (type == tessellation_type::textured || type == tessellation_type::cubemapped)
 	{
 		if (type == tessellation_type::cubemapped)
-			throw std::invalid_argument("cubemapped texcoords not supported for cone");
+			oThrow(std::errc::invalid_argument, "cubemapped texcoords not supported for cone");
 
 		auto cyl = cyltube_info(type, facet);
 		auto cir = circle_info (type, facet);
@@ -509,7 +509,7 @@ info_t cone_info(const tessellation_type& type, uint16_t facet)
 info_t cylinder_info(const tessellation_type& type, uint16_t facet)
 {
 	if (type == tessellation_type::cubemapped)
-		throw std::invalid_argument("cubemapped texcoords not supported for cylinder");
+		oThrow(std::errc::invalid_argument, "cubemapped texcoords not supported for cylinder");
 
 	clamp_facet(facet);
 
@@ -526,7 +526,7 @@ info_t cylinder_info(const tessellation_type& type, uint16_t facet)
 info_t torus_info(const tessellation_type& type, uint16_t facet, uint16_t divide)
 {
 	if (type == tessellation_type::cubemapped)
-		throw std::invalid_argument("cubemapped texcoords not supported for torus");
+		oThrow(std::errc::invalid_argument, "cubemapped texcoords not supported for torus");
 
 	if (type == tessellation_type::lines)
 	{
@@ -872,10 +872,10 @@ void deindex(mesh_t* out_mesh, const mesh_t& src_mesh, const info_t& src_info)
 	const float*    src_texcoords = src_mesh.texcoords;
 
 	if (out_mesh->indices)
-		throw std::invalid_argument("deindexed output should not have indices");
+		oThrow(std::errc::invalid_argument, "deindexed output should not have indices");
 
 	if (!src_indices)
-		throw std::invalid_argument("source must have indices");
+		oThrow(std::errc::invalid_argument, "source must have indices");
 
 	if (src_info.type == tessellation_type::lines)
 	{

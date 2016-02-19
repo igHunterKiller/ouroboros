@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <regex>
 #include <string>
+#include <oCore/assert.h>
 #include <oCore/countof.h>
 #include <oString/string_source.h>
 #include <unordered_map>
@@ -70,8 +71,7 @@ static void next_matching_ifdef(ifdef_block* p_blocks, size_t max_num_blocks, si
 		if (src_end && matches[0].first >= src_end)
 			break;
 
-		if (blockIndex >= max_num_blocks-1)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category(), "block buffer too small");
+		oCheck(blockIndex < max_num_blocks-1, std::errc::no_buffer_space, "block buffer too small");
 
 		enum ifdef_block::type type = get_type(matches);
 
@@ -170,7 +170,7 @@ static char* zero_ifdefs_internal(const macros_t& macros, char* src_begin, char*
 					break;
 
 				default:
-					throw std::invalid_argument("Unhandled case (Did #if/#elif get implemented?)");
+					oThrow(std::errc::invalid_argument, "Unhandled case (Did #if/#elif get implemented?)");
 			}
 
 			if (zeroBlock)

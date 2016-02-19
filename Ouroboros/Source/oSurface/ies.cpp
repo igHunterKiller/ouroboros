@@ -96,38 +96,38 @@ ies_header to_header(const char* ies_string, const char** out_data = nullptr)
 
 	cur = strstr(cur, "TILT=");
 	if (!cur)
-		throw std::invalid_argument("invalid ies (no TILT)");
+		oThrow(std::errc::invalid_argument, "invalid ies (no TILT)");
 
 	cur += 5;
 	from_string(&h.tilt, cur);
 	if (h.tilt != ies_tilt::none)
-		throw std::invalid_argument("invalid ies (TILT=INCLUDE and TILT=<filename> not supported)");
+		oThrow(std::errc::invalid_argument, "invalid ies (TILT=INCLUDE and TILT=<filename> not supported)");
 
 	move_to_next_line(cur);
 
 	if (10 != sscanf_s(cur, "%d %f %f %d %d %d %d %f %f %f", &h.num_lamps, &h.lumens_per_lamp, &h.candela_multiplier, &h.num_vangles, &h.num_hangles, &h.photometric_type, &h.units, &h.geometry, &h.width, &h.length, &h.height))
-		throw std::invalid_argument("invalid ies meta data (line 10)");
+		oThrow(std::errc::invalid_argument, "invalid ies meta data (line 10)");
 
 	move_to_next_line(cur);
 	if (3 != sscanf_s(cur, "%f %f %f", &h.ballast_factor, &h.ballast_lamp_photometric_factor, &h.input_watts))
-		throw std::invalid_argument("invalid ies meta data (line 11)");
+		oThrow(std::errc::invalid_argument, "invalid ies meta data (line 11)");
 
 	h.geometry = to_geometry(h.width, h.length, h.height);
 
 	// validate
-	if (1 != h.num_lamps)                                           throw std::invalid_argument("only 1 lamp supported");
-	if (0.0f > h.lumens_per_lamp)                                   throw std::invalid_argument("lumens_per_lamp must be a non-zero positive number");
-	if (0.0f > h.candela_multiplier)                                throw std::invalid_argument("candela_multiplier must be a non-zero positive number");
-	if (0 > h.num_vangles)                                          throw std::invalid_argument("num_vangles must be a non-zero positive number");
-	if (0 > h.num_hangles)                                          throw std::invalid_argument("num_hangles must be a non-zero positive number");
+	if (1 != h.num_lamps)                                           oThrow(std::errc::invalid_argument, "only 1 lamp supported");
+	if (0.0f > h.lumens_per_lamp)                                   oThrow(std::errc::invalid_argument, "lumens_per_lamp must be a non-zero positive number");
+	if (0.0f > h.candela_multiplier)                                oThrow(std::errc::invalid_argument, "candela_multiplier must be a non-zero positive number");
+	if (0 > h.num_vangles)                                          oThrow(std::errc::invalid_argument, "num_vangles must be a non-zero positive number");
+	if (0 > h.num_hangles)                                          oThrow(std::errc::invalid_argument, "num_hangles must be a non-zero positive number");
 	if (h.photometric_type != ies_photometric_type::a && 
 			h.photometric_type != ies_photometric_type::b && 
-			h.photometric_type != ies_photometric_type::c)              throw std::invalid_argument("invalid photometric type");
-	if (h.units != ies_units::feet && h.units != ies_units::meters) throw std::invalid_argument("invalid units");
-	//if (h.geometry == ies_geometry::unknown)                        throw std::invalid_argument("invalid geometry");
-	if (0.0f > h.ballast_factor)                                    throw std::invalid_argument("ballast_factor must be a non-zero positive number");
-	if (0.0f > h.ballast_lamp_photometric_factor)                   throw std::invalid_argument("ballast_lamp_photometric_factor must be a non-zero positive number");
-	if (0.0f > h.input_watts)                                       throw std::invalid_argument("input_watts must be a non-zero positive number");
+			h.photometric_type != ies_photometric_type::c)              oThrow(std::errc::invalid_argument, "invalid photometric type");
+	if (h.units != ies_units::feet && h.units != ies_units::meters) oThrow(std::errc::invalid_argument, "invalid units");
+	//if (h.geometry == ies_geometry::unknown)                        oThrow(std::errc::invalid_argument, "invalid geometry");
+	if (0.0f > h.ballast_factor)                                    oThrow(std::errc::invalid_argument, "ballast_factor must be a non-zero positive number");
+	if (0.0f > h.ballast_lamp_photometric_factor)                   oThrow(std::errc::invalid_argument, "ballast_lamp_photometric_factor must be a non-zero positive number");
+	if (0.0f > h.input_watts)                                       oThrow(std::errc::invalid_argument, "input_watts must be a non-zero positive number");
 
 	if (out_data)
 	{
@@ -270,7 +270,7 @@ static float sample_candela_1d(float vangle, size_t num_hangles, const float* va
 
 blob encode_ies(const image& img, const allocator& file_alloc, const allocator& temp_alloc, const compression& compression)
 {
-	throw std::system_error(std::errc::not_supported, std::system_category(), "encoding ies is not supported");
+	oThrow(std::errc::not_supported, "encoding ies is not supported");
 }
 
 image decode_ies(const void* buffer, size_t size, const allocator& texel_alloc, const allocator& temp_alloc, const mip_layout& layout)
@@ -279,7 +279,7 @@ image decode_ies(const void* buffer, size_t size, const allocator& texel_alloc, 
 	auto h = to_header(buffer, size, &cur);
 
 	if (h.photometric_type != ies_photometric_type::c)
-		throw std::invalid_argument("only photometric type c is currently supported");
+		oThrow(std::errc::invalid_argument, "only photometric type c is currently supported");
 
 	// allocate temp memory for angles and candela
 	const auto candela_count = h.num_vangles * h.num_hangles;
@@ -330,7 +330,7 @@ image decode_ies(const void* buffer, size_t size, const allocator& texel_alloc, 
 	info_t info = to_info(h);
 
 	if (info.format == format::unknown)
-		throw std::invalid_argument("invalid ies buffer");
+		oThrow(std::errc::invalid_argument, "invalid ies buffer");
 
 	image img(info, texel_alloc);
 

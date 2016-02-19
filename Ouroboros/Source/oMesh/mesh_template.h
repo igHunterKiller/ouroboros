@@ -15,7 +15,7 @@ namespace ouro { namespace mesh { namespace detail {
 template<typename T, typename IndexT> void remove_degenerates(const oHLSL3<T>* oRESTRICT positions, uint32_t num_positions, IndexT* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_new_num_indices)
 {
 	if ((num_indices % 3) != 0)
-		throw std::invalid_argument("num_indices must be a multiple of 3");
+		oThrow(std::errc::invalid_argument, "num_indices must be a multiple of 3");
 
 	for (uint32_t i = 0; i < num_indices / 3; i++)
 	{
@@ -24,7 +24,7 @@ template<typename T, typename IndexT> void remove_degenerates(const oHLSL3<T>* o
 		uint32_t K = i * 3 + 2;
 
 		if (indices[I] >= num_positions || indices[J] >= num_positions || indices[K] >= num_positions)
-			throw std::invalid_argument("an index value indexes outside the range of vertices specified");
+			oThrow(std::errc::invalid_argument, "an index value indexes outside the range of vertices specified");
 
 		const oHLSL3<T>& a = positions[indices[I]];
 		const oHLSL3<T>& b = positions[indices[J]];
@@ -75,14 +75,14 @@ template<typename T, typename IndexT> void calc_face_normals_task(size_t index, 
 template<typename T, typename IndexT> void calc_face_normals(oHLSL3<T>* oRESTRICT face_normals, const IndexT* oRESTRICT indices, uint32_t num_indices, const oHLSL3<T>* oRESTRICT positions, uint32_t num_positions, bool ccw)
 {
 	if ((num_indices % 3) != 0)
-		throw std::invalid_argument("num_indices must be a multiple of 3");
+		oThrow(std::errc::invalid_argument, "num_indices must be a multiple of 3");
 
 	bool success = true;
 	const T s = ccw ? T(-1) : T(1);
 	parallel_for( 0, num_indices / 3, std::bind( calc_face_normals_task<T, IndexT>, std::placeholders::_1
 		, face_normals, indices, num_indices, positions, num_positions, s, &success));
 	if (!success)
-		throw std::invalid_argument("an index value indexes outside the range of vertices specified");
+		oThrow(std::errc::invalid_argument, "an index value indexes outside the range of vertices specified");
 }
 
 template<typename InnerContainerT, typename VecT> void average_face_normals(
@@ -164,7 +164,7 @@ template<typename T, typename IndexT> void calc_vertex_normals(oHLSL3<T>* oRESTR
 		// print out why we ended up in this path...
 		for (uint32_t i = 0; i < num_positions; i++)
 			MaxValence = max(MaxValence, (uint32_t)trianglesUsedByVertex[i].size());
-		oTRACE("debug-slow path in normals caused by reasonable max valence (%u) being exceeded. Actual valence: %u", REASONABLE_MAX_FACES_PER_VERTEX, MaxValence);
+		oTrace("debug-slow path in normals caused by reasonable max valence (%u) being exceeded. Actual valence: %u", REASONABLE_MAX_FACES_PER_VERTEX, MaxValence);
 	}
 
 	else
@@ -241,7 +241,7 @@ template<typename T, typename IndexT, typename TexCoordTupleT> void calc_vertex_
 template<typename T, typename IndexT, typename UV0T>
 void calc_texcoords(const oHLSL3<T>& aabb_min, const oHLSL3<T>& aabb_max, const IndexT* indices, uint32_t num_indices, const oHLSL3<T>* positions, UV0T* out_texcoords, uint32_t num_vertices, double* out_solve_time)
 {
-	throw std::system_error(std::errc::operation_not_supported, std::system_category(), "calc_texcoords not implemented");
+	oThrow(std::errc::operation_not_supported, "calc_texcoords not implemented");
 }
 
 template<typename IndexT> void prune_indices(const std::vector<bool>& refed, IndexT* indices, uint32_t num_indices)

@@ -80,8 +80,7 @@ blob encode(const image& img
 		dst_format = buffer_format;
 
 	dst_format = required_input(fmt, dst_format);
-	if (dst_format == format::unknown)
-		throw std::system_error(std::errc::not_supported, std::system_category(), as_string(fmt) + std::string(" encoding does not support desired_format ") + as_string(desired_format));
+	oCheck(dst_format != format::unknown, std::errc::not_supported, "%s encoding does not support desired format %s", as_string(fmt), as_string(desired_format));
 
 	image converted;
 	image converted_for_bc_input;

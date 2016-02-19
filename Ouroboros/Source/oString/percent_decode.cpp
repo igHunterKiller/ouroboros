@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oArch/compiler.h>
+#include <oCore/assert.h>
 #include <oString/string.h>
 #include <system_error>
 
@@ -46,7 +47,7 @@ char* percent_decode(char* oRESTRICT dst, size_t dst_size, const char* oRESTRICT
 		}
 
 		else if (d >= end)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+			oThrow(std::errc::no_buffer_space, "");
 		else
 			*d++ = *s++;
 	}

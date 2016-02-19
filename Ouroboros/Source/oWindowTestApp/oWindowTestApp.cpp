@@ -1,7 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oCore/countof.h>
-#include <oCore/stringf.h>
 #include <oSystem/filesystem.h>
 #include <oSystem/peripherals.h>
 #include <oSystem/reporting.h>
@@ -139,7 +138,7 @@ oWindowTestApp::oWindowTestApp()
 	{
 		path_t watched = filesystem::desktop_path() / "test/";
 		try { DirWatcher->watch(watched, 64 * 1024, true); }
-		catch (std::exception& e) { e; oTRACEA("Cannot watch %s: %s", watched.c_str(), e.what()); }
+		catch (std::exception& e) { e; oTraceA("Cannot watch %s: %s", watched.c_str(), e.what()); }
 	}
 
 	Keyboard.initialize();
@@ -238,12 +237,12 @@ void oWindowTestApp::OnDirectoryEvent(filesystem::file_event::value _Event, cons
 	if (_Event == filesystem::file_event::added && !filesystem::is_directory(_Path))
 	{
 		int old = counter++;
-		oTRACE("%s: %s (%d)", as_string(_Event), _Path.c_str(), old + 1);
+		oTrace("%s: %s (%d)", as_string(_Event), _Path.c_str(), old + 1);
 	}
 
 	else
 	{
-		oTRACE("%s: %s", as_string(_Event), _Path.c_str());
+		oTrace("%s: %s", as_string(_Event), _Path.c_str());
 	}
 }
 
@@ -258,39 +257,39 @@ void oWindowTestApp::EventHook(const window::basic_event& _Event)
 				Window->set_status_text(0, "Timer: %d", PulseContext.Count);
 			}
 			else
-				oTRACE("event_type::timer");
+				oTrace("event_type::timer");
 			break;
 		case event_type::activated:
-			oTRACE("event_type::activated");
+			oTrace("event_type::activated");
 			break;
 		case event_type::deactivated:
-			oTRACE("event_type::deactivated");
+			oTrace("event_type::deactivated");
 			break;
 		case event_type::creating:
 		{
-			oTRACE("event_type::creating");
+			oTrace("event_type::creating");
 			CreateMenu(_Event.as_create());
 			CreateControls(_Event.as_create());
 			break;
 		}
 		case event_type::paint:
-			//oTRACE("event_type::paint");
+			//oTrace("event_type::paint");
 			break;
 		case event_type::display_changed:
-			oTRACE("event_type::display_changed");
+			oTrace("event_type::display_changed");
 			break;
 		case event_type::moving:
-			oTRACE("event_type::moving");
+			oTrace("event_type::moving");
 			break;
 		case event_type::moved:
-			oTRACE("event_type::moved %dx%d", _Event.as_shape().shape.client_position.x, _Event.as_shape().shape.client_position.y);
+			oTrace("event_type::moved %dx%d", _Event.as_shape().shape.client_position.x, _Event.as_shape().shape.client_position.y);
 			break;
 		case event_type::sizing:
-			oTRACE("event_type::sizing %s %dx%d", as_string(_Event.as_shape().shape.state), _Event.as_shape().shape.client_size.x, _Event.as_shape().shape.client_size.y);
+			oTrace("event_type::sizing %s %dx%d", as_string(_Event.as_shape().shape.state), _Event.as_shape().shape.client_size.x, _Event.as_shape().shape.client_size.y);
 			break;
 		case event_type::sized:
 		{
-			oTRACE("event_type::sized %s %dx%d", as_string(_Event.as_shape().shape.state), _Event.as_shape().shape.client_size.x, _Event.as_shape().shape.client_size.y);
+			oTrace("event_type::sized %s %dx%d", as_string(_Event.as_shape().shape.state), _Event.as_shape().shape.client_size.x, _Event.as_shape().shape.client_size.y);
 			CheckState(_Event.as_shape().shape.state);
 			CheckStyle(_Event.as_shape().shape.style);
 
@@ -305,29 +304,29 @@ void oWindowTestApp::EventHook(const window::basic_event& _Event)
 			break;
 		}
 		case event_type::closing:
-			oTRACE("event_type::closing");
+			oTrace("event_type::closing");
 			Running = false;
 			Window->quit();
 			break;
 		case event_type::closed:
-			oTRACE("event_type::closed");
+			oTrace("event_type::closed");
 			break;
 		case event_type::to_fullscreen:
-			oTRACE("event_type::to_fullscreen");
+			oTrace("event_type::to_fullscreen");
 			break;
 		case event_type::from_fullscreen:
-			oTRACE("event_type::from_fullscreen");
+			oTrace("event_type::from_fullscreen");
 			break;
 		case event_type::lost_capture:
-			oTRACE("event_type::lost_capture");
+			oTrace("event_type::lost_capture");
 			break;
 		case event_type::drop_files:
-			oTRACE("event_type::drop_files (at %d,%d starting with %s)", _Event.as_drop().client_drop_position.x, _Event.as_drop().client_drop_position.y, _Event.as_drop().paths[0]);
+			oTrace("event_type::drop_files (at %d,%d starting with %s)", _Event.as_drop().client_drop_position.x, _Event.as_drop().client_drop_position.y, _Event.as_drop().paths[0]);
 			break;
 		case event_type::input_device_changed:
-			oTRACE("event_type::input_device_changed %s %s %s", as_string(_Event.as_input_device().type), as_string(_Event.as_input_device().status), _Event.as_input_device().instance_name);
+			oTrace("event_type::input_device_changed %s %s %s", as_string(_Event.as_input_device().type), as_string(_Event.as_input_device().status), _Event.as_input_device().instance_name);
 			break;
-		default: throw std::invalid_argument(stringf("unexpected event %s", + as_string(_Event.type)));
+		default: oThrow(std::errc::invalid_argument, "unexpected event %s", + as_string(_Event.type));
 	}
 }
 
@@ -336,19 +335,19 @@ void oWindowTestApp::InputHook(const input_t& _Input)
 	switch (_Input.type)
 	{
 		case input_type::unknown:
-			oTRACE("input::unknown");
+			oTrace("input::unknown");
 			break;
 
 		case input_type::pad:
 		{
 			if (_Input.pad.type == pad_event::move)
 			{
-				oTRACE("pad%u: left(%f, %f) right(%f, %f) ltrigger(%f) rtrigger(%f)", _Input.pad.index, _Input.pad.mv.lx, _Input.pad.mv.ly, _Input.pad.mv.rx, _Input.pad.mv.ry, _Input.pad.mv.ltrigger, _Input.pad.mv.rtrigger);
+				oTrace("pad%u: left(%f, %f) right(%f, %f) ltrigger(%f) rtrigger(%f)", _Input.pad.index, _Input.pad.mv.lx, _Input.pad.mv.ly, _Input.pad.mv.rx, _Input.pad.mv.ry, _Input.pad.mv.ltrigger, _Input.pad.mv.rtrigger);
 			}
 
 			else
 			{
-				oTRACE("%s %s", as_string(_Input.pad.pr.button), _Input.pad.pr.down ? "pressed" : "released");
+				oTrace("%s %s", as_string(_Input.pad.pr.button), _Input.pad.pr.down ? "pressed" : "released");
 			}
 
 			break;
@@ -396,7 +395,7 @@ void oWindowTestApp::InputHook(const input_t& _Input)
 					}
 					break;
 				default:
-					oTRACE("hotkey");
+					oTrace("hotkey");
 					break;
 			}
 			break;
@@ -419,19 +418,19 @@ void oWindowTestApp::InputHook(const input_t& _Input)
 							break;
 						}
 						default:
-							oTRACE("control_activated");
+							oTrace("control_activated");
 							break;
 					}
 					break;
 
 				case control_status::deactivated:
-					oTRACE("deactivated");
+					oTrace("deactivated");
 					break;
 				case control_status::selection_changing:
-					oTRACE("selection_changing");
+					oTrace("selection_changing");
 					break;
 				case control_status::selection_changed:
-					oTRACE("selection_changed");
+					oTrace("selection_changed");
 					break;
 
 				default:
@@ -443,7 +442,7 @@ void oWindowTestApp::InputHook(const input_t& _Input)
 
 		case input_type::keypress:
 		{
-			oTRACE("keyboard key%s %s", _Input.keypress.down ? "down" : "up", as_string(_Input.keypress.key));
+			oTrace("keyboard key%s %s", _Input.keypress.down ? "down" : "up", as_string(_Input.keypress.key));
 			break;
 		}
 
@@ -451,18 +450,18 @@ void oWindowTestApp::InputHook(const input_t& _Input)
 		{
 			if (_Input.mouse.type == mouse_event::press)
 			{
-				oTRACE("mouse %s %s", as_string(_Input.mouse.pr.button), _Input.mouse.pr.down ? "down" : "up");
+				oTrace("mouse %s %s", as_string(_Input.mouse.pr.button), _Input.mouse.pr.down ? "down" : "up");
 			}
 
 			else
-				oTRACE("mouse %d %d", _Input.mouse.mv.x, _Input.mouse.mv.y);
+				oTrace("mouse %d %d", _Input.mouse.mv.x, _Input.mouse.mv.y);
 
 			break;
 		}
 
 		case input_type::skeleton:
 		{
-			oTRACE("%s", as_string(_Input.skeleton.status));
+			oTrace("%s", as_string(_Input.skeleton.status));
 			break;
 		}
 
@@ -478,9 +477,9 @@ void CheckInput(const keyboard_t& kb, const mouse_t& mse)
 		const key k = (key)i;
 
 		if (kb.pressed(k))
-			oTRACE("%s pressed", as_string(k));
+			oTrace("%s pressed", as_string(k));
 		else if (kb.released(k))
-			oTRACE("%s released", as_string(k));
+			oTrace("%s released", as_string(k));
 	}
 }
 
@@ -557,12 +556,12 @@ public:
 		if (e == filesystem::file_event::added && !filesystem::is_directory(p))
 		{
 			int n = ++counter;
-			oTRACE("%s: %s (%d)", as_string(e), p.c_str(), n);
+			oTrace("%s: %s (%d)", as_string(e), p.c_str(), n);
 		}
 
 		else
 		{
-			oTRACE("%s: %s", as_string(e), p.c_str());
+			oTrace("%s: %s", as_string(e), p.c_str());
 		}
 	}
 	

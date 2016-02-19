@@ -182,7 +182,7 @@ inline void threadpool<Traits, Alloc>::dispatch(const task_type& task)
 	}
 
 	else
-		throw std::invalid_argument("dispatch called after join");
+		oThrow(std::errc::invalid_argument, "dispatch called after join");
 }
 
 template<typename Traits, typename Alloc>
@@ -282,7 +282,7 @@ void task_group<Traits, Alloc>::wait()
 		std::unique_lock<std::mutex> lock(tp.mtx);
 
 		if (!tp.running)
-			throw std::invalid_argument("threadpool shut down before task group could complete");
+			oThrow(std::errc::invalid_argument, "threadpool shut down before task group could complete");
 
 		if (tp.global_queue.empty())
 		{

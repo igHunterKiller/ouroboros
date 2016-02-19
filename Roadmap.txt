@@ -74,6 +74,8 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	113               Externals               Update snappy source - code.google.com is gone.
 	114               Externals               Add lz4 to the compression pantheon
 	115               Externals               I hear-tell there's better than lz4 out there... add it to the pantheon
+	116               oBase       scc         Implement a git version
+	117 116           oBase       scc         Rejigger scc, reformat to code standard and try to simplify/unify svn and git methodologies.
 
 
 === Notes ===

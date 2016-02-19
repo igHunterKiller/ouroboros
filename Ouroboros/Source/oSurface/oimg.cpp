@@ -79,14 +79,14 @@ image decode_oimg(const void* buffer, size_t size, const allocator& texel_alloc,
 	info_t info = get_info_oimg(buffer, size);
 	
 	if (info.format == format::unknown)
-		throw std::invalid_argument("invalid oimg buffer");
+		oThrow(std::errc::invalid_argument, "invalid oimg buffer");
 
 	image img(info, texel_alloc);
 
 	auto hdr = (const file_header*)buffer;
 	auto chk = hdr->find_chunk(oimg_bits_signature);
 	if (!chk)
-		throw std::invalid_argument("invalid oimg: no bits section");
+		oThrow(std::errc::invalid_argument, "invalid oimg: no bits section");
 
 	auto bytes = total_size(info);
 	mapped_subresource mapped;

@@ -22,21 +22,21 @@ static const uint128 sExpectedTestFileHash(6836006664531726549ull, 1055778159873
 static void TESTfilesystem_paths()
 {
 	auto path = current_path();
-	oTRACE("CWD: %s", path.c_str());
+	oTrace("CWD: %s", path.c_str());
 	path = app_path();
-	oTRACE("APP: %s", path.c_str());
+	oTrace("APP: %s", path.c_str());
 	path = temp_path();
-	oTRACE("SYSTMP: %s", path.c_str());
+	oTrace("SYSTMP: %s", path.c_str());
 	path = system_path();
-	oTRACE("SYS: %s", path.c_str());
+	oTrace("SYS: %s", path.c_str());
 	path = os_path();
-	oTRACE("OS: %s", path.c_str());
+	oTrace("OS: %s", path.c_str());
 	path = dev_path();
-	oTRACE("DEV: %s", path.c_str());
+	oTrace("DEV: %s", path.c_str());
 	path = desktop_path();
-	oTRACE("DESKTOP: %s", path.c_str());
+	oTrace("DESKTOP: %s", path.c_str());
 	path = data_path();
-	oTRACE("DATA: %s", path.c_str());
+	oTrace("DATA: %s", path.c_str());
 }
 
 static void TESTfilesystem_read(unit_test::services& srv)
@@ -98,8 +98,7 @@ static void TESTfilesystem_map(unit_test::services& srv)
 {
 	path_t TestPath = srv.root_path();
 	TestPath /= "Test/Textures/lena_1.png";
-	if (!exists(TestPath))
-		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), std::string("not found: ") + TestPath.c_str());
+	oCheck(exists(TestPath), std::errc::no_such_file_or_directory, "not found: %s", TestPath.c_str());
 
 	unsigned long long size = file_size(TestPath);
 	
@@ -121,8 +120,7 @@ void TESTfilesystem_async1(unit_test::services& srv)
 {
 	path_t TestPath = srv.root_path();
 	TestPath /= "Test/Geometry/buddha.obj";
-	if (!exists(TestPath))
-		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), std::string("not found: ") + TestPath.c_str());
+	oCheck(exists(TestPath), std::errc::no_such_file_or_directory, "not found: ", TestPath.c_str());
 
 	event e;
 	timer t;
@@ -159,8 +157,7 @@ void TESTfilesystem_async2(unit_test::services& services)
 {
 	path_t TestPath = services.root_path();
 	TestPath /= sTestFile;
-	if (!exists(TestPath))
-		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), std::string("not found: ") + TestPath.c_str());
+	oCheck(exists(TestPath), std::errc::no_such_file_or_directory, "not found: %s", TestPath.c_str());
 	blob p;
 	event e;
 

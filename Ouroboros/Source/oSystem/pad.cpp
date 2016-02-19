@@ -2,7 +2,6 @@
 
 #include <oSystem/peripherals.h>
 #include <oCore/countof.h>
-#include <oCore/stringf.h>
 #include <oMath/quantize.h>
 
 #define WIN32_LEAN_AND_MEAN
@@ -105,12 +104,12 @@ void pad_t::update()
 		}
 
 		else if (result != ERROR_SUCCESS)
-			throw std::invalid_argument(stringf("XInputGetState failed with winerror code: %u", result));
+			oThrow(std::errc::invalid_argument, "XInputGetState failed with winerror code: %u", result);
 
 #if 0 // 1.4
 		result = XInputGetBatteryInformation(i, BATTERY_DEVTYPE_GAMEPAD, &inf);
 		if (result != ERROR_SUCCESS)
-			throw std::invalid_argument(stringf("XInputGetBatteryInformation failed with winerror code: %u", result));
+			oThrow(std::errc::invalid_argument, stringf("XInputGetBatteryInformation failed with winerror code: %u", result));
 #else
 		inf.BatteryType = BATTERY_TYPE_UNKNOWN;
 		inf.BatteryLevel = BATTERY_LEVEL_FULL;

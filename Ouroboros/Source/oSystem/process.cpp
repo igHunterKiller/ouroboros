@@ -14,6 +14,7 @@
 #include <TlHelp32.h>
 #include <Psapi.h>
 #include <set>
+#include <cstdint>
 
 #define oCLOSE(hHandle) do { if (hHandle && hHandle != INVALID_HANDLE_VALUE) ::CloseHandle(hHandle); } while(false)
 
@@ -162,7 +163,7 @@ public:
 			strlcpy(cmdline, CommandLine.c_str(), CommandLine.length()+1);
 		}
 
-		oASSERT(cmdline, "a null cmdline can BSOD a machine");
+		oAssert(cmdline, "a null cmdline can BSOD a machine");
 		oVB(CreateProcessA(nullptr, cmdline, nullptr, &sa, TRUE, dwCreationFlags, env
 			, InitialWorkingDirectory.empty() ? nullptr : InitialWorkingDirectory.c_str()
 			, &StartInfo, &ProcessInfo));
@@ -236,11 +237,8 @@ public:
 
 	size_t to_stdin(const void* _pSource, size_t _Size) override
 	{
-		if (!hInputWrite)
-			throw std::system_error(std::errc::permission_denied, std::system_category());
-
-		if (_Size > UINT_MAX)
-			throw std::invalid_argument("Windows supports only 32-bit sized writes");
+		oCheck(hInputWrite, std::errc::permission_denied, "");
+		oCheck(_Size <= UINT_MAX, std::errc::invalid_argument, "Windows supports only 32-bit sized writes");
 
 		DWORD dwSizeofWritten = 0;
 		oVB(WriteFile(hInputWrite, _pSource, DWORD(_Size), &dwSizeofWritten, 0));
@@ -249,16 +247,14 @@ public:
 
 	size_t from_stdout(void* _pDestination, size_t _Size) override
 	{
-		if (!hOutputRead)
-			throw std::system_error(std::errc::permission_denied, std::system_category());
+		oCheck(hOutputRead, std::errc::permission_denied, "");
 	
 		DWORD Available = 0;
 		oVB(PeekNamedPipe(hOutputRead, nullptr, 0, nullptr, &Available, nullptr));
 		if (0 == Available)
 			return 0;
 
-		if (_Size > UINT_MAX)
-			throw std::invalid_argument("Windows supports only 32-bit sized reads");
+		oCheck(_Size <= UINT_MAX, std::errc::invalid_argument, "Windows supports only 32-bit sized reads");
 
 		DWORD dwSizeofRead = 0;
 		oVB(ReadFile(hOutputRead, _pDestination, DWORD(_Size), &dwSizeofRead, 0));
@@ -315,8 +311,7 @@ void enumerate_threads(process::id _ID, const function<bool(std::thread::id _Thr
 
 	BOOL keepLooking = Thread32First(hSnapshot, &entry);
 
-	if (!keepLooking)
-		throw std::system_error(std::errc::no_such_process, std::system_category(), "no process threads found");
+	oCheck(keepLooking, std::errc::no_such_process, "no process threads found");
 
 	while (keepLooking)
 	{
@@ -362,7 +357,7 @@ bool process::has_debugger_attached(id _ID)
 				throw windows::error();
 		}
 
-		throw std::system_error(std::errc::no_such_process, std::system_category());
+		oThrow(std::errc::no_such_process, "");
 	}
 
 	return !!IsDebuggerPresent();
@@ -418,11 +413,10 @@ static void terminate_internal(process::id _ID
 			, _AllChildProcessesToo, std::ref(_HandledProcessIDs)));
 
 	windows::scoped_handle hProcess = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, asdword(_ID));
-	if (!hProcess)
-		throw std::system_error(std::errc::no_such_process, std::system_category());
+	oCheck(hProcess, std::errc::no_such_process, "");
 
 	path_t ProcessName = process::get_name(_ID);
-	oTRACE("Terminating process %u (%s) with ExitCode %u", *(unsigned int*)&_ID, ProcessName.c_str(), _ExitCode);
+	oTrace("Terminating process %u (%s) with ExitCode %u", *(unsigned int*)&_ID, ProcessName.c_str(), _ExitCode);
 	oVB(TerminateProcess(hProcess, _ExitCode));
 }
 
@@ -457,7 +451,7 @@ process::memory_info process::get_memory_info(id _ID)
 	if (hProcess)
 		oVB(GetProcessMemoryInfo(hProcess, (PROCESS_MEMORY_COUNTERS*)&m, m.cb));
 	else
-		throw std::system_error(std::errc::no_such_process, std::system_category());
+		oThrow(std::errc::no_such_process, "");
 
 	process::memory_info mi;
 	mi.working_set = m.WorkingSetSize;
@@ -475,8 +469,7 @@ process::time_info process::get_time_info(id _ID)
 	FILETIME c, e, k, u;
 	{
 		windows::scoped_handle hProcess = OpenProcess(PROCESS_QUERY_INFORMATION|PROCESS_VM_READ, FALSE, asdword(_ID));
-		if (!hProcess)
-			throw std::system_error(std::errc::no_such_process, std::system_category());
+		oCheck(hProcess, std::errc::no_such_process, "");
 		oVB(GetProcessTimes(hProcess, &c, &e, &k, &u));
 	}
 
@@ -501,7 +494,7 @@ process::time_info process::get_time_info(id _ID)
 	return ti;
 }
 
-double process::cpu_usage(id _ID, unsigned long long* _pPreviousSystemTime, unsigned long long* _pPreviousProcessTime)
+double process::cpu_usage(id _ID, uint64_t* _pPreviousSystemTime, uint64_t* _pPreviousProcessTime)
 {
 	double CPUUsage = 0.0f;
 
@@ -510,7 +503,7 @@ double process::cpu_usage(id _ID, unsigned long long* _pPreviousSystemTime, unsi
 
 	time_info ti = get_time_info(_ID);
 
-	unsigned long long kernel = 0, user = 0;
+	uint64_t kernel = 0, user = 0;
 
 	LARGE_INTEGER li;
 	li.LowPart = ftKernel.dwLowDateTime;
@@ -521,13 +514,13 @@ double process::cpu_usage(id _ID, unsigned long long* _pPreviousSystemTime, unsi
 	li.HighPart = ftUser.dwHighDateTime;
 	user = std::chrono::duration_cast<std::chrono::seconds>(file_time(li.QuadPart)).count();
 
-	unsigned long long totalSystemTime = kernel + user;
-	unsigned long long totalProcessTime = ti.kernel + ti.user;
+	uint64_t totalSystemTime = kernel + user;
+	uint64_t totalProcessTime = ti.kernel + ti.user;
 
 	if (*_pPreviousSystemTime && *_pPreviousProcessTime)
 	{
-		unsigned long long totalSystemDiff = totalSystemTime - *_pPreviousSystemTime;
-		unsigned long long totalProcessDiff = totalProcessTime - *_pPreviousProcessTime;
+		uint64_t totalSystemDiff = totalSystemTime - *_pPreviousSystemTime;
+		uint64_t totalProcessDiff = totalProcessTime - *_pPreviousProcessTime;
 
 		CPUUsage = totalProcessDiff * 100.0 / totalSystemDiff;
 	}
@@ -621,8 +614,7 @@ char* command_line(char* _StrDestination, size_t _SizeofStrDestination, bool _Pa
 		p += strspn(p, oWHITESPACE); // move past whitespace
 	}
 
-	if (strlcpy(_StrDestination, p, _SizeofStrDestination) >= _SizeofStrDestination)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(strlcpy(_StrDestination, p, _SizeofStrDestination) < _SizeofStrDestination, std::errc::no_buffer_space, "");
 	return _StrDestination;
 }
 

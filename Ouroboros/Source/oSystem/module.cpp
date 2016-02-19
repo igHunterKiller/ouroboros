@@ -1,7 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oCore/finally.h>
-#include <oCore/stringf.h>
 #include <oSystem/module.h>
 #include <oSystem/filesystem.h>
 #include <oSystem/windows/win_error.h>
@@ -67,8 +66,7 @@ void link(id module_id, const char** interface_function_names, void** interfaces
 	for (size_t i = 0; i < num_interfaces; i++)
 	{
 		interfaces[i] = sym(module_id, interface_function_names[i]);
-		if (!interfaces[i])
-			throw std::system_error(std::errc::function_not_supported, std::system_category(), stringf("'%s' not found in '%s'", interface_function_names[i], get_path(module_id).c_str()));
+		oCheck(interfaces[i], std::errc::function_not_supported, "'%s' not found in '%s'", interface_function_names[i], get_path(module_id).c_str());
 	}
 }
 
@@ -89,8 +87,7 @@ path_t get_path(id module_id)
 	path_string p;
 	size_t len = static_cast<size_t>(GetModuleFileNameA(*(HMODULE*)&module_id, p, static_cast<UINT>(p.capacity())));
 
-	if (len+1 == p.capacity() && GetLastError())
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(len+1 != p.capacity() || GetLastError() == S_OK, std::errc::no_buffer_space, "");
 
 	return path_t(p);
 }
@@ -265,8 +262,7 @@ info get_info(const path_t& path)
 
 	UINT nLanguages = LCPSize / sizeof(LANGANDCODEPAGE);
 	
-	if (nLanguages != 1)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("There are %u languages in the file. Currently we assume 1: English", nLanguages));
+	oCheck(nLanguages == 1, std::errc::protocol_error, "There are %u languages in the file. Currently we assume 1: English", nLanguages);
 
 	struct MAPPING
 	{

@@ -2,7 +2,6 @@
 
 #include <oCore/byte.h>
 #include <oCore/finally.h>
-#include <oCore/stringf.h>
 #include <oString/argtok.h>
 #include <oSystem/windows/win_util.h>
 #include "d3d_compile.h"
@@ -37,8 +36,7 @@ static void d3dcompile_convert_error_buffer(char* _OutErrorMessageString, size_t
 {
 	const char* msg = (const char*)_pErrorMessages->GetBufferPointer();
 
-	if (!_OutErrorMessageString)
-		throw std::invalid_argument("");
+	oCheck(_OutErrorMessageString, std::errc::invalid_argument, "");
 
 	if (_pErrorMessages)
 	{
@@ -231,8 +229,7 @@ blob compile_shader(const char* _CommandLineOptions, const path_t& _ShaderSource
 		}
 	}
 
-	if (UnsupportedOptionsEmptyLen != UnsupportedOptions.size())
-		throw std::invalid_argument(UnsupportedOptions.c_str());
+	oCheck(UnsupportedOptionsEmptyLen == UnsupportedOptions.size(), std::errc::invalid_argument, "%s", UnsupportedOptions.c_str());
 
 	std::vector<D3D_SHADER_MACRO> Macros;
 	Macros.resize(Defines.size() + 1);
@@ -271,7 +268,8 @@ blob compile_shader(const char* _CommandLineOptions, const path_t& _ShaderSource
 
 		std::unique_ptr<char[]> Errs(new char[size]);
 		d3dcompile_convert_error_buffer(Errs.get(), size, Errors, IncludePaths.data(), IncludePaths.size());
-		throw std::system_error(std::errc::io_error, std::system_category(), std::string("shader compilation error:\n") + Errs.get());
+		
+		oThrow(std::errc::io_error, "shader compilation error:\n%s", Errs.get());
 	}
 
 	void* buffer = _Allocator.allocate(Code->GetBufferSize(), "compile_shader");
@@ -304,7 +302,7 @@ const char* shader_profile(D3D_FEATURE_LEVEL level, const stage_binding::flag& s
 		case D3D_FEATURE_LEVEL_10_0: profiles = sDX10Profiles; break;
 		case D3D_FEATURE_LEVEL_10_1: profiles = sDX10_1Profiles; break;
 		case D3D_FEATURE_LEVEL_11_0: profiles = sDX11Profiles; break;
-		default: throw std::invalid_argument(stringf("unexpected D3D_FEATURE_LEVEL %d", level));
+		default: oThrow(std::errc::invalid_argument, "unexpected D3D_FEATURE_LEVEL %d", level);
 	}
 
 	// go from mask to integer... 1? 2?
@@ -314,7 +312,7 @@ const char* shader_profile(D3D_FEATURE_LEVEL level, const stage_binding::flag& s
 	{
 		version_t ver = version_t((level>>12) & 0xffff, (level>>8) & 0xffff);
 		char str_ver[64];
-		throw std::system_error(std::errc::not_supported, std::system_category(), std::string("Shader profile does not exist for D3D") + to_string(str_ver, ver) + "'s stage " + as_string(stage_binding));
+		oThrow(std::errc::not_supported, "Shader profile does not exist for D3D%s's stage %s", to_string(str_ver, ver), as_string(stage_binding));
 	}
 
 	return profile;

@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oMath/projection.h>
 #include <oMath/matrix.h>
 #include <oMath/primitive.h>
@@ -65,10 +64,10 @@ private:
 static derived_vertex_data_t derive_data(const allocator& alloc, const derive_flags& derive, const source_vertex_data_t& src)
 {
 	if (!derive.normals && derive.tangents)
-		throw std::invalid_argument("tangents require normals");
+		oThrow(std::errc::invalid_argument, "tangents require normals");
 
 	if (!src.texcoords && derive.tangents)
-		throw std::invalid_argument("tangents require texcoords");
+		oThrow(std::errc::invalid_argument, "tangents require texcoords");
 
 	// accumulate memory for the desired derived data
 	const size_t normals_bytes  = sizeof(float3)   * src.num_vertices;
@@ -375,11 +374,8 @@ model sphere(const allocator& alloc, const allocator& tmp, const face_type& type
 	if (platonic.nadir >= 0) primitive::fix_polar_seam(platonic.nadir, mesh.indices, platonic.nindices, mesh.positions, mesh.texcoords, nverts);
 
 	// check that everything stayed within calculated budgets
-	if (nindices > subdivided.nindices)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("more indices calculated than anticipated (%u > %u max)", nindices, subdivided.nindices));
-
-	if (nverts > subdivided.nvertices)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("more vertices calculated than anticipated (%u > %u max)", nverts, subdivided.nvertices));
+	oCheck(nindices <= subdivided.nindices, std::errc::no_buffer_space, "more indices calculated than anticipated (%u > %u max)", nindices, subdivided.nindices);
+	oCheck(nverts <= subdivided.nvertices, std::errc::no_buffer_space, "more vertices calculated than anticipated (%u > %u max)", nverts, subdivided.nvertices);
 
 	blob lines;
 	if (type == face_type::outline)

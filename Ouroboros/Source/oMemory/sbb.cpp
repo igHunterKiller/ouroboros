@@ -1,10 +1,11 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oMemory/sbb.h>
 #include <oCore/cbtree.h>
 #include <stdexcept>
 
-#define SBB_FATAL(msg) throw std::invalid_argument(msg)
+#define SBB_FATAL(msg) oThrow(std::errc::invalid_argument, msg)
 #define SBB_MAX(x,y) ((x) > (y) ? (x) : (y))
 #define SBB_ALIGNED(x,align) (((((uintptr_t)x) + (align) - 1) & ~(align-1)) == (uintptr_t)x)
 

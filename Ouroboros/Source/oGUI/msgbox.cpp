@@ -206,7 +206,7 @@ INT_PTR CALLBACK DLGAssert::WndProc(HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPAR
 {
 	//char desc[512];
 	//oGetWMDesc(desc, _hWnd, _uMsg, _wParam, _lParam);
-	//oTRACE("%s", desc);
+	//oTrace("%s", desc);
 
 	switch (_uMsg)
 	{
@@ -368,7 +368,7 @@ msg_result assert_dialog(msg_type _Type, const char* _Caption, const char* _Stri
 	if (int_ptr == -1)
 	{
 		std::string msg = windows::category().message(GetLastError());
-		oTRACE("DialogBoxIndirectParam failed. %s\n", msg.c_str());
+		oTrace("DialogBoxIndirectParam failed. %s\n", msg.c_str());
 		__debugbreak(); // debug msgbox called from oASSERTs, so don't recurse into it
 	}
 

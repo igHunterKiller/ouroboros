@@ -15,14 +15,14 @@ BITMAPINFOHEADER make_header(const surface::info_t& info, bool top_down)
 		case surface::format::r8_unorm:
 			break;
 		default:
-			throw std::invalid_argument("unsupported format");
+			oThrow(std::errc::invalid_argument, "unsupported format");
 	}
 
 	if (info.array_size != 0 || info.dimensions.z != 1)
-		throw std::invalid_argument("no support for 3D or array surfaces");
+		oThrow(std::errc::invalid_argument, "no support for 3D or array surfaces");
 
 	if (info.dimensions.x <= 0 || info.dimensions.y <= 0)
-		throw std::invalid_argument("invalid dimensions");
+		oThrow(std::errc::invalid_argument, "invalid dimensions");
 
 	BITMAPINFOHEADER h;
 	h.biSize = sizeof(BITMAPINFOHEADER);
@@ -108,7 +108,7 @@ scoped_bitmap make_bitmap(const surface::image* img)
 	const auto& si = img->info();
 
 	if (si.format != ouro::surface::format::b8g8r8a8_unorm)
-		throw std::invalid_argument("only b8g8r8a8_unorm currently supported");
+		oThrow(std::errc::invalid_argument, "only b8g8r8a8_unorm currently supported");
 
 	surface::shared_lock lock(img);
 	return CreateBitmap(si.dimensions.x, si.dimensions.y, 1, 32, lock.mapped.data);
@@ -133,9 +133,9 @@ void memcpy2d(void* _pDestination, size_t _DestinationPitch, HBITMAP _hBmp, size
 	{
 		int nScanlinesRead = GetDIBits(hDC, _hBmp, static_cast<unsigned int>(_FlipVertically ? (_NumRows - 1 - y) : y), 1, (uint8_t*)_pDestination + y * _DestinationPitch, (BITMAPINFO*)&bmif, DIB_RGB_COLORS);
 		if (nScanlinesRead == ERROR_INVALID_PARAMETER)
-			throw std::invalid_argument("invalid argument passed to GetDIBtis");
+			oThrow(std::errc::invalid_argument, "invalid argument passed to GetDIBtis");
 		else if (!nScanlinesRead)
-			throw std::system_error(std::errc::io_error, std::system_category(), "GetDIBits failed");
+			oThrow(std::errc::io_error, "GetDIBits failed");
 	}
 }
 
@@ -143,7 +143,7 @@ void draw_bitmap(HDC _hDC, int _X, int _Y, HBITMAP _hBitmap, DWORD _dwROP)
 {
 	BITMAP Bitmap;
 	if (!_hDC || !_hBitmap)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 	GetObject(_hBitmap, sizeof(BITMAP), (LPSTR)&Bitmap);
 	scoped_compat hDCBitmap(_hDC);
 	scoped_select sel(hDCBitmap, _hBitmap);
@@ -154,7 +154,7 @@ void stretch_bitmap(HDC _hDC, int _X, int _Y, int _Width, int _Height, HBITMAP _
 {
 	BITMAP Bitmap;
 	if (!_hDC || !_hBitmap)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 	GetObject(_hBitmap, sizeof(BITMAP), (LPSTR)&Bitmap);
 	scoped_compat hDCBitmap(_hDC);
 	scoped_select sel(hDCBitmap, _hBitmap);
@@ -166,7 +166,7 @@ void stretch_blend_bitmap(HDC _hDC, int _X, int _Y, int _Width, int _Height, HBI
 	static const BLENDFUNCTION kBlend = { AC_SRC_OVER, 0, 255, AC_SRC_ALPHA };
 	BITMAP Bitmap;
 	if (!_hDC || !_hBitmap)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 	GetObject(_hBitmap, sizeof(BITMAP), (LPSTR)&Bitmap);
 	scoped_compat hDCBitmap(_hDC);
 	scoped_select sel(hDCBitmap, _hBitmap);

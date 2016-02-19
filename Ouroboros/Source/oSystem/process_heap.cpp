@@ -282,7 +282,7 @@ bool context::find_or_allocate(size_t _Size
 	, void** _pPointer)
 {
 	if (!_Size || !_pPointer)
-		throw std::invalid_argument("invalid argument");
+		oThrow(std::errc::invalid_argument, "invalid argument");
 	size_t h = hash(_Name, _Scope);
 	bool Allocated = false;
 	bool CallCtor = false;
@@ -340,7 +340,7 @@ bool context::find_or_allocate(size_t _Size
 bool context::find(const char* _Name, scope _Scope, void** _pPointer)
 {
 	if (!_Name || !_pPointer)
-		throw std::invalid_argument("invalid argument");
+		oThrow(std::errc::invalid_argument, "invalid argument");
 	*_pPointer = nullptr;
 	size_t h = hash(_Name, _Scope);
 	lock_guard<recursive_mutex> lock(Mutex);
@@ -434,10 +434,8 @@ context& context::singleton()
 		HANDLE hMappedFile = CreateFileMapping(INVALID_HANDLE_VALUE, 0
 			, PAGE_READWRITE, 0, sizeof(context::mapped_file), MappedFilename);
 
-		if (!hMappedFile)
-			throw std::system_error(std::errc::io_error, std::system_category(), std::string("could not create process_heap memory mapped file ") + MappedFilename.c_str());
-		context::mapped_file* file = 
-			(context::mapped_file*)MapViewOfFile(hMappedFile, FILE_MAP_WRITE, 0, 0, 0);
+		oCheck(hMappedFile, std::errc::io_error, "could not create process_heap memory mapped file %s", MappedFilename.c_str());
+		context::mapped_file* file = (context::mapped_file*)MapViewOfFile(hMappedFile, FILE_MAP_WRITE, 0, 0, 0);
 
 		if (hMappedFile && GetLastError() == ERROR_ALREADY_EXISTS)
 		{
@@ -460,8 +458,7 @@ context& context::singleton()
 				VirtualAllocEx(GetCurrentProcess(), 0, sizeof(context)
 				, MEM_COMMIT|MEM_RESERVE|MEM_TOP_DOWN, PAGE_EXECUTE_READWRITE));
 			
-			if (!sInstance)
-				throw std::system_error(std::errc::no_buffer_space, std::system_category(), "process_heap VirtualAllocEx failed");
+			oCheck(sInstance, std::errc::no_buffer_space, "process_heap VirtualAllocEx failed");
 
 			new (sInstance) context();
 

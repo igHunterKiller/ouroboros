@@ -30,8 +30,8 @@ const char* as_string(const assert_type& type)
 
 void report_and_exit()
 {
-	oTRACEA("std::terminate called");
-	oASSERT(false, "std::terminate called");
+	oTraceA("std::terminate called");
+	oAssert(false, "std::terminate called");
 }
 
 void emit_debugger(const assert_context& ctx, const char* msg)
@@ -207,7 +207,7 @@ assert_action context::vformatf(const assert_context& ctx
 
 	if (ctx.type == assert_type::assertion)
 	{
-		oTRACE("%s (%i): %s", ctx.filename, ctx.line, msg);
+		oTrace("%s (%i): %s", ctx.filename, ctx.line, msg);
 		if (!this_process::has_debugger_attached())
 			debugger::dump_and_terminate(nullptr, nullptr);
 	}

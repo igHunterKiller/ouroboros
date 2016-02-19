@@ -113,9 +113,8 @@ path_t app_path(bool include_filename)
 	DWORD len = GetModuleFileNameA(GetModuleHandle(nullptr), Path, countof(Path));
 	if (!len)
 	{
-		if (GetLastError() == ERROR_INSUFFICIENT_BUFFER)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category());
+		oCheck(GetLastError() != ERROR_INSUFFICIENT_BUFFER, std::errc::no_buffer_space, "");
+		oThrow(std::errc::operation_not_permitted, "");
 	}
 
 	if (!include_filename)
@@ -123,8 +122,7 @@ path_t app_path(bool include_filename)
 		char* p = Path + len - 1;
 		while (*p != '\\' && p >= Path)
 			p--;
-		if (p < Path)
-			throw std::system_error(std::errc::operation_not_permitted, std::system_category());
+		oCheck(p >= Path, std::errc::operation_not_permitted, "");
 		*(++p) = '\0';
 	}
 
@@ -134,8 +132,7 @@ path_t app_path(bool include_filename)
 path_t temp_path(bool include_filename)
 {
 	char Path[MAX_PATH+1];
-	if (!GetTempPathA(countof(Path), Path))
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category());
+	oCheck(GetTempPathA(countof(Path), Path), std::errc::operation_not_permitted, "");
 	oVB(!include_filename || !GetTempFileNameA(Path, "tmp", 0, Path));
 	return Path;
 }
@@ -174,10 +171,8 @@ path_t log_path(bool include_filename, const char* exe_suffix)
 path_t desktop_path()
 {
 	char Path[MAX_PATH];
-	if (!SHGetSpecialFolderPathA(nullptr, Path, CSIDL_DESKTOPDIRECTORY/*CSIDL_COMMON_DESKTOPDIRECTORY*/, FALSE))
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category());
-	if (strlcat(Path, "\\") >= countof(Path))
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(SHGetSpecialFolderPathA(nullptr, Path, CSIDL_DESKTOPDIRECTORY/*CSIDL_COMMON_DESKTOPDIRECTORY*/, FALSE), std::errc::operation_not_permitted, "");
+	oCheck(strlcat(Path, "\\") < countof(Path), std::errc::no_buffer_space, "");
 	return Path;
 }
 
@@ -185,10 +180,8 @@ path_t system_path()
 {
 	char Path[MAX_PATH];
 	UINT len = GetSystemDirectoryA(Path, countof(Path));
-	if (!len)
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category());
-	if (len > (MAX_PATH-2))
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(len, std::errc::operation_not_permitted, "");
+	oCheck(len <= (MAX_PATH-2), std::errc::no_buffer_space, "");
 	Path[len] = '\\';
 	Path[len+1] = '\0';
 	return Path;
@@ -198,10 +191,8 @@ path_t os_path()
 {
 	char Path[MAX_PATH];
 	UINT len = GetWindowsDirectoryA(Path, countof(Path));
-	if (!len)
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category());
-	if (len > (MAX_PATH-2))
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(len, std::errc::operation_not_permitted, "");
+	oCheck(len <= (MAX_PATH-2), std::errc::no_buffer_space, "");
 	Path[len] = '\\';
 	Path[len+1] = '\0';
 	return Path;
@@ -216,8 +207,7 @@ path_t dev_path()
 		if (!_stricmp("bin", leaf))
 			return Root.remove_filename();
 		Root.remove_filename();
-		if (Root.empty())
-			throw std::system_error(std::errc::no_such_file_or_directory, std::system_category());
+		oCheck(!Root.empty(), std::errc::no_such_file_or_directory, "");
 	} while (!Root.empty());
 }
 
@@ -234,8 +224,7 @@ path_t data_path()
 path_t current_path()
 {
 	char Path[MAX_PATH];
-	if (!GetCurrentDirectoryA(countof(Path), Path))
-		throw std::system_error(std::errc::operation_not_permitted, std::system_category());
+	oCheck(GetCurrentDirectoryA(countof(Path), Path), std::errc::operation_not_permitted, "");
 	
 	return Path;
 }
@@ -673,8 +662,7 @@ path_t get_path(file_handle hfile)
 void last_write_time(file_handle hfile, time_t time)
 {
 	HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(hfile));
-	if (hFile == INVALID_HANDLE_VALUE)
-		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category());
+	oCheck(hFile != INVALID_HANDLE_VALUE, std::errc::no_such_file_or_directory, "");
 	FILETIME ftime = date_cast<FILETIME>(time);
 	oVB(SetFileTime(hFile, 0, 0, &ftime));
 }
@@ -688,8 +676,7 @@ void seek(file_handle hfile, int64_t offset, seek_origin origin)
 uint64_t file_size(file_handle hfile)
 {
 	HANDLE hFile = (HANDLE)_get_osfhandle(_fileno(hfile));
-	if (hFile == INVALID_HANDLE_VALUE)
-		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category());
+	oCheck(hFile != INVALID_HANDLE_VALUE, std::errc::no_such_file_or_directory, "");
 	
 	#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		FILE_STANDARD_INFO fsi;
@@ -766,7 +753,7 @@ blob load(const path_t& path, load_option opt, const allocator& alloc)
 		file_handle f = open(path, opt == load_option::text_read ? open_option::text_read : open_option::binary_read);
 		oFinally { close(f); };
 		if (FileSize != read(f, p, AllocSize, FileSize) && opt == load_option::binary_read)
-			throw std::system_error(std::errc::io_error, std::system_category(), std::string("read failed: ") + path.c_str());
+			oThrow(std::errc::io_error, "read failed: %s", path.c_str());
 	}
 
 	// record honest size (tools like FXC crash if any larger size is given)
@@ -843,7 +830,7 @@ static void iocp_close(iocp_file* f, uint64_t unused = 0)
 		if (f->error_code)
 		{
 			windows::error winerr(f->error_code);
-			oASSERT(f->file_size == f->buffer.size(), "size mismatch");
+			oAssert(f->file_size == f->buffer.size(), "size mismatch");
 			f->completion(std::ref(f->file_path), std::ref(f->buffer), &winerr, f->user);
 		}
 		else
@@ -1005,7 +992,7 @@ void load_async(const path_t& path, completion_fn on_complete, void* user, load_
 void save_async(const path_t& path, blob&& buffer, completion_fn on_complete, void* user, save_option opt)
 {
 	if (opt != save_option::binary_write && opt != save_option::binary_append)
-		throw std::invalid_argument("only binary_write and binary_append is currently supported");
+		oThrow(std::errc::invalid_argument, "only binary_write and binary_append is currently supported");
 
 	iocp_file* r = new iocp_file(path, allocator(), on_complete, user);
 	r->buffer = std::move(buffer);
@@ -1029,8 +1016,7 @@ bool joinable()
 
 void join()
 {
-	if (!joinable())
-		std::system_error(std::errc::invalid_argument, std::system_category());
+	oCheck(joinable(), std::errc::invalid_argument, "");
 	if (windows::iocp::joinable())
 		windows::iocp::join();
 }

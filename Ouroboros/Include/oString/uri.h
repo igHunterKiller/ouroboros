@@ -390,7 +390,7 @@ private:
 		std::match_results<const char_type*> matches;
 		std::regex_search(uri_.c_str(), matches, reURI);
 		if (matches.empty())
-			throw std::invalid_argument("invalid basic_uri_t");
+			oThrow(std::errc::invalid_argument, "invalid basic_uri_t");
 
 		// apply good practices from http://www.textuality.com/tag/uri-comp-2.html
 		bool hadprefix = matches[2].matched || matches[4].matched;

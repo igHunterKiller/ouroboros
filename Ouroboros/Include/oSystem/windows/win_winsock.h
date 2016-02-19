@@ -19,8 +19,8 @@
 #include <Ws2tcpip.h>
 #include <atomic>
 
-#define oWSATHROW(_WSAErr, _Message, ...) do { throw std::system_error(ouro::windows::winsock::get_errc(_WSAErr), std::system_category(), stringf(_Message, ## __VA_ARGS__)); } while(false)
-#define oWSATHROW0(_WSAErr) do { throw std::system_error(ouro::windows::winsock::get_errc(_WSAErr), std::system_category()); } while(false)
+#define oWSATHROW(_WSAErr, _Message, ...) do { oThrow(ouro::windows::winsock::get_errc(_WSAErr), _Message, ## __VA_ARGS__); } while(false)
+#define oWSATHROW0(_WSAErr) do { oThrow(ouro::windows::winsock::get_errc(_WSAErr), ""); } while(false)
 #define oWSAVB(_Expression) do { if (SOCKET_ERROR == (_Expression)) oWSATHROW(WSAGetLastError(), "%s", #_Expression); } while(false)
 #define oWSAVBE(_Expression, _ExceptForResult) do { if (SOCKET_ERROR == (_Expression) && _ExceptForResult != WSAGetLastError()) oWSATHROW(WSAGetLastError(), "%s", #_Expression); } while(false)
 #define oWSATHROWLAST() do { oWSATHROW0(WSAGetLastError()); } while(false)

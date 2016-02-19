@@ -38,7 +38,7 @@ static bool exercise_all_threads(ouro::unit_test::services& services)
 static bool fail_and_report()
 {
 	if (1)
-		throw std::invalid_argument("fail_and_report throw, this should have been caught");
+		oThrow(std::errc::invalid_argument, "fail_and_report throw, this should have been caught");
 	return false;
 }
 

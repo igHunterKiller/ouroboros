@@ -415,7 +415,7 @@ static void handle_exception(const char* _ErrorMessage
 	{
 		#ifdef _DEBUG
 			oASSERT_TRACE(assertion, abort, "", "%s", _ErrorMessage);
-			oASSERT(false, "%s", _ErrorMessage);
+			oAssert(false, "%s", _ErrorMessage);
 		#else
 			debugger::dump_and_terminate((void*)_ExceptionContext, _ErrorMessage);
 		#endif

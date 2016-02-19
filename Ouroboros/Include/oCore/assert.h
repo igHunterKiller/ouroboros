@@ -1,9 +1,12 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-// support for oASSERT and oTRACE debugging macros. These evaluate to a single
-// externally defined ouro::vtracef to be defined by a system implementation.
+// instrumentation for debugging: assert and trace macros evaluate to an ouro::vtracef
+// call, which must be implemented by the user.
 
 #pragma once
+
+#include <oCore/stringf.h> // To make exceptions more printf-like
+#include <system_error>
 
 // _____________________________________________________________________________
 // Configuration: Define these macros to control what checks are done.
@@ -54,7 +57,7 @@
 
 namespace ouro {
 
-	enum class assert_type   : unsigned short { trace, assertion };
+	enum class assert_type   : unsigned short { trace, assertion, exception };
 	enum class assert_action : unsigned short { abort, debug, ignore, ignore_always };
 
 	struct assert_context
@@ -92,32 +95,38 @@ namespace ouro {
 // Always-macros (debug or release)
 
 #if oHAS_oASSERTA == 1 || oHAS_oASSERT == 1
-	#define oASSERTA(expr, format, ...) do { if (!(expr)) { oASSERT_TRACE(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
+	#define oAssertA(expr, format, ...) do { if (!(expr)) { oASSERT_TRACE(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
 #else
-	#define oASSERTA(format, ...) do {} while(false)
+	#define oAssertA(format, ...) do {} while(false)
 #endif
 
 #if oHAS_oTRACEA == 1 || oHAS_oTRACE == 1
-	#define oTRACEA(format, ...)      oASSERT_TRACE(trace, ignore,        "", format, ## __VA_ARGS__)
-	#define oTRACEA_ONCE(format, ...) oASSERT_TRACE(trace, ignore_always, "", format, ## __VA_ARGS__)
+	#define oTraceA(format, ...)     oASSERT_TRACE(trace, ignore,        "", format, ## __VA_ARGS__)
+	#define oTraceOnceA(format, ...) oASSERT_TRACE(trace, ignore_always, "", format, ## __VA_ARGS__)
 #else
-	#define oTRACEA(format, ...)      do {} while(false)
-	#define oTRACEA_ONCE(format, ...) do {} while(false)
+	#define oTraceA(format, ...)     do {} while(false)
+	#define oTraceOnceA(format, ...) do {} while(false)
 #endif
 
 // _____________________________________________________________________________
 // Debug-only macros
 
 #if oHAS_oASSERT == 1
-	#define oASSERT(expr, format, ...) do { if (!(expr)) { oASSERT_TRACE(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
+	#define oAssert(expr, format, ...) do { if (!(expr)) { oASSERT_TRACE(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
 #else
-	#define oASSERT(format, ...) do {} while(false)
+	#define oAssert(format, ...) do {} while(false)
 #endif
 
 #if oHAS_oTRACE == 1
-	#define oTRACE(format, ...)      oASSERT_TRACE(trace, ignore,        "", format, ## __VA_ARGS__)
-	#define oTRACE_ONCE(format, ...) oASSERT_TRACE(trace, ignore_always, "", format, ## __VA_ARGS__)
+	#define oTrace(format, ...)     oASSERT_TRACE(trace, ignore,        "", format, ## __VA_ARGS__)
+	#define oTraceOnce(format, ...) oASSERT_TRACE(trace, ignore_always, "", format, ## __VA_ARGS__)
 #else
-	#define oTRACE(format, ...)      do {} while(false)
-	#define oTRACE_ONCE(format, ...) do {} while(false)
+	#define oTrace(format, ...)     do {} while(false)
+	#define oTraceOnce(format, ...) do {} while(false)
 #endif
+
+// _____________________________________________________________________________
+// Throwing
+
+#define oThrow(std_errc, format, ...) do { auto errc__ = std::make_error_code(std_errc); if (*format == '\0') throw std::system_error(errc__); else throw std::system_error(errc__, ouro::stringf(format, ## __VA_ARGS__)); } while(false)
+#define oCheck(expr, std_errc, format, ...) do { if (!(expr)) { oThrow(std_errc, format, ## __VA_ARGS__); } } while(false)

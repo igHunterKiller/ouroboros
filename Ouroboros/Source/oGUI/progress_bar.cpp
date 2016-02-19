@@ -205,7 +205,7 @@ void progress_bar_impl::set_textv(const char* _Format, va_list _Args)
 	if (-1 == vsnprintf(s, _Format, _Args))
 	{
 		ellipsize(s);
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	}
 	Window->dispatch([=] { oWinControlSetText(get(PB_TEXT), s.c_str()); });
 }
@@ -216,7 +216,7 @@ void progress_bar_impl::set_subtextv(const char* _Format, va_list _Args)
 	if (-1 == vsnprintf(s, _Format, _Args))
 	{
 		ellipsize(s);
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	}
 	Window->dispatch([=] { oWinControlSetText(get(PB_SUBTEXT), s.c_str()); });
 }

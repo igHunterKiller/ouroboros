@@ -2,8 +2,8 @@
 
 #include "gpu_pipeline_state.h"
 #include "gpu_fixed_state.h"
+#include <oCore/assert.h>
 #include <oCore/countof.h>
-#include <oCore/stringf.h>
 
 #include <VSpos_col.h>
 #include <PSvertex_color.h>
@@ -33,8 +33,7 @@ pipeline_state_desc get_pipeline_state_desc(const pipeline_state& state)
 		pipeline_state_desc(VSpos_col, PSvertex_color, mesh::basic::pos_col, basic::opaque, basic::two_sided, basic::depth_test_and_write, primitive_type::line),
 	};
 	match_array_e(s_state, pipeline_state);
-	if (state < pipeline_state::unknown || state >= pipeline_state::count)
-		throw std::out_of_range(stringf("invalid state %d", (int)state));
+	oCheck(state >= pipeline_state::unknown && state < pipeline_state::count, std::errc::invalid_argument, "invalid state %d", (int)state);
 	return s_state[(int)state];
 }
 

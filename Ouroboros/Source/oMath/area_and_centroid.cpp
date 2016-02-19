@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oMath/area_and_centroid.h>
 #include <oMath/equal.h>
 #include <stdexcept>
@@ -12,8 +13,7 @@ float calcuate_area_and_centroid(float2* out_centroid, const float2* vertices, u
 	// ed. Paul S. Heckbert. pg 3-6. Academic Press, San Diego, 1994.
 
 	float area = 0.0f;
-	if (num_vertices < 3)
-		throw std::invalid_argument("must be at least 3 vertices");
+	oCheck(num_vertices < 3, std::errc::invalid_argument, "must be at least 3 vertices");
 
 	float atmp = 0.0f, xtmp = 0.0f, ytmp = 0.0f;
 	const float2* vj = vertices;

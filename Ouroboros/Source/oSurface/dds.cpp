@@ -159,7 +159,7 @@ info_t get_info_dds(const void* buffer, size_t size)
 		}
 
 		if (!bits(si.format))
-			throw std::invalid_argument("");
+			oThrow(std::errc::invalid_argument, "");
 	}
 
 	// There's no way to distinguish between a not-array and an array of size 1.
@@ -186,7 +186,7 @@ static void map_bits(const info_t& info, const void* oRESTRICT src_dds_buffer, s
 			subresources[subresource] = map_const_subresource(info, subresource, src_dds_buffer);
 
 			if (((uint8_t*)subresources[subresource].data + subresources[subresource].depth_pitch) > end)
-				throw std::invalid_argument("end of file");
+				oThrow(std::errc::invalid_argument, "end of file");
 		}
 	}
 }
@@ -200,8 +200,7 @@ blob encode_dds(const image& img, const allocator& file_alloc, const allocator& 
 {
 	const auto& info = img.info();
 
-	if (info.mip_layout != mip_layout::none && info.mip_layout != mip_layout::tight)
-		throw std::system_error(std::errc::not_supported, std::system_category(), "right and below mip layouts not supported");
+	oCheck(info.mip_layout == mip_layout::none || info.mip_layout == mip_layout::tight, std::errc::not_supported, "right and below mip layouts not supported");
 
 	const bool is3d = false; // how to specify? probably .z != 0...
 	const bool isbc = dds_is_block_compressed(to_dds_format(info.format));
@@ -262,7 +261,7 @@ image decode_dds(const void* buffer, size_t size, const allocator& texel_alloc, 
 	info_t info = get_info_dds(buffer, size);
 
 	if (info.format == format::unknown)
-		throw std::invalid_argument("invalid dds buffer");
+		oThrow(std::errc::invalid_argument, "invalid dds buffer");
 
 	bool source_has_mips = info.mips();
 	auto src_nmips = num_mips(info);

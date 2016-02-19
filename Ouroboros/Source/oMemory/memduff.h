@@ -3,6 +3,7 @@
 #ifndef oBase_memduff_h
 #define oBase_memduff_h
 
+#include <oCore/assert.h>
 #include <oMemory/memory.h>
 #include <stdexcept>
 
@@ -25,8 +26,8 @@ template<typename T> void init_duffs_device_pointers_const(
 	*pp_postfix = (int8_t*)align_down(end, sizeof(T));
 	*p_postfix_bytes = size_t((uint8_t*)end - (uint8_t*)*pp_postfix);
 
-	if (((char*)mem + bytes) != (char*)end) throw std::invalid_argument("end miscalculation");
-	if (((char*)mem + bytes) != ((char*)*pp_postfix + *p_postfix_bytes)) throw std::invalid_argument("postfix miscalculation");
+	if (((char*)mem + bytes) != (char*)end) oThrow(std::errc::invalid_argument, "end miscalculation");
+	if (((char*)mem + bytes) != ((char*)*pp_postfix + *p_postfix_bytes)) oThrow(std::errc::invalid_argument, "postfix miscalculation");
 }
 
 // (non-const) void* version

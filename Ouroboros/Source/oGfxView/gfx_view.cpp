@@ -120,7 +120,7 @@ void gfx_view::create_menus(const window::create_event& evt)
 	erh_.add               (                             menus_[ui::menu::view_camera_control], ui::menu_item::view_camera_control_first, ui::menu_item::view_camera_control_last, [=](int camera_control)
 	{
 		auto type = (camera_control::type_t)camera_control;
-		oTRACE("change to %s", as_string(type));
+		oTrace("change to %s", as_string(type));
 		app_win_->set_status_text(ui::statusbar::camera_type, as_string(type));
 		camera_control_.type(type);
 	});
@@ -417,7 +417,7 @@ void gfx_view::on_hotkey(const input_t& inp)
 		}
 
 		default:
-			oTRACE("Unhandled hotkey id = %d", inp.hotkey.id);
+			oTrace("Unhandled hotkey id = %d", inp.hotkey.id);
 			break;
 	}
 }
@@ -599,14 +599,14 @@ void gfx_view::update_scene_selection()
 
 		if (current_selected_)
 		{
-			oTRACE("Picked %u", current_selected_->uid());
+			oTrace("Picked %u", current_selected_->uid());
 			gizmo_.transform(current_selected_->world());
 			gizmo_.set_transform_callback(transform_pivot, current_selected_);
 		}
 
 		else
 		{
-			oTRACE("No pick");
+			oTrace("No pick");
 		}
 	}
 }

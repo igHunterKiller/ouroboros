@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include "obj_test.h"
+#include <oCore/assert.h>
 #include <oCore/countof.h>
 
 namespace ouro { namespace tests {
@@ -254,7 +255,7 @@ std::shared_ptr<obj_test> obj_test::make(which _Which)
 		default: break;
 	}
 
-	throw std::invalid_argument("invalid obj_test");
+	oThrow(std::errc::invalid_argument, "invalid obj_test");
 }
 
 }}

@@ -1,17 +1,16 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oSurface/surface.h>
-#include <oCore/stringf.h>
 #include <oMath/hlsl.h>
 #include <oString/stringize.h>
 #include <atomic>
 
 namespace ouro { namespace surface {
 
-#define oSURF_CHECK(expr, format, ...) do { if (!(expr))               throw std::invalid_argument(stringf(format, ## __VA_ARGS__ )); } while(false)
-#define oSURF_CHECK_DIM(f, dim)  if (dim        < min_dimensions(f).x) throw std::invalid_argument(stringf("invalid dimension: %u", dim));
-#define oSURF_CHECK_DIM2(f, dim) if (any(dim    < min_dimensions(f)))  throw std::invalid_argument(stringf("invalid dimensions: [%u,%u]", dim.x, dim.y));
-#define oSURF_CHECK_DIM3(f, dim) if (any(dim.xy < min_dimensions(f)))  throw std::invalid_argument(stringf("invalid dimensions: [%u,%u,%u]", dim.x, dim.y, dim.z));
+#define oSURF_CHECK(expr, format, ...) oCheck(expr, std::errc::invalid_argument, format, ## __VA_ARGS__ )
+#define oSURF_CHECK_DIM(f, dim)        oCheck(dim        >= min_dimensions(f).x, std::errc::invalid_argument, "invalid dimension: %u", dim);
+#define oSURF_CHECK_DIM2(f, dim)       oCheck(any(dim    >= min_dimensions(f)),  std::errc::invalid_argument, "invalid dimensions: [%u,%u]", dim.x, dim.y);
+#define oSURF_CHECK_DIM3(f, dim)       oCheck(any(dim.xy >= min_dimensions(f)),  std::errc::invalid_argument, "invalid dimensions: [%u,%u,%u]", dim.x, dim.y, dim.z);
 
 	} // namespace surface
 
@@ -169,7 +168,7 @@ uint32_t row_pitch(const info_t& info, uint32_t mip, uint32_t subsurface)
 {
 	const auto nmips = num_mips(info.mip_layout, info.dimensions);
 	if (nmips && mip >= nmips)
-		throw std::invalid_argument("invalid mip");
+		oThrow(std::errc::invalid_argument, "invalid mip");
 
 	switch (info.mip_layout)
 	{
@@ -199,7 +198,7 @@ uint32_t row_pitch(const info_t& info, uint32_t mip, uint32_t subsurface)
 				return mip0RowSize;
 		}
 
-		default: throw std::invalid_argument(stringf("unexpected mip_layout %d", info.mip_layout));
+		default: oThrow(std::errc::invalid_argument, "unexpected mip_layout %d", info.mip_layout);
 	}
 }
 
@@ -308,7 +307,7 @@ uint32_t offset(const info_t& info, uint32_t mip, uint32_t subsurface)
 {
 	const auto nmips = num_mips(info.mip_layout, info.dimensions);
 	if (nmips && mip >= nmips) 
-		throw std::invalid_argument("invalid mip");
+		oThrow(std::errc::invalid_argument, "invalid mip");
 
 	switch (info.mip_layout)
 	{
@@ -316,7 +315,7 @@ uint32_t offset(const info_t& info, uint32_t mip, uint32_t subsurface)
 		case mip_layout::tight: return offset_tight(info, mip, subsurface);
 		case mip_layout::below: return offset_below(info, mip, subsurface);
 		case mip_layout::right: return offset_right(info, mip, subsurface);
-		default: throw std::invalid_argument(stringf("unexpected mip_layout %d", info.mip_layout));
+		default: oThrow(std::errc::invalid_argument, "unexpected mip_layout %d", info.mip_layout);
 	}
 }
 
@@ -346,7 +345,7 @@ uint32_t slice_pitch(const info_t& info, uint32_t subsurface)
 			pitch = (((pitch + (mip0RowPitch - 1)) / mip0RowPitch) * mip0RowPitch);
 			break;
 		}
-		default: throw std::invalid_argument(stringf("unexpected mip_layout %d", info.mip_layout));
+		default: oThrow(std::errc::invalid_argument, "unexpected mip_layout %d", info.mip_layout);
 	}
 
 	return pitch;
@@ -421,7 +420,7 @@ uint2 slice_dimensions(const info_t& info, uint32_t subsurface)
 			}
 			return uint2(mip0dimensions.x + mip1dimensions.x, ::max(mip0height, mip1andUpHeight));
 		}
-		default: throw std::invalid_argument(stringf("unexpected mip_layout %d", info.mip_layout));
+		default: oThrow(std::errc::invalid_argument, "unexpected mip_layout %d", info.mip_layout);
 	}
 }
 

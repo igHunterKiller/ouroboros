@@ -21,7 +21,7 @@ void enum_radio_handler::add(menu_handle m, int first_item, int last_item, const
 	});
 
 	if (it != callbacks.end())
-		throw std::invalid_argument("The specified menu/range has already been registered or overlaps a previously registered range");
+		oThrow(std::errc::invalid_argument, "The specified menu/range has already been registered or overlaps a previously registered range");
 
 	callbacks.push_back(e);
 }

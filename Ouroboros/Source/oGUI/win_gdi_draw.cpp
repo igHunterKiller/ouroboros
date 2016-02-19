@@ -86,7 +86,7 @@ static void draw_text(HDC _hDC, const text_info& _Desc, const char* _Text, RECT*
 
 	if (!fg.a)
 	{
-		if (!bg.a) throw std::invalid_argument("");
+		if (!bg.a) oThrow(std::errc::invalid_argument, "");
 		fg.r = bg.r;
 		fg.g = bg.g;
 		fg.b = bg.b;
@@ -111,7 +111,7 @@ static void draw_text(HDC _hDC, const text_info& _Desc, const char* _Text, RECT*
 	if (forcedSingleLine || _Desc.single_line)
 	{
 		if (forcedSingleLine)
-			oTRACE_ONCE("GDI doesn't support multi-line, vertically aligned text. See DrawText docs for more details. http://msdn.microsoft.com/en-us/library/ms901121.aspx");
+			oTraceOnce("GDI doesn't support multi-line, vertically aligned text. See DrawText docs for more details. http://msdn.microsoft.com/en-us/library/ms901121.aspx");
 		uFormat &=~ DT_WORDBREAK;
 		uFormat |= DT_SINGLELINE;
 	}

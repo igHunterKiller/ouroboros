@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oMemory/pool.h>
 #include <oMemory/allocate.h>
 #include <stdexcept>
@@ -70,8 +71,7 @@ void pool::initialize(void* arena, size_type bytes, size_type block_size)
 	if (!arena)
 		throw allocate_error(allocate_errc::invalid_bookkeeping);
 
-	if (block_size < sizeof(index_type))
-		throw std::invalid_argument("block_size must be a minimum of 4 bytes");
+	oCheck(block_size >= sizeof(index_type), std::errc::invalid_argument, "block_size must be a minimum of 4 bytes");
 
 	const size_type capacity = calc_capacity(bytes, block_size);
 	if (!capacity || capacity > max_capacity())
@@ -111,7 +111,7 @@ pool::index_type pool::allocate_index()
 void pool::deallocate(index_type index)
 {
 	if (!owns(index))
-		throw std::invalid_argument("pool does not own the specified index or pointer");
+		oThrow(std::errc::invalid_argument, "pool does not own the specified index or pointer");
 	*(index_type*)pointer(index) = index_type(head_);
 	head_ = index;
 	nfree_++;

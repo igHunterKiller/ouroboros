@@ -12,11 +12,11 @@ using namespace ouro::windows::gdi;
 void oWinControlSet::Initialize(HWND _hParent, const int2& _ParentClientSize, const xml& _XML, const IDFROMSTRING& _IDFromString)
 {
 	if (!_hParent)
-		throw std::invalid_argument("A valid HWND must be specified as the parent");
+		oThrow(std::errc::invalid_argument, "A valid HWND must be specified as the parent");
 
 	xml::node hRoot = _XML.first_child(_XML.root(), "oUI");
 	if (!hRoot)
-		throw std::invalid_argument("XML root node \"oUI\" not found");
+		oThrow(std::errc::invalid_argument, "XML root node \"oUI\" not found");
 
 	fonts_t fonts;
 	CreateFontsSibling(_XML, &fonts);
@@ -53,17 +53,14 @@ void oWinControlSet::CreateFontsSibling(const xml& _XML, fonts_t* _pFonts)
 {
 	xml::node hRoot = _XML.first_child(_XML.root(), "oUI");
 	if (!hRoot)
-		throw std::invalid_argument("XML root node \"oUI\" not found");
+		oThrow(std::errc::invalid_argument, "XML root node \"oUI\" not found");
 
 	xml::node hChild = _XML.first_child(hRoot, "Font");
 	while (hChild)
 	{
 		const char* StrFont = _XML.find_attr_value(hChild, "Name");
-		if (!StrFont)
-			throw std::invalid_argument("Invalid or missing Name attribute in a Font node");
-
-		if (_pFonts->end() != _pFonts->find(StrFont))
-			throw std::invalid_argument(std::string("Font") + StrFont + " already defined");
+		oCheck(StrFont, std::errc::invalid_argument, "Invalid or missing Name attribute in a Font node");
+		oCheck(_pFonts->end() == _pFonts->find(StrFont), std::errc::invalid_argument, "Font %s already defined", StrFont);
 
 		ouro::font_info fd;
 		ParseFontDesc(_XML, hChild, &fd);
@@ -93,19 +90,19 @@ bool oWinControlSet::ParseControlDesc(const XML_CONTEXT& _XmlContext, const CONT
 
 	const char* StrID = _XmlContext.pXML->find_attr_value(_XmlContext.hNode, "ID");
 	if (!oSTRVALID(StrID))
-		throw std::invalid_argument("Invalid or missing ID attribute for the specified Control.");
+		oThrow(std::errc::invalid_argument, "Invalid or missing ID attribute for the specified Control.");
 
 	int ID = -1;
 	if (_ControlContext.IDFromString(&ID, StrID))
 		_pDesc->id = (uint16_t)ID;
 	else
-		throw std::invalid_argument(std::string("Undeclared ID ") + StrID + ". All IDs must be declared as an enum in code.");
+		oThrow(std::errc::invalid_argument, "Undeclared ID %s. All IDs must be declared as an enum in code.", StrID);
 
 	if (ID < (int)_Controls.size() && _Controls[ID])
-		throw std::invalid_argument(std::string("ID ") + StrID + " has already been used");
+		oThrow(std::errc::invalid_argument, "ID %s has already been used", StrID);
 
 	if (!_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Type", &_pDesc->type))
-		throw std::invalid_argument(std::string("Invalid or missing Type attribute for Control ") + StrID);
+		oThrow(std::errc::invalid_argument, "Invalid or missing Type attribute for Control %s", StrID);
 
 	_pDesc->text = oSAFESTR(_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Text"));
 	_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "StartsNewGroup", &_pDesc->starts_new_group); // allow this to default to false
@@ -114,15 +111,14 @@ bool oWinControlSet::ParseControlDesc(const XML_CONTEXT& _XmlContext, const CONT
 	if (StrFont)
 	{
 		auto it = _XmlContext.Fonts.find(StrFont);
-		if (it == _XmlContext.Fonts.end())
-			throw std::invalid_argument(std::string("Invalid or missing Font ") + StrFont + " defined in Control " + StrID);
+		oCheck(it != _XmlContext.Fonts.end(), std::errc::invalid_argument, "Invalid or missing Font %s defined in Control %s", StrFont, StrID);
 		_pDesc->font = (ouro::font_handle)it->second;
 	}
 
 	// Resolve size relative to parent/context
 	int2 ControlPos(0, 0);
 	if (!_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Pos", &ControlPos))
-		throw std::invalid_argument(std::string("Invalid or missing Pos attribute for Control ") + StrID);
+		oThrow(std::errc::invalid_argument, "Invalid or missing Pos attribute for Control %s", StrID);
 
 	int2 ControlSize(oDEFAULT, oDEFAULT);
 	_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Size", &ControlSize); // allow oDEFAULT to fall through if not specified
@@ -203,7 +199,7 @@ bool oWinControlSet::CreateControlsRecursive(const XML_CONTEXT& _XmlContext, con
 		if (!_stricmp("RefPoint", NodeName))
 		{
 			//#ifdef _DEBUG
-			//	oTRACE("<RefPoint Name=\"%s\" ... >", oSAFESTRN(_XmlContext.pXML->GetValue(_XmlContext.hNode, "Name")));
+			//	oTrace("<RefPoint Name=\"%s\" ... >", oSAFESTRN(_XmlContext.pXML->GetValue(_XmlContext.hNode, "Name")));
 			//#endif
 			  
 			if (_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Pos", &RelativePos))

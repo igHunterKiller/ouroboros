@@ -94,7 +94,7 @@ char* get(char* _StrDestination, size_t _SizeofStrDestination, hkey _hKey, const
 			break;
 
 		default:
-			throw std::system_error(std::errc::operation_not_supported, std::system_category());
+			oThrow(std::errc::operation_not_supported, "");
 	}
 
 	return _StrDestination;

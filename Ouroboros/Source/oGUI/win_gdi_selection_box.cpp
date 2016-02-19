@@ -35,7 +35,7 @@ const selection_box& selection_box::operator=(selection_box&& _That)
 void selection_box::set_info(const info& _Info)
 {
 	if (!_Info.hParent)
-		throw std::invalid_argument("A valid HWND for a parent window must be specified");
+		oThrow(std::errc::invalid_argument, "A valid HWND for a parent window must be specified");
 
 	if (Info.hParent != _Info.hParent)
 	{

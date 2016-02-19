@@ -110,7 +110,7 @@ public:
 
 	void ShowTab(int _TabIndex)
 	{
-		oASSERT(Window->is_window_thread(), "wrong thread");
+		oAssert(Window->is_window_thread(), "wrong thread");
 		oWinControlSelectSubItem(ControlSet[ID_TAB], _TabIndex);
 	}
 
@@ -241,7 +241,7 @@ oSystemProperties::oSystemProperties()
 			HWND hWnd = (HWND)Window->native_handle();
 			RECT rClient;
 			GetClientRect(hWnd, &rClient);
-			oASSERT(all(oWinRectSize(rClient) == i.shape.client_size), "Client size mismatch");
+			oAssert(all(oWinRectSize(rClient) == i.shape.client_size), "Client size mismatch");
 		#endif
 
 		// Disable anti-aliasing since on Windows ClearType seems to be non-deterministic

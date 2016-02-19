@@ -3,7 +3,6 @@
 #include "d3d_util.h"
 #include "dxgi_util.h"
 #include <oCore/bit.h>
-#include <oCore/stringf.h>
 #include <oCore/version.h>
 #include <oSystem/windows/win_util.h>
 #include <d3d11_1.h>
@@ -13,7 +12,7 @@ namespace ouro { namespace gpu { namespace d3d {
 ref<ID3D11Device> make_device(const device_init& init)
 {
 	if (init.api_version < version_t(9,0))
-		throw std::invalid_argument("must be D3D 9.0 or above");
+		oThrow(std::errc::invalid_argument, "must be D3D 9.0 or above");
 
 	ref<IDXGIAdapter> adapter;
 
@@ -54,9 +53,9 @@ ref<ID3D11Device> make_device(const device_init& init)
 	if (hr == 0x887a002d)
 	{
 		#if NTDDI_VERSION < NTDDI_WIN8
-			oTRACE("The DirectX SDK must be installed for driver-level debugging.");
+			oTrace("The DirectX SDK must be installed for driver-level debugging.");
 		#else
-			oTRACE("The Windows SDK must be installed for driver-level debugging.");
+			oTrace("The Windows SDK must be installed for driver-level debugging.");
 		#endif
 
 		flags &=~ D3D11_CREATE_DEVICE_DEBUG;
@@ -66,7 +65,7 @@ ref<ID3D11Device> make_device(const device_init& init)
 
 	if (hr == E_FAIL)
 	{
-		oTRACE("The first-chance _com_error exception above is because there is no debug layer present during the creation of a D3D device, trying again without debug");
+		oTrace("The first-chance _com_error exception above is because there is no debug layer present during the creation of a D3D device, trying again without debug");
 
 		flags &=~ D3D11_CREATE_DEVICE_DEBUG;
 		debug = false;
@@ -83,7 +82,7 @@ ref<ID3D11Device> make_device(const device_init& init)
 			, &feature_level
 			, nullptr));
 
-		oTRACE("Debug D3D11 not found: device created in non-debug mode so driver error reporting will not be available.");
+		oTrace("Debug D3D11 not found: device created in non-debug mode so driver error reporting will not be available.");
 	}
 	else
 		oV(hr);
@@ -92,7 +91,7 @@ ref<ID3D11Device> make_device(const device_init& init)
 	if (D3DVersion < init.api_version)
 	{
 		sstring strver;
-		throw std::system_error(std::errc::not_supported, std::system_category(), std::string("Failed to create an ID3D11Device with a minimum feature set of D3D ") + to_string(strver, init.api_version));
+		oThrow(std::errc::not_supported, "Failed to create an ID3D11Device with a minimum feature set of D3D %s", to_string(strver, init.api_version));
 	}
 
 	debug_name(d3d, oSAFESTRN(init.name));
@@ -302,7 +301,7 @@ ref<ID3D11Resource> make_cpu_copy(ID3D11Resource* src, bool do_copy, uint32_t* o
 		}
 
 		default:
-			throw std::invalid_argument("unknown resource type");
+			oThrow(std::errc::invalid_argument, "unknown resource type");
 	}
 
 	// set the debug name
@@ -330,15 +329,13 @@ ref<ID3D11Resource> make_cpu_copy(ID3D11Resource* src, bool do_copy, uint32_t* o
 
 surface::image make_snapshot(ID3D11Texture2D* tex, bool flip_vertically, const allocator& alloc)
 {
-	if (!tex)
-		throw std::invalid_argument("invalid texture");
+	oCheck(tex, std::errc::invalid_argument, "invalid texture");
 
 	ref<ID3D11Resource> copy = make_cpu_copy(tex);
 
 	D3D11_TEXTURE2D_DESC desc;
 	tex->GetDesc(&desc);
-	if (desc.Format == DXGI_FORMAT_UNKNOWN)
-		throw std::system_error(std::errc::not_supported, std::system_category(), std::string("The specified texture's format ") + as_string(desc.Format) + " is not supported by surface::image");
+	oCheck(desc.Format != DXGI_FORMAT_UNKNOWN, std::errc::not_supported, "The specified texture's format %s is not supported by surface::image", as_string(desc.Format));
 
 	surface::info_t si;
 	si.format = dxgi::to_surface_format(desc.Format);
@@ -416,8 +413,8 @@ ID3D11Buffer* fitted_cbuffer::best_fit(uint32_t num_structs) const
 		for (uint32_t i = 0, n = 1; i < num_cbuffers_; i++, n = calc_next_capacity(n))
 			if (n >= num_structs)
 				return (ID3D11Buffer*)cbuffers_[i].c_ptr();
-
-		throw std::out_of_range("too many structs requested");
+		
+		oThrow(std::errc::result_out_of_range, "too many structs requested");
 	}
 
 	return nullptr;
@@ -443,7 +440,7 @@ char* debug_name(char* dst, size_t dst_size, const ID3D11Device* dev)
 	if (CreationFlags & D3D11_CREATE_DEVICE_DEBUG)
 		oV(const_cast<ID3D11Device*>(dev)->GetPrivateData(WKPDID_D3DDebugObjectName, &size, dst));
 	else if (strlcpy(dst, "non-debug dev", dst_size) >= dst_size)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	return dst;
 }
 
@@ -477,7 +474,7 @@ char* debug_name(char* dst, size_t dst_size, const ID3D11DeviceChild* child)
 			oV(hr);
 	}
 	else if (strlcpy(dst, "non-debug dev child", dst_size) >= dst_size)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oThrow(std::errc::no_buffer_space, "");
 	return dst;
 }
 
@@ -485,8 +482,7 @@ int vtrace(ID3D11InfoQueue* iq, D3D11_MESSAGE_SEVERITY severity, const char* for
 {
 	xlstring buf;
 	int len = vsnprintf(buf, format, args);
-	if (len == -1)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category());
+	oCheck(len != -1, std::errc::no_buffer_space, "");
 	iq->AddApplicationMessage(severity, buf);
 	return len;
 }

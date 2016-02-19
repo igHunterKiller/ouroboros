@@ -1,7 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oCore/color.h>
-#include <oCore/stringf.h>
 #include <oSurface/convert.h>
 #include <oMath/hlslx.h>
 #include <oMath/quantize.h>
@@ -9,7 +8,7 @@
 #include <oString/stringize.h>
 #include <ispc_texcomp.h>
 
-#define oSURF_CHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(stringf(format, ## __VA_ARGS__)); } while(false)
+#define oSURF_CHECK(expr, format, ...) oCheck(expr, std::errc::invalid_argument, format, ## __VA_ARGS__)
 
 namespace ouro { namespace surface {
 
@@ -442,7 +441,7 @@ static elcpy_fn select(format src_format, format dst_format)
 		default: break;
 	}
 
-	throw std::system_error(std::errc::not_supported, std::system_category(), as_string(src_format) + std::string(" -> ") + as_string(dst_format) + " not supported");
+	oThrow(std::errc::not_supported, "%s -> %s not supported", as_string(src_format), as_string(dst_format));
 	#undef CASE
 	#undef CASE_
 }
@@ -514,7 +513,7 @@ void convert_formatted_bc(const mapped_subresource& dst, const format& dst_forma
 			}
 
 			default:
-				throw std::system_error(std::errc::not_supported, std::system_category(), std::string("unsupported block compression format ") + as_string(dst_format));
+				oThrow(std::errc::not_supported, "unsupported block compression format %s", as_string(dst_format));
 		}
 	}
 }
@@ -580,7 +579,7 @@ void convert_formatted(const mapped_subresource& dst, const format& dst_format
 void convert_structured(void* oRESTRICT dst, uint32_t dst_elem_pitch, const format& dst_format, const void* oRESTRICT src, uint32_t src_elem_pitch, const format& src_format, uint32_t num_elements)
 {
 	if (is_block_compressed(dst_format) || is_block_compressed(src_format))
-		throw std::invalid_argument("block compressed formats not supported when copying elements");
+		oThrow(std::errc::invalid_argument, "block compressed formats not supported when copying elements");
 
 	if (dst_format == src_format)
 	{
@@ -633,7 +632,8 @@ swizzle_fn select_swizzle(format src_format, format dst_format)
 		CASE(b8g8r8a8_unorm, r8g8b8a8_unorm): return (swizzle_fn)sw_red_blue;
 		default: break;
 	}
-	throw std::system_error(std::errc::not_supported, std::system_category(), as_string(src_format) + std::string(" -> ") + as_string(dst_format) + " swizzle not supported");
+
+	oThrow(std::errc::not_supported, "%s -> %s swizzle not supported", as_string(src_format), as_string(dst_format));
 	#undef CASE
 	#undef CASE_
 }

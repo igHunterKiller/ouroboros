@@ -3,8 +3,8 @@
 // unit test framework
 
 #pragma once
+#include <oCore/assert.h>
 #include <oCore/blob.h>
-#include <oCore/stringf.h>
 #include <oCore/filter_chain.h> // unit_test needs to operate without this. Only needed by infrastructure, not in-each-unit-test header.
 #include <cstdarg>
 #include <cstdint>
@@ -37,9 +37,8 @@ oTEST(my_test)
 // Error handling and checking
 
 // Use these to simplify test, but any exception can be thrown on error in a test
-#define oCHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(stringf(format, ## __VA_ARGS__)); } while(false)
-#define oCHECK0(expr) do { if (!(expr)) throw std::invalid_argument(""); } while(false)
-
+#define oCHECK(expr, format, ...) oCheck(expr, std::errc::invalid_argument, format, ## __VA_ARGS__)
+#define oCHECK0(expr) oCheck(expr, std::errc::invalid_argument, "")
 
 namespace ouro { namespace surface { class image; } namespace unit_test {
 

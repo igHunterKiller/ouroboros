@@ -254,7 +254,7 @@ void tex_view::open_file_dialog()
 void tex_view::open_file(const path_t& p)
 {
 	if (!app_win_->is_window_thread())
-		throw std::invalid_argument("this should run on the UI thread");
+		oThrow(std::errc::invalid_argument, "this should run on the UI thread");
 
 	if (surface::file_format::unknown == surface::get_file_format(p))
 	{
@@ -442,7 +442,7 @@ void tex_view::on_hotkey(const input_t& inp)
 void tex_view::refresh()
 {
 	if (!gpu_win_->is_window_thread())
-		throw std::invalid_argument("must execute on main thread");
+		oThrow(std::errc::invalid_argument, "must execute on main thread");
 
 	auto cl = dev_->immediate();
 	cl->set_rtv(dev_->get_presentation_rtv());

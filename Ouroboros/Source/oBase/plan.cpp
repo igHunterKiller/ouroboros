@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oBase/plan.h>
 #include <algorithm>
 #include <stdexcept>
@@ -71,7 +72,7 @@ uint32_t master_tasklist::calc_size(uint32_t max_num_tasklists)
 void master_tasklist::initialize(ouro::plan* p, void* memory, uint32_t max_num_tasklists)
 {
 	if (!aligned(memory, oCACHE_LINE_SIZE))
-		throw std::invalid_argument("memory must be cacheline size aligned");
+		oThrow(std::errc::invalid_argument, "memory must be cacheline size aligned");
 
 	const size_t Bytes = calc_size(max_num_tasklists);
 	memset(memory, 0, Bytes);
@@ -105,7 +106,7 @@ tasklist master_tasklist::internal_make_tasklist(uint32_t phase)
 void master_tasklist::set_plan(ouro::plan* p)
 {
 	if (num_lists.load())
-		throw std::invalid_argument("cannot change plan while there are outstanding tasks");
+		oThrow(std::errc::invalid_argument, "cannot change plan while there are outstanding tasks");
 	plan = p;
 }
 
@@ -134,7 +135,7 @@ uint32_t plan::calc_size(uint32_t allocator_bytes, uint32_t num_phases)
 void plan::initialize(void* memory, uint32_t bytes, uint32_t num_phases)
 {
 	if (!aligned(memory, oCACHE_LINE_SIZE))
-		throw std::invalid_argument("memory must be cacheline size aligned");
+		oThrow(std::errc::invalid_argument, "memory must be cacheline size aligned");
 
 	const uint32_t PhaseTasklistsBytes = align((uint32_t)sizeof(flushed_tasklist) * num_phases, oCACHE_LINE_SIZE);
 	const uint32_t AllocBytes = bytes - PhaseTasklistsBytes;
@@ -183,10 +184,10 @@ start:
 			on_overflow();
 			// ensure it is simpler
 			if (overflow || master->overflowed())
-				throw std::invalid_argument("overflow handler overflowed or did not reset all state");
+				oThrow(std::errc::invalid_argument, "overflow handler overflowed or did not reset all state");
 		}
 		else
-			throw std::invalid_argument("plan overflow with no handler");
+			oThrow(std::errc::invalid_argument, "plan overflow with no handler");
 	}
 
 	// decode opaque pointers

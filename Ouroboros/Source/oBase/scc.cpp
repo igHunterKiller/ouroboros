@@ -1,4 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
+#include <oCore/assert.h>
 #include <oBase/scc.h>
 //#include "scc_git.h"
 //#include "scc_p4.h"
@@ -81,7 +83,7 @@ std::shared_ptr<scc> make_scc(scc_protocol::value _Protocol, scc_spawn_fn _Spawn
 		//case scc_protocol::git: return detail::make_scc_git(_Spawn, _User, _TimeoutMS);
 		default: break;
 	}
-	throw std::system_error(std::errc::protocol_not_supported, std::system_category());
+	oThrow(std::errc::protocol_not_supported, "");
 }
 
 }

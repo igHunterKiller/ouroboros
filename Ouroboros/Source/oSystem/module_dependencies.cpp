@@ -4,7 +4,6 @@
 
 #include <oCore/finally.h>
 #include <oCore/hash_map.h>
-#include <oCore/stringf.h>
 #include <oSystem/module.h>
 
 #define WIN32_LEAN_AND_MEAN
@@ -104,8 +103,7 @@ static void enum_dependencies_internal(const char* parent_path
 
 uint32_t enum_dependencies(const char* module_path, path_t* out_paths, uint32_t max_num_paths)
 {
-	if (max_num_paths > 512)
-		throw std::invalid_argument(stringf("code uses stack memory for a hash set and %u possible entries is probably too large for that", max_num_paths));
+	oCheck(max_num_paths <= 512, std::errc::invalid_argument, "code uses stack memory for a hash set and %u possible entries is probably too large for that", max_num_paths);
 
 	// set up a hash set to record which dependencies have already been traversed
 	hash_map<uint64_t, uint8_t> visited; // no hash_set handy, so use hash_map

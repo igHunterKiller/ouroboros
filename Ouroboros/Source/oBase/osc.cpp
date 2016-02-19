@@ -4,12 +4,11 @@
 #include <oCore/assert.h>
 #include <oCore/byte.h>
 #include <oCore/endian.h>
-#include <oCore/stringf.h>
 #include <oString/string.h>
 
 #define oUNKNOWN_SIZE SIZE_MAX
 
-#define oASSERT_ALIGNED(x) oASSERT(aligned(x, 4), "The destination pointer must be 4-byte aligned");
+#define oASSERT_ALIGNED(x) oAssert(aligned(x, 4), "The destination pointer must be 4-byte aligned");
 
 namespace ouro { namespace osc {
 
@@ -90,10 +89,10 @@ template<typename ptr_t>
 bool visit_struct_fields_internal(const typename Visitor<ptr_t>::Fn& visitor, const char* typetags, ptr_t _struct, size_t struct_size, char* optional_patch_tags = nullptr)
 {
 	if (!visitor || !typetags || !_struct || !struct_size)
-		throw std::invalid_argument("null value");
+		oThrow(std::errc::invalid_argument, "null value");
 
 	if (*typetags != ',')
-		throw std::invalid_argument("TypeTags must start with a ',' character");
+		oThrow(std::errc::invalid_argument, "TypeTags must start with a ',' character");
 
 	auto tag = typetags;
 	auto patchTag = optional_patch_tags;
@@ -107,7 +106,7 @@ bool visit_struct_fields_internal(const typename Visitor<ptr_t>::Fn& visitor, co
 			if (p == end && (*tag == 0 || *tag == '[' || *tag == ']'))  // If we finish on any of these tags it's ok since they do not expect valid data
 				return true;
 
-			throw std::invalid_argument(stringf("Tag string \"%s\" has run past the size of the struct pointed to by pointer 0x%p", typetags, _struct));
+			oThrow(std::errc::invalid_argument, "Tag string \"%s\" has run past the size of the struct pointed to by pointer 0x%p", typetags, _struct);
 		}
 
 		if (patchTag)
@@ -211,7 +210,7 @@ template<typename ptr_t, typename fn_t>
 bool visit_msg_type_tags_internal(const char* typetags, ptr_t msg_args, fn_t visitor)
 {
 	if (!visitor || !typetags || *typetags != ',' || !msg_args)
-		throw std::invalid_argument("valid typetags must be specified that starts with ','");
+		oThrow(std::errc::invalid_argument, "valid typetags must be specified that starts with ','");
 
 	auto tag = typetags;
 	auto p = msg_args;
@@ -277,7 +276,7 @@ size_t calc_args_data_size(const char* typetags, const void* _struct, size_t str
 {
 	size_t size = 0;
 	if (!visit_struct_fields(typetags, _struct, struct_size, std::bind(sum_field_sizes, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, &size)))
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 	return size;
 }
 
@@ -303,7 +302,7 @@ void AlignedIncrement(size_t* pSize)
 size_t calc_deserialized_struct_size(const char* typetags)
 {
 	if (!typetags || *typetags != ',')
-		throw std::invalid_argument("valid typetags must be specified that starts with ','");
+		oThrow(std::errc::invalid_argument, "valid typetags must be specified that starts with ','");
 
 	size_t size = 0;
 	const char* tag = typetags;
@@ -370,8 +369,8 @@ static void* NextChar(void* dst, const void* src)
 static void* copy_next_buffer(void* dst, size_t dst_size, const void* buf, size_t buf_size)
 {
 	oASSERT_ALIGNED(dst);
-	oASSERT(dst_size >= align(buf_size, 4), "");
-	oASSERT(buf, "A valid buffer must be specified");
+	oAssert(dst_size >= align(buf_size, 4), "");
+	oAssert(buf, "A valid buffer must be specified");
 	memcpy(dst, buf, buf_size);
 	// pad with zeros out to 4-byte alignment
 	char* p = (char*)byte_add(dst, buf_size);
@@ -400,7 +399,7 @@ static void* next_blob(void* dst, size_t dst_size, const void* src, size_t src_s
 
 static void serializer(int type, const void* field, size_t field_size, const void* out_struct_base, void** ppDest, void* pDstEnd)
 {
-	oASSERT(*ppDest < pDstEnd, "Writing past end of buffer");
+	oAssert(*ppDest < pDstEnd, "Writing past end of buffer");
 	switch (type)
 	{
 		case 'r': case 'i': case 'f': *ppDest = SERIALIZE::next_intrinsic<int>(out_struct_base, *ppDest, field); break;
@@ -451,7 +450,7 @@ static void* next_blob(void* struct_base, void* dst, const void* src, size_t _Si
 
 static void deserializer(int type, const void* field, size_t field_size, void* out_struct_base, void** ppDest, void* pDstEnd)
 {
-	oASSERT(*ppDest < pDstEnd || type == '[' || type == ']', "Writing past end of buffer");
+	oAssert(*ppDest < pDstEnd || type == '[' || type == ']', "Writing past end of buffer");
 	if ('T' != type && 'F' != type)
 		*ppDest = align(*ppDest, sizeof(char));
 
@@ -472,7 +471,7 @@ static void deserializer(int type, const void* field, size_t field_size, void* o
 size_t serialize_struct_to_msg(const char* address, const char* typetags, const void* _struct, size_t struct_size, void* msg, size_t msg_size)
 {
 	if (!address || *address != '/' || !msg || !_struct || struct_size == 0)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 
 	void* p = msg;
 	void* pend = byte_add(p, msg_size);
@@ -482,7 +481,7 @@ size_t serialize_struct_to_msg(const char* address, const char* typetags, const 
 	p = SERIALIZE::next_string(p, size_t((uint8_t*)pend - (uint8_t*)p), typetags);
 
 	size_t szSerializedMessage = 0;
-	oASSERT(size_t((uint8_t*)pend - (uint8_t*)p) >= calc_args_data_size(typetags, _struct, struct_size), "");
+	oAssert(size_t((uint8_t*)pend - (uint8_t*)p) >= calc_args_data_size(typetags, _struct, struct_size), "");
 	if (!visit_struct_fields_internal(std::bind(serializer, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, _struct, &p, pend), typetags, _struct, struct_size, pPatchTag))
 		return 0;
 
@@ -492,12 +491,10 @@ size_t serialize_struct_to_msg(const char* address, const char* typetags, const 
 bool deserialize_msg_to_struct(const void* msg, void* _struct, size_t struct_size)
 {
 	// if struct ptr is not aligned, all the alignment logic will be off
-	if (!msg || !aligned(_struct, 4))
-		throw std::invalid_argument("");
+	oCheck(msg && aligned(_struct, 4), std::errc::invalid_argument, "");
 
 	const char* tags = get_msg_type_tags(msg);
-	if (!tags)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), "failed to read message type tags");
+	oCheck(tags, std::errc::protocol_error, "failed to read message type tags");
 
 	const void* args = (const void*)byte_add(tags, align(strlen(tags)+1, 4));
 	void* p = _struct;
@@ -513,18 +510,16 @@ static bool IsBoolTag(char _TypeTag)
 
 bool type_tags_match(const char* typetags0, const char* typetags1)
 {
-	if (!typetags0 || *typetags0 != ',' || !typetags1 || *typetags1 != ',')
-		throw std::invalid_argument("valid typetags must be specified that starts with ','");
+	oCheck(typetags0 && *typetags0 == ',' && typetags1 && *typetags1 == ',', std::errc::invalid_argument, "valid typetags must be specified that starts with ','");
 
 	size_t len0 = strlen(typetags0);
 	size_t len1 = strlen(typetags1);
-	if (len0 != len1)
-		throw std::invalid_argument("length mismatch");
+	oCheck(len0 != len1, std::errc::invalid_argument, "length mismatch");
 
 	while (*typetags0)
 	{
 		if (*typetags0 != *typetags1 && (!IsBoolTag(*typetags0) || !IsBoolTag(*typetags1)))
-			throw std::system_error(std::errc::protocol_error, std::system_category(), "tags mismatch");
+		oCheck(*typetags0 == *typetags1 || (IsBoolTag(*typetags0) && IsBoolTag(*typetags1)), std::errc::protocol_error, "tags mismatch");
 		typetags0++;
 		typetags1++;
 	}
@@ -534,7 +529,7 @@ bool type_tags_match(const char* typetags0, const char* typetags1)
 
 ntp_timestamp get_bundle_timestamp(const void* osc_bundle)
 {
-	oASSERT(is_bundle(is_bundle), "The specified pointer is not a bundle");
+	oAssert(is_bundle(is_bundle), "The specified pointer is not a bundle");
 	return to_big_endian(*(ntp_timestamp*)byte_add(osc_bundle, 8));
 }
 
@@ -563,9 +558,9 @@ const void* tokenize(const void* osc_packet, size_t osc_packet_size, void** out_
 		return ctx->subbundle;
 	}
 	
-	oASSERT(out_ctx, "A valid context must be specified");
+	oAssert(out_ctx, "A valid context must be specified");
 	tok_ctx* ctx = (tok_ctx*)*out_ctx;
-	oASSERT(ctx && ctx->cookie == 'OSCT', "Invalid context");
+	oAssert(ctx && ctx->cookie == 'OSCT', "Invalid context");
 
 	const void* pNext = byte_add(ctx->subbundle, ctx->size);
 	if (pNext >= ctx->end)
@@ -582,9 +577,9 @@ const void* tokenize(const void* osc_packet, size_t osc_packet_size, void** out_
 
 void close_tokenize(void** out_ctx)
 {
-	oASSERT(out_ctx, "A valid context must be specified");
+	oAssert(out_ctx, "A valid context must be specified");
 	tok_ctx* ctx = (tok_ctx*)*out_ctx;
-	oASSERT(ctx && ctx->cookie == 'OSCT', "Invalid context");
+	oAssert(ctx && ctx->cookie == 'OSCT', "Invalid context");
 	delete ctx;
 	*out_ctx = nullptr;
 }

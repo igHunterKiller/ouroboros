@@ -124,7 +124,7 @@ protected:
 	{
 		if (syserr)
 		{
-			oTRACE("Load failed: %s\n  %s", path.c_str(), syserr->what());
+			oTrace("Load failed: %s\n  %s", path.c_str(), syserr->what());
 			return;
 		}
 

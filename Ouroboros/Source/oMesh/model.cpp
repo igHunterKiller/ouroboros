@@ -194,7 +194,7 @@ void model::bake_transform(const float4x4& tx)
 		i++;
 	}
 
-	throw std::invalid_argument("no position semantic found");
+	oThrow(std::errc::invalid_argument, "no position semantic found");
 }
 
 }}

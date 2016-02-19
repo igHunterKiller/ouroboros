@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oSystem/golden_image.h>
 #include <oSystem/filesystem.h>
 #include <oSystem/system.h>
@@ -74,10 +73,10 @@ void golden_image::test(const char* test_name, const surface::image& img, uint32
 			{
 				blob b;
 				try { b = filesystem::load(golden_path); }
-				catch (std::exception&) { throw std::system_error(std::errc::io_error, std::system_category(), stringf("Load failed: (Golden)...%s", gpath)); }
+				catch (std::exception&) { oThrow(std::errc::io_error, "Load failed: (Golden)...%s", gpath); }
 
 				try { golden_img = surface::decode(b, img_info.format); }
-				catch (std::exception&) { throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("Corrupt image: (Golden)...%s", gpath)); }
+				catch (std::exception&) { oThrow(std::errc::protocol_error, "Corrupt image: (Golden)...%s", gpath); }
 			}
 
 			auto golden_info = golden_img.info();
@@ -93,12 +92,12 @@ void golden_image::test(const char* test_name, const surface::image& img, uint32
 					}
 					catch (std::exception&)
 					{
-						throw std::system_error(std::errc::io_error, std::system_category(), std::string("Save failed: (Output)...") + fpath);
+						oThrow(std::errc::io_error, "Save failed: (Output)...%s", fpath);
 					}
 					
-					throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("Dimension mismatch: (Output %dx%d)...%s != (Golden %dx%d)...%s"
+					oThrow(std::errc::protocol_error, "Dimension mismatch: (Output %dx%d)...%s != (Golden %dx%d)...%s"
 						, img_info.dimensions.x, img_info.dimensions.y, fpath
-						, golden_info.dimensions.x, golden_info.dimensions.y, gpath));
+						, golden_info.dimensions.x, golden_info.dimensions.y, gpath);
 				}
 
 				if (img_info.format != golden_info.format)
@@ -110,10 +109,10 @@ void golden_image::test(const char* test_name, const surface::image& img, uint32
 					}
 					catch (std::exception&)
 					{
-						throw std::system_error(std::errc::io_error, std::system_category(), std::string("Save failed: (Output)...") + fpath);
+						oThrow(std::errc::io_error, "Save failed: (Output)...", fpath);
 					}
 					
-					throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("Format mismatch: (Output %s)...%s != (Golden %s)...%s", as_string(img_info.format), fpath, as_string(golden_info.format), gpath));
+					oThrow(std::errc::protocol_error, "Format mismatch: (Output %s)...%s != (Golden %s)...%s", as_string(img_info.format), fpath, as_string(golden_info.format), gpath);
 				}
 			}
 
@@ -130,7 +129,7 @@ void golden_image::test(const char* test_name, const surface::image& img, uint32
 					blob encoded = encode(img, save_fmt, img_info.format);
 					filesystem::save(failed_path, encoded);
 				}
-				catch (std::exception&) { throw std::system_error(std::errc::io_error, std::system_category(), std::string("Save failed: (Output)...") + fpath); }
+				catch (std::exception&) { oThrow(std::errc::io_error, "Save failed: (Output)...%s", fpath); }
 
 				// save diff image
 				path_t diff_path(failed_path);
@@ -142,9 +141,9 @@ void golden_image::test(const char* test_name, const surface::image& img, uint32
 					blob encoded = encode(diff_img, save_fmt, surface::format::r8_unorm);
 					filesystem::save(diff_path, encoded);
 				}
-				catch (std::exception&) { throw std::system_error(std::errc::io_error, std::system_category(), std::string("Save failed: (Diff)...") + dpath); }
+				catch (std::exception&) { oThrow(std::errc::io_error, "Save failed: (Diff)...%s", dpath); }
 
-				throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("Compare failed: %.03f RMS error (threshold %.03f): (Output)...%s != (Golden)...%s", rms_err, max_rms_error, fpath, gpath));
+				oThrow(std::errc::protocol_error, "Compare failed: %.03f RMS error (threshold %.03f): (Output)...%s != (Golden)...%s", rms_err, max_rms_error, fpath, gpath);
 			}
 
 			return;
@@ -157,9 +156,9 @@ void golden_image::test(const char* test_name, const surface::image& img, uint32
 		blob encoded = encode(img, save_fmt, img_info.format);
 		filesystem::save(failed_path, encoded);
 	}
-	catch (std::exception&) { throw std::system_error(std::errc::io_error, std::system_category(), std::string("Save failed: (Failed)") + failed_path.c_str()); }
+	catch (std::exception&) { oThrow(std::errc::io_error, "Save failed: (Failed)", failed_path.c_str()); }
 
-	throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), std::string("Not found: (Golden).../") + filename + " result image saved to " + failed_path.c_str());
+	oThrow(std::errc::no_such_file_or_directory, "Not found: (Golden).../%s result image saved to %s", filename, failed_path.c_str());
 }
 
 }

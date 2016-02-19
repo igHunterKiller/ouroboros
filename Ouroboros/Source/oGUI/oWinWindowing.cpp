@@ -2,7 +2,6 @@
 
 #include <oCore/countof.h>
 #include <oCore/finally.h>
-#include <oCore/stringf.h>
 #include <oGUI/Windows/oWinWindowing.h>
 #include <oGUI/Windows/win_gdi_bitmap.h>
 #include <oGUI/Windows/oWinRect.h>
@@ -54,8 +53,8 @@ enum oUS_USAGE
 };
 
 #define oWIN_CHECK(_hWnd) do \
-	{	if (!oWinExists(_hWnd)) throw std::invalid_argument(stringf("Invalid HWND 0x%x specified", _hWnd)); \
-		if (!oWinIsWindowThread(_hWnd)) throw std::system_error(std::errc::operation_not_permitted, std::system_category(), stringf("This function must be called on the window thread %d for HWND 0x%x", asdword(std::this_thread::get_id()), _hWnd)); \
+	{	if (!oWinExists(_hWnd)) oThrow(std::errc::invalid_argument, "Invalid HWND 0x%x specified", _hWnd); \
+		if (!oWinIsWindowThread(_hWnd)) oThrow(std::errc::operation_not_permitted, "This function must be called on the window thread %d for HWND 0x%x", asdword(std::this_thread::get_id()), _hWnd); \
 	} while (false)
 
 static const char* kRegisteredWindowMessages[] = 
@@ -158,7 +157,7 @@ static void oWinSetupGetString(mstring& _StrDestination, HDEVINFO _hDevInfo, SP_
 	if (size)
 	{
 		mwstring buffer;
-		oASSERT(buffer.capacity() > (size / sizeof(mwstring::char_type)), "");
+		oAssert(buffer.capacity() > (size / sizeof(mwstring::char_type)), "");
 		oVB(SetupDiGetDevicePropertyW(_hDevInfo, _pSPDID, _pPropKey, &dpType, (BYTE*)buffer.c_str(), size, &size, 0) && dpType == DEVPROP_TYPE_STRING);
 		_StrDestination = buffer;
 	}
@@ -175,7 +174,7 @@ static void oWinSetupGetStringList(mstring* _StrDestination, size_t& _NumStrings
 	if (size)
 	{
 		xlwstring buffer;
-		oASSERT(buffer.capacity() > size, "");
+		oAssert(buffer.capacity() > size, "");
 		oVB(SetupDiGetDevicePropertyW(_hDevInfo, _pSPDID, _pPropKey, &dpType, (BYTE*)buffer.c_str(), size, &size, 0) && dpType != DEVPROP_TYPE_STRING_LIST);
 
 		const wchar_t* c = buffer.c_str();
@@ -201,7 +200,7 @@ static void oWinSetupGetStringList(mstring* _StrDestination, size_t& _NumStrings
 			}
 
 			_NumStrings = i + 1;
-			throw std::system_error(std::errc::no_buffer_space, std::system_category(), "not enough strings");
+			oThrow(std::errc::no_buffer_space, "not enough strings");
 		}
 	}
 	else
@@ -224,7 +223,7 @@ struct oWINDOWS_HID_DESC
 static void oWinEnumInputDevices(bool _EnumerateAll, const char* _Enumerator, const std::function<void(const oWINDOWS_HID_DESC& _HIDDesc)>& _Visitor)
 {
 	if (!_Visitor)
-		throw std::invalid_argument("must specify a visitor");
+		oThrow(std::errc::invalid_argument, "must specify a visitor");
 
 	HDEVINFO hDevInfo = INVALID_HANDLE_VALUE;
 	oFinally 
@@ -274,7 +273,7 @@ static void oWinEnumInputDevices(bool _EnumerateAll, const char* _Enumerator, co
 				size_t Capacity = countof(Strings);
 				oWinSetupGetStringList(Strings, Capacity, hDevInfo, &SPDID, &oDEVPKEY_Device_Siblings);
 				if (Capacity != 1)
-					throw std::invalid_argument("expected one result");
+					oThrow(std::errc::invalid_argument, "expected one result");
 
 				KinectCameraSibling = Strings[0];
 				KinectCameraParent = HIDDesc.ParentDeviceInstancePath;
@@ -414,7 +413,7 @@ static bool oWinTranslateDeviceChange(HWND _hWnd, WPARAM _wParam, LPARAM _lParam
 				oVB(GetRawInputDeviceInfoA(ctx->RawInputs[i].hDevice, RIDI_DEVICENAME, ctx->RawInputInstanceNames[i].c_str(), &Capacity));
 			}
 
-			oASSERT(RawCount == RawCapacity, "size mismatch");
+			oAssert(RawCount == RawCapacity, "size mismatch");
 			Type = oWinGetTypeFromRIM(RIDDI.dwType);
 			break;
 		}
@@ -499,8 +498,7 @@ void oWinGetProcessTopWindowAndThread(process::id _ProcessID
 		return false;
 	});
 
-	if(!Hwnd)
-		throw std::system_error(std::errc::no_such_process, std::system_category());
+	oCheck(Hwnd, std::errc::no_such_process, "");
 
 	*_pHWND = Hwnd;
 	*_pThreadID = astid(ThreadID);
@@ -511,11 +509,11 @@ void oWinGetProcessTopWindowAndThread(process::id _ProcessID
 // constructed. First get the massive integration done, then come back to this.
 
 #define oWINVP(_hWnd) \
-	if (!oWinExists(_hWnd)) throw std::invalid_argument(stringf("Invalid HWND %p specified", _hWnd)); \
-	if (!oWinIsWindowThread(_hWnd)) throw std::invalid_argument(stringf("This function must be called on the window thread %d for %p", asdword(std::this_thread::get_id()), _hWnd))
+	if (!oWinExists(_hWnd)) oThrow(std::errc::invalid_argument, "Invalid HWND %p specified", _hWnd); \
+	if (!oWinIsWindowThread(_hWnd)) oThrow(std::errc::invalid_argument, "This function must be called on the window thread %d for %p", asdword(std::this_thread::get_id()), _hWnd)
 
-#define oTHROW_BAD_TYPE(_hControl, _Type) throw std::invalid_argument(stringf("The specified %s %p (%d) is not valid for this operation", as_string(_Type), _hControl, GetDlgCtrlID(_hControl)))
-#define oTHROW_BAD_INDEX(_hControl, _Type, _SubItemIndex) throw std::invalid_argument(stringf("_SubItemIndex %d was not found in %s %p (%d)", _SubItemIndex, as_string(_Type), _hControl, GetDlgCtrlID(_hControl)))
+#define oTHROW_BAD_TYPE(_hControl, _Type) oThrow(std::errc::invalid_argument, "The specified %s %p (%d) is not valid for this operation", as_string(_Type), _hControl, GetDlgCtrlID(_hControl))
+#define oTHROW_BAD_INDEX(_hControl, _Type, _SubItemIndex) oThrow(std::errc::invalid_argument, "_SubItemIndex %d was not found in %s %p (%d)", _SubItemIndex, as_string(_Type), _hControl, GetDlgCtrlID(_hControl))
 
 inline HWND oWinControlGetBuddy(HWND _hControl) { return (HWND)SendMessage(_hControl, UDM_GETBUDDY, 0, 0); }
 
@@ -647,7 +645,7 @@ HWND oWinCreate(HWND _hParent
 	if (!hWnd)
 	{
 		if (GetLastError() == S_OK)
-			throw std::system_error(std::errc::protocol_error, std::system_category(), std::string("CreateWindowEx returned a null HWND (failure condition) for '") + oSAFESTRN(_Title) + "' but GetLastError is S_OK. This implies that user handling of a WM_CREATE message failed, so start looking there.");
+			oThrow(std::errc::protocol_error, "CreateWindowEx returned a null HWND (failure condition) for '%s' but GetLastError is S_OK. This implies that user handling of a WM_CREATE message failed, so start looking there.", oSAFESTRN(_Title));
 		else
 			throw windows::error();
 	}
@@ -901,7 +899,7 @@ void oWinRegisterTouchEvents(HWND _hWnd, bool _Registered)
 		}
 		else
 	#endif
-		throw std::system_error(std::errc::not_supported, std::system_category(), "Windows 7 is the minimum required version for touch support");
+	oThrow(std::errc::not_supported, "Windows 7 is the minimum required version for touch support");
 }
 
 // A wrapper for MS's GetWindow() that changes the rules of traversal. The rules 
@@ -1105,7 +1103,7 @@ void oWinShowMenu(HWND _hWnd, bool _Show)
 {
 	oWIN_CHECK(_hWnd);
 	HMENU hMenu = oWinGetMenu(_hWnd);
-	oASSERT(hMenu, "invalid menu");
+	oAssert(hMenu, "invalid menu");
 
 	// If the top-level menu is empty then not even the bar gets drawn and the
 	// client area is resized. So in this case preserve the sizing by avoiding 
@@ -1330,7 +1328,7 @@ void oWinGetClientRect(HWND _hWnd, RECT* _pRect)
 	oWIN_CHECK(_hWnd);
 
 	if (!_pRect)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 
 	// Discount status bar from dimensions
 	oVB(GetClientRect(_hWnd, _pRect));
@@ -1398,13 +1396,13 @@ static window_style::value oWinGetStyle(HWND _hWnd)
 	#define oFIXED_STYLE (WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX)
 	#define oSET(_Flag) ((style & (_Flag)) == (_Flag))
 
-	oASSERT(oWinExists(_hWnd) && oWinIsWindowThread(_hWnd), "function must be called on window thread");
+	oAssert(oWinExists(_hWnd) && oWinIsWindowThread(_hWnd), "function must be called on window thread");
 	const bool HasMenu = !!GetMenu(_hWnd);
 	const bool HasStatusBar = oWinStatusBarShown(_hWnd);
 
 	if (HasStatusBar && oWinIsRenderTarget(_hWnd))
 	{
-		oTRACE("HWND 0x%x is showing a status bar and is a render target, which is not allowed. The application will now terminate.", _hWnd);
+		oTrace("HWND 0x%x is showing a status bar and is a render target, which is not allowed. The application will now terminate.", _hWnd);
 		std::terminate();
 	}
 
@@ -1452,7 +1450,7 @@ void oWinSetShape(HWND _hWnd, const window_shape& _Shape)
 	window_shape Old = oWinGetShape(_hWnd);
 
 	if (Old.state == window_state::invalid || Old.style == window_style::default_style)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 
 	if (New.state == window_state::invalid)
 		New.state = Old.state;
@@ -1460,8 +1458,7 @@ void oWinSetShape(HWND _hWnd, const window_shape& _Shape)
 	if (New.style == window_style::default_style)
 		New.style = Old.style;
 
-	if (has_statusbar(New.style) && oWinIsRenderTarget(_hWnd))
-		throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("HWND 0x%x is marked as a render target, disallowing status bar styles to be set", _hWnd));
+	oCheck(!has_statusbar(New.style) || !oWinIsRenderTarget(_hWnd), std::errc::protocol_error, "HWND 0x%x is marked as a render target, disallowing status bar styles to be set", _hWnd);
 
 	if (Old.state == window_state::restored)
 		oWinSaveRestoredPosSize(_hWnd);
@@ -1622,7 +1619,7 @@ bool oWinRestore(HWND _hWnd)
 {
 	oWIN_CHECK(_hWnd);
 	HWND hProgMan = FindWindow(0, "Program Manager");
-	oASSERT(hProgMan, "Program Manager not found");
+	oAssert(hProgMan, "Program Manager not found");
 	oWinSetFocus(hProgMan);
 	oWinSetFocus(_hWnd);
 	ShowWindow(_hWnd, SW_SHOWDEFAULT);
@@ -1699,7 +1696,7 @@ bool oWinSetText(HWND _hWnd, const char* _Text, int _SubItemIndex)
 
 		case control_type::floatbox:
 		case control_type::floatbox_spinner:
-			throw std::invalid_argument("For FloatBoxes and FloatBoxSpinners, use oWinControlSetValue instead.");
+			oThrow(std::errc::invalid_argument, "For FloatBoxes and FloatBoxSpinners, use oWinControlSetValue instead.");
 
 		default: 
 			oVB(SetWindowText(_hWnd, _Text));
@@ -1716,8 +1713,8 @@ size_t oWinGetTruncatedLength(HWND _hWnd, const char* _StrSource)
 	GetClientRect(_hWnd, &rClient);
 	scoped_getdc hDC(_hWnd);
 
-	if (!PathCompactPathA(hDC, temp, oWinRectW(rClient) + 70)) // @tony: This constant was measured empirically. I think this should work without the +70, but truncation happens too aggressively.
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("Buffer must be at least MAX_PATH (%u) chars big", MAX_PATH));
+	// @tony: This constant was measured empirically. I think this should work without the +70, but truncation happens too aggressively.
+	oCheck(PathCompactPathA(hDC, temp, oWinRectW(rClient) + 70), std::errc::no_buffer_space, "Buffer must be at least MAX_PATH (%u) chars big", MAX_PATH);
 
 	return temp.length();
 }
@@ -1729,9 +1726,8 @@ char* oWinTruncateLeft(char* _StrDestination, size_t _SizeofStrDestination, HWND
 	{
 		uri_string Truncated;
 		const char* pCopy = _StrSource + strlen(_StrSource) - TruncatedLength + 3;
-		oASSERT(pCopy >= _StrSource, "");
-		if (-1 == snprintf(_StrDestination, _SizeofStrDestination, "...%s", pCopy))
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oAssert(pCopy >= _StrSource, "");
+		oCheck(-1 == snprintf(_StrDestination, _SizeofStrDestination, "...%s", pCopy), std::errc::no_buffer_space, "");
 	}
 
 	return _StrDestination;
@@ -1739,14 +1735,13 @@ char* oWinTruncateLeft(char* _StrDestination, size_t _SizeofStrDestination, HWND
 
 char* oWinTruncatePath(char* _StrDestination, size_t _SizeofStrDestination, HWND _hWnd, const char* _Path)
 {
-	if (_SizeofStrDestination < MAX_PATH)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("_SizeofStrDestination must be at least MAX_PATH (%d)", MAX_PATH)); // can't pass this to the function
+	oCheck(_SizeofStrDestination >= MAX_PATH, std::errc::no_buffer_space, "_SizeofStrDestination must be at least MAX_PATH (%d)", MAX_PATH); // can't pass this to the function
 	strlcpy(_StrDestination, _Path, _SizeofStrDestination);
 	RECT rClient;
 	GetClientRect(_hWnd, &rClient);
 	scoped_getdc hDC(_hWnd);
-	if (!PathCompactPathA(hDC, _StrDestination, oWinRectW(rClient) + 70)) // @tony: This constant was measured empirically. I think this should work without the +70, but truncation happens too aggressively.
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), stringf("Buffer must be at least MAX_PATH (%u) chars big", MAX_PATH));
+	// @tony: This constant was measured empirically. I think this should work without the +70, but truncation happens too aggressively.
+	oCheck(PathCompactPathA(hDC, _StrDestination, oWinRectW(rClient) + 70), std::errc::no_buffer_space, "Buffer must be at least MAX_PATH (%u) chars big", MAX_PATH);
 	return _StrDestination;
 }
 
@@ -1762,16 +1757,9 @@ char* oWinGetText(char* _StrDestination, size_t _SizeofStrDestination, HWND _hWn
 		case control_type::combotextbox:
 		{
 			size_t len = (size_t)ComboBox_GetLBTextLen(_hWnd, _SubItemIndex);
-			if (len > _SizeofStrDestination)
-			{
-				throw std::system_error(std::errc::no_buffer_space, std::system_category());
-				//return nullptr;
-			}
-			else
-			{
-				if (CB_ERR != ComboBox_GetLBText(_hWnd, _SubItemIndex, _StrDestination))
-					return _StrDestination;
-			}
+			oCheck(len <= _SizeofStrDestination, std::errc::no_buffer_space, "");
+			if (CB_ERR != ComboBox_GetLBText(_hWnd, _SubItemIndex, _StrDestination))
+				return _StrDestination;
 		}
 
 		case control_type::tab:
@@ -2080,7 +2068,7 @@ static const CONTROL_CREATION_DESC& oWinControlGetCreationDesc(control_type::val
 HWND oWinControlCreate(const control_info& _Desc)
 {
 	if (!_Desc.parent || _Desc.type == control_type::unknown)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 	oWINVP((HWND)_Desc.parent);
 
 	const CONTROL_CREATION_DESC& CCDesc = oWinControlGetCreationDesc(_Desc.type);
@@ -2222,12 +2210,7 @@ int oWinControlInsertSubItem(HWND _hControl, const char* _SubItemText, int _SubI
 			else
 				index = ComboBox_AddString(_hControl, _SubItemText);
 
-			if (index == CB_ERRSPACE)
-			{
-				throw std::system_error(std::errc::no_buffer_space, std::system_category(), "String is too large");
-				//index = CB_ERR;
-			}
-
+			oCheck(index != CB_ERRSPACE, std::errc::no_buffer_space, "String is too large");
 			return index;
 		}
 
@@ -2239,12 +2222,7 @@ int oWinControlInsertSubItem(HWND _hControl, const char* _SubItemText, int _SubI
 			else
 				index = ListBox_AddString(_hControl, _SubItemText);
 
-			if (index == LB_ERRSPACE)
-			{
-				throw std::system_error(std::errc::no_buffer_space, std::system_category(), "String is too large");
-				//index = CB_ERR;
-			}
-
+			oCheck(index != LB_ERRSPACE, std::errc::no_buffer_space, "String is too large");
 			return index;
 		}
 
@@ -2319,16 +2297,14 @@ int oWinControlFindSubItem(HWND _hControl, const char* _SubItemText)
 		case control_type::combotextbox:
 		{
 			int index = ComboBox_FindStringExact(_hControl, 0, _SubItemText);
-			if (index == CB_ERR)
-				throw std::invalid_argument(stringf("Text %s was not found in %s %p (%d)", oSAFESTRN(_SubItemText), as_string(type), _hControl, GetDlgCtrlID(_hControl)));
+			oCheck(index != CB_ERR, std::errc::invalid_argument, "Text %s was not found in %s %p (%d)", oSAFESTRN(_SubItemText), as_string(type), _hControl, GetDlgCtrlID(_hControl));
 			break;
 		}
 
 		case control_type::listbox:
 		{
 			int index = ListBox_FindStringExact(_hControl, 0, _SubItemText);
-			if (index == CB_ERR)
-				throw std::invalid_argument(stringf("Text %s was not found in %s %p (%d)", oSAFESTRN(_SubItemText), as_string(type), _hControl, GetDlgCtrlID(_hControl)));
+			oCheck(index != CB_ERR, std::errc::invalid_argument, "Text %s was not found in %s %p (%d)", oSAFESTRN(_SubItemText), as_string(type), _hControl, GetDlgCtrlID(_hControl));
 			break;
 		}
 
@@ -2614,12 +2590,7 @@ char* oWinControlGetSelectedText(char* _StrDestination, size_t _SizeofStrDestina
 			uint start = 0, end = 0;
 			SendMessage(_hControl, EM_GETSEL, (WPARAM)&start, (LPARAM)&end);
 			size_t len = end - start;
-			if (len >= _SizeofStrDestination)
-			{
-				throw std::system_error(std::errc::no_buffer_space, std::system_category(), "Buffer too small to receive string");
-				//return nullptr;
-			}
-
+			oCheck(len < _SizeofStrDestination, std::errc::no_buffer_space, "Buffer too small to receive string");
 			oVB(GetWindowText(_hControl, _StrDestination, int(_SizeofStrDestination)));
 
 			if (start != end)
@@ -2639,18 +2610,8 @@ char* oWinControlGetSelectedText(char* _StrDestination, size_t _SizeofStrDestina
 				return nullptr;
 
 			size_t len = ListBox_GetTextLen(_hControl, index);
-			if (len >= _SizeofStrDestination)
-			{
-				throw std::system_error(std::errc::no_buffer_space, std::system_category(), "Buffer too small to receive string");
-				//return nullptr;
-			}
-
-			if (LB_ERR == ListBox_GetText(_hControl, index, _StrDestination))
-			{
-				throw std::system_error(std::errc::protocol_error, std::system_category(), "GetText failed");
-				//return nullptr;
-			}
-
+			oCheck(len < _SizeofStrDestination, std::errc::no_buffer_space, "Buffer too small to receive string");
+			oCheck(LB_ERR == ListBox_GetText(_hControl, index, _StrDestination), std::errc::protocol_error, "GetText failed");
 			return _StrDestination;
 		}
 
@@ -2732,7 +2693,7 @@ void oWinControlSetIcon(HWND _hControl, HICON _hIcon, int _SubItemIndex)
 	{
 		case control_type::icon:
 			if (_SubItemIndex != -1)
-				throw std::invalid_argument("Invalid _SubItemIndex");
+				oThrow(std::errc::invalid_argument, "Invalid _SubItemIndex");
 			SendMessage(_hControl, STM_SETICON, (WPARAM)_hIcon, 0);
 			break;
 		default:
@@ -2748,7 +2709,7 @@ HICON oWinControlGetIcon(HWND _hControl, int _SubItemIndex)
 		case control_type::icon:
 			if (_SubItemIndex != -1)
 			{
-				throw std::invalid_argument("invalid _SubItemIndex");
+				oThrow(std::errc::invalid_argument, "invalid _SubItemIndex");
 				//return nullptr;
 			}
 			return oWinGetIcon(_hControl);
@@ -2966,7 +2927,7 @@ void oGDIScreenCaptureWindow(HWND _hWnd, const RECT* _pRect, void* _pImageBuffer
 	int2 size = oWinRectSize(r);
 
 	if (size.x == 0 || size.y == 0)
-		throw std::invalid_argument("invalid size");
+		oThrow(std::errc::invalid_argument, "invalid size");
 
 	WORD BitDepth = 0;
 	{
@@ -2976,7 +2937,7 @@ void oGDIScreenCaptureWindow(HWND _hWnd, const RECT* _pRect, void* _pImageBuffer
 	}
 
 	if (!_pBitmapInfo)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 	const int BytesPerPixel = BitDepth / 8;
 	const int AlignedWidth = align(size.x, 4);
 	const int RowPitch = AlignedWidth * BytesPerPixel;
@@ -2992,8 +2953,7 @@ void oGDIScreenCaptureWindow(HWND _hWnd, const RECT* _pRect, void* _pImageBuffer
 
 	if (_pImageBuffer)
 	{
-		if (_SizeofImageBuffer < _pBitmapInfo->bmiHeader.biSizeImage)
-			throw std::system_error(std::errc::no_buffer_space, std::system_category());
+		oCheck(_SizeofImageBuffer >= _pBitmapInfo->bmiHeader.biSizeImage, std::errc::no_buffer_space, "");
 
 		HDC hDC = GetWindowDC(_hWnd);
 		HDC hMemDC = CreateCompatibleDC(hDC);
@@ -3029,7 +2989,7 @@ void oGDIScreenCaptureWindow(HWND _hWnd, const RECT* _pRect, void* _pImageBuffer
 void oGDIScreenCaptureWindow(HWND _hWnd, bool _IncludeBorder, std::function<void*(size_t _Size)> _Allocate, void** _ppBuffer, size_t* _pBufferSize, bool _RedrawWindow, bool _FlipV)
 {
 	if (!_Allocate || !_ppBuffer || !_pBufferSize)
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 
 	*_ppBuffer = nullptr;
 	*_pBufferSize = 0;

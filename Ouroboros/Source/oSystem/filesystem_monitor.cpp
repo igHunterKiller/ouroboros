@@ -148,7 +148,7 @@ watcher::watcher(monitor_impl* _pMonitor, const path_t& _Path, bool _Recursive, 
 	if (Directory.has_filename())
 	{
 		if (_Recursive)
-			throw std::invalid_argument("a filename/wildcard cannot be recursive");
+			oThrow(std::errc::invalid_argument, "a filename/wildcard cannot be recursive");
 
 		Filename = Directory.filename().c_str();
 		Directory.remove_filename();
@@ -157,11 +157,8 @@ watcher::watcher(monitor_impl* _pMonitor, const path_t& _Path, bool _Recursive, 
 	if (!exists(Directory))
 		create_directory(Directory);
 
-	if (!exists(Directory))
-		throw std::system_error(std::errc::no_such_file_or_directory, std::system_category());
-
-	if (!is_directory(Directory))
-		throw std::system_error(std::errc::not_a_directory, std::system_category());
+	oCheck(exists(Directory), std::errc::no_such_file_or_directory, "direction does not exist: %s", Directory.c_str());
+	oCheck(is_directory(Directory), std::errc::not_a_directory, "not a directory: %s", Directory.c_str());
 
 	hDirectory = CreateFile(Directory
 		, FILE_LIST_DIRECTORY
@@ -175,8 +172,7 @@ watcher::watcher(monitor_impl* _pMonitor, const path_t& _Path, bool _Recursive, 
 
 	pOverlapped = windows::iocp::associate(hDirectory, watcher::static_on_complete, this);
 
-	if (!pOverlapped)
-		throw std::system_error(std::errc::operation_would_block, std::system_category(), "OVERLAPPED allocation failed");
+	oCheck(pOverlapped, std::errc::operation_would_block, "OVERLAPPED allocation failed");
 
 	pBuffer[0] = new char[_BufferSize];
 	pBuffer[1] = new char[_BufferSize];
@@ -254,8 +250,7 @@ void watcher::process(FILE_NOTIFY_INFORMATION* _pNotify)
 		{
 			// *2 for that fact that FileNameLength is # bytes for a wide-char non-
 			// null-term string
-			if (n->FileNameLength >= (path_string::Capacity*2))
-				throw std::system_error(std::errc::no_buffer_space, std::system_category(), "not expecting paths that are longer than they should be");
+			oCheck(n->FileNameLength < (path_string::Capacity*2), std::errc::no_buffer_space, "not expecting paths that are longer than they should be");
 
 			// note the path given to us by windows is only the portion after the 
 			// path of the folder we are monitoring, so have to reform the full path.
@@ -339,8 +334,7 @@ monitor_impl::~monitor_impl()
 	oVB(DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, hEvent));
 
 	HRESULT hr = WaitForSingleObject(hEvent, INFINITE);
-	if (hr != WAIT_OBJECT_0)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), "failed waiting for DeleteTimerQueueTimer");
+	oCheck(hr == WAIT_OBJECT_0, std::errc::protocol_error, "failed waiting for DeleteTimerQueueTimer");
 
 	oVB(CloseHandle(hEvent));
 	oVB(DeleteTimerQueue(hTimerQueue));
@@ -388,7 +382,7 @@ void monitor_impl::check_accessibility()
 
 			else if ((e.timestamp + Timeout) > Now)
 			{
-				oTRACEA("monitor: accessibility for %s timed out", p.c_str());
+				oTraceA("monitor: accessibility for %s timed out", p.c_str());
 				it = Events.erase(it);
 			}
 
@@ -409,8 +403,7 @@ void monitor_impl::watch(const path_t& _Path, size_t _BufferSize, bool _Recursiv
 	lock_guard<mutex> lock(WatchesMutex);
 
 	for (auto it = std::begin(Watches); it != std::end(Watches); ++it)
-		if ((*it)->watching(_Path))
-			throw std::system_error(std::errc::operation_in_progress, std::system_category(), std::string("already watching ") + _Path.c_str());
+		oCheck(!(*it)->watching(_Path), std::errc::operation_in_progress, "already watching %s", _Path.c_str());
 
 	Watches.push_back(new watcher(this, _Path, _Recursive, _BufferSize));
 	Watches.back()->watch_changes();

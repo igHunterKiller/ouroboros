@@ -106,7 +106,7 @@ static void push_and_pop_task(QueueT* _pQueue, size_t _NumPushPops, size_t _NumI
 			_pQueue->pop(j);
 	}
 
-	//oTRACE("TESTQueues_PushAndPop finished (0x%x)", asuint(this_thread::get_id()));
+	//oTrace("TESTQueues_PushAndPop finished (0x%x)", asuint(this_thread::get_id()));
 }
 
 template<typename T, typename QueueT>
@@ -114,7 +114,7 @@ static void push_and_pop_task_performance(QueueT* _pQueue, size_t _NumPushPops, 
 {
 	_pStart->wait();
 	push_and_pop_task<T, QueueT>(_pQueue, _NumPushPops, _NumIterations);
-	oTRACE("Done thread.");
+	oTrace("Done thread.");
 }
 
 template<typename T, typename QueueT>
@@ -234,7 +234,7 @@ static double test_performance(unit_test::services& services, const char* queue_
 		//JoinThreads();
 		for (size_t i = 0; i < threadArray.size(); i++)
 			threadArray[i].join();
-		oTRACE("Done main.");
+		oTrace("Done main.");
 
 		time = t.seconds();
 	

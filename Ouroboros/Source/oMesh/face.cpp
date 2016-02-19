@@ -2,11 +2,10 @@
 
 #include <oMesh/face.h>
 #include <oMemory/memory.h>
-#include <oCore/stringf.h>
 
 #define STR_SUPPORT(_T) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
 
-#define oFACE_CHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(format, ## __VA_ARGS__); } while(false)
+#define oFACE_CHECK(expr, format, ...) do { if (!(expr)) oThrow(std::errc::invalid_argument, format, ## __VA_ARGS__); } while(false)
 
 namespace ouro {
 
@@ -91,7 +90,7 @@ uint32_t num_primitives(const primitive_type& type, uint32_t num_indices, uint32
 		case primitive_type::line_strips: n--; break;
 		case primitive_type::triangles: n /= 3; break;
 		case primitive_type::triangle_strips: n -= 2; break;
-		default: throw std::invalid_argument("unsupported primitive type");
+		default: oThrow(std::errc::invalid_argument, "unsupported primitive type");
 	}
 	return n;
 }
@@ -119,7 +118,7 @@ void copy_indices(void* oRESTRICT dst, uint32_t dst_pitch, const void* oRESTRICT
 	else if (dst_pitch == sizeof(uint16_t) && src_pitch == sizeof(uint32_t))
 		copy_indices((uint16_t*)dst, (const uint32_t*)src, num_indices);
 	else
-		throw std::invalid_argument(stringf("unsupported index pitches (src=%d, dst=%d)", src_pitch, dst_pitch));
+		oThrow(std::errc::invalid_argument, "unsupported index pitches (src=%d, dst=%d)", src_pitch, dst_pitch);
 }
 
 void copy_indices(uint16_t* oRESTRICT dst, const uint32_t* oRESTRICT src, uint32_t num_indices)
@@ -127,7 +126,7 @@ void copy_indices(uint16_t* oRESTRICT dst, const uint32_t* oRESTRICT src, uint32
 	const uint32_t* end = &src[num_indices];
 	while (src < end)
 	{
-		if (*src > 65535) throw std::invalid_argument(stringf("truncating a uint32_t (%d) to a uint16_t in a way that will change its value.", *src));
+		oCheck(*src <= 65535, std::errc::invalid_argument, "truncating a uint32_t (%d) to a uint16_t in a way that will change its value.", *src);
 		*dst++ = (*src++) & 0xffff;
 	}
 }

@@ -37,12 +37,12 @@ oTEST(oString_atof)
 	{
 		if (!atof(sFloatStrings[i], &f))
 		{
-			throw std::invalid_argument(std::string("ouro::atof failed on ") + sFloatStrings[i]);
+			oThrow(std::errc::invalid_argument, "ouro::atof failed on %s", sFloatStrings[i]);
 		}
 
 		if (!equal(f, sFloats[i]))
 		{
-			throw std::logic_error(std::string("ouro::atof failed on ") + sFloatStrings[i]);
+			oThrow(std::errc::invalid_argument, "ouro::atof failed on %s", sFloatStrings[i]);
 		}
 	}
 

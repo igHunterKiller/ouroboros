@@ -34,8 +34,7 @@ static std::regex reNVVersionString("[0-9]+\\.[0-9]+\\.[0-9]+([0-9])\\.([0-9][0-
 static version_t from_string_nv(const char* version_string)
 {
 	std::cmatch matches;
-	if (!regex_match(version_string, matches, reNVVersionString))
-		throw std::invalid_argument(std::string("not a well-formed NVIDIA version string; ") + oSAFESTRN(version_string));
+	oCheck(regex_match(version_string, matches, reNVVersionString), std::errc::invalid_argument, "not a well-formed NVIDIA version string: %s", oSAFESTRN(version_string));
 
 	char major[4];
 	major[0] = *matches[1].first;
@@ -53,8 +52,7 @@ static std::regex reAMDVersionString("([0-9]+)\\.([0-9]+)\\.[0-9]+\\.[0-9]+");
 static version_t from_string_amd(const char* version_string)
 {
 	std::cmatch matches;
-	if (!regex_match(version_string, matches, reAMDVersionString))
-		throw std::invalid_argument(std::string("not a well-formed AMD version string: ") + oSAFESTRN(version_string));
+	oCheck(regex_match(version_string, matches, reAMDVersionString), std::errc::invalid_argument, "not a well-formed AMD version string: %S", oSAFESTRN(version_string));
 
 	return version_t(static_cast<uint8_t>(atoi(matches[1].first)), static_cast<uint8_t>(atoi(matches[2].first)));
 }
@@ -285,13 +283,9 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 				{
 					sstring StrAdd, StrReq;
 					if (exact_version)
-					{
-						if (adapter_info.version != required_version)
-							throw std::system_error(std::errc::no_such_device, std::system_category(), std::string("Exact video driver version ") + to_string(StrReq, required_version) + " required, but current driver is " + to_string(StrAdd, adapter_info.version));
-					}
-
-					else if (adapter_info.version < required_version)
-						throw std::system_error(std::errc::no_such_device, std::system_category(), std::string("Video driver version ") + to_string(StrReq, required_version) + " or newer required, but current driver is " + to_string(StrAdd, adapter_info.version));
+						oCheck(adapter_info.version == required_version, std::errc::no_such_device, "Exact video driver version %s required, but current driver is %s", to_string(StrReq, required_version), to_string(StrAdd, adapter_info.version));
+					else 
+						oCheck(adapter_info.version >= required_version, std::errc::no_such_device, "Video driver version %s or newer required, but current driver is %s", to_string(StrReq, required_version), to_string(StrAdd, adapter_info.version));
 
 					return adapter_info;
 				}
@@ -309,9 +303,9 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 
 		sstring StrReq;
 	if (LookForOutput)
-		throw std::system_error(std::errc::no_such_device, std::system_category(), std::string("no adapter found for the specified virtual desktop coordinates that also matches the ") + (exact_version ? "exact" : "minimum") + " driver version " + to_string(StrReq, min_version));
+		oThrow(std::errc::no_such_device, "no adapter found for the specified virtual desktop coordinates that also matches the %s driver version %s", exact_version ? "exact" : "minimum", to_string(StrReq, min_version));
 	else
-		throw std::system_error(std::errc::no_such_device, std::system_category(), std::string("no adapter found matching the ") + (exact_version ? "exact" : "minimum") + " driver version " + to_string(StrReq, min_version));
+		oThrow(std::errc::no_such_device, "no adapter found matching the %s driver version %s", exact_version ? "exact" : "minimum", to_string(StrReq, min_version));
 }
 
 info_t find(const display::id& display_id)
@@ -342,7 +336,7 @@ info_t find(const display::id& display_id)
 		adapter = nullptr;
 	}
 
-	throw std::system_error(std::errc::no_such_device, std::system_category(), "no adapter matches the specified display id");
+	oThrow(std::errc::no_such_device, "no adapter matches the specified display id");
 }
 
 }}

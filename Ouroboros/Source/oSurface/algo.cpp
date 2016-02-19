@@ -2,7 +2,6 @@
 
 #include <oSurface/algo.h>
 #include <oCore/color.h>
-#include <oCore/stringf.h>
 #include <oMath/hlslx.h>
 #include <oMath/quantize.h>
 #include <atomic>
@@ -26,7 +25,7 @@ void put(const subresource_info_t& subresource_info, const mapped_subresource& d
 		case format::b8g8r8a8_unorm: *p++ = ch.b; *p++ = ch.g; *p++ = ch.r; *p++ = ch.a; break;
 		case format::b8g8r8_unorm:   *p++ = ch.b; *p++ = ch.g; *p++ = ch.r;              break;
 		case format::r8_unorm:       *p++ = ch.r;                                        break;
-		default: throw std::invalid_argument("unsupported format");
+		default: oThrow(std::errc::invalid_argument, "unsupported format");
 	}
 }
 
@@ -56,8 +55,7 @@ uint32_t get(const subresource_info_t& subresource_info, const const_mapped_subr
 
 bool use_large_pages(const info_t& info, const uint2& tile_dimensions, uint32_t small_page_size_bytes, uint32_t large_page_size_bytes)
 {
-	if (is_planar(info.format))
-		throw std::system_error(std::errc::not_supported, std::system_category(), "planar formats not supported");
+	oCheck(!is_planar(info.format), std::errc::not_supported, "planar formats not supported");
 
 	auto surface_size = mip_size(info.format, info.dimensions);
 	if (surface_size < (large_page_size_bytes / 4))
@@ -146,11 +144,11 @@ void enumerate_pixels(const info_t& input_info
 	, const function<void(const void* oRESTRICT pixel1, const void* oRESTRICT pixel2, void* oRESTRICT out_pixel)>& enumerator)
 {
 	if (any(input_info.dimensions != output_info.dimensions))
-		throw std::invalid_argument(stringf("Dimensions mismatch In(%dx%d) != Out(%dx%d)"
+		oThrow(std::errc::invalid_argument, "Dimensions mismatch In(%dx%d) != Out(%dx%d)"
 			, input_info.dimensions.x
 			, input_info.dimensions.y
 			, output_info.dimensions.x
-			, output_info.dimensions.y));
+			, output_info.dimensions.y);
 	
 	const void* pRow1 = mappedInput1.data;
 	const void* pRow2 = mappedInput2.data;
@@ -251,7 +249,7 @@ static rms_enumerator get_rms_enumerator(format in_format, format out_format)
 		default: break;
 	}
 
-	throw std::system_error(std::errc::not_supported, std::system_category(), as_string(in_format) + std::string(" -> ") + as_string(out_format) + " not supported");
+	oThrow(std::errc::not_supported, "%s -> %s not supported", as_string(in_format), as_string(out_format));
 	#undef CASE
 }
 
@@ -341,7 +339,7 @@ histogramenumerator get_histogramenumerator(const format& f, int bitdepth)
 		default: break;
 	}
 
-	throw std::system_error(std::errc::not_supported, std::system_category(), stringf("%dbit histogram on %s not supported", bitdepth, as_string(f)));
+	oThrow(std::errc::not_supported, "%dbit histogram on %s not supported", bitdepth, as_string(f));
 
 	#undef IO
 }

@@ -13,9 +13,9 @@ mru::mru(const info& _Info)
 	, NumMRUs(_Info.last_id-_Info.first_id+1)
 {
 	if (_Info.prefix.empty())
-		throw std::invalid_argument("A prefix must be specified");
+		oThrow(std::errc::invalid_argument, "A prefix must be specified");
 	if (0 > snprintf(KeyFormat, "%s%%02d", _Info.prefix))
-		throw std::invalid_argument("the prefix is too long");
+		oThrow(std::errc::invalid_argument, "the prefix is too long");
 }
 
 sstring mru::entry_name(int _Index)

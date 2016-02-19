@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oBase/compression.h>
 
 #define FOREACH_EXT(macro) macro(gzip) macro(lz4) macro(lzma) macro(snappy)
@@ -23,7 +24,7 @@ size_t compress(const compression& type, void* oRESTRICT dst, size_t dst_size, c
 		default: break;
 	}
 
-	throw std::invalid_argument("unknown compression format");
+	oThrow(std::errc::invalid_argument, "unknown compression format");
 }
 
 size_t decompress(const compression& type, void* oRESTRICT dst, size_t dst_size, const void* oRESTRICT src, size_t src_size)
@@ -34,7 +35,7 @@ size_t decompress(const compression& type, void* oRESTRICT dst, size_t dst_size,
 		default: break;
 	}
 
-	throw std::invalid_argument("unknown compression format");
+	oThrow(std::errc::invalid_argument, "unknown compression format");
 }
 
 }

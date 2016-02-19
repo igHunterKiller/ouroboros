@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oSystem/windows/win_crt_leak_tracker.h>
 #include <oSystem/debugger.h>
 #include <oConcurrency/mutex.h>
@@ -93,7 +92,7 @@ context::~context()
 	{
 		mstring buf;
 		format_bytes(buf, NonLinearBytes, 2);
-		oTRACE("CRT leak tracker: Allocated %s beyond the internal reserve. Increase kTrackingInternalReserve to improve performance, especially on shutdown.", buf.c_str());
+		oTrace("CRT leak tracker: Allocated %s beyond the internal reserve. Increase kTrackingInternalReserve to improve performance, especially on shutdown.", buf.c_str());
 	}
 
 	process_heap::deallocate(deinitialize());
@@ -177,7 +176,7 @@ int context::on_malloc_event(int alloc_type, void* user_data, size_t size
 				s.ordinal = windows::crt_heap::allocation_id(user_data);
 				s.operation = memory_operation::deallocate;
 				break;
-			default: throw std::invalid_argument(stringf("unexpected alloc type %d", alloc_type));
+			default: oThrow(std::errc::invalid_argument, "unexpected alloc type %d", alloc_type);
 		}
 
 		on_stat_ordinal(s, old_id);

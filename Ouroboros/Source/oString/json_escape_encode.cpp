@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oArch/compiler.h>
+#include <oCore/assert.h>
 #include <oString/string.h>
 #include <system_error>
 
@@ -16,7 +17,7 @@ char* json_escape_encode(char* oRESTRICT dst, size_t dst_size, const char* oREST
 		if ((*src & 0x80) != 0)
 		{
 			// TODO: Support UTF-8 
-			throw std::system_error(std::errc::function_not_supported, std::system_category(), "UTF-8 not yet supported");
+			oThrow(std::errc::function_not_supported, "UTF-8 not yet supported");
 			//sncatf(dst, dst_size, "_");
 			//int unicode = oUTF8Decode(src);
 			//sncatf(dst, dst_size, "\\u%c%c%c%c", oHEXDIGIT((unicode >> 12) & 0xf), oHEXDIGIT((unicode >> 8) & 0xf), oHEXDIGIT((unicode >> 4) & 0xf), oHEXDIGIT(unicode & 0xf));

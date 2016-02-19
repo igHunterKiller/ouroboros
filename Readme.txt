@@ -20,11 +20,13 @@ Enjoy!
 Dependency Graph:
 
            oArch
-          /  ^  \             
-     oCore oMath oMemory 
-        ^    ^     ^   \
-        |    | oString oConcurrency
-        |    |     ^    /
+		     |
+           oCore
+           /   \             
+      oMath  oMemory 
+        ^      ^   \
+        |   String oConcurrency
+        |      ^     ^
      ------ oBase ------
     /     ^     ^       \
 oSurface  |   oMesh  oCompute

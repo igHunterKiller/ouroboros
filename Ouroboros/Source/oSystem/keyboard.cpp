@@ -272,7 +272,7 @@ static key to_key(WORD vkcode)
 	match_array(sKeys, 256);
 	
 	if (vkcode >= VK_XBUTTON2 && sKeys[vkcode] == key::none)
-		oTRACE("No mapping for vkcode = %x", vkcode);
+		oTrace("No mapping for vkcode = %x", vkcode);
 	
 	return sKeys[vkcode];
 }
@@ -355,7 +355,7 @@ static INPUT to_input(WORD vkcode, bool down, HWND hwnd = nullptr, int16_t x = 0
 
 	switch (vkcode)
 	{
-		case VK_XBUTTON1: case VK_XBUTTON2: throw std::invalid_argument("extended buttons 1 & 2 not supported");
+		case VK_XBUTTON1: case VK_XBUTTON2: oThrow(std::errc::invalid_argument, "extended buttons 1 & 2 not supported");
 		case VK_LBUTTON: case VK_RBUTTON: case VK_MBUTTON:
 		{
 			static const uint16_t sUps[]   =  { MOUSEEVENTF_LEFTUP,   MOUSEEVENTF_RIGHTUP,   MOUSEEVENTF_MIDDLEUP   };
@@ -521,7 +521,7 @@ static void accels_to_hotkeys(size_t num_entries, const void* accels, hotkey* ho
 	for (size_t i = 0; i < num_entries; i++)
 	{
 		const ACCEL& a = ((const ACCEL*)accels)[i];
-		oASSERT(a.fVirt & FVIRTKEY, "");
+		oAssert(a.fVirt & FVIRTKEY, "");
 
 		uint8_t modifiers = 0;
 		if (a.fVirt & FCONTROL) modifiers |= (uint8_t)key_modifier::ctrl;
@@ -539,7 +539,7 @@ static void accels_to_hotkeys(size_t num_entries, const void* accels, hotkey* ho
 keyboard_t::hotkeyset_t keyboard_t::new_hotkeyset(const hotkey* hotkeys, size_t num_hotkeys)
 {
 	size_t bytes = sizeof(ACCEL) * num_hotkeys;
-	oASSERT(bytes <= 64 * 1024, "need a better alloc");
+	oAssert(bytes <= 64 * 1024, "need a better alloc");
 	LPACCEL accels = (LPACCEL)alloca(bytes);
 	hotkeys_to_accels(num_hotkeys, hotkeys, accels);
 	HACCEL hAccel = CreateAcceleratorTable(accels, (uint32_t)num_hotkeys);

@@ -4,7 +4,6 @@
 
 #include <oCore/assert.h>
 #include <oCore/countof.h>
-#include <oCore/stringf.h>
 #include <oString/stringize.h>
 #include <oString/string_path.h>
 
@@ -94,13 +93,13 @@ char* scc_svn::root(const char* _Path, char* _StrDestination, size_t _SizeofStrD
 	size_t len = strcspn(path, oNEWLINE); // move to end of line
 
 	if (len >= _SizeofStrDestination)
-		throw std::invalid_argument("destination buffer to receive scc root is too small");
+		oThrow(std::errc::invalid_argument, "destination buffer to receive scc root is too small");
 
 	memcpy(_StrDestination, path, len);
 	_StrDestination[len] = 0;
 
 	if (!clean_path(_StrDestination, _SizeofStrDestination, _StrDestination))
-		throw std::invalid_argument("destination buffer to receive scc root is too small");
+		oThrow(std::errc::invalid_argument, "destination buffer to receive scc root is too small");
 	return _StrDestination;
 }
 
@@ -165,7 +164,7 @@ static char* svn_parse_status_line(char* _StatusBuffer, unsigned int _UpToRevisi
 	}
 
 	_File.status = get_status(s[0]);
-	oASSERT(s[1] == ' ' || (s[0] == 's' && s[1] == 'v' && s[2] == 'n'), "haven't thought about this yet:\n s[1]=%c %s", s[1], _StatusBuffer);
+	oAssert(s[1] == ' ' || (s[0] == 's' && s[1] == 'v' && s[2] == 'n'), "haven't thought about this yet:\n s[1]=%c %s", s[1], _StatusBuffer);
 	if (s[8] == '*') _File.status = scc_status::out_of_date;
 	s += 9;
 	s += strspn(s, oWHITESPACE);

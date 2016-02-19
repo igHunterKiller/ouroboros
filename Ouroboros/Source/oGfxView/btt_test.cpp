@@ -29,7 +29,7 @@ uint32_t populate_btt_vbv_ibvs(const char* name, gpu::device* dev, uint16_t max_
 			auto num_indices = prim::btt_write_indices(btt, max_depth, patch_index, indices);
 			//out_ibvs[patch_index] = dev->new_ibv(name, num_indices, indices);
 			if (1)
-				throw std::invalid_argument("fixme");
+				oThrow(std::errc::invalid_argument, "fixme");
 		}
 	}
 	
@@ -40,7 +40,7 @@ uint32_t populate_btt_vbv_ibvs(const char* name, gpu::device* dev, uint16_t max_
 		auto verts = default_allocator.scoped_allocate(num_verts * sizeof(float3), "temp patch verts");
 		prim::btt_vertices(max_depth, verts, sizeof(float3));
 		//*out_vbv = dev->new_vbv(name, sizeof(float3), num_verts, verts);
-		throw std::invalid_argument("fixme");
+		oThrow(std::errc::invalid_argument, "fixme");
 	}
 
 	return last_patch_index + 1;
@@ -73,7 +73,7 @@ btt_test::btt_test()
 		};
 
 		//ground_plane_ = dev->new_vbv("ground plane", sizeof(float3), 6, ground_verts);
-		throw std::invalid_argument("fixme");
+		oThrow(std::errc::invalid_argument, "fixme");
 	}
 
 	static uint16_t s_max_depth = 7;

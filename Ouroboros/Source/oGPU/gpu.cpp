@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oGPU/gpu.h>
 #include <oSystem/windows/win_error.h>
 #include <oSystem/windows/win_util.h>
@@ -11,7 +10,7 @@
 #include "dxgi_util.h"
 #include <oCore/assert.h>
 
-#define oGPU_CHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(stringf(format, ## __VA_ARGS__)); } while(false)
+#define oGPU_CHECK(expr, format, ...) oCheck(expr, std::errc::invalid_argument, format, ## __VA_ARGS__)
 
 using namespace ouro::gpu::d3d;
 
@@ -326,7 +325,7 @@ static D3D11_RENDER_TARGET_VIEW_DESC from_rtv_desc(const rtv_desc& desc)
 			d.Texture3D.WSize = desc.texture3d.wsize;
 			break;
 		
-		default: throw std::invalid_argument(stringf("invalid dimension %d", desc.dimension));
+		default: oThrow(std::errc::invalid_argument, "invalid dimension %d", desc.dimension);
 	}
 	return d;
 }
@@ -370,7 +369,7 @@ static rtv_desc to_rtv_desc(const D3D11_RENDER_TARGET_VIEW_DESC& desc)
 			d.texture3d.wsize = desc.Texture3D.WSize;
 			break;
 		
-		default: throw std::invalid_argument(stringf("invalid D3D11_RTV_DIMENSION %d", desc.ViewDimension));
+		default: oThrow(std::errc::invalid_argument, "invalid D3D11_RTV_DIMENSION %d", desc.ViewDimension);
 	}
 	return d;
 }
@@ -419,7 +418,7 @@ static D3D11_DEPTH_STENCIL_VIEW_DESC from_dsv_desc(const dsv_desc& desc)
 			d.Texture2DMSArray.ArraySize = desc.texture2dmsarray.array_size;
 			break;
 		
-		default: throw std::invalid_argument(stringf("invalid dimension %d", desc.dimension));
+		default: oThrow(std::errc::invalid_argument, "invalid dimension %d", desc.dimension);
 	}
 	return d;
 }
@@ -456,7 +455,7 @@ static dsv_desc to_dsv_desc(const D3D11_DEPTH_STENCIL_VIEW_DESC& desc)
 			d.texture2dmsarray.array_size = desc.Texture2DMSArray.ArraySize;
 			break;
 		
-		default: throw std::invalid_argument(stringf("invalid D3D11_DSV_DIMENSION %d", desc.ViewDimension));
+		default: oThrow(std::errc::invalid_argument, "invalid D3D11_DSV_DIMENSION %d", desc.ViewDimension);
 	}
 	return d;
 }
@@ -513,7 +512,7 @@ static D3D11_UNORDERED_ACCESS_VIEW_DESC from_uav_desc(const uav_desc& desc)
 			d.Texture3D.WSize = desc.texture3d.wsize;
 			break;
 		
-		default: throw std::invalid_argument(stringf("invalid dimension %d", desc.dimension));
+		default: oThrow(std::errc::invalid_argument, "invalid dimension %d", desc.dimension);
 	}
 	return d;
 }
@@ -560,7 +559,7 @@ static uav_desc to_uav_desc(const D3D11_UNORDERED_ACCESS_VIEW_DESC& desc)
 			d.texture3d.wsize = desc.Texture3D.WSize;
 			break;
 		
-		default: throw std::invalid_argument(stringf("invalid D3D11_UAV_DIMENSION %d", desc.ViewDimension));
+		default: oThrow(std::errc::invalid_argument, "invalid D3D11_UAV_DIMENSION %d", desc.ViewDimension);
 	}
 	return d;
 }
@@ -632,7 +631,7 @@ static D3D11_SHADER_RESOURCE_VIEW_DESC from_srv_desc(const srv_desc& desc)
 			oGPU_CHECK(desc.texturecubearray.resource_min_lod_clamp == 0.0f, "resource_min_lod_clamp not supported");
 			break;
 		
-		default: throw std::invalid_argument(stringf("unexpected D3D11_RESOURCE_DIMENSION %d", desc.dimension));
+		default: oThrow(std::errc::invalid_argument, "unexpected D3D11_RESOURCE_DIMENSION %d", desc.dimension);
 	}
 	return d;
 }
@@ -691,7 +690,7 @@ static srv_desc to_srv_desc(const D3D11_SHADER_RESOURCE_VIEW_DESC& desc)
 			d.texturecubearray.resource_min_lod_clamp = 0.0f;
 			break;
 		
-		default: throw std::invalid_argument(stringf("unexpected D3D11_RESOURCE_DIMENSION %d", desc.ViewDimension));
+		default: oThrow(std::errc::invalid_argument, "unexpected D3D11_RESOURCE_DIMENSION %d", desc.ViewDimension);
 	}
 	return d;
 }
@@ -761,7 +760,7 @@ static D3D11_SHADER_RESOURCE_VIEW_DESC srv_from_resource_desc(const resource_des
 			oGPU_CHECK((desc.depth_or_array_size % 6) == 0, "cubemap has unexpected number of slices");
 			break;
 		
-		default: throw std::invalid_argument(stringf("unexpected D3D11_RESOURCE_DIMENSION %d", desc_dimension));
+		default: oThrow(std::errc::invalid_argument, "unexpected D3D11_RESOURCE_DIMENSION %d", desc_dimension);
 	}
 	return d;
 }
@@ -1102,7 +1101,7 @@ resource_desc resource::get_desc() const
 			break;
 		};
 
-		default: throw std::invalid_argument(stringf("unexpected D3D11_RESOURCE_DIMENSION %d", type));
+		default: oThrow(std::errc::invalid_argument, "unexpected D3D11_RESOURCE_DIMENSION %d", type);
 	}
 
 	return d;
@@ -1500,7 +1499,7 @@ void device::resize(uint32_t width, uint32_t height)
 		#if oHAS_oTRACEA
 			char target_name[128];
 		#endif
-		oTRACEA("%s %s resize %dx%d -> %dx%d", type_name(typeid(*this).name()), debug_name(target_name, (ID3D11Device*)dev_), current_width, current_height, new_width, new_height);
+		oTraceA("%s %s resize %dx%d -> %dx%d", type_name(typeid(*this).name()), debug_name(target_name, (ID3D11Device*)dev_), current_width, current_height, new_width, new_height);
 
 		swp_srv_ = nullptr;
 		swp_rtv_ = nullptr;
@@ -1559,8 +1558,7 @@ present_mode device::get_present_mode()
 
 void device::set_present_mode(const present_mode& mode)
 {
-	if (!swp_)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), "no primary render target has been created");
+	oCheck(swp_, std::errc::protocol_error, "no primary render target has been created");
 	
 	BOOL was_excl = FALSE;
 	((IDXGISwapChain*)swp_)->GetFullscreenState(&was_excl, nullptr);
@@ -1588,8 +1586,7 @@ void device::set_present_mode(const present_mode& mode)
 
 void device::present(uint32_t interval)
 {
-	if (!swp_)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), "no primary render target has been created");
+	oCheck(swp_, std::errc::protocol_error, "no primary render target has been created");
 	dxgi::present((IDXGISwapChain*)swp_, interval);
 	npresents_++;
 }
@@ -1633,7 +1630,7 @@ void device::flush(const flush_type& type)
 {
 	auto dc = ((graphics_command_list_d3d11*)imm_.c_ptr())->dc;
 
-	oASSERT(type != flush_type::periodic, "periodic is not yet implemented");
+	oAssert(type != flush_type::periodic, "periodic is not yet implemented");
 
 	if (type == flush_type::immediate_and_sync)
 		imm_->insert_fence(flush_sync_);
@@ -1854,7 +1851,7 @@ ref<graphics_command_list> device::new_graphics_command_list_internal(const char
 	gcl->dev = this;
 
 	if (FAILED(gcl->dc->QueryInterface(__uuidof(ID3DUserDefinedAnnotation), (void**)&gcl->uda)))
-		oTRACE("ID3DUserDefinedAnnotation creation failed, there will be no debug markup for this session");
+		oTrace("ID3DUserDefinedAnnotation creation failed, there will be no debug markup for this session");
 
 	gcl->refcount = 1;
 	gcl->mesh_buffers[0] = persistent_mesh_buffer_;
@@ -2548,7 +2545,7 @@ ibv graphics_command_list::commit_transient_indices()
 void* graphics_command_list::new_transient_vertices(uint32_t vertex_stride, uint32_t num_vertices)
 {
 	if ((vertex_stride & 0x3) != 0)
-		throw std::invalid_argument("vertex_stride must be 4-byte aligned");
+		oThrow(std::errc::invalid_argument, "vertex_stride must be 4-byte aligned");
 
 	auto gcl = (graphics_command_list_d3d11*)this;
 	const auto bytes = vertex_stride * num_vertices;

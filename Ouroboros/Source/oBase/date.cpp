@@ -30,7 +30,7 @@ static const uint64_t kSecondsFrom1601To1900 = static_cast<uint64_t>(kNTPEpochJD
 namespace ouro {
 
 #define oDATE_OUT_OF_RANGE(_ToType) do { char buf[1024]; snprintf(buf, sizeof(buf), "date_cast<%s>(const %s&) out of range", typeid(_date).name(), typeid(_ToType).name()); throw std::domain_error(buf); } while(false)
-#define oDATE_INVALID_ARG(format, ...) do { char buf[1024]; snprintf(buf, sizeof(buf), format, ## __VA_ARGS__); throw std::invalid_argument(buf); } while(false)
+#define oDATE_INVALID_ARG(format, ...) do { char buf[1024]; snprintf(buf, sizeof(buf), format, ## __VA_ARGS__); oThrow(std::errc::invalid_argument, buf); } while(false)
 
 // From NTP reference implementation ntp-dev-4.2.7p295/libntp/ntp_calendar.cpp:
 /*

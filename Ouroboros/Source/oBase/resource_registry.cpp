@@ -200,7 +200,7 @@ resource_registry_t::size_type resource_registry_t::flush(size_type max_operatio
 				ex;
 				*e = failed_;
 				f->status.store(resource_status::failed);
-				oTRACEA("failed: %s (%s)", f->path.c_str(), ex.what());
+				oTraceA("failed: %s (%s)", f->path.c_str(), ex.what());
 			}
 			n--;
 		}
@@ -295,7 +295,7 @@ resource_base_t resource_registry_t::insert(key_type key, const path_t& path, bl
 		}
 
 		// anything else is some sort of loading which is flagged
-		oASSERT(force || old != resource_status::initialized, "unexpected status");
+		oAssert(force || old != resource_status::initialized, "unexpected status");
 
 		if (old == resource_status::deinitializing && !force)
 			f->status.store(resource_status::initialized);
@@ -327,7 +327,7 @@ resource_base_t resource_registry_t::insert(key_type key, const path_t& path, bl
 		// hmm... why would two threads get back the same index from a call to pool_create()? Maybe this isn't needed.
 		if (lookup_.nullidx != lookup_.set(key, index))
 		{
-			oTRACE("resource_registry_t race on setting index %u", index);
+			oTrace("resource_registry_t race on setting index %u", index);
 			pool_.destroy(f);
 		}
 		else if (f->status == resource_status::failed)

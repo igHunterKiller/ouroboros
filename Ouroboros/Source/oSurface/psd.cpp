@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oCore/finally.h>
 #include <oSurface/codec.h>
 #include <oSurface/convert.h>
@@ -64,7 +63,7 @@ info_t get_info_psd(const void* buffer, size_t size)
 
 blob encode_psd(const image& img, const allocator& file_alloc, const allocator& temp_alloc, const compression& compression)
 {
-	throw std::system_error(std::errc::operation_not_supported, std::system_category(), "psd encoding not supported");
+	oThrow(std::errc::operation_not_supported, "psd encoding not supported");
 }
 
 image decode_psd(const void* buffer, size_t size, const allocator& texel_alloc, const allocator& temp_alloc, const mip_layout& layout)
@@ -73,7 +72,7 @@ image decode_psd(const void* buffer, size_t size, const allocator& texel_alloc, 
 	info_t psd_info = get_info_psd(buffer, size, &h);
 
 	if (psd_info.format == format::unknown)
-		throw std::invalid_argument("invalid psd buffer");
+		oThrow(std::errc::invalid_argument, "invalid psd buffer");
 
 	info_t info = psd_info;
 	info.mip_layout = layout;
@@ -113,7 +112,7 @@ image decode_psd(const void* buffer, size_t size, const allocator& texel_alloc, 
 		//		case psd_bits_per_channel::k8: interleave_channels<uint8_t>((uint8_t*)mapped.data, byte_dimensions.x, byte_dimensions.y, dst_has_alpha, red, green, blue, alpha); break;
 		//		case psd_bits_per_channel::k16: interleave_channels<uint16_t>((uint16_t*)mapped.data, byte_dimensions.x, byte_dimensions.y, dst_has_alpha, red, green, blue, alpha); break;
 		//		case psd_bits_per_channel::k32: interleave_channels<uint32_t>((uint32_t*)mapped.data, byte_dimensions.x, byte_dimensions.y, dst_has_alpha, red, green, blue, alpha); break;
-		//		default: throw std::system_error(std::errc::operation_not_supported, "unsupported bitdepth in psd decode");
+		//		default: oThrow(std::errc::operation_not_supported, "unsupported bitdepth in psd decode");
 		//	}
 
 		//	break;
@@ -133,7 +132,7 @@ image decode_psd(const void* buffer, size_t size, const allocator& texel_alloc, 
 			break;
 		}
 
-		default: throw std::system_error(std::errc::operation_not_supported, std::system_category(), stringf("unsupported compression type %d in psd decode", (int)compression));
+		default: oThrow(std::errc::operation_not_supported, "unsupported compression type %d in psd decode", (int)compression);
 	}
 
 	if (info.mips())

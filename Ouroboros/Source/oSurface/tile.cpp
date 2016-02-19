@@ -2,7 +2,7 @@
 
 #include <oSurface/tile.h>
 
-#define oSURF_CHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(format, ## __VA_ARGS__); } while(false)
+#define oSURF_CHECK(expr, format, ...) do { if (!(expr)) oThrow(std::errc::invalid_argument, format, ## __VA_ARGS__); } while(false)
 
 namespace ouro { namespace surface {
 

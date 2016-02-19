@@ -51,7 +51,7 @@ HRESULT include::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pP
 					err += ";";
 				}
 			
-			throw std::system_error(std::errc::no_such_file_or_directory, std::system_category(), err.c_str());
+			oThrow(std::errc::no_such_file_or_directory, "%s", err.c_str());
 		}
 
 		blob source = filesystem::load(full_path);
@@ -59,7 +59,7 @@ HRESULT include::Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pP
 		*ppData = source;
 		*pBytes = (uint32_t)source.size();
 		if (!cache_.add(filename.hash(), std::move(source)))
-			throw std::system_error(std::errc::no_buffer_space, std::system_category(), "add failed");
+			oThrow(std::errc::no_buffer_space, "add failed");
 	}
 
 	catch (std::exception&)

@@ -6,7 +6,7 @@
 #include <vector>
 #include <float.h>
 
-#define oSURF_CHECK(expr, format, ...) do { if (!(expr)) throw std::invalid_argument(format, ## __VA_ARGS__); } while(false)
+#define oSURF_CHECK(expr, format, ...) do { if (!(expr)) oThrow(std::errc::invalid_argument, format, ## __VA_ARGS__); } while(false)
 
 namespace ouro {
 
@@ -174,7 +174,7 @@ template<typename FILTER, size_t ELEMENT_SIZE>
 void resize_horizontal(const info_t& src_info, const const_mapped_subresource& src, const info_t& dst_info, const mapped_subresource& dst)
 {
 	if (src_info.dimensions.y != dst_info.dimensions.y)
-		throw std::invalid_argument("Horizontal resize assumes y dimensions are the same for source and destination");
+		oThrow(std::errc::invalid_argument, "Horizontal resize assumes y dimensions are the same for source and destination");
 
 	FILTER filter;
 	filter.initialize_filter(src_info.dimensions.x, dst_info.dimensions.x);
@@ -213,7 +213,7 @@ template<typename FILTER, int ELEMENT_SIZE>
 void resize_vertical(const info_t& src_info, const const_mapped_subresource& src, const info_t& dst_info, const mapped_subresource& dst)
 {
 	if (src_info.dimensions.x != dst_info.dimensions.x)
-		throw std::invalid_argument("vertical resize assumes x dimensions are the same for source and destination");
+		oThrow(std::errc::invalid_argument, "vertical resize assumes x dimensions are the same for source and destination");
 
 	FILTER filter;
 	filter.initialize_filter(src_info.dimensions.y, dst_info.dimensions.y);
@@ -350,7 +350,7 @@ void resize(const info_t& src_info, const const_mapped_subresource& src, const i
 		FILTER_CASE(triangle)
 		FILTER_CASE(lanczos2)
 		FILTER_CASE(lanczos3)
-		default: throw std::invalid_argument("unsupported filter type");
+		default: oThrow(std::errc::invalid_argument, "unsupported filter type");
 	}
 
 	#undef FILTER_CASE

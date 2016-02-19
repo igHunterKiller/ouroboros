@@ -170,13 +170,10 @@ console::info_t context::get_info() const
 {
 	lock_t lock(mutex_);
 	CONSOLE_SCREEN_BUFFER_INFO sbi;
-	oASSERT(GetStdHandle(STD_OUTPUT_HANDLE) != INVALID_HANDLE_VALUE, "");
+	oAssert(GetStdHandle(STD_OUTPUT_HANDLE) != INVALID_HANDLE_VALUE, "");
 
 	if (!GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &sbi))
-	{
-		if (GetLastError() == ERROR_INVALID_HANDLE && this_process::is_child())
-			throw std::system_error(std::errc::permission_denied, std::system_category(), "Failed to access console because this is a child process.");
-	}
+		oCheck(GetLastError() != ERROR_INVALID_HANDLE || !this_process::is_child(), std::errc::permission_denied, "Failed to access console because this is a child process.");
 
 	info_t i;
 	i.window_position = int2(sbi.srWindow.Left, sbi.srWindow.Top);
@@ -208,10 +205,7 @@ void context::set_info(const info_t& info)
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	COORD bufferDimension = { static_cast<SHORT>(i.buffer_size.x), static_cast<SHORT>(i.buffer_size.y) };
 	if (!SetConsoleScreenBufferSize(hConsole, bufferDimension))
-	{
-		if (GetLastError() == ERROR_INVALID_HANDLE && ouro::this_process::is_child())
-			throw std::system_error(std::errc::permission_denied, std::system_category(), "Failed to access console because this is a child process.");
-	}
+		oCheck(GetLastError() != ERROR_INVALID_HANDLE || !ouro::this_process::is_child(), std::errc::permission_denied, "Failed to access console because this is a child process.");
 
 	SMALL_RECT r;
 	r.Left = 0;
@@ -226,18 +220,18 @@ void context::set_info(const info_t& info)
 	{
 		r.Right = sbi.dwMaximumWindowSize.X - 1;
 		if (bufferDimension.X <= i.window_size.x)
-			oTRACE("Clamping console width (%d) to system max of %d due to a specified buffer width (%d) larger than screen width", i.buffer_size.x, r.Right, bufferDimension.X);
+			oTrace("Clamping console width (%d) to system max of %d due to a specified buffer width (%d) larger than screen width", i.buffer_size.x, r.Right, bufferDimension.X);
 		else
-			oTRACE("Clamping console width (%d) to system max of %d", i.buffer_size.x, r.Right);
+			oTrace("Clamping console width (%d) to system max of %d", i.buffer_size.x, r.Right);
 	}
 
 	if (r.Bottom >= sbi.dwMaximumWindowSize.Y)
 	{
 		r.Bottom = sbi.dwMaximumWindowSize.Y - 4; // take a bit more off for the taskbar
 		if (bufferDimension.Y <= i.window_size.y)
-			oTRACE("Clamping console height (%d) to system max of %d due to a specified buffer width (%d) larger than screen width", i.buffer_size.y, r.Bottom, bufferDimension.Y);
+			oTrace("Clamping console height (%d) to system max of %d due to a specified buffer width (%d) larger than screen width", i.buffer_size.y, r.Bottom, bufferDimension.Y);
 		else
-			oTRACE("Clamping console height (%d) to system max of %d", i.buffer_size.y, r.Bottom);
+			oTrace("Clamping console height (%d) to system max of %d", i.buffer_size.y, r.Bottom);
 	}
 
 	oVB(SetConsoleWindowInfo(hConsole, TRUE, &r));

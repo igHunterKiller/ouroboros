@@ -1,6 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
+#include <oCore/assert.h>
 #include <oString/path.h>
 #include <oSystem/module.h>
 #include <oString/opttok.h>
@@ -51,7 +51,7 @@ void ParseCommandLine(int argc, const char* argv[], oVER_DESC* _pDesc)
 			case 'c': _pDesc->PrintCopyright = true; break;
 			case 'h': _pDesc->ShowHelp = true; break;
 			case ' ': _pDesc->InputPath = value; break;
-			case ':': throw std::invalid_argument(stringf("The %d%s option is missing a parameter (does it begin with '-' or '/'?)", count, ordinal(count)));
+			case ':': oThrow(std::errc::invalid_argument, "The %d%s option is missing a parameter (does it begin with '-' or '/'?)", count, ordinal(count));
 		}
 
 		ch = opttok(&value);
@@ -78,13 +78,13 @@ void Main(int argc, const char* argv[])
 		return;
 	}
 
-	if (!opts.InputPath)
-		throw std::invalid_argument("no input file specified");
+	oCheck(opts.InputPath, std::errc::invalid_argument, "no input file specified");
 
 	module::info mi = module::get_info(path_t(opts.InputPath));
 	sstring FBuf, PBuf;
-	if (!to_string(FBuf, mi.version)) throw std::invalid_argument("");
-	if (!to_string(PBuf, mi.version)) throw std::invalid_argument("");
+
+	oCheck(to_string(FBuf, mi.version), std::errc::invalid_argument, "");
+	oCheck(to_string(PBuf, mi.version), std::errc::invalid_argument, "");
 
 	if (opts.PrintFileDescription)
 		printf("%s\n", mi.description.c_str());

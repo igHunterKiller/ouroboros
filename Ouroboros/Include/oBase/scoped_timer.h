@@ -22,7 +22,7 @@ public:
 	scoped_timer(const char* name) : name_(name) {}
 	~scoped_timer() { trace(); }
 	
-	inline void trace() { oTRACEA("%s took %.03f sec", name_ ? name_ : "(null)", seconds()); }
+	inline void trace() { oTraceA("%s took %.03f sec", name_ ? name_ : "(null)", seconds()); }
 
 private:
 	const char* name_;

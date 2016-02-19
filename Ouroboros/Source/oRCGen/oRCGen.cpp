@@ -1,8 +1,8 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oString/opttok.h>
 #include <oBase/scc.h>
+#include <oCore/assert.h>
 #include <oCore/version.h>
 #include <oSystem/filesystem.h>
 #include <oSystem/system.h>
@@ -58,13 +58,12 @@ oOPT ParseOptions(int argc, const char* argv[])
 					if (from_string(&o.Major, v) && from_string(&o.Minor, majend))
 						break;
 				}
-				throw std::invalid_argument("version number not well-formatted");
+				oThrow(std::errc::invalid_argument, "version number not well-formatted");
 			}
 			case 'a': o.AutoRevision = true; break;
 			case 'r':
 			{
-				if (!from_string(&o.Revision, value))
-					throw std::invalid_argument(stringf("unrecognized -r value: it must be an non-negative integer", value));
+				oCheck(from_string(&o.Revision, value), std::errc::invalid_argument, "unrecognized -r value: it must be an non-negative integer", value);
 				break;
 			}
 			case 'p': o.ProductName = value; break;
@@ -74,15 +73,15 @@ oOPT ParseOptions(int argc, const char* argv[])
 			case 'd': o.Description = value; break;
 			case 'h': o.ShowHelp = true; break;
 			case 'o': o.Output = value; break;
-			case '?': throw std::invalid_argument(stringf("unrecognized switch \"%s\"", value));
-			case ':': throw std::invalid_argument(stringf("missing parameter option for argument %d", (int)value));
+			case '?': oThrow(std::errc::invalid_argument, "unrecognized switch \"%s\"", value);
+			case ':': oThrow(std::errc::invalid_argument, "missing parameter option for argument %d", (int)value);
 		}
 
 		ch = opttok(&value);
 	}
 
 	if (!o.Output)
-		throw std::invalid_argument("-o specifying an output file is required");
+		oThrow(std::errc::invalid_argument, "-o specifying an output file is required");
 
 	return o;
 }

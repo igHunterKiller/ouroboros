@@ -210,7 +210,7 @@ void gpu_test::on_event(const window::basic_event& e)
 
 void gpu_test::run(unit_test::services& services)
 {
-	oASSERT(win_->is_window_thread(), "Run must be called from same thread that created the window");
+	oAssert(win_->is_window_thread(), "Run must be called from same thread that created the window");
 	bool all_frames_succeeded = true;
 
 	initialize();
@@ -247,8 +247,7 @@ void gpu_test::run(unit_test::services& services)
 
 	deinitialize();
 
-	if (!all_frames_succeeded)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), "Image compares failed, see debug output/log for specifics.");
+	oCheck(all_frames_succeeded, std::errc::protocol_error, "Image compares failed, see debug output/log for specifics.");
 }
 
 const int gpu_texture_test::s_snapshot_frames[2] = { 0, 1 };

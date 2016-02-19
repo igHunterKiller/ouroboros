@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oMemory/memory.h>
 #include <memory.h>
 #include <stdexcept>
@@ -12,8 +13,7 @@ void* memmem(void* buf, size_t buf_size, const void* find, size_t find_size)
 	// buffer that might straddle splits, including if splits are smaller than the 
 	// sizeof find (where it straddles 3 or more splits).
 
-	if (find_size < 4)
-		throw std::invalid_argument("find buffer under 4 bytes is not yet implemented");
+	oCheck(find_size >= 4, std::errc::invalid_argument, "find buffer under 4 bytes is not yet implemented");
 
 	int8_t* oRESTRICT end = buf_size + (int8_t*)buf;
 	int8_t* oRESTRICT found = (int8_t*)memchr(buf, *(const int32_t*)find, buf_size);

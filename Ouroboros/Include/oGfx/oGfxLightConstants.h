@@ -40,7 +40,7 @@ struct oGfxLightConstants
 
 		void Set(const oGfxLight* _pLights, uint _NumLights)
 		{
-			oASSERT(_NumLights <= oGPU_MAX_NUM_LIGHTS_PER_PASS, "_LightCount of %d exceeds %d", _NumLights, oGPU_MAX_NUM_LIGHTS_PER_PASS);
+			oAssert(_NumLights <= oGPU_MAX_NUM_LIGHTS_PER_PASS, "_LightCount of %d exceeds %d", _NumLights, oGPU_MAX_NUM_LIGHTS_PER_PASS);
 			if (_pLights)
 				memcpy(Lights, _pLights, min(oGPU_MAX_NUM_LIGHTS_PER_PASS, _NumLights) * sizeof(oGfxLight));
 			NumLights = _NumLights;
@@ -49,7 +49,7 @@ struct oGfxLightConstants
 
 		void Add(const oGfxLight& _Light)
 		{
-			oASSERT(NumLights < oGPU_MAX_NUM_LIGHTS_PER_PASS, "AddLight has reached %d lights", oGPU_MAX_NUM_LIGHTS_PER_PASS);
+			oAssert(NumLights < oGPU_MAX_NUM_LIGHTS_PER_PASS, "AddLight has reached %d lights", oGPU_MAX_NUM_LIGHTS_PER_PASS);
 			Lights[NumLights++] = _Light;
 		}
 protected:

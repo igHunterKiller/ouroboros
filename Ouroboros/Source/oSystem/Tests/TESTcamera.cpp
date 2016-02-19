@@ -20,10 +20,10 @@ oTEST(oSystem_camera)
 			reported = true;
 		}
 
-		oTRACE("oCore::camera \"%s\", supports:", _Camera->name());
+		oTrace("oCore::camera \"%s\", supports:", _Camera->name());
 		_Camera->enumerate_modes([&](const camera::mode& _Mode)->bool
 		{
-			oTRACE("- %dx%d %s %d bitrate", _Mode.dimensions.x, _Mode.dimensions.y, as_string(_Mode.format), _Mode.bit_rate);
+			oTrace("- %dx%d %s %d bitrate", _Mode.dimensions.x, _Mode.dimensions.y, as_string(_Mode.format), _Mode.bit_rate);
 			return true;
 		});
 		return true;
@@ -75,7 +75,7 @@ oTEST(oSystem_camera)
 
 			oCamera::MODE closest;
 			if (!Camera->FindClosestMatchingMode(mode, &closest))
-				oASSERT(false, "");
+				oAssert(false, "");
 
 			if (!Camera->SetMode(closest))
 			{

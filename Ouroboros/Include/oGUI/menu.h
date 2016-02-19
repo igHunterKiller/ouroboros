@@ -8,6 +8,7 @@
 
 #pragma once
 #include <oGUI/oGUI.h>
+#include <oCore/assert.h>
 #include <oString/fixed_string.h>
 
 namespace ouro { namespace gui { namespace menu {
@@ -83,8 +84,7 @@ template<size_t capacity> char* get_text(fixed_string<char, capacity>& out_text,
 template<typename enumT> void append_enum_items(const enumT& num_enum_values, menu_handle m, int first_item, int last_item, int initial_item = -1)
 {
 	const int nItems = last_item - first_item + 1;
-	if (nItems != (int)num_enum_values)
-		throw std::system_error(std::errc::no_buffer_space, std::system_category(), "Enum count and first/last menu item indices mismatch");
+	oCheck(nItems == (int)num_enum_values, std::errc::no_buffer_space, "Enum count and first/last menu item indices mismatch");
 	for (int i = 0; i < nItems; i++)
 		append_item(m, first_item + i, as_string((enumT)i));
 	check_radio(m, first_item, last_item, initial_item == -1 ? first_item : first_item + initial_item);

@@ -70,12 +70,12 @@ static const oNTPDATE_TEST sNTPTests[] =
 
 static void throw_failed_date(const char* _DateName, const char* _DateType, long long _ExpectedValue, long long _CalculatedValue)
 {
-	throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("%s off by %+lld for %s", oSAFESTRN(_DateType), _ExpectedValue-_CalculatedValue, oSAFESTRN(_DateName)));
+	oThrow(std::errc::protocol_error, "%s off by %+lld for %s", oSAFESTRN(_DateType), _ExpectedValue-_CalculatedValue, oSAFESTRN(_DateName));
 }
 
 static void throw_failed_date(const char* _DateName, const char* _DateType, const date& _ExpectedValue, const date& _CalculatedValue)
 {
-	throw std::system_error(std::errc::protocol_error, std::system_category(), std::string("Conversion back to date failed for ") + oSAFESTRN(_DateName));
+	oThrow(std::errc::protocol_error, "Conversion back to date failed for %s", oSAFESTRN(_DateName));
 }
 
 #define oTESTDATE(_Test, _LLExpected, _LLCalculated) do \
@@ -87,19 +87,15 @@ template<typename DateT1, typename DateT2>
 static void expected_fail(const DateT1& _Destination, const DateT2& _Source)
 {
 	bool ExceptionThrown = false;
-	oTRACE("Expecting a domain_exception failure as part of test...");
+	oTrace("Expecting a domain_exception failure as part of test...");
 	try { DateT1 d = date_cast<DateT1>(_Source); }
 	catch (...) { ExceptionThrown = true; }
-	if (!ExceptionThrown)
-		throw std::system_error(std::errc::protocol_error, std::system_category(), typeid(DateT1).name() + std::string(" = date_cast(") + typeid(DateT2).name() + ") succeeded for invalid date %s");
+	oCheck(ExceptionThrown, std::errc::protocol_error, "%s = date_cast(%s) succeeded for invalid date", typeid(DateT1).name(), typeid(DateT2).name());
 }
 
 #define oTESTDATENOCONVERT(_Test, src, pdst) do { expected_fail(*pdst, src); } while(false)
 
-#define oTESTDATEMILLI(_Test, _IExpected, _ICalculated) do \
-{	if (_IExpected != _ICalculated) \
-		throw std::system_error(std::errc::protocol_error, std::system_category(), stringf("Fractional sec should have been %dms for %s", _IExpected, oSAFESTRN(_Test.ExpectedTimeString))); \
-} while(false)
+#define oTESTDATEMILLI(_Test, _IExpected, _ICalculated) do { oCheck(_IExpected == _ICalculated, std::errc::protocol_error, "Fractional sec should have been %dms for %s", _IExpected, oSAFESTRN(_Test.ExpectedTimeString)); } while(false)
 
 static void test_date_julian()
 {
@@ -264,8 +260,7 @@ static void test_date_ntp(unit_test::services& services)
 		char StrDate[128];
 		strftime(StrDate, T.TimeFormat, NTPDateNoMS);
 		
-		if (strcmp(StrDate, T.ExpectedTimeString))
-			throw std::system_error(std::errc::protocol_error, std::system_category(), std::string("mal-formatted time for ") + oSAFESTRN(T.ExpectedTimeString));
+		oCheck(!strcmp(StrDate, T.ExpectedTimeString), std::errc::protocol_error, "mal-formatted time for %S", oSAFESTRN(T.ExpectedTimeString));
 	}
 }
 

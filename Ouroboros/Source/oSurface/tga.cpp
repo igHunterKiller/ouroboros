@@ -38,16 +38,10 @@ info_t get_info_tga(const void* buffer, size_t size)
 
 blob encode_tga(const image& img, const allocator& file_alloc, const allocator& temp_alloc, const compression& compression)
 {
-	if (compression != compression::none)
-		throw std::system_error(std::errc::not_supported, std::system_category(), "compression not supported");
-
+	oCheck(compression == compression::none, std::errc::not_supported, "compression not supported");
 	auto info = img.info();
-
-	if (info.format != format::b8g8r8a8_unorm && info.format != format::b8g8r8_unorm)
-		throw std::invalid_argument("source must be b8g8r8a8_unorm or b8g8r8_unorm");
-
-	if (info.dimensions.x > 0xffff || info.dimensions.y > 0xffff)
-		throw std::invalid_argument("dimensions must be <= 65535");
+	oCheck(info.format == format::b8g8r8a8_unorm || info.format == format::b8g8r8_unorm, std::errc::invalid_argument, "source must be b8g8r8a8_unorm or b8g8r8_unorm");
+	oCheck(info.dimensions.x <= 0xffff && info.dimensions.y <= 0xffff, std::errc::invalid_argument, "dimensions must be <= 65535");
 
 	tga_header h = {0};
 	h.data_type_field = tga_data_type_field::rgb;
@@ -71,9 +65,7 @@ blob encode_tga(const image& img, const allocator& file_alloc, const allocator& 
 image decode_tga(const void* buffer, size_t size, const allocator& texel_alloc, const allocator& temp_alloc, const mip_layout& layout)
 {
 	info_t tga_info = get_info_tga(buffer, size);
-
-	if (tga_info.format == format::unknown)
-		throw std::invalid_argument("invalid tga buffer");
+	oCheck(tga_info.format != format::unknown, std::errc::invalid_argument, "invalid tga buffer");
 
 	auto h = (const tga_header*)buffer;
 	info_t info = tga_info;

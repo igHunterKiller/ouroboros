@@ -52,8 +52,8 @@ static void print_header(const unit_test::info_t& info, unit_test::services& srv
 {
 	trace_cpu_features(srv);
 
-	oTRACEA("Aero is %sactive", system::uses_gpu_compositing() ? "" : "in");
-	oTRACEA("Remote desktop is %sactive", system::is_remote_session() ? "" : "in");
+	oTraceA("Aero is %sactive", system::uses_gpu_compositing() ? "" : "in");
+	oTraceA("Remote desktop is %sactive", system::is_remote_session() ? "" : "in");
 
 	srv.printf(unit_test::print_type::info, "Root Path: %s\n", srv.root_path());
 	srv.printf(unit_test::print_type::info, "Random Seed: %u\n", info.random_seed);
@@ -132,8 +132,7 @@ void ouro_unit_test_framework::check_system_requirements(const unit_test::info_t
 		return true;
 	}, &adapter_info);
 
-	if (adapter_info.vendor == vendor::unknown)
-		throw std::exception("no suitable video driver found");
+	oCheck(adapter_info.vendor != vendor::unknown, std::errc::no_such_device, "no suitable video driver found");
 
 	root_ = filesystem::data_path();
 
@@ -193,7 +192,7 @@ void ouro_unit_test_framework::vtrace(const char* format, va_list args)
 {
 	char buf[2048];
 	ouro::vsnprintf(buf, format, args);
-	oTRACEA("%s", buf);
+	oTraceA("%s", buf);
 }
 
 void ouro_unit_test_framework::vprintf(const unit_test::print_type& type, const char* format, va_list args)
@@ -296,11 +295,11 @@ static bool scc_push_modified(std::vector<scc_file>& modified)
 	{
 		if (e.code() == std::errc::no_such_file_or_directory)
 		{
-			oTRACEA("'%s' must be in the path for filtering to work", as_string(scc->protocol()));
+			oTraceA("'%s' must be in the path for filtering to work", as_string(scc->protocol()));
 			return false;
 		}
 		else
-			oTRACEA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(scc->protocol()), e.what());
+			oTraceA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(scc->protocol()), e.what());
 
 		return false;
 	}
@@ -308,7 +307,7 @@ static bool scc_push_modified(std::vector<scc_file>& modified)
 	catch (std::exception& e)
 	{
 		e;
-		oTRACEA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(scc->protocol()), e.what());
+		oTraceA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(scc->protocol()), e.what());
 		return false;
 	}
 
@@ -374,44 +373,44 @@ void auto_filter_libs(std::vector<ouro::filter_chain::filter_t>& filters)
 	static const char* s_libs[] =
 	{
 		"oArch",
-		"oMemory",
-		"oString",
-		"oMath",
-		"oConcurrency",
 		"oBase",
-		"oSurface",
-		"oPrim",
-		"oManip",
 		"oCompute",
-		"oMesh",
-		"oGPU",
+		"oConcurrency",
 		"oCore",
 		"oGfx",
+		"oGPU",
 		"oGUI",
+		"oMath",
+		"oMemory",
+		"oMesh",
+		"oString",
+		"oSurface",
+		"oSystem",
 	};
 
 	static const char* s_patterns[] =
 	{
 		"oArch.*",
-		"oMemory.*",
-		"oString.*",
-		"oMath.*",
-		"oConcurrency.*",
 		"oBase.*",
-		"oSurface.*",
-		"oPrim.*",
-		"oManip.*",
 		"oCompute.*",
-		"oMesh.*",
-		"oGPU.*",
+		"oConcurrency.*",
 		"oCore.*",
 		"oGfx.*",
+		"oGPU.*",
 		"oGUI.*",
+		"oMath.*",
+		"oMemory.*",
+		"oMesh.*",
+		"oString.*",
+		"oSurface.*",
+		"oSystem.*",
 	};
 	static_assert(countof(s_libs) == countof(s_patterns), "array mismatch");
 
 	bool has_changes[countof(s_libs)];
 	scc_scan_for_changes(s_libs, has_changes, countof(s_libs));
+
+	oTrace("scc changes will not be detected until a git implementation is done");
 
 	// append an exclusion filter for anything that hasn't changed
 	for (size_t i = 0; i < countof(has_changes); i++)

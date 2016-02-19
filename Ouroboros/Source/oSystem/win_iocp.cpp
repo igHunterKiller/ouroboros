@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/stringf.h>
 #include <oSystem/windows/win_iocp.h>
 #include <oConcurrency/backoff.h>
 #include <oMemory/allocate.h>
@@ -119,7 +118,7 @@ void iocp_threadpool::work()
 				catch (std::exception& e)
 				{
 					e;
-					oTRACEA("iocp post failed: %s", e.what());
+					oTraceA("iocp post failed: %s", e.what());
 				}
 			}
 
@@ -129,7 +128,7 @@ void iocp_threadpool::work()
 			else if (op::completion == key)
 				CallCompletion = true;
 			else
-				throw std::system_error(std::errc::operation_not_supported, std::system_category(), stringf("CompletionKey %p not supported", key));
+				oThrow(std::errc::operation_not_supported, "CompletionKey %p not supported", key);
 		}
 		else if (ol)
 				CallCompletion = true;
@@ -145,7 +144,7 @@ void iocp_threadpool::work()
 			catch (std::exception& e)
 			{
 				e;
-				oTRACEA("iocp completion failed: %s", e.what());
+				oTraceA("iocp completion failed: %s", e.what());
 			}
 		}
 	}
@@ -261,7 +260,7 @@ bool iocp_threadpool::wait_for(unsigned int _TimeoutMS)
 		#ifdef _DEBUG
 			if (to.timed_out())
 			{
-				oTRACE("Waiting for %u outstanding iocp associations to finish...", NumAssociations);
+				oTrace("Waiting for %u outstanding iocp associations to finish...", NumAssociations);
 				to.reset(5.0);
 			}
 		#endif
@@ -277,11 +276,8 @@ bool iocp_threadpool::joinable() const
 
 void iocp_threadpool::join()
 {
-	if (!joinable())
-		throw std::system_error(std::errc::invalid_argument, std::system_category());
-
-	if (!wait_for(20000))
-		throw std::system_error(std::errc::timed_out, std::system_category(), "timed out waiting for iocp completion");
+	oCheck(joinable(), std::errc::invalid_argument, "");
+	oCheck(wait_for(20000), std::errc::timed_out, "timed out waiting for iocp completion");
 
 	for (auto& w : Workers)
 		PostQueuedCompletionStatus(hIoPort, 0, op::shutdown, nullptr);

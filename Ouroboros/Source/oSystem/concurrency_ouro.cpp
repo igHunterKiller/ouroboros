@@ -1,4 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
+#include <oCore/assert.h>
 #include <oConcurrency/concurrency.h>
 #include <oConcurrency/threadpool.h>
 #include <oSystem/process_heap.h>
@@ -95,7 +97,7 @@ void parallel_for(size_t _Begin, size_t _End, const std::function<void(size_t _I
 
 void at_thread_exit(const std::function<void()>& _Task)
 {
-	throw std::system_error(std::errc::operation_not_supported, std::system_category());
+	oThrow(std::errc::operation_not_supported, "");
 }
 
 }

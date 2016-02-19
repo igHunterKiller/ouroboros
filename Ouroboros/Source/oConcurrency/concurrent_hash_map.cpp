@@ -1,5 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
 #include <oConcurrency/concurrent_hash_map.h>
+#include <oCore/assert.h>
 #include <oCore/bit.h>
 
 namespace ouro {
@@ -157,8 +159,7 @@ concurrent_hash_map::size_type concurrent_hash_map::migrate(concurrent_hash_map&
 
 concurrent_hash_map::value_type concurrent_hash_map::set(const key_type& key, const value_type& value)
 {
-	if (key == nullkey)
-		throw std::invalid_argument("key must be non-zero");
+	oCheck(key != nullkey, std::errc::invalid_argument, "key must be non-zero");
 	for (key_type k = key, j = 0;; k++, j++)
 	{
 		if (j > modulo_mask_)
@@ -182,8 +183,7 @@ concurrent_hash_map::value_type concurrent_hash_map::set(const key_type& key, co
 	
 concurrent_hash_map::value_type concurrent_hash_map::get(const key_type& key) const
 {
-	if (key == nullkey)
-		throw std::invalid_argument("key must be non-zero");
+	oCheck(key != nullkey, std::errc::invalid_argument, "key must be non-zero");
 	for (key_type k = key;; k++)
 	{
 		k &= modulo_mask_;

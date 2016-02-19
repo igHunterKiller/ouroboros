@@ -105,7 +105,7 @@ void replace_item_with_submenu(menu_handle parent, int item, menu_handle submenu
 {
 	mstring text;
 	if (!get_text(text, parent, item))
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 
 	oVB(RemoveMenu((HMENU)parent, item, MF_BYCOMMAND));
 	oVB(InsertMenu((HMENU)parent, item, MF_STRING|MF_POPUP, (UINT_PTR)submenu, text));
@@ -114,11 +114,11 @@ void replace_item_with_submenu(menu_handle parent, int item, menu_handle submenu
 void replace_submenu_with_item(menu_handle parent, menu_handle submenu, int item, bool enabled)
 {
 	int p = find_position(parent, submenu);
-	oASSERT(p != -1, "the specified submenu is not under the specified parent menu");
+	oAssert(p != -1, "the specified submenu is not under the specified parent menu");
 	
 	mstring text;	
 	if (!get_text_by_position(text, text.capacity(), parent, p))
-		throw std::invalid_argument("");
+		oThrow(std::errc::invalid_argument, "");
 
 	oVB(DeleteMenu((HMENU)parent, p, MF_BYPOSITION));
 
@@ -161,9 +161,9 @@ void append_separator(menu_handle parent)
 
 void check(menu_handle m, int item, bool checked)
 {
-	oASSERT(item >= 0, "");
+	oAssert(item >= 0, "");
 	if (-1 == CheckMenuItem((HMENU)m, static_cast<unsigned int>(item), MF_BYCOMMAND | (checked ? MF_CHECKED : MF_UNCHECKED)))
-		oASSERT(false, "MenuItemID not found in the specified menu");
+		oAssert(false, "MenuItemID not found in the specified menu");
 }
 
 bool checked(menu_handle m, int item)
@@ -172,7 +172,7 @@ bool checked(menu_handle m, int item)
 	ZeroMemory(&mii, sizeof(mii));
 	mii.cbSize = sizeof(mii);
 	mii.fMask = MIIM_STATE;
-	oASSERT(item >= 0, "");
+	oAssert(item >= 0, "");
 	if (!GetMenuItemInfo((HMENU)m, static_cast<unsigned int>(item), FALSE, &mii))
 		return false;
 
@@ -187,8 +187,8 @@ void check_radio(menu_handle m, int item_range_first, int item_range_last, int c
 	// CheckMenuRadioItem returns false if the menu is wrong, but doesn't set a 
 	// useful last error (S_OK is returned when I ran into this) so add our own
 	// check here.
-	oASSERT(num_items(m) >= (item_range_last-item_range_first+1), "A radio range was specified that is larger than the number of elements in the list (menu count=%d, range implies %d items)", num_items(m), (item_range_last-item_range_first+1));
-	oASSERT(contains_range(m, item_range_first, item_range_last), "The specified menu 0x%p does not include the specified range [%d,%d] with selected %d. Most API works with an ancestor menu but this requires the immediate parent, so if the ranges look correct check the specified m.", m, item_range_first, item_range_last, check_item);
+	oAssert(num_items(m) >= (item_range_last-item_range_first+1), "A radio range was specified that is larger than the number of elements in the list (menu count=%d, range implies %d items)", num_items(m), (item_range_last-item_range_first+1));
+	oAssert(contains_range(m, item_range_first, item_range_last), "The specified menu 0x%p does not include the specified range [%d,%d] with selected %d. Most API works with an ancestor menu but this requires the immediate parent, so if the ranges look correct check the specified m.", m, item_range_first, item_range_last, check_item);
 	oVB(CheckMenuRadioItem((HMENU)m, item_range_first, item_range_last, check_item, MF_BYCOMMAND));
 }
 
@@ -202,9 +202,9 @@ int checked_radio(menu_handle m, int item_range_first, int item_range_last)
 
 void enable(menu_handle m, int item, bool enabled)
 {
-	oASSERT(item >= 0, "");
+	oAssert(item >= 0, "");
 	if (-1 == EnableMenuItem((HMENU)m, static_cast<unsigned int>(item), MF_BYCOMMAND | (enabled ? MF_ENABLED : MF_GRAYED)))
-		oASSERT(false, "MenuItemID not found in the specified menu");
+		oAssert(false, "MenuItemID not found in the specified menu");
 }
 
 bool enabled(menu_handle m, int item)
@@ -213,7 +213,7 @@ bool enabled(menu_handle m, int item)
 	ZeroMemory(&mii, sizeof(mii));
 	mii.cbSize = sizeof(mii);
 	mii.fMask = MIIM_STATE;
-	oASSERT(item >= 0, "");
+	oAssert(item >= 0, "");
 	oVB(GetMenuItemInfo((HMENU)m, static_cast<unsigned int>(item), FALSE, &mii));
 	if (mii.fState & (MF_GRAYED|MF_DISABLED))
 		return false;

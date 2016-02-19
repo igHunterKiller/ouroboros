@@ -13,7 +13,7 @@ using namespace windows::crt_leak_tracker;
 oTEST(oSystem_win_crt_leak_tracker)
 {
 	#ifdef _DEBUG
-		oTRACE("THIS TESTS THE LEAK REPORTING CODE, SO THIS WILL INTENTIONALLY REPORT LEAKS IN THE OUTPUT AS PART OF THAT TEST.");
+		oTrace("THIS TESTS THE LEAK REPORTING CODE, SO THIS WILL INTENTIONALLY REPORT LEAKS IN THE OUTPUT AS PART OF THAT TEST.");
 	
 		bool old_value = enabled();
 		oFinally { enable(old_value); };

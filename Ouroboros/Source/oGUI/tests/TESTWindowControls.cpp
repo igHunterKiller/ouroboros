@@ -97,7 +97,7 @@ void oWindowUITest::EventHook(const window::basic_event& _Event)
 	switch (_Event.type)
 	{
 		case ouro::event_type::sized:
-			oTRACE("NewClientSize = %dx%d%s", _Event.as_shape().shape.client_size.x, _Event.as_shape().shape.client_size.y, _Event.as_shape().shape.state == ouro::window_state::minimized ? " (minimized)" : "");
+			oTrace("NewClientSize = %dx%d%s", _Event.as_shape().shape.client_size.x, _Event.as_shape().shape.client_size.y, _Event.as_shape().shape.state == ouro::window_state::minimized ? " (minimized)" : "");
 			break;
 		case ouro::event_type::creating:
 		{
@@ -122,7 +122,7 @@ void oWindowUITest::InputHook(const ouro::input_t& _Input)
 				{
 					ouro::lstring text;
 					oWinControlGetText(text, (HWND)_Input.control.window);
-					oTRACE("Action %s \"%s\" code=%d", ouro::as_string(oWinControlGetType((HWND)_Input.control.window)), text.c_str(), _Input.control.native_status);
+					oTrace("Action %s \"%s\" code=%d", ouro::as_string(oWinControlGetType((HWND)_Input.control.window)), text.c_str(), _Input.control.native_status);
 					break;
 				}
 				default:
@@ -297,7 +297,7 @@ void oWindowUITest::OnCreate(HWND _hWnd, ouro::menu_handle _hMenu)
 
 	oWinControlSetValue(Controls[ID_FLOATBOX], 1.234f);
 
-	oTRACE("About to test an invalid case, an exception may be caught by the debugger. CONTINUE.");
+	oTrace("About to test an invalid case, an exception may be caught by the debugger. CONTINUE.");
 	try
 	{
 		oWinControlSetText(Controls[ID_FLOATBOX], "Error!"); // should not show up
@@ -395,9 +395,9 @@ void oWindowUITest::OnMenuCommand(HWND _hWnd, int _MenuID)
 		{
 			ouro::path_t path;
 			if (windows::common_dialog::open_path(path, "TESTWindowUI", "Source Files|*.cpp|Header Files|*.h", _hWnd))
-				oTRACE("Open %s", path.c_str());
+				oTrace("Open %s", path.c_str());
 			else
-				oTRACE("Open dialog canceled.");
+				oTrace("Open dialog canceled.");
 
 			ouro::msgbox(ouro::msg_type::info, nullptr, "TESTWindowUI", "User selected path:\n\t%s", path.c_str());
 			break;
@@ -408,9 +408,9 @@ void oWindowUITest::OnMenuCommand(HWND _hWnd, int _MenuID)
 		{
 			ouro::path_t path;
 			if (windows::common_dialog::save_path(path, "TESTWindowUI", "Source Files|*.cpp|Header Files|*.h", _hWnd))
-				oTRACE("SaveAs %s", path.c_str());
+				oTrace("SaveAs %s", path.c_str());
 			else
-				oTRACE("SaveAs dialog canceled.");
+				oTrace("SaveAs dialog canceled.");
 
 			ouro::msgbox(ouro::msg_type::info, nullptr, "TESTWindowUI", "User selected path:\n\t%s", path.c_str());
 			break;
@@ -485,13 +485,13 @@ void oWindowUITest::OnMenuCommand(HWND _hWnd, int _MenuID)
 	}
 
 	if (menu::checked(hViewMenu, MENU_VIEW_SOLID))
-		oTRACE("View Solid");
+		oTrace("View Solid");
 	else if (menu::checked(hViewMenu, MENU_VIEW_WIREFRAME))
-		oTRACE("View Wireframe");
+		oTrace("View Wireframe");
 	else
-		oTRACE("View Nothing");
+		oTrace("View Nothing");
 
-	oTRACE("Exit is %sabled", menu::enabled(hFileMenu, MENU_FILE_EXIT) ? "en" : "dis");
+	oTrace("Exit is %sabled", menu::enabled(hFileMenu, MENU_FILE_EXIT) ? "en" : "dis");
 }
 
 oTEST(oGUI_WindowControls)

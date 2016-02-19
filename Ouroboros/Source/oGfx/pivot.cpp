@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oGfx/pivot.h>
 #include <oMath/hlslx.h>
 #include <oMath/matrix.h>
@@ -33,8 +34,7 @@ void pivot_t::obb(float3x3* out_rotation, float3* out_position, float3* out_exte
 void pivot_t::world(const float4x4& world)
 {
 	world_ = world;
-	if (!affine(world))
-		throw std::invalid_argument("not affine");
+	oCheck(affine(world), std::errc::invalid_argument, "pivot world matrix must be affine");
 
 	if (determinant(world) < 0.0f)
 		pivot_flags_ |=  tx_mirrored;

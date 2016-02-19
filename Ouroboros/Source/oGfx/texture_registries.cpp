@@ -28,7 +28,7 @@ blob encode_oimg(blob& compiled, const allocator& alloc)
 
 	auto fformat = surface::get_file_format(compiled);
 	if (fformat == surface::file_format::unknown)
-		throw std::invalid_argument("unknown file format");
+		oThrow(std::errc::invalid_argument, "unknown file format");
 
 	if (fformat == surface::file_format::oimg)
 		return std::move(compiled);
@@ -62,12 +62,10 @@ void texture2d_registry::deinitialize()
 void* texture2d_registry::create(const char* name, blob& compiled)
 {
 	auto fformat = surface::get_file_format(compiled);
-	if (fformat == surface::file_format::unknown)
-		throw std::invalid_argument(std::string("Unknown file format: ") + name);
+	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument,"Unknown file format: %s", name ? name : "(null)");
 
 	auto info = surface::get_info(compiled);
-	if (!info.is_2d())
-		throw std::invalid_argument(name + std::string(" is not a 2d texture"));
+	oCheck(info.is_2d(), std::errc::invalid_argument, "%s is not a 2d texture", name ? name : "(null)");
 
 	// ensure the format is render-compatible
 	auto desired_format = surface::as_texture(info.format);
@@ -82,7 +80,7 @@ void* texture2d_registry::create(const char* name, blob& compiled)
 
 	auto tex = pool_.create();
 	tex->view = dev_->new_texture(name, img);
-	oTRACE("[texture2d_registry] create %s", name);
+	oTrace("[texture2d_registry] create %s", name);
 	return tex;
 }
 

@@ -37,7 +37,7 @@ void core_fill_grid_numbers(surface::image* _pBuffer, const int2& _GridDimension
 	const auto& si = _pBuffer->info();
 
 	if (si.format != surface::format::b8g8r8a8_unorm)
-		throw std::invalid_argument("only b8g8r8a8_unorm currently supported");
+		oThrow(std::errc::invalid_argument, "only b8g8r8a8_unorm currently supported");
 
 	scoped_bitmap hBmp = make_bitmap(_pBuffer);
 	scoped_getdc hScreenDC(nullptr);
