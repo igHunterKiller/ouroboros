@@ -16,18 +16,23 @@ static const float3 ZERO3(0.0f, 0.0f, 0.0f);
 
 namespace ouro {
 
-static const char* s_texture_type_names[] = 
+template<> const char* as_string(const mesh::obj::texture_type& type)
 {
-	"regular",
-	"cube_right",
-	"cube_left",
-	"cube_top",
-	"cube_bottom",
-	"cube_back",
-	"cube_front",
-	"sphere",
-};
-oDEFINE_AS_TO_FROM_STRING(mesh::obj::texture_type, s_texture_type_names)
+	static const char* s_names[] = 
+	{
+		"regular",
+		"cube_right",
+		"cube_left",
+		"cube_top",
+		"cube_bottom",
+		"cube_back",
+		"cube_front",
+		"sphere",
+	};
+	return detail::enum_as(type, s_names);
+}
+
+oDEFINE_TO_FROM_STRING(mesh::obj::texture_type)
 
 	namespace mesh { namespace obj {
 

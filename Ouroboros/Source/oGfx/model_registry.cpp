@@ -9,7 +9,7 @@
 
 namespace ouro { 
 
-template<> const char* as_string<gfx::primitive_model>(const gfx::primitive_model& m)
+template<> const char* as_string(const gfx::primitive_model& m)
 {
 	static const char* s_names[] =
 	{
@@ -30,8 +30,7 @@ template<> const char* as_string<gfx::primitive_model>(const gfx::primitive_mode
 		"rectangle_outline",
 		"torus_outline",
 	};
-
-	return detail::counted_enum_as_string(m, s_names);
+	return detail::enum_as(m, s_names);
 }
 	
 namespace gfx {

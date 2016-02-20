@@ -16,7 +16,7 @@ using namespace ouro::gpu::d3d;
 
 namespace ouro { 
 
-template<> const char* as_string<gpu::stage_binding::flag>(const gpu::stage_binding::flag& binding)
+template<> const char* as_string(const gpu::stage_binding::flag& binding)
 {
 	switch (binding)
 	{

@@ -1,94 +1,91 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oBase/mime.h>
-#include <oCore/countof.h>
 #include <oString/stringize.h>
 #include <cstring>
 
 namespace ouro {
 
-template<> const char* as_string<mime>(const mime& m)
+template<> const char* as_string(const mime& m)
 {
-	switch (m)
+	static const char* s_names[] =
 	{
-		case mime::unknown: "unknown";
-		case mime::application_atomxml: "application/atom+xml";
-		case mime::application_ecmascript: "application/ecmascript";
-		case mime::application_edix12: "application/edi-x12";
-		case mime::application_edifact: "application/editfact";
-		case mime::application_exe : "application/exe";
-		case mime::application_json: "application/json";
-		case mime::application_javascript: "application/javascript";
-		case mime::application_octetstream: "application/octet-stream";
-		case mime::application_ogg: "application/ogg";
-		case mime::application_pdf: "application/pdf";
-		case mime::application_postscript: "application/postscript";
-		case mime::application_rdfxml: "application/rdf+xml";
-		case mime::application_rssxml: "application/rss+xml";
-		case mime::application_soapxml: "application/soap+xml";
-		case mime::application_fontwoff: "application/font-woff";
-		case mime::application_xdmp: "application/x-dmp";
-		case mime::application_xhtmlxml: "application/xhtml+xml";
-		case mime::application_xmldtd: "application/xml-dtd";
-		case mime::application_xopxml: "application/xop+xml";
-		case mime::application_zip: "application/zip";
-		case mime::application_gzip: "application/x-gzip";
-		case mime::application_7z: "application/x-7z-compressed";
-		case mime::audio_basic: "audio/basic";
-		case mime::audio_l24: "audio/l24";
-		case mime::audio_mp4: "audio/mp4";
-		case mime::audio_mpeg: "audio/mpeg";
-		case mime::audio_ogg: "audio/ogg";
-		case mime::audio_vorbis: "audio/vorbis";
-		case mime::audio_wma: "audio/x-ms-wma";
-		case mime::audio_wax: "audio/x-ms-wax";
-		case mime::audio_realaudio: "audio/vnd.rn-realaudio";
-		case mime::audio_wav: "audio/vnd.wave";
-		case mime::audio_webm: "audio/webm";
-		case mime::image_gif: "image/gif";
-		case mime::image_jpeg: "image/jpeg";
-		case mime::image_pjpeg: "image/pjpeg";
-		case mime::image_png: "image/png";
-		case mime::image_svgxml: "imagesvg+xml";
-		case mime::image_tiff: "image/tiff";
-		case mime::image_ico: "image/vnd.microsoft.icon";
-		case mime::message_http: "message/http";
-		case mime::message_imdnxml: "message/imdn+xml";
-		case mime::message_partial: "message/partial";
-		case mime::message_rfc822: "message/rfc822";
-		case mime::model_example: "model/example";
-		case mime::model_iges: "model/iges";
-		case mime::model_mesh: "model/mesh";
-		case mime::model_vrml: "model/vrml";
-		case mime::model_x3dbinary: "model/x3d+binary";
-		case mime::model_x3dvrml: "model/x3d+vrml";
-		case mime::model_x3dxml: "model/x3d+xml";
-		case mime::multipart_mixed: "multipart/mixed";
-		case mime::multipart_alternative: "multipart/alternative";
-		case mime::multipart_related: "multipart/related";
-		case mime::multipart_formdata: "multipart/form-data";
-		case mime::multipart_signed: "multipart/signed";
-		case mime::multipart_encrypted: "multipart/encrypted";
-		case mime::text_cmd: "text/cmd";
-		case mime::text_css: "text/css";
-		case mime::text_csv: "text/csv";
-		case mime::text_html: "text/html";
-		case mime::text_javascript: "text/javascript";
-		case mime::text_plain: "text/plain";
-		case mime::text_vcard: "text/vcard";
-		case mime::text_xml: "text/xml";
-		case mime::video_mpeg: "video/mpeg";
-		case mime::video_mp4: "video/mp4";
-		case mime::video_ogg: "video/ogg";
-		case mime::video_quicktime: "video/quicktime";
-		case mime::video_webm: "video/webm";
-		case mime::video_matroska: "video/x-matroska";
-		case mime::video_wmv: "video/x-ms-wmv";
-		case mime::video_flash_video: "video/x-flv";
-		default: break;
-	}
-
-	return "?";
+		"unknown",
+		"application/atom+xml",
+		"application/ecmascript",
+		"application/edi-x12",
+		"application/editfact",
+		"application/exe",
+		"application/json",
+		"application/javascript",
+		"application/octet-stream",
+		"application/ogg",
+		"application/pdf",
+		"application/postscript",
+		"application/rdf+xml",
+		"application/rss+xml",
+		"application/soap+xml",
+		"application/font-woff",
+		"application/x-dmp",
+		"application/xhtml+xml",
+		"application/xml-dtd",
+		"application/xop+xml",
+		"application/zip",
+		"application/x-gzip",
+		"application/x-7z-compressed",
+		"audio/basic",
+		"audio/l24",
+		"audio/mp4",
+		"audio/mpeg",
+		"audio/ogg",
+		"audio/vorbis",
+		"audio/x-ms-wma",
+		"audio/x-ms-wax",
+		"audio/vnd.rn-realaudio",
+		"audio/vnd.wave",
+		"audio/webm",
+		"image/gif",
+		"image/jpeg",
+		"image/pjpeg",
+		"image/png",
+		"imagesvg+xml",
+		"image/tiff",
+		"image/vnd.microsoft.icon",
+		"message/http",
+		"message/imdn+xml",
+		"message/partial",
+		"message/rfc822",
+		"model/example",
+		"model/iges",
+		"model/mesh",
+		"model/vrml",
+		"model/x3d+binary",
+		"model/x3d+vrml",
+		"model/x3d+xml",
+		"multipart/mixed",
+		"multipart/alternative",
+		"multipart/related",
+		"multipart/form-data",
+		"multipart/signed",
+		"multipart/encrypted",
+		"text/cmd",
+		"text/css",
+		"text/csv",
+		"text/html",
+		"text/javascript",
+		"text/plain",
+		"text/vcard",
+		"text/xml",
+		"video/mpeg",
+		"video/mp4",
+		"video/ogg",
+		"video/quicktime",
+		"video/webm",
+		"video/x-matroska",
+		"video/x-ms-wmv",
+		"video/x-flv",
+	};
+	return detail::enum_as(m, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(mime)

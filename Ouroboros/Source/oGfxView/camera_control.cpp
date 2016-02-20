@@ -8,16 +8,14 @@
 
 namespace ouro {
 
-template<> const char* as_string<camera_control::type_t>(const camera_control::type_t& type)
+template<> const char* as_string(const camera_control::type_t& type)
 {
-	switch (type)
+	static const char* s_names[] = 
 	{
-		case camera_control::type::dcc: return "Maya";
-		case camera_control::type::mmo: return "MMO";
-		default: break;
-	}
-
-	return "?";
+		"Maya",
+		"MMO",
+	};
+	return detail::enum_as(type, s_names);
 }
 
 static float3 calc_walk_delta(const keyboard_t& keyboard, bool auto_forward, float walk_speed)

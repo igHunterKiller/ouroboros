@@ -19,14 +19,14 @@ using namespace std;
 
 namespace ouro {
 
-template<> const char* as_string<camera::format>(const camera::format& _Format)
+template<> const char* as_string(const camera::format& _Format)
 {
 	switch (_Format)
 	{
 		case camera::rgb565: return "rgb565";
-		case camera::rgb24: return "rgb24";
+		case camera::rgb24:  return "rgb24";
 		case camera::argb32: return "argb32";
-		case camera::rgb32: return "rgb32";
+		case camera::rgb32:  return "rgb32";
 		default: break;
 	}
 	return "?";

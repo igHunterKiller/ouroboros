@@ -57,8 +57,8 @@
 
 namespace ouro {
 
-	enum class assert_type   : unsigned short { trace, assertion, exception };
-	enum class assert_action : unsigned short { abort, debug, ignore, ignore_always };
+	enum class assert_type   : unsigned short { trace, assertion, exception, count };
+	enum class assert_action : unsigned short { abort, debug, ignore, ignore_always, count };
 
 	struct assert_context
 	{

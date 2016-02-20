@@ -8,31 +8,29 @@
 
 namespace ouro {
 
-template<> const char* as_string<ouro::cpu::type>(const ouro::cpu::type& type)
+template<> const char* as_string(const ouro::cpu::type& type)
 {
-	switch (type)
+	static const char* s_names[] =
 	{
-		case ouro::cpu::type::unknown: return "unknown";
-		case ouro::cpu::type::x86: return "x86";
-		case ouro::cpu::type::x64: return "x64";
-		case ouro::cpu::type::ia64: return "ia64";
-		case ouro::cpu::type::arm: return "arm";
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"x86",
+		"x64",
+		"ia64",
+		"arm",
+	};
+	return detail::enum_as(type, s_names);
 }
 
-template<> const char* as_string<ouro::cpu::support>(const ouro::cpu::support& support)
+template<> const char* as_string(const ouro::cpu::support& support)
 {
-	switch (support)
+	static const char* s_names[] =
 	{
-		case ouro::cpu::support::none: return "none";
-		case ouro::cpu::support::not_found: return "not found";
-		case ouro::cpu::support::hardware_only: return "hardware only";
-		case ouro::cpu::support::full: return "full";
-		default: break;
-	}
-	return "?";
+		"none",
+		"not found",
+		"hardware only",
+		"full",
+	};
+	return detail::enum_as(support, s_names);
 }
 
 namespace cpu { namespace detail {

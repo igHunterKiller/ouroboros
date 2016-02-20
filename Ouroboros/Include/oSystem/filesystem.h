@@ -132,6 +132,8 @@ enum class file_type
 	type_unknown,
 	read_only_directory_file,
 	read_only_file,
+
+	count,
 };
 
 enum class symlink_option

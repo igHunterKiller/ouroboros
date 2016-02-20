@@ -12,18 +12,17 @@
 
 namespace ouro {
 
-	template<> const char* as_string<filesystem::file_event>(const filesystem::file_event& e)
+	template<> const char* as_string(const filesystem::file_event& e)
 	{
-		switch (e)
+		static const char* s_names[] =
 		{
-			case filesystem::file_event::unsupported: return "unsupported";
-			case filesystem::file_event::added:       return "added";
-			case filesystem::file_event::removed:     return "removed";
-			case filesystem::file_event::modified:    return "modified";
-			case filesystem::file_event::accessible:  return "accessible";
-			default: break;
-		}
-		return "?";
+			"unsupported",
+			"added",
+			"removed",
+			"modified",
+			"accessible",
+		};
+		return detail::enum_as(e, s_names);
 	}
 
 	namespace filesystem {

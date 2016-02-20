@@ -104,8 +104,10 @@ enum class semantic : uint8_t
 	unknown,
 
 	// texture semantics
+	color_srgb,
+	color_hdr,
 	custom,
-	color,
+
 	specular,
 	diffuse,
 	height,
@@ -122,18 +124,19 @@ enum class semantic : uint8_t
 	color_correction3d,
 
 	customcube,
-	colorcube,
+	cube_hdr, // IBL
+	cube_srgb,
 
 	count,
 
-	first1d = custom1d,
-	last1d = color_correction1d,
-	first2d = custom,
-	last2d = world_normal,
-	first3d = custom3d,
-	last3d = color_correction3d,
+	first1d   = custom1d,
+	last1d    = color_correction1d,
+	first2d   = custom,
+	last2d    = world_normal,
+	first3d   = custom3d,
+	last3d    = color_correction3d,
 	firstcube = customcube,
-	lastcube = colorcube,
+	lastcube  = cube_srgb,
 };
 
 enum class cube_face : uint8_t

@@ -8,39 +8,37 @@
 
 namespace ouro {
 
-template<> const char* as_string<scc_protocol::value>(const scc_protocol::value& _Protocol)
+template<> const char* as_string(const scc_protocol& protocol)
 {
-	switch (_Protocol)
+	static const char* s_names[] =
 	{
-		case scc_protocol::p4: return "perforce";
-		case scc_protocol::svn: return "svn";
-		case scc_protocol::git: return "git";
-		default: break;
-	}
-	return "unrecognized scc_protocol";
+		"perforce",
+		"svn",
+		"git",
+	};
+	return detail::enum_as(protocol, s_names);
 }
 
-template<> const char* as_string<scc_status::value>(const scc_status::value& _Status)
+template<> const char* as_string(const scc_status& status)
 {
-	switch (_Status)
+	static const char* s_names[] =
 	{
-		case scc_status::unknown: return "unknown";
-		case scc_status::unchanged: return "unchanged";
-		case scc_status::unversioned: return "unversioned";
-		case scc_status::ignored: return "ignored";
-		case scc_status::modified: return "modified";
-		case scc_status::missing: return "missing";
-		case scc_status::added: return "added";
-		case scc_status::removed: return "removed";
-		case scc_status::replaced: return "replaced";
-		case scc_status::copied: return "copied";
-		case scc_status::conflict: return "conflict";
-		case scc_status::merged: return "merged";
-		case scc_status::obstructed: return "obstructed";
-		case scc_status::out_of_date: return "out_of_date";
-		default: break;
-	}
-	return "unrecognized scc_status";
+		"unknown",
+		"unchanged",
+		"unversioned",
+		"ignored",
+		"modified",
+		"missing",
+		"added",
+		"removed",
+		"replaced",
+		"copied",
+		"conflict",
+		"merged",
+		"obstructed",
+		"out_of_date",
+	};
+	return detail::enum_as(status, s_names);
 }
 
 namespace detail {
@@ -49,17 +47,17 @@ class scc_category_impl : public std::error_category
 {
 public:
 	const char* name() const noexcept override { return "future"; }
-	std::string message(int _ErrCode) const override
+	std::string message(int errc) const override
 	{
-		switch (_ErrCode)
+		switch (errc)
 		{
-			case scc_error::none: return "no error";
-			case scc_error::command_string_too_long: return "the command string is too long for internal buffers";
-			case scc_error::scc_exe_not_available: return "scc executable not available";
-			case scc_error::scc_exe_error: return "scc exe reported an error";
+			case scc_error::none:                     return "no error";
+			case scc_error::command_string_too_long:  return "the command string is too long for internal buffers";
+			case scc_error::scc_exe_not_available:    return "scc executable not available";
+			case scc_error::scc_exe_error:            return "scc exe reported an error";
 			case scc_error::scc_server_not_available: return "scc server not available";
-			case scc_error::file_not_found: return "file not found";
-			case scc_error::entry_not_found: return "entry not found";
+			case scc_error::file_not_found:           return "file not found";
+			case scc_error::entry_not_found:          return "entry not found";
 			default: break;
 		}
 		return "unrecognized scc error code";
@@ -74,7 +72,7 @@ const std::error_category& scc_category()
 	return sSingleton;
 }
 
-std::shared_ptr<scc> make_scc(scc_protocol::value _Protocol, scc_spawn_fn _Spawn, void* _User, unsigned int _TimeoutMS)
+std::shared_ptr<scc> make_scc(scc_protocol _Protocol, scc_spawn_fn _Spawn, void* _User, unsigned int _TimeoutMS)
 {
 	switch (_Protocol)
 	{

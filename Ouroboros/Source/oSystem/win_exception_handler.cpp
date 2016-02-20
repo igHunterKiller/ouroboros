@@ -38,17 +38,16 @@
 
 namespace ouro {
 
-	template<> const char* as_string<windows::exception::type::value>(const windows::exception::type::value& _Type)
+	template<> const char* as_string(const windows::exception::type& type)
 	{
-		switch (_Type)
+		static const char* s_names[] =
 		{
-			case windows::exception::type::unknown: return "unknown exception";
-			case windows::exception::type::std: return "std::exception";
-			case windows::exception::type::com: return "_com_error";
-			case windows::exception::type::atl: return "ATL::CAtlException";
-			default: break;
-		}
-		return "?";
+			"unknown exception",
+			"std::exception",
+			"_com_error",
+			"ATL::CAtlException",
+		};
+		return detail::enum_as(type, s_names);
 	}
 
 	namespace windows {

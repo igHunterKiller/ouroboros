@@ -12,7 +12,7 @@
 
 namespace ouro {
 
-template<> const char* as_string<unit_test::result>(const unit_test::result& r)
+template<> const char* as_string(const unit_test::result& r)
 {
 	const char* s_names[] =
 	{
@@ -26,8 +26,7 @@ template<> const char* as_string<unit_test::result>(const unit_test::result& r)
 		"leaks",
 		"perf test",
 	};
-
-	return detail::counted_enum_as_string(r, s_names);
+	return detail::enum_as(r, s_names);
 }
 
 namespace unit_test {

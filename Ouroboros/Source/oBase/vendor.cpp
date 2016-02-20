@@ -5,7 +5,7 @@
 
 namespace ouro {
 
-template<> const char* as_string<vendor>(const vendor& v)
+template<> const char* as_string(const vendor& v)
 {
 	const char* s_names[] =
 	{
@@ -26,8 +26,7 @@ template<> const char* as_string<vendor>(const vendor& v)
 		"Vizio",
 		"Western Digital",
 	};
-
-	return detail::counted_enum_as_string(v, s_names);
+	return detail::enum_as(v, s_names);
 }
 
 }

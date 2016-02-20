@@ -9,71 +9,68 @@
 
 namespace ouro {
 
-template<> const char* as_string<mesh::primitive_type>(const mesh::primitive_type& type)
+template<> const char* as_string(const mesh::primitive_type& type)
 {
-	switch (type)
+	static const char* s_names[] = 
 	{
-		case mesh::primitive_type::unknown: return "unknown";
-		case mesh::primitive_type::points: return "points";
-		case mesh::primitive_type::lines: return "lines";
-		case mesh::primitive_type::line_strips: return "line_strips";
-		case mesh::primitive_type::triangles: return "triangles";
-		case mesh::primitive_type::triangle_strips: return "triangle_strips";
-		case mesh::primitive_type::lines_adjacency: return "lines_adjacency";
-		case mesh::primitive_type::line_strips_adjacency: return "line_strips_adjacency";
-		case mesh::primitive_type::triangles_adjacency: return "triangles_adjacency";
-		case mesh::primitive_type::triangle_strips_adjacency: return "triangle_strips_adjacency";
-		case mesh::primitive_type::patches1: return "patches1";
-		case mesh::primitive_type::patches2: return "patches2";
-		case mesh::primitive_type::patches3: return "patches3";
-		case mesh::primitive_type::patches4: return "patches4";
-		case mesh::primitive_type::patches5: return "patches5";
-		case mesh::primitive_type::patches6: return "patches6";
-		case mesh::primitive_type::patches7: return "patches7";
-		case mesh::primitive_type::patches8: return "patches8";
-		case mesh::primitive_type::patches9: return "patches9";
-		case mesh::primitive_type::patches10: return "patches10";
-		case mesh::primitive_type::patches11: return "patches11";
-		case mesh::primitive_type::patches12: return "patches12";
-		case mesh::primitive_type::patches13: return "patches13";
-		case mesh::primitive_type::patches14: return "patches14";
-		case mesh::primitive_type::patches15: return "patches15";
-		case mesh::primitive_type::patches16: return "patches16";
-		case mesh::primitive_type::patches17: return "patches17";
-		case mesh::primitive_type::patches18: return "patches18";
-		case mesh::primitive_type::patches19: return "patches19";
-		case mesh::primitive_type::patches20: return "patches20";
-		case mesh::primitive_type::patches21: return "patches21";
-		case mesh::primitive_type::patches22: return "patches22";
-		case mesh::primitive_type::patches23: return "patches23";
-		case mesh::primitive_type::patches24: return "patches24";
-		case mesh::primitive_type::patches25: return "patches25";
-		case mesh::primitive_type::patches26: return "patches26";
-		case mesh::primitive_type::patches27: return "patches27";
-		case mesh::primitive_type::patches28: return "patches28";
-		case mesh::primitive_type::patches29: return "patches29";
-		case mesh::primitive_type::patches30: return "patches30";
-		case mesh::primitive_type::patches31: return "patches31";
-		case mesh::primitive_type::patches32: return "patches32";
-
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"points",
+		"lines",
+		"line_strips",
+		"triangles",
+		"triangle_strips",
+		"lines_adjacency",
+		"line_strips_adjacency",
+		"triangles_adjacency",
+		"triangle_strips_adjacency",
+		"patches1",
+		"patches2",
+		"patches3",
+		"patches4",
+		"patches5",
+		"patches6",
+		"patches7",
+		"patches8",
+		"patches9",
+		"patches10",
+		"patches11",
+		"patches12",
+		"patches13",
+		"patches14",
+		"patches15",
+		"patches16",
+		"patches17",
+		"patches18",
+		"patches19",
+		"patches20",
+		"patches21",
+		"patches22",
+		"patches23",
+		"patches24",
+		"patches25",
+		"patches26",
+		"patches27",
+		"patches28",
+		"patches29",
+		"patches30",
+		"patches31",
+		"patches32",
+	};
+	return detail::enum_as(type, s_names);
 }
 
 STR_SUPPORT(mesh::primitive_type);
 
-template<> const char* as_string<mesh::face_type>(const mesh::face_type& type)
+template<> const char* as_string(const mesh::face_type& type)
 {
-	switch (type)
+	static const char* s_names[] = 
 	{
-		case mesh::face_type::unknown: return "unknown";
-		case mesh::face_type::front_ccw: return "front_ccw";
-		case mesh::face_type::front_cw: return "front_cw";
-		case mesh::face_type::outline: return "outline";
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"front_ccw",
+		"front_cw",
+		"outline",
+	};
+	return detail::enum_as(type, s_names);
 }
 		
 STR_SUPPORT(mesh::face_type);

@@ -128,9 +128,9 @@ unsigned int scc_svn::revision(const char* _Path) const
 	return r;
 }
 
-static scc_status::value get_status(char _Status)
+static scc_status get_status(char status)
 {
-	switch (_Status)
+	switch (status)
 	{
 		case ' ': return scc_status::unchanged;
 		case 'A': return scc_status::added;
@@ -192,14 +192,14 @@ static char* svn_parse_status_line(char* _StatusBuffer, unsigned int _UpToRevisi
 struct status_context
 {
 	xlstring line;
-	scc_error::value errc;
+	scc_error errc;
 	std::string errline;
 	scc_file_enumerator_fn file_enumerator;
 	void* user;
 	unsigned int up_to_revisition;
 };
 
-void scc_svn::status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, scc_file_enumerator_fn _Enumerator, void* _User) const
+void scc_svn::status(const char* _Path, unsigned int _UpToRevision, scc_visit_option _Option, scc_file_enumerator_fn _Enumerator, void* _User) const
 {
 	char cmd[512];
 	

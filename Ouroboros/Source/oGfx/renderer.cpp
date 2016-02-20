@@ -19,9 +19,9 @@
 
 namespace ouro {
 	
-template<> const char* as_string<gfx::fullscreen_mode>(const gfx::fullscreen_mode& m)
+template<> const char* as_string(const gfx::fullscreen_mode& mode)
 {
-	static const char* s_strings[] = 
+	static const char* s_names[] = 
 	{
 		"normal",
 		"wireframe",
@@ -29,13 +29,12 @@ template<> const char* as_string<gfx::fullscreen_mode>(const gfx::fullscreen_mod
 		"texcoordu",
 		"texcoordv",
 	};
-	match_array_e(s_strings, gfx::fullscreen_mode);
-	return s_strings[(int)m];
+	return detail::enum_as(mode, s_names);
 }
 
-template<> const char* as_string<gfx::render_pass>(const gfx::render_pass& pass)
+template<> const char* as_string(const gfx::render_pass& pass)
 {
-	const char* s_strings[] = 
+	const char* s_names[] = 
 	{
 		"pass_initialize",
 		"pass_geometry",
@@ -44,13 +43,12 @@ template<> const char* as_string<gfx::render_pass>(const gfx::render_pass& pass)
 		"pass_debug",
 		"pass_resolve",
 	};
-	match_array_e(s_strings, gfx::render_pass);
-	return s_strings[(int)pass];
+	return detail::enum_as(pass, s_names);
 }
 
-template<> const char* as_string<gfx::render_technique>(const gfx::render_technique& technique)
+template<> const char* as_string(const gfx::render_technique& technique)
 {
-	const char* s_strings[] = 
+	const char* s_names[] = 
 	{
 		"pass_begin",
 		"view_begin",
@@ -62,8 +60,7 @@ template<> const char* as_string<gfx::render_technique>(const gfx::render_techni
 		"view_end",
 		"pass_end",
 	};
-	match_array_e(s_strings, gfx::render_technique);
-	return s_strings[(int)technique];
+	return detail::enum_as(technique, s_names);
 }
 
 	namespace gfx {

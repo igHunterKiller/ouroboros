@@ -15,6 +15,8 @@ enum class type
 	x64,
 	ia64,
 	arm,
+
+	count,
 };
 
 enum class support
@@ -23,6 +25,8 @@ enum class support
 	not_found,     // the feature is not exposed
 	hardware_only, // no platform support/API exposure
 	full,          // both the current platform and HW support the feature
+
+	count,
 };
 
 struct cache_info_t

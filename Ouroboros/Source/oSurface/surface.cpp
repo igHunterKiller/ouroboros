@@ -14,51 +14,51 @@ namespace ouro { namespace surface {
 
 	} // namespace surface
 
-template<> const char* as_string<surface::cube_face>(const surface::cube_face& f)
+template<> const char* as_string(const surface::cube_face& face)
 {
-	switch (f)
+	static const char* s_names[] =
 	{
-		case surface::cube_face::posx: return "posx";
-		case surface::cube_face::negx: return "negx";
-		case surface::cube_face::posy: return "posy";
-		case surface::cube_face::negy: return "negy";
-		case surface::cube_face::posz: return "posz";
-		case surface::cube_face::negz: return "negz";
-		default: break;
-	}
-	return "?";
+		"posx",
+		"negx",
+		"posy",
+		"negy",
+		"posz",
+		"negz",
+	};
+	return detail::enum_as(face, s_names);
 }
 
 oDEFINE_ENUM_TO_STRING(surface::cube_face)
 oDEFINE_ENUM_FROM_STRING(surface::cube_face)
 
-template<> const char* as_string<surface::semantic>(const surface::semantic& s)
+template<> const char* as_string(const surface::semantic& s)
 {
-	switch (s)
+	static const char* s_names[] = 
 	{
-		case surface::semantic::unknown: return "unknown";
-		case surface::semantic::color: return "color";
-		case surface::semantic::specular: return "specular";
-		case surface::semantic::diffuse: return "diffuse";
-		case surface::semantic::height: return "height";
-		case surface::semantic::noise: return "noise";
-		case surface::semantic::intensity: return "intensity";
-		case surface::semantic::tangent_normal: return "tangent_normal";
-		case surface::semantic::world_normal: return "world_normal";
-		case surface::semantic::custom1d: return "custom1d";
-		case surface::semantic::color_correction1d: return "color_correction1d";
-		case surface::semantic::custom3d: return "custom3d";
-		case surface::semantic::color_correction3d: return "color_correction3d";
-		case surface::semantic::customcube: return "customcube";
-		case surface::semantic::colorcube: return "colorcube";
-		case surface::semantic::custom: return "custom";
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"color_srgb",
+		"color_hdr",
+		"custom",
+		"specular",
+		"diffuse",
+		"height",
+		"noise",
+		"intensity",
+		"tangent_normal",
+		"world_normal",
+		"photometric_profile",
+		"custom1d",
+		"color_correction1d",
+		"custom3d",
+		"color_correction3d",
+		"customcube",
+		"cube_hdr",
+		"cube_srgb",
+	};
+	return detail::enum_as(s, s_names);
 }
 
-oDEFINE_ENUM_TO_STRING(surface::semantic)
-oDEFINE_ENUM_FROM_STRING(surface::semantic)
+oDEFINE_TO_FROM_STRING(surface::semantic)
 
 namespace surface {
 

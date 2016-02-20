@@ -16,6 +16,7 @@ enum class file_event
 	modified,
 	accessible,
 
+	count,
 };
 
 class monitor

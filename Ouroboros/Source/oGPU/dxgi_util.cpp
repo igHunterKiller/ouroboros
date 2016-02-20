@@ -10,7 +10,7 @@
 
 namespace ouro {
 
-template<> const char* as_string<DXGI_FORMAT>(const DXGI_FORMAT& format)
+template<> const char* as_string(const DXGI_FORMAT& format)
 {
 	switch (format)
 	{

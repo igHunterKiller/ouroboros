@@ -10,18 +10,17 @@
 
 namespace ouro {
 
-template<> const char* as_string<surface::filter>(const surface::filter& f)
+template<> const char* as_string(const surface::filter& f)
 {
-	switch (f)
+	static const char* s_names[] =
 	{
-		case surface::filter::point: return "point";
-		case surface::filter::box: return "box";
-		case surface::filter::triangle: return "triangle";
-		case surface::filter::lanczos2: return "lanczos2";
-		case surface::filter::lanczos3: return "lanczos3";
-		default: break;
-	}
-	return "?";
+		"point",
+		"box",
+		"triangle",
+		"lanczos2",
+		"lanczos3",
+	};
+	return detail::enum_as(f, s_names);
 }
 
 	namespace surface {

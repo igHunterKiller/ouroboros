@@ -45,7 +45,7 @@ namespace ouro {
 		switch (ff)
 		{
 			FOREACH_EXT(AS_STRING)
-		default: break;
+			default: break;
 		}
 		return "?";
 	}

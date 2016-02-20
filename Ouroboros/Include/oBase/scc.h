@@ -10,9 +10,8 @@
 
 namespace ouro {
 
-namespace scc_error
-{	enum value {
-
+enum class scc_error
+{
 	none,
 	command_string_too_long,
 	scc_exe_not_available,
@@ -21,32 +20,32 @@ namespace scc_error
 	file_not_found,
 	entry_not_found, // returned when parsing output fails
 
-};}
+	count,
+};
 
 const std::error_category& scc_category();
 
-/*constexpr*/ inline std::error_code make_error_code(scc_error::value err) { return std::error_code(static_cast<int>(err), scc_category()); }
-/*constexpr*/ inline std::error_condition make_error_condition(scc_error::value err) { return std::error_condition(static_cast<int>(err), scc_category()); }
+/*constexpr*/ inline std::error_code make_error_code(scc_error err) { return std::error_code(static_cast<int>(err), scc_category()); }
+/*constexpr*/ inline std::error_condition make_error_condition(scc_error err) { return std::error_condition(static_cast<int>(err), scc_category()); }
 
 class scc_exception : public std::system_error
 {
 public:
-	scc_exception(const scc_error::value& err) : std::system_error(make_error_code(err)) {}
-	scc_exception(const scc_error::value& err, const std::string& what) : std::system_error(make_error_code(err), what) {}
+	scc_exception(const scc_error& err) : std::system_error(make_error_code(err)) {}
+	scc_exception(const scc_error& err, const std::string& what) : std::system_error(make_error_code(err), what) {}
 };
 
-namespace scc_protocol
-{	enum value {
-
+enum class scc_protocol
+{
 	p4,
 	svn,
 	git,
 
-};}
+	count,
+};
 
-namespace scc_status
-{	enum value {
-
+enum class scc_status
+{
 	unknown,
 	unchanged,
 	unversioned,
@@ -62,17 +61,18 @@ namespace scc_status
 	obstructed,
 	out_of_date,
 
-};}
+	count,
+};
 
-namespace scc_visit_option
-{	enum value {
-
+enum class scc_visit_option
+{
 	visit_all,
 	skip_unversioned,
 	skip_unmodified,
 	modified_only,
 
-};}
+	count,
+};
 
 struct scc_file
 {
@@ -82,7 +82,7 @@ struct scc_file
 	{}
 
 	path_string path;
-	scc_status::value status;
+	scc_status status;
 	unsigned int revision;
 };
 
@@ -106,7 +106,7 @@ class scc
 {
 public:
 	// Returns the current protocol in use by this instances
-	virtual scc_protocol::value protocol() const = 0;
+	virtual scc_protocol protocol() const = 0;
 
 	// Returns true if the client executable for the specified protocol can be 
 	// executed by the scc_spawn function.
@@ -124,7 +124,7 @@ public:
 
 	// Visits each file that matches the search under the specified path and given 
 	// the specified option.
-	virtual void status(const char* _Path, unsigned int _UpToRevision, scc_visit_option::value _Option, scc_file_enumerator_fn _Visitor, void* _User) const = 0;
+	virtual void status(const char* _Path, unsigned int _UpToRevision, scc_visit_option _Option, scc_file_enumerator_fn _Visitor, void* _User) const = 0;
 
 	// Returns true if all files under the specified path are unmodified and at 
 	// their latest revisions up to the specified revision so this can be used 
@@ -163,6 +163,6 @@ public:
 	virtual void revert(const char* _Path) = 0;
 };
 
-std::shared_ptr<scc> make_scc(scc_protocol::value _Protocol, scc_spawn_fn _Spawn, void* _User = nullptr, unsigned int _TimeoutMS = 5000);
+std::shared_ptr<scc> make_scc(scc_protocol _Protocol, scc_spawn_fn _Spawn, void* _User = nullptr, unsigned int _TimeoutMS = 5000);
 
 }

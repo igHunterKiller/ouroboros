@@ -33,6 +33,8 @@ enum class version
 	win8_1,
 	server_2012_sp1,
 	win10,
+
+	count,
 };
 
 version get_version();

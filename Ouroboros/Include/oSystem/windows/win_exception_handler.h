@@ -13,15 +13,7 @@ class _com_error;
 
 namespace ouro { namespace windows { namespace exception {
 
-namespace type
-{	enum value {
-
-	unknown,
-	std,
-	com,
-	atl,
-
-};}
+enum class type { unknown, std, com, atl, count };
 
 struct cpp_exception
 {
@@ -31,7 +23,7 @@ struct cpp_exception
 		, what("")
 	{ void_exception = nullptr; }
 
-	type::value type;
+	type type;
 	const char* type_name;
 	std::string what;
 	union

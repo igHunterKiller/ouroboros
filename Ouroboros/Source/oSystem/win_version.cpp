@@ -8,34 +8,37 @@
 
 namespace ouro {
 
-template<> const char* as_string<windows::version>(const windows::version& v)
+template<> const char* as_string(const windows::version& v)
 {
-	switch (v)
+	static const char* s_names[] =
 	{
-		case windows::version::win2000: return "Windows 2000";
-		case windows::version::xp: return "Windows XP";
-		case windows::version::xp_sp1: return "Windows XP SP1";
-		case windows::version::xp_sp2: return "Windows XP SP2";
-		case windows::version::xp_sp3: return "Windows XP SP3";
-		case windows::version::xp_pro_64bit: return "Windows XP Pro 64-bit";
-		case windows::version::server_2003: return "Windows Server 2003";
-		case windows::version::home_server: return "Windows Home Server";
-		case windows::version::server_2003r2: return "Windows Server 2003R2";
-		case windows::version::vista: return "Windows Vista";
-		case windows::version::server_2008: return "Windows Server 2008";
-		case windows::version::server_2008r2: return "Windows Server 2008R2";
-		case windows::version::win7: return "Windows 7";
-		case windows::version::win7_sp1: return "Windows 7 SP1";
-		case windows::version::win8: return "Windows 8";
-		case windows::version::server_2012: "Windows Server 2012";
-		case windows::version::win8_1: return "Windows 8.1";
-		case windows::version::server_2012_sp1: "Windows Server 2012 SP1";
-		case windows::version::win10: "Windows 10";
-		case windows::version::unknown:
-		default: break;
-	}
-
-	return "?";
+		"Unknown Windows",
+		"Windows 2000",
+		"Windows XP",
+		"Windows XP SP1",
+		"Windows XP SP2",
+		"Windows XP SP3",
+		"Windows XP Pro 64-bit",
+		"Windows Server 2003",
+		"Windows Home Server",
+		"Windows Server 2003R2",
+		"Windows Vista",
+		"Windows Server 2008",
+		"Windows Vista SP1",
+		"Windows Server 2008 SP1",
+		"Windows Vista SP2",
+		"Windows Server 2008 SP2",
+		"Windows 7",
+		"Windows Server 2008R2",
+		"Windows 7 SP1",
+		"Windows Server 2008R2 SP1",
+		"Windows 8",
+		"Windows Server 2012",
+		"Windows 8.1",
+		"Windows Server 2012 SP1",
+		"Windows 10",
+	};
+	return detail::enum_as(v, s_names);
 }
 
 	namespace windows {

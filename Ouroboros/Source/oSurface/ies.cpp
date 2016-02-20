@@ -17,7 +17,7 @@ static void move_to_next_line(const char*& cur)
 	while (*cur && (*cur == '\r' || *cur == '\n')) cur++;
 }
 	
-template<> const char* as_string<ies_format>(const ies_format& f)
+template<> const char* as_string(const ies_format& f)
 {
 	static const char* s_names[] = 
 	{
@@ -27,11 +27,10 @@ template<> const char* as_string<ies_format>(const ies_format& f)
 		"IESNA:LM-63-1995",
 		"IESNA:LM-63-2002",
 	};
-
-	return detail::counted_enum_as_string(f, s_names);
+	return detail::enum_as(f, s_names);
 }
 
-template<> const char* as_string<ies_units>(const ies_units& u)
+template<> const char* as_string(const ies_units& u)
 {
 	static const char* s_names[] = 
 	{
@@ -39,8 +38,7 @@ template<> const char* as_string<ies_units>(const ies_units& u)
 		"feet",
 		"meters",
 	};
-
-	return detail::counted_enum_as_string(u, s_names);
+	return detail::enum_as(u, s_names);
 }
 
 bool from_string(ies_format* out_format, const char* src)

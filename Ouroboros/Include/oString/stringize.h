@@ -4,17 +4,16 @@
 // requiring std::string. Also as-string for constant types like enums.
 
 #pragma once
+#include <oCore/countof.h>
 #include <oString/string.h>
 #include <type_traits>
 #include <vector>
 
-#define oDEFINE_AS_STRING(_T, names) template<> const char* as_string<_T>(const _T& x) { return ::ouro::detail::counted_enum_as_string(x, names); }
-#define oDEFINE_ENUM_TO_STRING(_T) template<> char* to_string(char* dst, size_t dst_size, const _T& value) { return ::ouro::detail::to_string(dst, dst_size, value); }
-#define oDEFINE_ENUM_FROM_STRING(_T) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, _T(0)); }
-#define oDEFINE_ENUM_FROM_STRING2(_T, invalid_value) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, invalid_value); }
+#define oDEFINE_ENUM_TO_STRING(_T)                        template<> char* to_string(char* dst, size_t dst_size, const _T& value) { return ::ouro::detail::to_string(dst, dst_size, value); }
+#define oDEFINE_ENUM_FROM_STRING2(_T, invalid_value)      template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, invalid_value); }
+#define oDEFINE_ENUM_FROM_STRING(_T)                      oDEFINE_ENUM_FROM_STRING2(_T, _T(0))
 #define oDEFINE_ENUMFLAGS_FROM_STRING2(_T, invalid_value) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string_enumbits<_T>(out_value, src, invalid_value); }
-#define oDEFINE_TO_FROM_STRING(_T) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
-#define oDEFINE_AS_TO_FROM_STRING(_T, names) oDEFINE_AS_STRING(_T, names) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
+#define oDEFINE_TO_FROM_STRING(_T)                        oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
 
 namespace ouro {
 	
@@ -36,13 +35,21 @@ template<size_t size> bool from_string(char (&dst)[size], const char* src) { ret
 	
 namespace detail {
 
-// use this to implement as_string's of enums that are intended to index an array
-// and have a count member
-template<size_t size, typename enumT>
-const char* counted_enum_as_string(const enumT& x, const char* (&names)[size])
+// Simplify converting from an enum to another type. This requires the enum have a 'count' member
+template<typename enumT, typename T, size_t size> T enum_as(const enumT& e, T (&names)[size])
 {
-	static_assert(size == (size_t)enumT::count, "array mismatch");
-	return ((size_t)x >= 0 && (size_t)x <= (size_t)enumT::count) ? names[(size_t)x] : "?";
+  static_assert(std::is_enum<enumT>::value, "not enum");
+	match_array_e(names, enumT);
+	size_t i = (size_t)e;
+	return (i >= 0 && i <= (size_t)enumT::count) ? names[i] : T(0);
+}
+
+template<typename enumT, typename T, size_t size> const char* enum_as(const enumT& e, const char* (&types)[size])
+{
+  static_assert(std::is_enum<enumT>::value, "not enum");
+	match_array_e(types, enumT);
+	size_t i = (size_t)e;
+	return (i >= 0 && i <= (size_t)enumT::count) ? names[i] : "?";
 }
 
 // enum from_string: this requires the enum have a memory count that is the 

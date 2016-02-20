@@ -710,7 +710,7 @@ fourcc_t to_fourcc(const format& f)
 
 	}
 
-template<> const char* as_string<surface::format>(const surface::format& f)
+template<> const char* as_string(const surface::format& f)
 {
 	return (f < surface::format::count) ? surface::sFormatInfo[int(f)].string : "unknown";
 }

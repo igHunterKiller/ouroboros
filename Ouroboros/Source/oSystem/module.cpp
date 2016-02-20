@@ -15,31 +15,30 @@ namespace ouro {
 
 template<> const char* as_string(const module::type& type)
 {
-	switch (type)
+	static const char* s_names[] = 
 	{
-		case module::type::unknown: return "unknown";
-		case module::type::app: return "application";
-		case module::type::dll: return "dll";
-		case module::type::lib: return "library";
-		case module::type::font_unknown: return "unknown font";
-		case module::type::font_raster: return "raster font";
-		case module::type::font_truetype: return "truetype font";
-		case module::type::font_vector: return "vector font";
-		case module::type::virtual_device: return "virtual device";
-		case module::type::drv_unknown: return "unknown driver";
-		case module::type::drv_comm: return "comm driver";
-		case module::type::drv_display: return "display driver";
-		case module::type::drv_installable: return "installable driver";
-		case module::type::drv_keyboard: return "keyboard driver";
-		case module::type::drv_language: return "language driver";
-		case module::type::drv_mouse: return "mouse driver";
-		case module::type::drv_network: return "network driver";
-		case module::type::drv_printer: return "printer driver";
-		case module::type::drv_sound: return "sound driver";
-		case module::type::drv_system: return "system driver";
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"application",
+		"dll",
+		"library",
+		"unknown font",
+		"raster font",
+		"truetype font",
+		"vector font",
+		"virtual device",
+		"unknown driver",
+		"comm driver",
+		"display driver",
+		"installable driver",
+		"keyboard driver",
+		"language driver",
+		"mouse driver",
+		"network driver",
+		"printer driver",
+		"sound driver",
+		"system driver",
+	};
+	return detail::enum_as(type, s_names);
 }
 
 	namespace module {

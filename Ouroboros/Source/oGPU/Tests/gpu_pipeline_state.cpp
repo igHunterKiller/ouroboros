@@ -24,7 +24,7 @@ using namespace ouro::gpu;
 
 namespace ouro { 
 	
-template<> const char* as_string<tests::pipeline_state>(const tests::pipeline_state& state)
+template<> const char* as_string(const tests::pipeline_state& state)
 {
 	const char* s_names[] = 
 	{
@@ -39,8 +39,7 @@ template<> const char* as_string<tests::pipeline_state>(const tests::pipeline_st
 		"geometry_texture3d_only",
 		"geometry_texturecube_only",
 	};
-	match_array_e(s_names, tests::pipeline_state);
-	return s_names[(int)state];
+	return detail::enum_as(state, s_names);
 }
 
 	namespace tests {

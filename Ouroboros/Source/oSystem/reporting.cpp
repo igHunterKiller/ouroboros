@@ -17,13 +17,13 @@ namespace ouro {
 
 template<> const char* as_string(const assert_type& type)
 {
-	switch (type)
+	static const char* s_names[] = 
 	{
-		case assert_type::trace: return "Trace";
-		case assert_type::assertion: return "Error";
-		default: break;
-	}
-	return "?";
+		"Trace",
+		"Error",
+		"Exception",
+	};
+	return detail::enum_as(type, s_names);
 }
 
 	namespace reporting {

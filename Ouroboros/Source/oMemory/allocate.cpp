@@ -29,7 +29,7 @@ allocator noop_allocator(noop_allocate, noop_deallocate);
 	
 template<typename T> const char* as_string(const T& value);
 
-template<> const char* as_string<memory_alignment>(const memory_alignment& alignment)
+template<> const char* as_string(const memory_alignment& alignment)
 {
 	static const char* names[] = 
 	{
@@ -55,7 +55,7 @@ template<> const char* as_string<memory_alignment>(const memory_alignment& align
 	return names[(uint32_t)alignment];
 }
 
-template<> const char* as_string<memory_type>(const memory_type& type)
+template<> const char* as_string(const memory_type& type)
 {
 	static const char* names[] = 
 	{

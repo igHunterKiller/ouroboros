@@ -26,25 +26,24 @@
 
 namespace ouro {
 
-template<> const char* as_string<filesystem::file_type>(const filesystem::file_type& t)
+template<> const char* as_string(const filesystem::file_type& type)
 {
-	switch (t)
+	static const char* s_names[] = 
 	{
-		case filesystem::file_type::block_file: return "block_file";
-		case filesystem::file_type::character_file: return "character_file";
-		case filesystem::file_type::directory_file: return "directory_file";
-		case filesystem::file_type::fifo_file: return "fifo_file";
-		case filesystem::file_type::file_not_found: return "file_not_found";
-		case filesystem::file_type::regular_file: return "regular_file";
-		case filesystem::file_type::socket_file: return "socket_file";
-		case filesystem::file_type::status_unknown: return "status_unknown";
-		case filesystem::file_type::symlink_file: return "symlink_file";
-		case filesystem::file_type::type_unknown: return "type_unknown";
-		case filesystem::file_type::read_only_directory_file: return "read_only_directory_file";
-		case filesystem::file_type::read_only_file: return "read_only_file";
-		default: break;
-	}
-	return "?";
+		"block_file",
+		"character_file",
+		"directory_file",
+		"fifo_file",
+		"file_not_found",
+		"regular_file",
+		"socket_file",
+		"status_unknown",
+		"symlink_file",
+		"type_unknown",
+		"read_only_directory_file",
+		"read_only_file",
+	};
+	return detail::enum_as(type, s_names);
 }
 
 }

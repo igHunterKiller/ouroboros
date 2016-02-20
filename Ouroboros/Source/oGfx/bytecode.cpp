@@ -187,9 +187,9 @@ oSH_END(compute_shader)
 
 }
 
-template<> const char* as_string<gfx::vertex_layout>(const gfx::vertex_layout& layout)
+template<> const char* as_string(const gfx::vertex_layout& layout)
 {
-	const char* s_layouts[] = 
+	const char* s_names[] = 
 	{
 		"none",
 		"pos",
@@ -213,8 +213,7 @@ template<> const char* as_string<gfx::vertex_layout>(const gfx::vertex_layout& l
 		"uv0_uv1_col",
 		"uvw_col",
 	};
-	match_array_e(s_layouts, gfx::vertex_layout);
-	return s_layouts[(int)layout];
+	return detail::enum_as(layout, s_names);
 }
 
 }

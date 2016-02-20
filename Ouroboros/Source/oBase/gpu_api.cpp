@@ -5,19 +5,21 @@
 
 namespace ouro {
 
-template<> const char* as_string<gpu_api>(const gpu_api& value)
+template<> const char* as_string(const gpu_api& api)
 {
-	switch (value)
+	static const char* s_names[] =
 	{
-		case gpu_api::unknown: return "unknown";
-		case gpu_api::d3d11: return "d3d11";
-		case gpu_api::ogl: return "ogl";
-		case gpu_api::ogles: return "ogles";
-		case gpu_api::webgl: return "webgl";
-		case gpu_api::custom: return "custom";
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"d3d11",
+		"d3d12",
+		"mantle",
+		"ogl",
+		"ogles",
+		"webgl",
+		"vulkan",
+		"custom",
+	};
+	return detail::enum_as(api, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(gpu_api);

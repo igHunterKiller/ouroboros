@@ -12,38 +12,37 @@ namespace ouro {
 
 template<> const char* as_string(const serial_port::port& port)
 {
-	switch (port)
+	static const char* s_names[] = 
 	{
-		case serial_port::com1: return "COM1";
-		case serial_port::com2: return "COM2";
-		case serial_port::com3: return "COM3";
-		case serial_port::com4: return "COM4";
-		default: break;
-	}
-	return "?";
+		"COM1",
+		"COM2",
+		"COM3",
+		"COM4",
+	};
+	return detail::enum_as(port, s_names);
 }
 
-static unsigned char get_stop_bits(serial_port::stop_bits _StopBits)
+static unsigned char get_stop_bits(const serial_port::stop_bits& stop_bits)
 {
-	switch(_StopBits)
+	switch(stop_bits)
 	{
-		case serial_port::one: return ONESTOPBIT;
-		case serial_port::one5: return ONE5STOPBITS;
-		case serial_port::two: return TWOSTOPBITS;
+		case serial_port::stop_bits::one:  return ONESTOPBIT;
+		case serial_port::stop_bits::one5: return ONE5STOPBITS;
+		case serial_port::stop_bits::two:  return TWOSTOPBITS;
 		default: break;
 	}
 	return ONESTOPBIT;
 }
 
-static unsigned char get_parity(serial_port::parity _Parity)
+static unsigned char get_parity(const serial_port::parity& parity)
 {
-	switch (_Parity)
+	switch (parity)
 	{
-		case serial_port::even: return EVENPARITY;
-		case serial_port::odd: return ODDPARITY;
-		case serial_port::none: return NOPARITY;
-		case serial_port::mark: return MARKPARITY;
-		case serial_port::space: return SPACEPARITY;
+		case serial_port::parity::even:  return EVENPARITY;
+		case serial_port::parity::odd:   return ODDPARITY;
+		case serial_port::parity::none:  return NOPARITY;
+		case serial_port::parity::mark:  return MARKPARITY;
+		case serial_port::parity::space: return SPACEPARITY;
 		default: break;
 	}
 	return NOPARITY;

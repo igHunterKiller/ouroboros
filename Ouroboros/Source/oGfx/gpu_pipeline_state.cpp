@@ -12,15 +12,14 @@ using namespace ouro::gpu;
 
 namespace ouro { 
 
-template<> const char* as_string<gfx2::pipeline_state>(const gfx2::pipeline_state& state)
+template<> const char* as_string(const gfx2::pipeline_state& state)
 {
 	const char* s_names[] = 
 	{
 		"unknown",
 		"lines",
 	};
-	match_array_e(s_names, gfx2::pipeline_state);
-	return s_names[(int)state];
+	return detail::enum_as(state, s_names);
 }
 
 namespace gfx2 {

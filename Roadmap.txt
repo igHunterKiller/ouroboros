@@ -74,7 +74,7 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	117 116           oBase       scc         Rejigger scc, reformat to code standard and try to simplify/unify svn and git methodologies.
 	118               oSystem     filesystem_monitor Remove <functional> and shared_ptr usage
 	119               oString     stringize   Consider promoting as_string to_string from_string to oCore, be choosey about what follows.
-
+	120               oGUI        enums       In oGUI.h, make them all enum classes.
 
 === Notes ===
 

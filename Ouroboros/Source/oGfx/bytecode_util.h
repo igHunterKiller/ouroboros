@@ -14,7 +14,7 @@ struct oSHshader { const void* bytecode; const char* name; };
 #define oSH_NULL { nullptr, "none" }
 
 #define oSH_END_COMMON__(type) \
-	} template<> const char* as_string<gfx::type>(const gfx::type& x) { return gfx::s_##type[(int)x].name; } namespace gfx { \
+	} template<> const char* as_string(const gfx::type& x) { return gfx::s_##type[(int)x].name; } namespace gfx { \
 	match_array_e(s_##type, type);
 
 #define oSH_END(type) oSH_END_COMMON__(type) \

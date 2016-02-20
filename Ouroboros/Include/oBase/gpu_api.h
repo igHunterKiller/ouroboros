@@ -16,6 +16,7 @@ enum class gpu_api : uint8_t
 	ogl,
 	ogles,
 	webgl,
+	vulkan,
 	custom,
 
 	count,

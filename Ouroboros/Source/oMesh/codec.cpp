@@ -96,7 +96,7 @@ format required_input(const file_format& file_format, const format& stored_forma
 #endif
 	}
 
-template<> const char* as_string<mesh::file_format>(const mesh::file_format& ff)
+template<> const char* as_string(const mesh::file_format& ff)
 {
 	switch (ff)
 	{

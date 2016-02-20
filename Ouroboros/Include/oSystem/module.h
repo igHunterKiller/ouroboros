@@ -30,6 +30,8 @@ enum class type
 	drv_printer,
 	drv_sound,
 	drv_system,
+
+	count,
 };
 
 class id

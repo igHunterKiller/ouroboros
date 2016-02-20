@@ -5,7 +5,7 @@
 
 namespace ouro {
 
-template<> const char* as_string<control_status>(const control_status& s)
+template<> const char* as_string(const control_status& s)
 {
 	static const char* s_names[] = 
 	{
@@ -14,10 +14,10 @@ template<> const char* as_string<control_status>(const control_status& s)
 		"selection_changing",
 		"selection_changed",
 	};
-	return detail::counted_enum_as_string(s, s_names);
+	return detail::enum_as(s, s_names);
 }
 
-template<> const char* as_string<skeleton_clip::flag>(const skeleton_clip::flag& c)
+template<> const char* as_string(const skeleton_clip::flag& c)
 {
 	switch (c)
 	{
@@ -32,7 +32,7 @@ template<> const char* as_string<skeleton_clip::flag>(const skeleton_clip::flag&
 	return "?";
 }
 
-template<> const char* as_string<skeleton_status>(const skeleton_status& s)
+template<> const char* as_string(const skeleton_status& s)
 {
 	static const char* s_names[] =
 	{
@@ -40,12 +40,12 @@ template<> const char* as_string<skeleton_status>(const skeleton_status& s)
 		"acquired",
 		"lost",
 	};
-	return detail::counted_enum_as_string(s, s_names);
+	return detail::enum_as(s, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(skeleton_status);
 
-template<> const char* as_string<skeleton_bone>(const skeleton_bone& b)
+template<> const char* as_string(const skeleton_bone& b)
 {
 	static const char* s_names[] = 
 	{
@@ -70,7 +70,7 @@ template<> const char* as_string<skeleton_bone>(const skeleton_bone& b)
 		"ankle_right",
 		"foot_right",
 	};
-	return detail::counted_enum_as_string(b, s_names);
+	return detail::enum_as(b, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(skeleton_bone);
@@ -90,7 +90,7 @@ template<> const char* as_string(const input_type& t)
 		"menu",
 		"control",
 	};
-	return detail::counted_enum_as_string(t, s_names);
+	return detail::enum_as(t, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(input_type);

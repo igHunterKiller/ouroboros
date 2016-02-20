@@ -21,17 +21,16 @@ using namespace ouro::gpu;
 
 namespace ouro {
 	
-template<> const char* as_string<gfx::signature>(const gfx::signature& sig)
+template<> const char* as_string(const gfx::signature& sig)
 {
 	const char* s_names[] = 
 	{
 		"graphics",
 	};
-	match_array_e(s_names, gfx::signature);
-	return s_names[(int)sig];
+	return detail::enum_as(sig, s_names);
 }
 
-template<> const char* as_string<gfx::pipeline_state>(const gfx::pipeline_state& state)
+template<> const char* as_string(const gfx::pipeline_state& state)
 {
 	const char* s_names[] = 
 	{
@@ -52,7 +51,7 @@ template<> const char* as_string<gfx::pipeline_state>(const gfx::pipeline_state&
 		"mesh_wire",
 	};
 	
-	return detail::counted_enum_as_string(state, s_names);
+	return detail::enum_as(state, s_names);
 }
 
 namespace gfx {
