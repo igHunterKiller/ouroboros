@@ -40,7 +40,7 @@ public:
 
   virtual info get_info() const = 0;
   
-  // The specified path can be a wildcard. _BufferSize is how much watch data
+  // The specified path can be a wildcard. buffer_size is how much watch data
 	// to buffer between sampling calls. This size is doubled to enable double-
 	// buffering and better concurrency.
   virtual void watch(const path_t& path, size_t buffer_size, bool recursive) = 0; 

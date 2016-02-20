@@ -72,7 +72,10 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	115               oExternals              I hear-tell there's better than lz4 out there... add it to the pantheon
 	116               oBase       scc         Implement a git version
 	117 116           oBase       scc         Rejigger scc, reformat to code standard and try to simplify/unify svn and git methodologies.
-	118               oSystem     filesystem_monitor Remove shared_ptr usage
+	118 119 120 121   oSystem     filesystem_monitor Remove shared_ptr usage
+	119               oSystem     filesystem_monitor Change config to boot-time style in preparation to make it a singleton system
+	120               oSystem     filesystem_monitor Move monitor_impl to a system singleton, change API to namespace-based in filesystem (keep .cpp separate still)
+	121               oSystem     filesystem_monitor Figure out where buffer alloc comes from... maybe user-specified buffer rather than just size? unwatch could return pointer
 
 === Notes ===
 

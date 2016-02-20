@@ -66,7 +66,7 @@ class monitor_impl;
 class watcher
 {
 public:
-	watcher(monitor_impl* _pMonitor, const path_t& path, bool recursive, size_t buffer_size);
+	watcher(monitor_impl* monitor, const path_t& path, bool recursive, size_t buffer_size);
 	~watcher();
 
 	void watch_changes();
@@ -137,8 +137,8 @@ private:
 	static VOID CALLBACK WaitOrTimerCallback(PVOID lpParameter, BOOLEAN TimerOrWaitFired) { static_cast<monitor_impl*>(lpParameter)->check_accessibility(); }
 };
 
-watcher::watcher(monitor_impl* _pMonitor, const path_t& path, bool recursive, size_t buffer_size)
-	: monitor_(_pMonitor)
+watcher::watcher(monitor_impl* monitor, const path_t& path, bool recursive, size_t buffer_size)
+	: monitor_(monitor)
 	, overlapped_(nullptr)
 	, hdirectory_(INVALID_HANDLE_VALUE)
 	, directory_(path)
@@ -420,6 +420,7 @@ void monitor_impl::unwatch(const path_t& path)
 		if ((*it)->watching(path))
 		{
 			(*it)->unwatch_changes();
+			delete *it;
 			it = watches_.erase(it);
 		}
 
