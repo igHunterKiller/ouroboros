@@ -6,8 +6,6 @@
 #include <oSurface/convert.h>
 #include "mesh_template.h"
 
-#define STR_SUPPORT(_T) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
-
 namespace ouro { namespace mesh {
 
 void copy_vertices(void* oRESTRICT* oRESTRICT dst, const layout_t& dst_elements, const void* oRESTRICT* oRESTRICT src, const layout_t& src_elements, uint32_t num_vertices)

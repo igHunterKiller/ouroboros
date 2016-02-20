@@ -6,7 +6,7 @@
 #include <oMath/hlsl.h>
 #include <oString/opttok.h>
 #include <oString/string.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <array>
 #include <chrono>
 
@@ -26,7 +26,7 @@ template<> const char* as_string(const unit_test::result& r)
 		"leaks",
 		"perf test",
 	};
-	return detail::enum_as(r, s_names);
+	return as_string(r, s_names);
 }
 
 namespace unit_test {

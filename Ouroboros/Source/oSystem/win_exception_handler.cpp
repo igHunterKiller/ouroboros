@@ -47,7 +47,7 @@ namespace ouro {
 			"_com_error",
 			"ATL::CAtlException",
 		};
-		return detail::enum_as(type, s_names);
+		return as_string(type, s_names);
 	}
 
 	namespace windows {

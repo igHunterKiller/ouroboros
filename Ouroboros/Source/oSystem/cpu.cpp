@@ -18,7 +18,7 @@ template<> const char* as_string(const ouro::cpu::type& type)
 		"ia64",
 		"arm",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
 template<> const char* as_string(const ouro::cpu::support& support)
@@ -30,7 +30,7 @@ template<> const char* as_string(const ouro::cpu::support& support)
 		"hardware only",
 		"full",
 	};
-	return detail::enum_as(support, s_names);
+	return as_string(support, s_names);
 }
 
 namespace cpu { namespace detail {

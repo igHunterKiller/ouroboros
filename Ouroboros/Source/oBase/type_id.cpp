@@ -1,6 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 #include <oBase/type_id.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 namespace ouro {
 
@@ -36,7 +36,7 @@ template<> const char* as_string(const data_type& type)
 		"float4",
 		"float4x4",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(data_type);

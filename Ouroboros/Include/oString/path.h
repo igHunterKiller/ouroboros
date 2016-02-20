@@ -5,7 +5,7 @@
 #pragma once
 #include <oString/fixed_string.h>
 #include <oString/path_traits.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <functional>
 
 namespace ouro {

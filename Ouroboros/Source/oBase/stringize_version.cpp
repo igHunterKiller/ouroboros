@@ -2,7 +2,7 @@
 
 #include <oCore/version.h>
 #include <oCore/snprintf.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 namespace ouro {
 

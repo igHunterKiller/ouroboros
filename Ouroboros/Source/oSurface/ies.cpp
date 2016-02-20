@@ -3,7 +3,7 @@
 #include <oCore/finally.h>
 #include <oMath/quantize.h>
 #include <oString/atof.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oSurface/codec.h>
 #include <oSurface/convert.h>
 #include "ies.h"
@@ -27,7 +27,7 @@ template<> const char* as_string(const ies_format& f)
 		"IESNA:LM-63-1995",
 		"IESNA:LM-63-2002",
 	};
-	return detail::enum_as(f, s_names);
+	return as_string(f, s_names);
 }
 
 template<> const char* as_string(const ies_units& u)
@@ -38,7 +38,7 @@ template<> const char* as_string(const ies_units& u)
 		"feet",
 		"meters",
 	};
-	return detail::enum_as(u, s_names);
+	return as_string(u, s_names);
 }
 
 bool from_string(ies_format* out_format, const char* src)

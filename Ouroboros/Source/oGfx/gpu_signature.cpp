@@ -2,7 +2,7 @@
 
 #include <oCore/countof.h>
 #include <oGfx/gpu_signature.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 #include <VSpos.h>
 #include <VSpos_col.h>
@@ -27,7 +27,7 @@ template<> const char* as_string(const gfx::signature& sig)
 	{
 		"graphics",
 	};
-	return detail::enum_as(sig, s_names);
+	return as_string(sig, s_names);
 }
 
 template<> const char* as_string(const gfx::pipeline_state& state)
@@ -51,7 +51,7 @@ template<> const char* as_string(const gfx::pipeline_state& state)
 		"mesh_wire",
 	};
 	
-	return detail::enum_as(state, s_names);
+	return as_string(state, s_names);
 }
 
 namespace gfx {

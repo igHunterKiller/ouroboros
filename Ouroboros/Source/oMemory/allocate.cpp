@@ -1,7 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oMemory/allocate.h>
-#include <oCore/countof.h>
+#include <oCore/stringize.h>
 
 namespace ouro {
 
@@ -27,8 +27,6 @@ void noop_deallocate(void* pointer)
 allocator default_allocator(default_allocate, default_deallocate);
 allocator noop_allocator(noop_allocate, noop_deallocate);
 	
-template<typename T> const char* as_string(const T& value);
-
 template<> const char* as_string(const memory_alignment& alignment)
 {
 	static const char* names[] = 

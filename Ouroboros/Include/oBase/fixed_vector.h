@@ -4,7 +4,7 @@
 
 #pragma once
 #include <oArch/compiler.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <array>
 #include <stdexcept>
 

@@ -2,7 +2,7 @@
 
 #include <oCore/countof.h>
 #include <oGfx/oGfxShaders.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 typedef unsigned char BYTE;
 

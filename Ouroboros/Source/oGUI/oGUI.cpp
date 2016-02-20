@@ -26,8 +26,7 @@ template<> const char* as_string(const alignment::value& _Alignment)
 	return "?";
 }
 
-oDEFINE_ENUM_TO_STRING(alignment::value);
-oDEFINE_ENUM_FROM_STRING(alignment::value);
+oDEFINE_TO_FROM_STRING(alignment::value)
 
 template<> const char* as_string(const window_state::value& _State)
 {
@@ -44,8 +43,7 @@ template<> const char* as_string(const window_state::value& _State)
 	return "?";
 }
 
-oDEFINE_ENUM_TO_STRING(window_state::value);
-oDEFINE_ENUM_FROM_STRING(window_state::value);
+oDEFINE_TO_FROM_STRING(window_state::value)
 
 template<> const char* as_string(const window_style::value& _Style)
 {
@@ -67,8 +65,7 @@ template<> const char* as_string(const window_style::value& _Style)
 	return "?";
 }
 
-oDEFINE_ENUM_TO_STRING(window_style::value);
-oDEFINE_ENUM_FROM_STRING(window_style::value);
+oDEFINE_TO_FROM_STRING(window_style::value)
 
 template<> const char* as_string(const window_sort_order::value& _SortOrder)
 {
@@ -82,8 +79,7 @@ template<> const char* as_string(const window_sort_order::value& _SortOrder)
 	return "?";
 }
 
-oDEFINE_ENUM_TO_STRING(window_sort_order::value);
-oDEFINE_ENUM_FROM_STRING(window_sort_order::value);
+oDEFINE_TO_FROM_STRING(window_sort_order::value)
 
 template<> const char* as_string(const control_type::value& _Control)
 {
@@ -117,8 +113,7 @@ template<> const char* as_string(const control_type::value& _Control)
 	return "?";
 }
 
-oDEFINE_ENUM_TO_STRING(control_type::value);
-oDEFINE_ENUM_FROM_STRING(control_type::value);
+oDEFINE_TO_FROM_STRING(control_type::value)
 
 template<> const char* as_string(const event_type::value& _Event)
 {
@@ -147,8 +142,7 @@ template<> const char* as_string(const event_type::value& _Event)
 	return "?";
 }
 
-oDEFINE_ENUM_TO_STRING(event_type::value);
-oDEFINE_ENUM_FROM_STRING(event_type::value);
+oDEFINE_TO_FROM_STRING(event_type::value)
 
 int4 resolve_rect(const int4& _Parent, const int4& _UnadjustedChild, alignment::value _Alignment, bool _Clip)
 {

@@ -38,7 +38,7 @@ template<> const char* as_string(const windows::version& v)
 		"Windows Server 2012 SP1",
 		"Windows 10",
 	};
-	return detail::enum_as(v, s_names);
+	return as_string(v, s_names);
 }
 
 	namespace windows {

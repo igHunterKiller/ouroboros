@@ -1,7 +1,8 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oBase/date.h>
-#include <oString/stringize.h>
+#include <oString/string.h>
+#include <oCore/stringize.h>
 #include <cassert>
 #include <ctime>
 #include <calfaq/calfaq.h>

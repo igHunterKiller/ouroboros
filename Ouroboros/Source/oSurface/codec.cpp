@@ -3,7 +3,7 @@
 #include <oSurface/codec.h>
 #include <oSurface/convert.h>
 #include <oMemory/memory.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 // _____________________________________________________________________________
 // Boilerplate (don't use directly, they're registered with the functions below)

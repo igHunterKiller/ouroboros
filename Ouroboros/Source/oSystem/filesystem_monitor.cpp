@@ -22,7 +22,7 @@ namespace ouro {
 			"modified",
 			"accessible",
 		};
-		return detail::enum_as(e, s_names);
+		return as_string(e, s_names);
 	}
 
 	namespace filesystem {

@@ -1,7 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oBase/mime.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <cstring>
 
 namespace ouro {
@@ -85,7 +85,7 @@ template<> const char* as_string(const mime& m)
 		"video/x-ms-wmv",
 		"video/x-flv",
 	};
-	return detail::enum_as(m, s_names);
+	return as_string(m, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(mime)

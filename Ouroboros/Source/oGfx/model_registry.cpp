@@ -5,7 +5,7 @@
 #include <oMesh/codec.h>
 #include <oMesh/obj.h>
 #include <oMesh/primitive.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 namespace ouro { 
 
@@ -30,7 +30,7 @@ template<> const char* as_string(const gfx::primitive_model& m)
 		"rectangle_outline",
 		"torus_outline",
 	};
-	return detail::enum_as(m, s_names);
+	return as_string(m, s_names);
 }
 	
 namespace gfx {

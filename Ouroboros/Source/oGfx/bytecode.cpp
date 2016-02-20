@@ -1,7 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oGfx/bytecode.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include "bytecode_util.h"
 
 #include <VSpos.h>
@@ -213,7 +213,7 @@ template<> const char* as_string(const gfx::vertex_layout& layout)
 		"uv0_uv1_col",
 		"uvw_col",
 	};
-	return detail::enum_as(layout, s_names);
+	return as_string(layout, s_names);
 }
 
 }

@@ -18,7 +18,7 @@
 #include <oString/string_path.h>
 #include <oString/string_source.h>
 #include <oString/string_traits.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oString/text_document.h>
 #include <oString/uri.h>
 #include <oString/xml.h>

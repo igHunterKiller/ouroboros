@@ -1,6 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oCore/fourcc.h>
 #include <oCore/endian.h>
 #include <oCore/guid.h>

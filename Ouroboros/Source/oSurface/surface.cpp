@@ -2,7 +2,7 @@
 
 #include <oSurface/surface.h>
 #include <oMath/hlsl.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <atomic>
 
 namespace ouro { namespace surface {
@@ -25,11 +25,10 @@ template<> const char* as_string(const surface::cube_face& face)
 		"posz",
 		"negz",
 	};
-	return detail::enum_as(face, s_names);
+	return as_string(face, s_names);
 }
 
-oDEFINE_ENUM_TO_STRING(surface::cube_face)
-oDEFINE_ENUM_FROM_STRING(surface::cube_face)
+oDEFINE_TO_FROM_STRING(surface::cube_face)
 
 template<> const char* as_string(const surface::semantic& s)
 {
@@ -55,7 +54,7 @@ template<> const char* as_string(const surface::semantic& s)
 		"cube_hdr",
 		"cube_srgb",
 	};
-	return detail::enum_as(s, s_names);
+	return as_string(s, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(surface::semantic)

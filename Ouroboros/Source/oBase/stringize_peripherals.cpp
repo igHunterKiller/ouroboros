@@ -1,7 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oCore/peripherals.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 namespace ouro {
 
@@ -19,7 +19,7 @@ template<> const char* as_string(const peripheral_status& s)
 		"med_power",
 		"full_power",
 	};
-	return detail::enum_as(s, s_names);
+	return as_string(s, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(peripheral_status);
@@ -156,7 +156,7 @@ template<> const char* as_string(const key& k)
 		"app1",
 		"app2",
 	};
-	return detail::enum_as(k, s_names);
+	return as_string(k, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(key);
@@ -174,7 +174,7 @@ template<> const char* as_string(const key_modifier& m)
 		"alt_shift",
 		"ctrl_alt_shift",
 	};
-	return detail::enum_as(m, s_names);
+	return as_string(m, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(key_modifier);
@@ -192,7 +192,7 @@ template<> const char* as_string(const mouse_button& b)
 		"dbl_middle",
 		"dbl_right",
 	};
-	return detail::enum_as(b, s_names);
+	return as_string(b, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(mouse_button);
@@ -205,7 +205,7 @@ template<> const char* as_string(const mouse_capture& c)
 		"absolute",
 		"relative",
 	};
-	return detail::enum_as(c, s_names);
+	return as_string(c, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(mouse_capture);
@@ -223,7 +223,7 @@ template<> const char* as_string(const mouse_cursor& c)
 		"wait_background",
 		"user",
 	};
-	return detail::enum_as(c, s_names);
+	return as_string(c, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(mouse_cursor);
@@ -249,7 +249,7 @@ template<> const char* as_string(const pad_button& b)
 		"start",
 		"select",
 	};
-	return detail::enum_as(b, s_names);
+	return as_string(b, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(pad_button);

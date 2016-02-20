@@ -39,7 +39,7 @@ template<> const char* as_string(const tests::pipeline_state& state)
 		"geometry_texture3d_only",
 		"geometry_texturecube_only",
 	};
-	return detail::enum_as(state, s_names);
+	return as_string(state, s_names);
 }
 
 	namespace tests {

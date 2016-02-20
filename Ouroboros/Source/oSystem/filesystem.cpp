@@ -43,7 +43,7 @@ template<> const char* as_string(const filesystem::file_type& type)
 		"read_only_directory_file",
 		"read_only_file",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
 }

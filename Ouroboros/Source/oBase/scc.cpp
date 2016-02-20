@@ -16,7 +16,7 @@ template<> const char* as_string(const scc_protocol& protocol)
 		"svn",
 		"git",
 	};
-	return detail::enum_as(protocol, s_names);
+	return as_string(protocol, s_names);
 }
 
 template<> const char* as_string(const scc_status& status)
@@ -38,7 +38,7 @@ template<> const char* as_string(const scc_status& status)
 		"obstructed",
 		"out_of_date",
 	};
-	return detail::enum_as(status, s_names);
+	return as_string(status, s_names);
 }
 
 namespace detail {

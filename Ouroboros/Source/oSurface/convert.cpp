@@ -5,7 +5,7 @@
 #include <oMath/hlslx.h>
 #include <oMath/quantize.h>
 #include <oMemory/memory.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <ispc_texcomp.h>
 
 #define oSURF_CHECK(expr, format, ...) oCheck(expr, std::errc::invalid_argument, format, ## __VA_ARGS__)

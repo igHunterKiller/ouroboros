@@ -4,7 +4,7 @@
 
 #include <oCore/color.h>
 
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 #include <oMath/hlslx.h>
 #include <oMath/matrix.h>
@@ -18,12 +18,10 @@
 
 namespace ouro {
 
-template<typename T> const char* as_string(const T& value);
-
 template<> const char* as_string(const gizmo::space_t& s)
 {
 	static const char* s_names[] = { "local", "world", };
-	return detail::enum_as(s, s_names);
+	return as_string(s, s_names);
 }
 
 namespace vector_component

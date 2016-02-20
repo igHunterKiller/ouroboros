@@ -1,6 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oBase/vendor.h>
 
 namespace ouro {
@@ -26,7 +26,7 @@ template<> const char* as_string(const vendor& v)
 		"Vizio",
 		"Western Digital",
 	};
-	return detail::enum_as(v, s_names);
+	return as_string(v, s_names);
 }
 
 }

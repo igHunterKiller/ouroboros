@@ -4,7 +4,7 @@
 // and caches indices to the values
 
 #pragma once
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oString/text_document.h>
 #include <cstdint>
 #include <cstring>

@@ -4,7 +4,7 @@
 
 #include <oCore/assert.h>
 #include <oCore/countof.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oString/string_path.h>
 
 namespace ouro {

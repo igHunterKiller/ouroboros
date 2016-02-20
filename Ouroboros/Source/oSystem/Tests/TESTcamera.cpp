@@ -4,7 +4,7 @@
 
 #include <oSystem/camera.h>
 #include <oCore/assert.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 using namespace ouro;
 

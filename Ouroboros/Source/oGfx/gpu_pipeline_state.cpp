@@ -19,7 +19,7 @@ template<> const char* as_string(const gfx2::pipeline_state& state)
 		"unknown",
 		"lines",
 	};
-	return detail::enum_as(state, s_names);
+	return as_string(state, s_names);
 }
 
 namespace gfx2 {

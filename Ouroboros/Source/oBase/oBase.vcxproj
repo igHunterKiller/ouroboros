@@ -43,7 +43,7 @@
     <ClCompile Include="scc.cpp" />
     <ClCompile Include="scc_svn.cpp" />
     <ClCompile Include="snappy.cpp" />
-    <ClCompile Include="stringize.cpp" />
+    <ClCompile Include="stringize_base.cpp" />
     <ClCompile Include="stringize_hlsl.cpp" />
     <ClCompile Include="stringize_peripherals.cpp" />
     <ClCompile Include="stringize_version.cpp" />

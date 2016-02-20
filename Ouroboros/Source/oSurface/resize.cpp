@@ -20,7 +20,7 @@ template<> const char* as_string(const surface::filter& f)
 		"lanczos2",
 		"lanczos3",
 	};
-	return detail::enum_as(f, s_names);
+	return as_string(f, s_names);
 }
 
 	namespace surface {

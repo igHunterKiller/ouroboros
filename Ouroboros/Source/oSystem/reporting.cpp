@@ -23,7 +23,7 @@ template<> const char* as_string(const assert_type& type)
 		"Error",
 		"Exception",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
 	namespace reporting {

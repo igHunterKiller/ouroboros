@@ -5,7 +5,7 @@
 
 #pragma once
 #include <oString/path.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oString/string_codec.h>
 #include <oString/uri_traits.h>
 #include <oMemory/fnv1a.h>

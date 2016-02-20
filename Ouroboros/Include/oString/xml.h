@@ -13,7 +13,7 @@
 
 #pragma once
 #include <oString/fixed_string.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <oString/text_document.h>
 #include <cstdint>
 #include <cstring>

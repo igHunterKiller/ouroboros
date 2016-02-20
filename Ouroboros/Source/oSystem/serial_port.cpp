@@ -19,7 +19,7 @@ template<> const char* as_string(const serial_port::port& port)
 		"COM3",
 		"COM4",
 	};
-	return detail::enum_as(port, s_names);
+	return as_string(port, s_names);
 }
 
 static unsigned char get_stop_bits(const serial_port::stop_bits& stop_bits)

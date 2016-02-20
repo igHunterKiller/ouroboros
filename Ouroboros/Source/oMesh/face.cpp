@@ -1,11 +1,8 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/assert.h>
 #include <oMesh/face.h>
 #include <oMemory/memory.h>
-
-#define STR_SUPPORT(_T) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
-
-#define oFACE_CHECK(expr, format, ...) do { if (!(expr)) oThrow(std::errc::invalid_argument, format, ## __VA_ARGS__); } while(false)
 
 namespace ouro {
 
@@ -56,10 +53,10 @@ template<> const char* as_string(const mesh::primitive_type& type)
 		"patches31",
 		"patches32",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
-STR_SUPPORT(mesh::primitive_type);
+oDEFINE_TO_FROM_STRING(mesh::primitive_type);
 
 template<> const char* as_string(const mesh::face_type& type)
 {
@@ -70,10 +67,10 @@ template<> const char* as_string(const mesh::face_type& type)
 		"front_cw",
 		"outline",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 		
-STR_SUPPORT(mesh::face_type);
+oDEFINE_TO_FROM_STRING(mesh::face_type);
 
 namespace mesh {
 
@@ -94,16 +91,16 @@ uint32_t num_primitives(const primitive_type& type, uint32_t num_indices, uint32
 
 void flip_winding_order(uint32_t base_index_index, uint16_t* indices, uint32_t num_indices)
 {
-	oFACE_CHECK((base_index_index % 3) == 0, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
-	oFACE_CHECK((num_indices % 3) == 0, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
+	oCheck((base_index_index % 3) == 0, std::errc::invalid_argument, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
+	oCheck((num_indices % 3) == 0, std::errc::invalid_argument, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
 	for (uint32_t i = base_index_index; i < num_indices; i += 3)
 		std::swap(indices[i+1], indices[i+2]);
 }
 
 void flip_winding_order(uint32_t base_index_index, uint32_t* indices, uint32_t num_indices)
 {
-	oFACE_CHECK((base_index_index % 3) == 0, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
-	oFACE_CHECK((num_indices % 3) == 0, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
+	oCheck((base_index_index % 3) == 0, std::errc::invalid_argument, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
+	oCheck((num_indices % 3) == 0, std::errc::invalid_argument, "Indices is not divisible by 3, so thus is not triangles and cannot be re-winded");
 	for (uint32_t i = base_index_index; i < num_indices; i += 3)
 		std::swap(indices[i+1], indices[i+2]);
 }

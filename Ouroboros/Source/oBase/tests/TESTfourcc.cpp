@@ -3,7 +3,7 @@
 #include <oBase/unit_test.h>
 
 #include <oCore/fourcc.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 
 using namespace ouro;
 

@@ -2,7 +2,7 @@
 
 #pragma once
 #include <oString/string_traits.h>
-#include <oString/stringize.h>
+#include <oCore/stringize.h>
 #include <cstring>
 #include <cwchar>
 #include <stdexcept>

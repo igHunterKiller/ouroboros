@@ -128,6 +128,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "oCore", "oCore", "{C4CCFB09
 		Ouroboros\Include\oCore\peripherals.h = Ouroboros\Include\oCore\peripherals.h
 		Ouroboros\Include\oCore\random.h = Ouroboros\Include\oCore\random.h
 		Ouroboros\Include\oCore\ref.h = Ouroboros\Include\oCore\ref.h
+		Ouroboros\Include\oCore\stringize.h = Ouroboros\Include\oCore\stringize.h
 		Ouroboros\Include\oCore\timer.h = Ouroboros\Include\oCore\timer.h
 	EndProjectSection
 EndProject

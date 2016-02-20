@@ -29,7 +29,7 @@ template<> const char* as_string(const mesh::obj::texture_type& type)
 		"cube_front",
 		"sphere",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
 oDEFINE_TO_FROM_STRING(mesh::obj::texture_type)

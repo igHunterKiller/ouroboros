@@ -14,6 +14,7 @@
 // capabilities.
 
 #pragma once
+#include <oArch/compiler.h> // oALIGNAS
 
 // Returns true if c is any kind of whitespace
 /// inline bool is_whitespace(int c)

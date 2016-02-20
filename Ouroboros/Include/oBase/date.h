@@ -7,7 +7,7 @@
 // NTP v4: http://tools.ietf.org/html/rfc5905#section-6
 
 #pragma once
-#include <oString/stringize.h> // as_string
+#include <oCore/stringize.h> // as_string
 #include <oCore/uint128.h>
 #include <chrono>
 #include <climits>

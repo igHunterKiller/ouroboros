@@ -46,9 +46,6 @@
     <ClCompile Include="ip4.cpp">
       <Filter>Source\types</Filter>
     </ClCompile>
-    <ClCompile Include="stringize.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="stringize_hlsl.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -78,6 +75,9 @@
     </ClCompile>
     <ClCompile Include="lz4.cpp">
       <Filter>Source\compression</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize_base.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

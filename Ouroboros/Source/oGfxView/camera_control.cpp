@@ -15,7 +15,7 @@ template<> const char* as_string(const camera_control::type_t& type)
 		"Maya",
 		"MMO",
 	};
-	return detail::enum_as(type, s_names);
+	return as_string(type, s_names);
 }
 
 static float3 calc_walk_delta(const keyboard_t& keyboard, bool auto_forward, float walk_speed)

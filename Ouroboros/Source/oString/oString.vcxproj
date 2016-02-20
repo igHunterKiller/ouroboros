@@ -30,7 +30,8 @@
     <ClInclude Include="..\..\Include\oString\path.h" />
     <ClInclude Include="..\..\Include\oString\path_traits.h" />
     <ClInclude Include="..\..\Include\oString\string.h" />
-    <ClInclude Include="..\..\Include\oString\stringize.h" />
+    <ClInclude Include="..\..\Include\oString\stringize_array.h" />
+    <ClInclude Include="..\..\Include\oString\stringize_container.h" />
     <ClInclude Include="..\..\Include\oString\string_codec.h" />
     <ClInclude Include="..\..\Include\oString\string_fast_scan.h" />
     <ClInclude Include="..\..\Include\oString\string_path.h" />
@@ -96,7 +97,7 @@
     <ClCompile Include="split_path.cpp" />
     <ClCompile Include="strbitmask.cpp" />
     <ClCompile Include="strcasestr.cpp" />
-    <ClCompile Include="stringize.cpp" />
+    <ClCompile Include="stringize_array.cpp" />
     <ClCompile Include="strncasestr.cpp" />
     <ClCompile Include="strnstr.cpp" />
     <ClCompile Include="strtok.cpp" />

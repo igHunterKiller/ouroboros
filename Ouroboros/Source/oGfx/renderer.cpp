@@ -29,7 +29,7 @@ template<> const char* as_string(const gfx::fullscreen_mode& mode)
 		"texcoordu",
 		"texcoordv",
 	};
-	return detail::enum_as(mode, s_names);
+	return as_string(mode, s_names);
 }
 
 template<> const char* as_string(const gfx::render_pass& pass)
@@ -43,7 +43,7 @@ template<> const char* as_string(const gfx::render_pass& pass)
 		"pass_debug",
 		"pass_resolve",
 	};
-	return detail::enum_as(pass, s_names);
+	return as_string(pass, s_names);
 }
 
 template<> const char* as_string(const gfx::render_technique& technique)
@@ -60,7 +60,7 @@ template<> const char* as_string(const gfx::render_technique& technique)
 		"view_end",
 		"pass_end",
 	};
-	return detail::enum_as(technique, s_names);
+	return as_string(technique, s_names);
 }
 
 	namespace gfx {

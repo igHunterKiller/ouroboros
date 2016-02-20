@@ -42,9 +42,6 @@
     <ClInclude Include="..\..\Include\oString\all.h">
       <Filter>oString</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\oString\stringize.h">
-      <Filter>oString</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\oString\atof.h">
       <Filter>oString</Filter>
     </ClInclude>
@@ -79,6 +76,12 @@
       <Filter>oString</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\oString\argtok.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\stringize_array.h">
+      <Filter>oString</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oString\stringize_container.h">
       <Filter>oString</Filter>
     </ClInclude>
   </ItemGroup>
@@ -215,9 +218,6 @@
     <ClCompile Include="..\..\External\OpenBSD\src\lib\libc\string\wcslcat.c">
       <Filter>Source\strlcpy</Filter>
     </ClCompile>
-    <ClCompile Include="stringize.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="text_document.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -235,6 +235,9 @@
     </ClCompile>
     <ClCompile Include="percent_encode.cpp">
       <Filter>Source\encoding</Filter>
+    </ClCompile>
+    <ClCompile Include="stringize_array.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
