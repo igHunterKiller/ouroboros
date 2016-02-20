@@ -24,6 +24,51 @@ struct TESTMonitorEvents
 	event ZFileAccessible;
 };
 
+struct monitor_ctx
+{
+	unit_test::services* srv;
+	TESTMonitorEvents* events;
+	double start_time;
+};
+
+void dir_monitor(filesystem::file_event event, const path_t& path, void* user)
+{
+	auto& ctx    = *(monitor_ctx*)user;
+	auto& srv    = *ctx.srv;
+	auto& events = *ctx.events;
+
+	int timeMS = static_cast<int>((timer::now() - ctx.start_time) * 1000);
+	switch (event)
+	{
+		case filesystem::file_event::added:
+			srv.trace("file %s was added at time %dms from start", path.c_str(), timeMS);
+			events.FileAdded.set();
+			break;
+		case filesystem::file_event::removed:
+			srv.trace("file %s was removed at time %dms from start", path.c_str(), timeMS);
+			events.FileRemoved.set();
+			break;
+		case filesystem::file_event::modified:
+		{
+			srv.trace("file %s was modified at time %dms from start", path.c_str(), timeMS);
+			events.FileModified.set();
+			break;
+		}
+		case filesystem::file_event::accessible:
+		{
+			srv.trace("file %s is accessible at time %dms from start", path.c_str(), timeMS);
+			if (strstr(path, "-NZ.txt"))
+				events.NZFileAccessible.set();
+			else if (strstr(path, "-Z.txt"))
+				events.ZFileAccessible.set();
+			break;
+		}
+	}
+
+	events.LastEventTimestamp = timer::now();
+	srv.trace("Events->LastEventTimestamp = %f", events.LastEventTimestamp);
+}
+
 oTEST(oSystem_filesystem_monitor)
 {
 	auto Events = std::make_shared<TESTMonitorEvents>();
@@ -44,45 +89,17 @@ oTEST(oSystem_filesystem_monitor)
 
 	double startTime = timer::now();
 
+	monitor_ctx ctx;
+	ctx.srv = &srv;
+	ctx.events = Events.get();
+	ctx.start_time = startTime;
+
 	// It is not normally a good practice to capture the events by reference, 
 	// but for simplicity doing it here. counting on not getting further 
 	// callbacks once the test is finished.
 	filesystem::monitor::info fsmi;
 	fsmi.accessibility_poll_rate_ms = 1000; // crank this up for testing since we're not doing anything else
-	std::shared_ptr<filesystem::monitor> Monitor = filesystem::monitor::make(fsmi,
-		[startTime, Events, &srv](filesystem::file_event _Event, const path_t& _Path)
-		{
-			int timeMS = static_cast<int>((timer::now() - startTime) * 1000);
-			switch (_Event)
-			{
-				case filesystem::file_event::added:
-					srv.trace("file %s was added at time %dms from start", _Path.c_str(), timeMS);
-					Events->FileAdded.set();
-					break;
-				case filesystem::file_event::removed:
-					srv.trace("file %s was removed at time %dms from start", _Path.c_str(), timeMS);
-					Events->FileRemoved.set();
-					break;
-				case filesystem::file_event::modified:
-				{
-					srv.trace("file %s was modified at time %dms from start", _Path.c_str(), timeMS);
-					Events->FileModified.set();
-					break;
-				}
-				case filesystem::file_event::accessible:
-				{
-					srv.trace("file %s is accessible at time %dms from start", _Path.c_str(), timeMS);
-					if (strstr(_Path, "-NZ.txt"))
-						Events->NZFileAccessible.set();
-					else if (strstr(_Path, "-Z.txt"))
-						Events->ZFileAccessible.set();
-					break;
-				}
-			}
-
-			Events->LastEventTimestamp = timer::now();
-			srv.trace("Events->LastEventTimestamp = %f", Events->LastEventTimestamp);
-		});
+	std::shared_ptr<filesystem::monitor> Monitor = filesystem::monitor::make(fsmi, dir_monitor, &ctx);
 
 	auto FolderToMonitor = root / RelFolderToMonitor;
 	Monitor->watch(FolderToMonitor, 65536, true);

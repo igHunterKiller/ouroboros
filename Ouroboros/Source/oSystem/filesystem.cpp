@@ -574,6 +574,35 @@ void enumerate(const path_t& wildcard_path, enumerate_fn enumerator, void* user)
 	}
 }
 
+void enumerate_recursively(const path_t& wildcard_path, enumerate_fn enumerator, void* user)
+{
+	struct ctx_t
+	{
+		const path_t* wildcard_path;
+		enumerate_fn enumerator;
+		void* user;
+	};
+
+	ctx_t ctx;
+	ctx.wildcard_path = &wildcard_path;
+	ctx.enumerator = enumerator;
+	ctx.user = user;
+
+	enumerate(wildcard_path, [](const path_t& path, const file_status& status, uint64_t size, void* user)->bool
+	{
+		ctx_t* ctx = (ctx_t*)user;
+
+		if (is_directory(status))
+		{
+			path_t wildcard = path / ctx->wildcard_path->filename();
+			enumerate_recursively(wildcard, ctx->enumerator, ctx->user);
+			return true;
+		}
+
+		return ctx->enumerator(path, status, size, ctx->user);
+	}, user);
+}
+
 void* map(const path_t& path, map_option opt, uint64_t offset, uint64_t size)
 {
 	HANDLE hFile = CreateFileA(path, opt == map_option::binary_read ? GENERIC_READ : (GENERIC_READ|GENERIC_WRITE), 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);

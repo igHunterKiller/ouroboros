@@ -12,18 +12,18 @@
 
 namespace ouro {
 
-	template<> const char* as_string(const filesystem::file_event& e)
+template<> const char* as_string(const filesystem::file_event& e)
+{
+	static const char* s_names[] =
 	{
-		static const char* s_names[] =
-		{
-			"unsupported",
-			"added",
-			"removed",
-			"modified",
-			"accessible",
-		};
-		return as_string(e, s_names);
-	}
+		"unsupported",
+		"added",
+		"removed",
+		"modified",
+		"accessible",
+	};
+	return as_string(e, s_names);
+}
 
 	namespace filesystem {
 
@@ -41,81 +41,84 @@ static file_event as_event(DWORD notify_action)
 	return file_event::unsupported;
 }
 
-// Returns true if the file exists and can be opened for shared reading, false 
-// otherwise.
-static bool is_accessible(const char* _Path)
+static bool is_accessible(const char* path)
 {
-	DWORD dwAttributes = GetFileAttributes(_Path);
+	// returns true if the file exists and can be opened for shared reading
+	if (!path)
+		return false;
+
+	DWORD dwAttributes = GetFileAttributes(path);
 	if (dwAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		return true;
 
-	bool IsAccessible = false;
-	HANDLE hFile = CreateFile(_Path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
+	bool accessible = false;
+	HANDLE hFile = CreateFile(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
-		IsAccessible = true;
+		accessible = true;
 		oVB(CloseHandle(hFile));
 	}
 
-	return IsAccessible;
+	return accessible;
 }
 
 class monitor_impl;
 class watcher
 {
 public:
-	watcher(monitor_impl* _pMonitor, const path_t& _Path, bool _Recursive, size_t _BufferSize);
+	watcher(monitor_impl* _pMonitor, const path_t& path, bool recursive, size_t buffer_size);
 	~watcher();
 
 	void watch_changes();
 	void unwatch_changes();
-	bool watching(const path_t& _Path) const;
+	bool watching(const path_t& path) const;
 
 private:
-	mutex ProcessMutex;
-	void* pBuffer[2];
-	DWORD BufferSize;
-	monitor_impl* pMonitor;
-	OVERLAPPED* pOverlapped;
-	HANDLE hDirectory;
-	path_t Directory;
-	sstring Filename;
-	bool Recursive;
-	bool Watching;
-	char BufferIndex;
+	mutex process_mutex_;
+	void* buffer_[2];
+	DWORD buffer_size_;
+	monitor_impl* monitor_;
+	OVERLAPPED* overlapped_;
+	HANDLE hdirectory_;
+	path_t directory_;
+	sstring filename_;
+	bool recursive_;
+	bool watching_;
+	char buffer_index_;
 
-	void process(FILE_NOTIFY_INFORMATION* _pNotify);
+	void process(FILE_NOTIFY_INFORMATION* notify);
 
-	static void static_on_complete(void* _pContext, unsigned long long _NumBytes) { ((watcher*)_pContext)->on_complete(_NumBytes); }
-	void on_complete(unsigned long long _NumBytes);
+	static void static_on_complete(void* context, uint64_t num_bytes) { ((watcher*)context)->on_complete(num_bytes); }
+	void on_complete(uint64_t num_bytes);
 };
 
 class monitor_impl : public monitor
 {
 public:
-	monitor_impl(const info& _Info, const std::function<void (file_event _Event, const path_t& _Path)>& _OnEvent);
+	monitor_impl(const info& info, on_event_fn on_event, void* user);
 	~monitor_impl();
-	info get_info() const override { return Info; }
-  void watch(const path_t& _Path, size_t _BufferSize, bool _Recursive) override;
-  void unwatch(const path_t& _Path) override;
+	info get_info() const override { return info_; }
+  void watch(const path_t& path, size_t buffer_size, bool recursive) override;
+  void unwatch(const path_t& path) override;
 	void unwatch_all();
 
 	// API called from class watch
-	void watch_ended() { NumActiveWatches--; }
-	void on_event(const path_t& _Path, file_event _Event, double _Timestamp);
+	void watch_ended() { num_active_watches_--; }
+	void on_event(const path_t& path, file_event _Event, double _Timestamp);
 
 private:
 
-	std::function<void (file_event _Event, const path_t& _Path)> OnEvent;
-	mutex WatchesMutex;
-	std::vector<watcher*> Watches;
-	std::vector<path_t> Accessibles;
+	on_event_fn on_event_;
+	void* user_;
+	mutex watches_mutex_;
+	std::vector<watcher*> watches_;
+	std::vector<path_t> accessibles_;
 
-	HANDLE hTimerQueue;
-	HANDLE hTimerQueueTimer;
-	info Info;
-	std::atomic<int> NumActiveWatches;
-	bool Debug;
+	HANDLE htimer_queue_;
+	HANDLE htimer_queue_timer_;
+	info info_;
+	std::atomic<int> num_active_watches_;
+	bool debug_;
 
 	// Some events need further analysis, so here's a container for them
 	// to hold over from the immediate event until they can be looked at.
@@ -126,40 +129,38 @@ private:
 		file_event event;
 	};
 
-	mutex EventsMutex;
-	std::map<path_t, EVENT, less_i<path_t>> Events;
-	mutex AccessibilityMutex;
+	mutex events_mutex_;
+	std::map<path_t, EVENT, less_i<path_t>> events_;
+	mutex accessibility_mutex_;
 
 	void check_accessibility();
 	static VOID CALLBACK WaitOrTimerCallback(PVOID lpParameter, BOOLEAN TimerOrWaitFired) { static_cast<monitor_impl*>(lpParameter)->check_accessibility(); }
 };
 
-watcher::watcher(monitor_impl* _pMonitor, const path_t& _Path, bool _Recursive, size_t _BufferSize)
-	: pMonitor(_pMonitor)
-	, pOverlapped(nullptr)
-	, hDirectory(INVALID_HANDLE_VALUE)
-	, Directory(_Path)
-	, BufferSize(static_cast<DWORD>(_BufferSize))
-	, BufferIndex(0)
-	, Recursive(_Recursive)
-	, Watching(true)
+watcher::watcher(monitor_impl* _pMonitor, const path_t& path, bool recursive, size_t buffer_size)
+	: monitor_(_pMonitor)
+	, overlapped_(nullptr)
+	, hdirectory_(INVALID_HANDLE_VALUE)
+	, directory_(path)
+	, buffer_size_(static_cast<DWORD>(buffer_size))
+	, buffer_index_(0)
+	, recursive_(recursive)
+	, watching_(true)
 {
-	if (Directory.has_filename())
+	if (directory_.has_filename())
 	{
-		if (_Recursive)
-			oThrow(std::errc::invalid_argument, "a filename/wildcard cannot be recursive");
-
-		Filename = Directory.filename().c_str();
-		Directory.remove_filename();
+		oCheck(recursive, std::errc::invalid_argument, "a filename/wildcard cannot be recursive");
+		filename_ = directory_.filename().c_str();
+		directory_.remove_filename();
 	}
 
-	if (!exists(Directory))
-		create_directory(Directory);
+	if (!exists(directory_))
+		create_directory(directory_);
 
-	oCheck(exists(Directory), std::errc::no_such_file_or_directory, "direction does not exist: %s", Directory.c_str());
-	oCheck(is_directory(Directory), std::errc::not_a_directory, "not a directory: %s", Directory.c_str());
+	oCheck(exists(directory_), std::errc::no_such_file_or_directory, "direction does not exist: %s", directory_.c_str());
+	oCheck(is_directory(directory_), std::errc::not_a_directory, "not a directory: %s", directory_.c_str());
 
-	hDirectory = CreateFile(Directory
+	hdirectory_ = CreateFile(directory_
 		, FILE_LIST_DIRECTORY
 		, FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE
 		, nullptr
@@ -167,80 +168,80 @@ watcher::watcher(monitor_impl* _pMonitor, const path_t& _Path, bool _Recursive, 
 		, FILE_FLAG_BACKUP_SEMANTICS|FILE_FLAG_OVERLAPPED
 		, nullptr);
 
-	oVB(hDirectory != INVALID_HANDLE_VALUE);
+	oVB(hdirectory_ != INVALID_HANDLE_VALUE);
 
-	pOverlapped = windows::iocp::associate(hDirectory, watcher::static_on_complete, this);
+	overlapped_ = windows::iocp::associate(hdirectory_, watcher::static_on_complete, this);
 
-	oCheck(pOverlapped, std::errc::operation_would_block, "OVERLAPPED allocation failed");
+	oCheck(overlapped_, std::errc::operation_would_block, "OVERLAPPED allocation failed");
 
-	pBuffer[0] = new char[_BufferSize];
-	pBuffer[1] = new char[_BufferSize];
+	buffer_[0] = new char[buffer_size];
+	buffer_[1] = new char[buffer_size];
 }
 
 watcher::~watcher()
 {
-	lock_guard<mutex> lock(ProcessMutex);
+	lock_guard<mutex> lock(process_mutex_);
 
-	if (hDirectory != INVALID_HANDLE_VALUE)
-		CloseHandle(hDirectory);
+	if (hdirectory_ != INVALID_HANDLE_VALUE)
+		CloseHandle(hdirectory_);
 
-	windows::iocp::disassociate(pOverlapped);
+	windows::iocp::disassociate(overlapped_);
 
-	if (pBuffer[0])
-		delete [] (char*)pBuffer[0];
+	if (buffer_[0])
+		delete [] (char*)buffer_[0];
 
-	if (pBuffer[1])
-		delete [] (char*)pBuffer[1];
+	if (buffer_[1])
+		delete [] (char*)buffer_[1];
 
-	pMonitor->watch_ended();
+	monitor_->watch_ended();
 }
 
 void watcher::watch_changes()
 {
-	oVB(ReadDirectoryChangesW(hDirectory
-				, pBuffer[BufferIndex]
-				, static_cast<DWORD>(BufferSize)
-				, Recursive
+	oVB(ReadDirectoryChangesW(hdirectory_
+				, buffer_[buffer_index_]
+				, static_cast<DWORD>(buffer_size_)
+				, recursive_
 				, FILE_NOTIFY_CHANGE_LAST_WRITE|FILE_NOTIFY_CHANGE_SIZE|FILE_NOTIFY_CHANGE_FILE_NAME
 				, nullptr
-				, pOverlapped
+				, overlapped_
 				, nullptr));
 }
 
 void watcher::unwatch_changes()
 {
 	{
-		lock_guard<mutex> lock(ProcessMutex);
-		Watching = false;
+		lock_guard<mutex> lock(process_mutex_);
+		watching_ = false;
 	}
-	CancelIoEx(hDirectory, pOverlapped);
+	CancelIoEx(hdirectory_, overlapped_);
 }
 
-void watcher::on_complete(unsigned long long _NumBytes)
+void watcher::on_complete(uint64_t num_bytes)
 {
-	bool DeleteThis = _NumBytes == 0;
-	if (_NumBytes)
+	bool delete_this = num_bytes == 0;
+	if (num_bytes)
 	{
-		ProcessMutex.lock();
-		int OldIndex = BufferIndex;
-		BufferIndex = (BufferIndex + 1) & 0x1;
-		if (Watching)
+		process_mutex_.lock();
+		int OldIndex = buffer_index_;
+		buffer_index_ = (buffer_index_ + 1) & 0x1;
+		if (watching_)
 			watch_changes();
 		else
-			DeleteThis = true;
-		process((FILE_NOTIFY_INFORMATION*)pBuffer[OldIndex]);
+			delete_this = true;
+		process((FILE_NOTIFY_INFORMATION*)buffer_[OldIndex]);
 	}
 	
-	if (DeleteThis)
+	if (delete_this)
 	{
-		monitor_impl* m = pMonitor;
+		monitor_impl* m = monitor_;
 		delete this;
 	}
 }
 
-void watcher::process(FILE_NOTIFY_INFORMATION* _pNotify)
+void watcher::process(FILE_NOTIFY_INFORMATION* notify)
 {
-	FILE_NOTIFY_INFORMATION* n = _pNotify;
+	FILE_NOTIFY_INFORMATION* n = notify;
 	double Now = timer::now();
 	while (true)
 	{
@@ -256,7 +257,7 @@ void watcher::process(FILE_NOTIFY_INFORMATION* _pNotify)
 
 			// These strings aren't null-terminated, AND in wide-character so convert 
 			// back to a useable form.
-			path_t p(Directory);
+			path_t p(directory_);
 			{
 				wchar_t ForNullTermination[path_string::Capacity];
 				memcpy(ForNullTermination, n->FileName, n->FileNameLength);
@@ -265,8 +266,8 @@ void watcher::process(FILE_NOTIFY_INFORMATION* _pNotify)
 				p /= pathString;
 			}
 
-			if (!Filename || !*Filename || matches_wildcard(Filename, p.c_str()))
-				pMonitor->on_event(p, e, Now);
+			if (!filename_ || !*filename_ || matches_wildcard(filename_, p.c_str()))
+				monitor_->on_event(p, e, Now);
 		}
 
 		if (!n->NextEntryOffset)
@@ -275,71 +276,72 @@ void watcher::process(FILE_NOTIFY_INFORMATION* _pNotify)
 		n = (FILE_NOTIFY_INFORMATION*)((uint8_t*)n + n->NextEntryOffset);
 	}
 
-	ProcessMutex.unlock();
+	process_mutex_.unlock();
 }
 
-bool watcher::watching(const path_t& _Path) const
+bool watcher::watching(const path_t& path) const
 {
-	path_t ThatDirectory(_Path);
-	sstring ThatFilename;
+	path_t that_dir(path);
+	sstring that_filename;
 
-	if (!Filename.empty())
+	if (!filename_.empty())
 	{
-		ThatFilename = ThatDirectory.filename().c_str();
-		ThatDirectory.remove_filename();
+		that_filename = that_dir.filename().c_str();
+		that_dir.remove_filename();
 	}
 
-	return same_i<path_t>()(Directory, ThatDirectory) && same_i<sstring>()(Filename, ThatFilename);
+	return same_i<path_t>()(directory_, that_dir) && same_i<sstring>()(filename_, that_filename);
 }
 
-std::shared_ptr<monitor> monitor::make(const info& _Info, const std::function<void (file_event _Event, const path_t& _Path)>& _OnEvent)
+std::shared_ptr<monitor> monitor::make(const info& info, on_event_fn on_event, void* user)
 {
-	return std::make_shared<monitor_impl>(_Info, _OnEvent);
+	return std::make_shared<monitor_impl>(info, on_event, user);
 }
 
-monitor_impl::monitor_impl(const info& _Info, const std::function<void (file_event _Event, const path_t& _Path)>& _OnEvent)
-		: Info(_Info)
-		, OnEvent(_OnEvent)
-		, hTimerQueue(CreateTimerQueue())
-		, hTimerQueueTimer(nullptr)
-		, NumActiveWatches(false)
+monitor_impl::monitor_impl(const info& info, on_event_fn on_event, void* user)
+		: info_(info)
+		, on_event_(on_event)
+		, user_(user)
+		, htimer_queue_(CreateTimerQueue())
+		, htimer_queue_timer_(nullptr)
+		, num_active_watches_(false)
 {
-	oVB(hTimerQueue);
+	oVB(htimer_queue_);
 	HANDLE hTimer = nullptr;
 	oVB(CreateTimerQueueTimer(
-	&hTimerQueueTimer
-	, hTimerQueue
+	&htimer_queue_timer_
+	, htimer_queue_
 	, monitor_impl::WaitOrTimerCallback
 	, this
-	, _Info.accessibility_poll_rate_ms
-	, _Info.accessibility_poll_rate_ms
+	, info.accessibility_poll_rate_ms
+	, info.accessibility_poll_rate_ms
 	, WT_EXECUTEDEFAULT
 	));
 
-	Accessibles.reserve(64);
+	accessibles_.reserve(64);
 }
 
 monitor_impl::~monitor_impl()
 {
-	size_t nWatches = Watches.size();
+	size_t nWatches = watches_.size();
 	unwatch_all();
 	
 	backoff bo;
-	while (NumActiveWatches)
+	while (num_active_watches_)
 		bo.pause();
 
 	HANDLE hEvent = CreateEventA(0, FALSE, FALSE, nullptr);
 	ResetEvent(hEvent);
-	oVB_NOTHROW(DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, hEvent));
+	oVB_NOTHROW(DeleteTimerQueueTimer(htimer_queue_, htimer_queue_timer_, hEvent));
 
 	HRESULT hr = WaitForSingleObject(hEvent, INFINITE);
 	oAssertA(hr == WAIT_OBJECT_0, "failed waiting for DeleteTimerQueueTimer");
 
 	oVB_NOTHROW(CloseHandle(hEvent));
-	oVB_NOTHROW(DeleteTimerQueue(hTimerQueue));
+	oVB_NOTHROW(DeleteTimerQueue(htimer_queue_));
 }
 
-void monitor_impl::on_event(const path_t& _Path, file_event _Event, double _Timestamp)
+void monitor_impl::on_event(const path_t& path, file_event _Event, double _Timestamp)
 {
 	// Files that are added or modified aren't necessarily usable, so queue
 	// such files up for later analysis for accessibility.
@@ -348,41 +350,41 @@ void monitor_impl::on_event(const path_t& _Path, file_event _Event, double _Time
 		EVENT e;
 		e.timestamp = _Timestamp;
 		e.event = _Event;
-		lock_guard<mutex> lock(EventsMutex);
-		Events[_Path] = e;
+		lock_guard<mutex> lock(events_mutex_);
+		events_[path] = e;
 	}
 
-	if (OnEvent)
-		OnEvent(_Event, _Path);
+	if (on_event_)
+		on_event_(_Event, path, user_);
 }
 
 void monitor_impl::check_accessibility()
 {
-	lock_guard<mutex> lock(AccessibilityMutex);
+	lock_guard<mutex> lock(accessibility_mutex_);
 
-	if (Events.empty())
+	if (events_.empty())
 		return;
 
-	const double Timeout = Info.accessibility_timeout_ms / 1000.0;
+	const double Timeout = info_.accessibility_timeout_ms / 1000.0;
 	const double Now = timer::now();
 
 	{
-		lock_guard<mutex> lock_events(EventsMutex);
-		for (auto it = std::begin(Events); it != std::end(Events); /* no increment */)
+		lock_guard<mutex> lock_events(events_mutex_);
+		for (auto it = std::begin(events_); it != std::end(events_); /* no increment */)
 		{
 			const path_t& p = it->first;
 			const EVENT& e = it->second;
 
 			if (is_accessible(p))
 			{
-				Accessibles.push_back(p);
-				it = Events.erase(it);
+				accessibles_.push_back(p);
+				it = events_.erase(it);
 			}
 
 			else if ((e.timestamp + Timeout) > Now)
 			{
 				oTraceA("monitor: accessibility for %s timed out", p.c_str());
-				it = Events.erase(it);
+				it = events_.erase(it);
 			}
 
 			else
@@ -390,35 +392,35 @@ void monitor_impl::check_accessibility()
 		}
 	}
 
-	for (const auto& a : Accessibles)
-		if (OnEvent)
-			OnEvent(file_event::accessible, a);
+	for (const auto& a : accessibles_)
+		if (on_event_)
+			on_event_(file_event::accessible, a, user_);
 
-	Accessibles.clear();
+	accessibles_.clear();
 }
 
-void monitor_impl::watch(const path_t& _Path, size_t _BufferSize, bool _Recursive)
+void monitor_impl::watch(const path_t& path, size_t buffer_size, bool recursive)
 {
-	lock_guard<mutex> lock(WatchesMutex);
+	lock_guard<mutex> lock(watches_mutex_);
 
-	for (auto it = std::begin(Watches); it != std::end(Watches); ++it)
-		oCheck(!(*it)->watching(_Path), std::errc::operation_in_progress, "already watching %s", _Path.c_str());
+	for (auto it = std::begin(watches_); it != std::end(watches_); ++it)
+		oCheck(!(*it)->watching(path), std::errc::operation_in_progress, "already watching %s", path.c_str());
 
-	Watches.push_back(new watcher(this, _Path, _Recursive, _BufferSize));
-	Watches.back()->watch_changes();
+	watches_.push_back(new watcher(this, path, recursive, buffer_size));
+	watches_.back()->watch_changes();
 
-	NumActiveWatches++;
+	num_active_watches_++;
 }
 
-void monitor_impl::unwatch(const path_t& _Path)
+void monitor_impl::unwatch(const path_t& path)
 {
-	lock_guard<mutex> lock(WatchesMutex);
-	for (auto it = std::begin(Watches); it != std::end(Watches); /* no inc */)
+	lock_guard<mutex> lock(watches_mutex_);
+	for (auto it = std::begin(watches_); it != std::end(watches_); /* no inc */)
 	{
-		if ((*it)->watching(_Path))
+		if ((*it)->watching(path))
 		{
 			(*it)->unwatch_changes();
-			it = Watches.erase(it);
+			it = watches_.erase(it);
 		}
 
 		else
@@ -428,11 +430,10 @@ void monitor_impl::unwatch(const path_t& _Path)
 
 void monitor_impl::unwatch_all()
 {
-	lock_guard<mutex> lock(WatchesMutex);
-	for (auto w : Watches)
+	lock_guard<mutex> lock(watches_mutex_);
+	for (auto w : watches_)
 		w->unwatch_changes();
-	Watches.clear();
+	watches_.clear();
 }
 
-	} // namespace filesystem
-}
+}}
