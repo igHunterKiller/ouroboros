@@ -124,7 +124,7 @@ bool oWinControlSet::ParseControlDesc(const XML_CONTEXT& _XmlContext, const CONT
 	_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Size", &ControlSize); // allow oDEFAULT to fall through if not specified
 	ControlSize = oWinControlGetInitialSize(_pDesc->type, ControlSize);
 
-	ouro::alignment::value alignment = ouro::alignment::top_left;
+	ouro::alignment alignment = ouro::alignment::top_left;
 	_XmlContext.pXML->find_attr_value(_XmlContext.hNode, "Align", &alignment); // allow TopLeft as default value
 
 	RECT rParentClient;

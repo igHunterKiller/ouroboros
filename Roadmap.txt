@@ -68,12 +68,11 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	107               oGUI        ui          property sheet based on some lightweight osc-like thing
 	108 107           oGfxView    ui          Make the window bigger for the render space and the UI
 	109               ?           ?           Move wang hash to HLSL-compile. Does that mean it needs to be in 2 places?
-	114               Externals               Add lz4 to the compression pantheon
-	115               Externals               I hear-tell there's better than lz4 out there... add it to the pantheon
+	114               oExternals              Add lz4 to the compression pantheon
+	115               oExternals              I hear-tell there's better than lz4 out there... add it to the pantheon
 	116               oBase       scc         Implement a git version
 	117 116           oBase       scc         Rejigger scc, reformat to code standard and try to simplify/unify svn and git methodologies.
 	118               oSystem     filesystem_monitor Remove <functional> and shared_ptr usage
-	120               oGUI        enums       In oGUI.h, make them all enum classes.
 
 === Notes ===
 

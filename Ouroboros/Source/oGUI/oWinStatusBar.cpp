@@ -77,7 +77,7 @@ RECT oWinStatusBarGetItemRect(HWND _hStatusBar, int _ItemIndex)
 	return r;
 }
 
-static int oWinStatusBarGetStyle(ouro::border_style::value _Style)
+static int oWinStatusBarGetStyle(ouro::border_style _Style)
 {
 	switch (_Style)
 	{
@@ -88,7 +88,7 @@ static int oWinStatusBarGetStyle(ouro::border_style::value _Style)
 	}
 }
 
-void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style::value _BorderStyle, const char* _Format, va_list _Args)
+void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style _BorderStyle, const char* _Format, va_list _Args)
 {
 	lstring s;
 	vsnprintf(s, _Format, _Args);

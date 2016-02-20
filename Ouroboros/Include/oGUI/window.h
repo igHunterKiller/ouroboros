@@ -40,9 +40,9 @@ public:
 
 
 	// shape API
-	virtual void state(window_state::value st) = 0;
-	virtual window_state::value state() const = 0;
-	inline void show(window_state::value st = window_state::restored) { state(st); }
+	virtual void state(window_state st) = 0;
+	virtual window_state state() const = 0;
+	inline void show(window_state st = window_state::restored) { state(st); }
 	inline void hide() { state(window_state::hidden); }
 	inline void minimize() { state(window_state::minimized); }
 	inline void maximize() { state(window_state::maximized); }
@@ -87,8 +87,8 @@ public:
 	virtual void owner(const std::shared_ptr<basic_window>& owner) = 0;
 	virtual std::shared_ptr<basic_window> owner() const = 0;
 
-	virtual void sort_order(window_sort_order::value order) = 0;
-	virtual window_sort_order::value sort_order() const = 0;
+	virtual void sort_order(window_sort_order order) = 0;
+	virtual window_sort_order sort_order() const = 0;
 
 	virtual void focus(bool f = true) = 0;
 	virtual bool has_focus() const = 0;
@@ -108,7 +108,7 @@ public:
 
 	struct basic_event
 	{
-		basic_event(window_handle _hWindow, event_type::value type)
+		basic_event(window_handle _hWindow, event_type type)
 			: window(_hWindow)
 			, type(type)
 		{}
@@ -117,7 +117,7 @@ public:
 		window_handle window;
 
 		// Event type. Use this to choose a downcaster below.
-		event_type::value type;
+		event_type type;
 
 		// union doesn't work because of int2's copy ctor so use downcasting instead
 		inline const create_event& as_create() const;
@@ -156,7 +156,7 @@ public:
 	struct shape_event : basic_event
 	{
 		shape_event(window_handle _hWindow
-			, event_type::value type
+			, event_type type
 			, const window_shape& _Shape)
 			: basic_event(_hWindow, type)
 			, shape(_Shape)
@@ -248,7 +248,7 @@ public:
 		void* create_user_data; // user data accessible in the create event
 		cursor_handle user_cursor; // if mouse_cursor::user is specified
 		mouse_cursor cursor;
-		window_sort_order::value sort_order;
+		window_sort_order sort_order;
 		bool debug;
 		bool allow_controller;
 		bool allow_touch;
@@ -272,10 +272,10 @@ public:
 	// shape API
 	virtual void shape(const window_shape& _Shape) = 0;
 	virtual window_shape shape() const = 0;
-	void state(window_state::value st) override { window_shape s; s.state = st; shape(s); }
-	window_state::value state() const override { window_shape s = shape(); return s.state; }
-	void style(window_style::value _Style) { window_shape s; s.style = _Style; shape(s); }
-	window_style::value style() const { window_shape s = shape(); return s.style; }
+	void state(window_state st) override { window_shape s; s.state = st; shape(s); }
+	window_state state() const override { window_shape s = shape(); return s.state; }
+	void style(window_style _Style) { window_shape s; s.style = _Style; shape(s); }
+	window_style style() const { window_shape s = shape(); return s.style; }
 
 	void client_position(const int2& pos) override { window_shape s; s.client_position = pos; shape(s); }
 	int2 client_position() const override { window_shape s = shape(); return s.client_position; }

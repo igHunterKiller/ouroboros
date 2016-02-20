@@ -191,7 +191,7 @@ struct oWIN_CREATESTRUCT
 // message processing.
 HWND oWinCreate(HWND _hParent
 	, const char* _Title
-	, ouro::window_style::value _Style
+	, ouro::window_style _Style
 	, const int2& _ClientPosition
 	, const int2& _ClientSize
 	, WNDPROC _Wndproc
@@ -524,7 +524,7 @@ HWND oWinControlCreate(const ouro::control_info& _Desc);
 // function, passing that through can avoid the recalculation.
 // FloatboxSpinner: handles incrementing/decrementing values
 // Hyperlabel: handles chasing web links
-bool oWinControlDefaultOnNotify(HWND _hWnd, const NMHDR& _NotifyMessageHeader, LRESULT* _plResult = nullptr, ouro::control_type::value _Type = ouro::control_type::unknown);
+bool oWinControlDefaultOnNotify(HWND _hWnd, const NMHDR& _NotifyMessageHeader, LRESULT* _plResult = nullptr, ouro::control_type _Type = ouro::control_type::unknown);
 
 // _____________________________________________________________________________
 // UI Control State
@@ -605,12 +605,12 @@ int oWinControlGetSelectedSubItem(HWND _hControl);
 // This will probably return oWINDOW_CONTROL_UNKNOWN for any control not created
 // with oWinControlCreate().
 // Valid for: All
-ouro::control_type::value oWinControlGetType(HWND _hControl);
+ouro::control_type oWinControlGetType(HWND _hControl);
 
 // Returns the size returned if int2(oDEFAULT, oDEFAULT) were passed as the size
 // value to oWinControlCreate().
 // Valid for: All
-int2 oWinControlGetInitialSize(ouro::control_type::value _Type, const int2& _Size);
+int2 oWinControlGetInitialSize(ouro::control_type _Type, const int2& _Size);
 
 // Returns true if the specified _hWnd has the WS_TABSTOP style and is also 
 // enabled and visible, so all criteria from tabbing and using the control must 

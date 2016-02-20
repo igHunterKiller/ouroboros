@@ -128,11 +128,11 @@ void gfx_view::create_menus(const window::create_event& evt)
 	menu::append_enum_items(window_style::count, menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, evt.shape.style);
 	enable_status_bar_styles(true);
 
-	erh_.add         (menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, [=](int border_style) { app_win_->style((window_style::value)border_style); });
-	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + window_style::sizable_with_menu);
+	erh_.add         (menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, [=](int border_style) { app_win_->style((window_style)border_style); });
+	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + (int)window_style::sizable_with_menu);
 
 	menu::append_enum_items(window_state::count, menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, evt.shape.state);
-	erh_.add               (                     menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, [=](int state) { app_win_->show((window_state::value)state); });
+	erh_.add               (                     menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, [=](int state) { app_win_->show((window_state)state); });
 
 	menu::append_enum_items(gfx::fullscreen_mode::count, menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, (int)gfx::fullscreen_mode::normal);
 	erh_.add               (                         menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, [=](int state) { g_render_settings.mode = (gfx::fullscreen_mode)state; });
@@ -148,10 +148,10 @@ void gfx_view::create_menus(const window::create_event& evt)
 void gfx_view::enable_status_bar_styles(bool enabled)
 {
 	// enable styles not allowed for render target windows
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::fixed_with_statusbar,            enabled);
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::fixed_with_menu_and_statusbar,   enabled);
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::sizable_with_statusbar,          enabled);
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::sizable_with_menu_and_statusbar, enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::fixed_with_statusbar,            enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::fixed_with_menu_and_statusbar,   enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::sizable_with_statusbar,          enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::sizable_with_menu_and_statusbar, enabled);
 }
 
 void gfx_view::set_manip_space(const gizmo::space_t& space)
@@ -159,14 +159,14 @@ void gfx_view::set_manip_space(const gizmo::space_t& space)
 	gizmo_.space(space);
 }
 
-void gfx_view::check_state(window_state::value state)
+void gfx_view::check_state(window_state state)
 {
-	menu::check_radio(menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, ui::menu_item::view_state_first + state);
+	menu::check_radio(menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, ui::menu_item::view_state_first + (int)state);
 }
 
-void gfx_view::check_style(window_style::value style)
+void gfx_view::check_style(window_style style)
 {
-	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + style);
+	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + (int)style);
 }
 
 void gfx_view::set_standalone_mode_internal(bool enabled, const window_shape& gpu_shape)
@@ -179,7 +179,7 @@ void gfx_view::set_standalone_mode_internal(bool enabled, const window_shape& gp
 
 		// Status bar isn't allowed in this mode
 		if (has_statusbar(new_gpu_shape.style))
-			new_gpu_shape.style = window_style::value(new_gpu_shape.style - 2);
+			new_gpu_shape.style = window_style((int)new_gpu_shape.style - 2);
 
 		gpu_win_->parent(nullptr);
 		gpu_win_->shape(new_gpu_shape);

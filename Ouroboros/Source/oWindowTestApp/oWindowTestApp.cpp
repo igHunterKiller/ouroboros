@@ -58,10 +58,10 @@ enum oWMI // menuitems
 	oWMI_FILE_EXIT,
 
 	oWMI_VIEW_STYLE_FIRST,
-	oWMI_VIEW_STYLE_LAST = oWMI_VIEW_STYLE_FIRST + window_style::count - 1,
+	oWMI_VIEW_STYLE_LAST = oWMI_VIEW_STYLE_FIRST + (int)window_style::count - 1,
 
 	oWMI_VIEW_STATE_FIRST,
-	oWMI_VIEW_STATE_LAST = oWMI_VIEW_STATE_FIRST + window_state::count - 1,
+	oWMI_VIEW_STATE_LAST = oWMI_VIEW_STATE_FIRST + (int)window_state::count - 1,
 
 	oWMI_HELP_ABOUT,
 };
@@ -102,7 +102,7 @@ private:
 	menu_handle Menus[oWMENU_COUNT];
 	oWindowTestAppPulseContext PulseContext;
 	menu::enum_radio_handler RadioHandler; 
-	window_state::value PreFullscreenState;
+	window_state PreFullscreenState;
 	bool Running;
 
 	mouse_t Mouse;
@@ -118,8 +118,8 @@ private:
 	void EventHook(const window::basic_event& _Event);
 	void CreateMenu(const window::create_event& _CreateEvent);
 	void CreateControls(const window::create_event& _CreateEvent);
-	void CheckState(window_state::value _State);
-	void CheckStyle(window_style::value _Style);
+	void CheckState(window_state _State);
+	void CheckStyle(window_style _Style);
 	void OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path);
 };
 
@@ -193,13 +193,13 @@ void oWindowTestApp::CreateMenu(const window::create_event& _CreateEvent)
 	menu::append_enum_items(window_style::count, Menus[oWMENU_VIEW_STYLE], oWMI_VIEW_STYLE_FIRST, oWMI_VIEW_STYLE_LAST, _CreateEvent.shape.style);
 	RadioHandler.add(Menus[oWMENU_VIEW_STYLE], oWMI_VIEW_STYLE_FIRST, oWMI_VIEW_STYLE_LAST, [=](int _BorderStyle)
 	{
-		Window->style((window_style::value)_BorderStyle);
+		Window->style((window_style)_BorderStyle);
 	});
 
 	menu::append_enum_items(window_state::count, Menus[oWMENU_VIEW_STATE], oWMI_VIEW_STATE_FIRST, oWMI_VIEW_STATE_LAST, _CreateEvent.shape.state);
 	RadioHandler.add(Menus[oWMENU_VIEW_STATE], oWMI_VIEW_STATE_FIRST, oWMI_VIEW_STATE_LAST, [=](int _State)
 	{
-		Window->show((window_state::value)_State);
+		Window->show((window_state)_State);
 	});
 
 	menu::append_item(Menus[oWMENU_HELP], oWMI_HELP_ABOUT, "&About...");
@@ -218,16 +218,16 @@ void oWindowTestApp::CreateControls(const window::create_event& _CreateEvent)
 	hButton = oWinControlCreate(d);
 }
 
-void oWindowTestApp::CheckState(window_state::value _State)
+void oWindowTestApp::CheckState(window_state _State)
 {
 	menu::check_radio(Menus[oWMENU_VIEW_STATE]
-	, oWMI_VIEW_STATE_FIRST, oWMI_VIEW_STATE_LAST, oWMI_VIEW_STATE_FIRST + _State);
+	, oWMI_VIEW_STATE_FIRST, oWMI_VIEW_STATE_LAST, oWMI_VIEW_STATE_FIRST + (int)_State);
 }
 
-void oWindowTestApp::CheckStyle(window_style::value _Style)
+void oWindowTestApp::CheckStyle(window_style _Style)
 {
 	menu::check_radio(Menus[oWMENU_VIEW_STYLE]
-	, oWMI_VIEW_STYLE_FIRST, oWMI_VIEW_STYLE_LAST, oWMI_VIEW_STYLE_FIRST + _Style);
+	, oWMI_VIEW_STYLE_FIRST, oWMI_VIEW_STYLE_LAST, oWMI_VIEW_STYLE_FIRST + (int)_Style);
 }
 
 void oWindowTestApp::OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path)

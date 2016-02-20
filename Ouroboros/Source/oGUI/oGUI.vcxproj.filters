@@ -101,9 +101,6 @@
     <ClCompile Include="oWinDialog.cpp">
       <Filter>Source\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="oWinRect.cpp">
-      <Filter>Source\Windows</Filter>
-    </ClCompile>
     <ClCompile Include="oWinStatusBar.cpp">
       <Filter>Source\Windows</Filter>
     </ClCompile>

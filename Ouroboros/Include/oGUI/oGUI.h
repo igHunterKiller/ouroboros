@@ -16,173 +16,74 @@
 
 namespace ouro {
 
-namespace alignment
-{ enum value {
-
-	// Position is relative to parent's top-left corner
+enum class alignment : uint8_t
+{
 	top_left,
-
-	// Position is centered horizontally and vertically relative to the parent's 
-	// top
 	top_center,
-
-	// Position is relative to parent's top-right corner minus the child's width
 	top_right,
-
-	// Position is centered vertically and horizontally relative to parent's left 
-	// corner
 	middle_left,
-	
-	// Position is relative to that which centers the child in the parent's bounds
 	middle_center,
-	
-	// Position is centered vertically and horizontally relative to parent's right 
-	// corner minus the child's width
 	middle_right,
-	
-	// Position is relative to parent's bottom-left corner
 	bottom_left,
-
-	// Position is centered horizontally and vertically relative to the parent's 
-	// bottom minus the child's height
 	bottom_center,
-	
-	// Position is relative to parent's bottom-right corner minus the child's width
 	bottom_right,
-	
-	// Child is sized and positioned to match parent: aspect ration is not 
-	// respected. Alignment will be center-middle and respect any offset value.
-	fit_parent,
-
-	// Retain aspect ratio and choose the child's largest dimension (width or 
-	// height) and leave letterbox (vertical or horizontal) areas. Alignment will 
-	// be center-middle and respect any offset value.
-	fit_largest_axis,
-
-	// Retain aspect ration and choose the child's smallest dimension (width or 
-	// height) and crop any overflow. (cropping of the result rectangle is 
-	// dependent on a separate cropping flag.
-	fit_smallest_axis,
+	fit_parent,     // middle_center aligned, sized and positioned to match parent ignoring aspect ratio
+	fit_major_axis, // middle_center, sizes to parent on larger axis and sizes smaller axis to maintain original aspect ratio
+	fit_minor_axis, // middle_center, sizes to parent on smaller axis and sizes larger axis to maintain original aspect ratio
 
 	count,
+};
 
-};}
-
-namespace window_state
-{	enum value {
-
-	// A GUI window is a rectangular client area with an operating system-specific
-	// border. It can exist in one of the several states listed below.
-	
-	// Window does not exist, or when specifying a new state, use this to indicate 
-	// no-change.
-	invalid,
-	
-	// Window is invisible.
-	hidden,
-
-	// Window is reduces to iconic or taskbar size. When setting this size
-	// and position are ignored but style is preserved.
-	minimized,
-	
-	// Window is in normal sub-screen-size mode. When setting this state size,  
-	// position and style are respected.
-	restored,
-
-	// Window takes up the entire screen but still has borders. When setting this 
-	// state size and position are ignored but style is preserved.
-	maximized, 
-
-	// Window borders are removed and the client area fills the whole screen but 
-	// does not do special direct-access or HW-syncing - it still behaves like a 
-	// window thus enabling fast application switching or multi-full-screen
-	// support.
-	fullscreen,
+enum class window_state : uint8_t
+{
+	invalid,    // does not exist/uninitialized
+	hidden,     // invisible, but exists
+	minimized,  // reduced to an icon or taskbar entry, ignoring size and position and style
+	restored,   // respects size position and style
+	maximized,  // window is sized and positioned to fit the containing workarea (monitor size - OS UI control elements)
+	fullscreen, // OS decorations are removed and the client area is sized and positioned to fill the entire monitor (over OS UI control elements)
 	
 	count,
+};
 
-};}
-
-namespace window_style
-{	enum value {
-
-	// Use this value for "noop" or "previous" value.
-	default_style,
-
-	// There is no border around the client area and the window remains a top-
-	// level window. This is the best for splash screens and fullscreen modes.
-	borderless,
-
-	// There is a border but closing the window from the decoration is not allowed
-	dialog,
-
-	// There is a border but no user resize is allowed
-	fixed,
-
-	// Same as fixed with a menu
-	fixed_with_menu,
-
-	// Same as fixed with a status bar
-	fixed_with_statusbar,
-
-	// Same as fixed with a menu and status bar
-	fixed_with_menu_and_statusbar,
-
-	// There is a border and user can resize window
-	sizable,
-
-	// Same as sizable with a menu
-	sizable_with_menu,
-
-	// Same as sizable with a status bar
-	sizable_with_statusbar,
-
-	// Same as sizable with a menu and a status bar
-	sizable_with_menu_and_statusbar,
+enum class window_style
+{
+	default_style,                   // noop or use-previous
+	borderless,                      // no OS border around client area - best for splash screens and fullscreen modes
+	dialog,                          // OS border without min/max/close controls or resize
+	fixed,                           // OS border without resize
+	fixed_with_menu,                 // same as fixed with a menu
+	fixed_with_statusbar,            // same as fixed with a status bar
+	fixed_with_menu_and_statusbar,   // same as fixed with a menu and status bar
+	sizable,                         // OS border and resizeable (default simple window)
+	sizable_with_menu,               // same as sizeable with a menu
+	sizable_with_statusbar,          // same as sizable with a status bar
+	sizable_with_menu_and_statusbar, // same as sizable with a menu and a status bar
 
 	count,
+};
 
-};}
-
-namespace window_sort_order
-{	enum value {
-
-	// normal/default behavior
-	sorted,
-
-	// "normal" always-on-top
-	always_on_top,
-
-	// Meant for final shipping, this fights hard to ensure any Windows popups or
-	// even the taskbar stays hidden.
-	always_on_top_with_focus,
-
-	count,
-
-};}
-
-namespace capture_state
-{	enum value {
-
-	// normal mouse movement: mouse outside of window doesn't trigger events
-	none,
-
-	// the mouse cursor is clipped to the client area of the window
-	client,
+enum class window_sort_order
+{
+	sorted,                   // normal/default behavior
+	always_on_top,            // "normal" always-on-top
+	always_on_top_with_focus, // meant for 'embedded OS' behavior, this fights hard to ensure any other OS popups or taskbar remain hidden behind the client area
 	
-	// mouse can move outside the client area but all events go to the window
-	unconstrained,
+	count,
+};
 
-	// after each mouse move the cursor is set to 0,0 thus only deltas are valid
-	cursor_recentered,
+enum class capture_state
+{
+	none,              // normal mouse movement: mouse outside of window doesn't trigger events
+	client,            // the mouse cursor is clipped to the client area of the window
+	unconstrained,     // mouse can move outside the client area but all events go to the window
+	cursor_recentered, // after each mouse move the cursor is set to 0,0 thus only deltas are valid
 
 	count,
+};
 
-};}
-
-namespace control_type
-{	enum value {
-
+enum class control_type
+{
 	unknown,
 	group,
 	button,
@@ -190,40 +91,37 @@ namespace control_type
 	radio,
 	label,
 	label_centered,
-	hyperlabel, // supports multiple markups of <a href="<somelink>">MyLink</a> or <a id="someID">MyID</a>. There can be multiple in one string.
+	hyperlabel,          // supports multiple markups of <a href="<somelink>">MyLink</a> or <a id="someID">MyID</a>. There can be multiple in one string.
 	label_selectable,
 	icon,
 	textbox,
 	textbox_scrollable,
-	floatbox, // textbox that only allows floating point (single-precision) numbers to be entered. Specify oDEFAULT for Size values to use icon's values.
+	floatbox,            // textbox that only allows floating point (single-precision) numbers to be entered. Specify oDEFAULT for Size values to use icon's values.
 	floatbox_spinner,
-	combobox, // Supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
-	combotextbox, // Supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
+	combobox,            // supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
+	combotextbox,        // supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
 	progressbar,
 	progressbar_unknown, // (marquee)
-	tab, // Supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
+	tab,                 // Supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
 	slider,
-	slider_selectable, // displays a portion of the slider as selected
-	slider_with_ticks, // Same as Slider but tick marks can be added
-	listbox, // Supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
+	slider_selectable,   // displays a portion of the slider as selected
+	slider_with_ticks,   // Same as Slider but tick marks can be added
+	listbox,             // Supports specifying contents all at once, delimited by '|'. i.e. "Text1|Text2|Text3"
+	
 	count,
+};
 
-};}
-
-namespace border_style
-{	enum value {
-
+enum class border_style
+{
 	sunken,
 	flat,
 	raised,
 
 	count,
+};
 
-};}
-
-namespace event_type
-{	enum value {
-
+enum class event_type
+{
 	// An event is something that the window issues to client code. Events can be
 	// triggered as a side-effect of other actions. Rarely does client code have
 	// direct control over events. All events should be downcast to AsShape() 
@@ -287,8 +185,7 @@ namespace event_type
 	custom_event,
 
 	count,
-
-};}
+};
 
 oDECLARE_HANDLE(draw_context_handle);
 oDECLARE_HANDLE(window_handle);
@@ -311,11 +208,11 @@ struct window_shape
 	// Minimize and maximize will override/ignore client_position and client_size 
 	// values. Use window_state::invalid to indicate the state should remain 
 	// untouched (only respect client_position and client_size values).
-	window_state::value state;
+	window_state state;
 
 	// Use window_style::default_style to indicate that the style should remain 
 	// untouched. Changing style will not affect client size/position.
-	window_style::value style;
+	window_style style;
 
 	// This always refers to non-minimized, non-maximized states. oDEFAULT values 
 	// imply "use whatever was there before". For example if the state is set to 
@@ -346,7 +243,7 @@ struct control_info
 	font_handle font;
 
 	// Type of control to create
-	control_type::value type;
+	control_type type;
 	
 	// Any item that contains a list of strings can set this to be a '|'-delimited 
 	// set of strings to immediately populate all items. ("Item1|Item2|Item3").
@@ -358,7 +255,7 @@ struct control_info
 
 	int2 position;
 	int2 size;
-	unsigned short id;
+	uint16_t id;
 	bool starts_new_group;
 };
 
@@ -402,7 +299,7 @@ struct text_info
 	// the screen and alignment would be middle-center.
 	int2 position;
 	int2 size;
-	alignment::value alignment;
+	alignment alignment;
 	// Any non-1.0 (non-0xff) alpha will be not-drawn
 	uint32_t argb_foreground;
 	uint32_t argb_background;
@@ -425,37 +322,33 @@ struct menu_item_info : basic_menu_item_info
 };
 
 // Invalid, hidden and minimized windows are not visible
-inline bool is_visible(const window_state::value& _State) { return _State >= window_state::restored; }
+inline bool is_visible(const window_state& state) { return (int)state >= (int)window_state::restored; }
 
-inline bool has_statusbar(const window_style::value& _Style)
+inline bool has_statusbar(const window_style& style)
 {
-	switch (_Style)
+	switch (style)
 	{
-		case window_style::fixed_with_statusbar:
-		case window_style::fixed_with_menu_and_statusbar:
-		case window_style::sizable_with_statusbar:
-		case window_style::sizable_with_menu_and_statusbar: return true;
+		case window_style::fixed_with_statusbar: case window_style::fixed_with_menu_and_statusbar:
+		case window_style::sizable_with_statusbar: case window_style::sizable_with_menu_and_statusbar: return true;
 		default: break;
 	}
 	return false;
 }
 
-inline bool has_menu(const window_style::value& _Style)
+inline bool has_menu(const window_style& style)
 {
-	switch (_Style)
+	switch (style)
 	{
-		case window_style::fixed_with_menu:
-		case window_style::fixed_with_menu_and_statusbar:
-		case window_style::sizable_with_menu:
-		case window_style::sizable_with_menu_and_statusbar: return true;
+		case window_style::fixed_with_menu: case window_style::fixed_with_menu_and_statusbar:
+		case window_style::sizable_with_menu: case window_style::sizable_with_menu_and_statusbar: return true;
 		default: break;
 	}
 	return false;
 }
 
-inline bool is_shape_event(const event_type::value& _Event)
+inline bool is_shape_event(const event_type& event)
 {
-	switch (_Event)
+	switch (event)
 	{
 		case event_type::creating: case event_type::timer: case event_type::drop_files: 
 		case event_type::input_device_changed: case event_type::custom_event: return false;
@@ -468,7 +361,7 @@ inline bool is_shape_event(const event_type::value& _Event)
 // Rectangle utils
 
 // Replaces any oDEFAULT values with the specified default value.
-inline int2 resolve_default(const int2& _Size, const int2& _DefaultSize) { int2 result(_Size); if (result.x == oDEFAULT) result.x = _DefaultSize.x; if (result.y == oDEFAULT) result.y = _DefaultSize.y; return result; }
+inline int2 resolve_default(const int2& size, const int2& default_size) { int2 result(size); if (result.x == oDEFAULT) result.x = default_size.x; if (result.y == oDEFAULT) result.y = default_size.y; return result; }
 
 // Positions a child rectangle "inside" (parent can be smaller than the child)
 // the specified parent according to the specified alignment and clipping. In 
@@ -477,7 +370,7 @@ inline int2 resolve_default(const int2& _Size, const int2& _DefaultSize) { int2 
 // aligned, and there is a position of x=-10, then the rectangle is inset an
 // additional 10 units. oDEFAULT for position most often evaluates to a zero 
 // offset.
-int4 resolve_rect(const int4& _Parent, const int4& _UnadjustedChild, alignment::value _Alignment, bool _Clip);
-inline int4 resolve_rect(const int4& _Parent, const int2& _UnadjustedChildPosition, const int2& _UnadjustedChildSize, alignment::value _Alignment, bool _Clip) { int4 r; r.xy() = resolve_default(_UnadjustedChildPosition, int2(0,0)); r.zw() = r.xy() + _UnadjustedChildSize; return resolve_rect(_Parent, r, _Alignment, _Clip); }
+int4 resolve_rect(const int4& parent, const int4& unadjusted_child, const alignment& alignment, bool clip);
+inline int4 resolve_rect(const int4& parent, const int2& unadjusted_child_position, const int2& unadjusted_child_size, const alignment& alignment, bool clip) { int4 r; r.xy() = resolve_default(unadjusted_child_position, int2(0,0)); r.zw() = r.xy() + unadjusted_child_size; return resolve_rect(parent, r, alignment, clip); }
 
 }

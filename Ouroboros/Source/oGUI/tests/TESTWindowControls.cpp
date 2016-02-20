@@ -86,7 +86,7 @@ private:
 	};
 
 	HWND Controls[NUM_CONTROLS];
-	ouro::border_style::value BorderStyle;
+	ouro::border_style BorderStyle;
 
 	void EventHook(const window::basic_event& _Event);
 	void InputHook(const ouro::input_t& _Input);
@@ -473,7 +473,7 @@ void oWindowUITest::OnMenuCommand(HWND _hWnd, int _MenuID)
 		{
 			bool NewState = !menu::checked(hViewMenu, MENU_VIEW_SHOW_STATUSBAR);
 			menu::check(hViewMenu, MENU_VIEW_SHOW_STATUSBAR, NewState);
-			ouro::window_style::value s;
+			ouro::window_style s;
 			s = NewState ? ouro::window_style::sizable_with_menu_and_statusbar : ouro::window_style::sizable_with_menu;
 			Window->style(s);
 			break;

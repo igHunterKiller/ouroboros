@@ -61,10 +61,10 @@ namespace menu_item { enum value
 	file_exit,
 
 	view_style_first,
-	view_style_last = view_style_first + window_style::count - 1,
+	view_style_last = view_style_first + (int)window_style::count - 1,
 
 	view_state_first,
-	view_state_last = view_state_first + window_state::count - 1,
+	view_state_last = view_state_first + (int)window_state::count - 1,
 
 	view_exclusive,
 
@@ -111,7 +111,7 @@ private:
 	std::thread ui_thread_;
 	std::array<menu_handle, ui::menu::count> menus_;
 	menu::enum_radio_handler erh_;
-	window_state::value pre_fullscreen_state_;
+	window_state pre_fullscreen_state_;
 	bool standalone_mode_;
 	bool allow_standalone_mode_change_;
 
@@ -129,8 +129,8 @@ private:
 	// allow its features to be shown integrated with OS UI drawing
 	void create_menus(const window::create_event& evt);
 	void enable_status_bar_styles(bool enabled);
-	void check_state(window_state::value state);
-	void check_style(window_style::value style);
+	void check_state(window_state state);
+	void check_style(window_style style);
 
 	// GPU window inside UI window v. GPU window standalone
 	// window::shape() must be called from the window's thread, so when in standalone
@@ -221,11 +221,11 @@ void gpu_test_app::create_menus(const window::create_event& evt)
 	menu::append_enum_items(window_style::count, menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, evt.shape.style);
 	enable_status_bar_styles(true);
 
-	erh_.add         (menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, [=](int border_style) { app_win_->style((window_style::value)border_style); });
-	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + window_style::sizable_with_menu);
+	erh_.add         (menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, [=](int border_style) { app_win_->style((window_style)border_style); });
+	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + (int)window_style::sizable_with_menu);
 
 	menu::append_enum_items(window_state::count, menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, evt.shape.state);
-	erh_.add               (                     menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, [=](int state) { app_win_->show((window_state::value)state); });
+	erh_.add               (                     menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, [=](int state) { app_win_->show((window_state)state); });
 
 	menu::append_item(menus_[ui::menu::view], ui::menu_item::view_exclusive, "Fullscreen E&xclusive");
 
@@ -236,20 +236,20 @@ void gpu_test_app::create_menus(const window::create_event& evt)
 void gpu_test_app::enable_status_bar_styles(bool enabled)
 {
 	// enable styles not allowed for render target windows
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::fixed_with_statusbar,            enabled);
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::fixed_with_menu_and_statusbar,   enabled);
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::sizable_with_statusbar,          enabled);
-	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + window_style::sizable_with_menu_and_statusbar, enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::fixed_with_statusbar,            enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::fixed_with_menu_and_statusbar,   enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::sizable_with_statusbar,          enabled);
+	menu::enable(menus_[ui::menu::view_style], ui::menu_item::view_style_first + (int)window_style::sizable_with_menu_and_statusbar, enabled);
 }
 
-void gpu_test_app::check_state(window_state::value state)
+void gpu_test_app::check_state(window_state state)
 {
-	menu::check_radio(menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, ui::menu_item::view_state_first + state);
+	menu::check_radio(menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, ui::menu_item::view_state_first + (int)state);
 }
 
-void gpu_test_app::check_style(window_style::value style)
+void gpu_test_app::check_style(window_style style)
 {
-	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + style);
+	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + (int)style);
 }
 
 void gpu_test_app::set_standalone_mode_internal(bool enabled, const window_shape& gpu_shape)
@@ -262,7 +262,7 @@ void gpu_test_app::set_standalone_mode_internal(bool enabled, const window_shape
 
 		// Status bar isn't allowed in this mode
 		if (has_statusbar(new_gpu_shape.style))
-			new_gpu_shape.style = window_style::value(new_gpu_shape.style - 2);
+			new_gpu_shape.style = window_style((int)new_gpu_shape.style - 2);
 
 		gpu_win_->parent(nullptr);
 		gpu_win_->shape(new_gpu_shape);

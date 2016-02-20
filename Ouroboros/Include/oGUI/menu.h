@@ -90,4 +90,9 @@ template<typename enumT> void append_enum_items(const enumT& num_enum_values, me
 	check_radio(m, first_item, last_item, initial_item == -1 ? first_item : first_item + initial_item);
 }
 
+template<typename enumT> void append_enum_items(const enumT& num_enum_values, menu_handle m, int first_item, int last_item, const enumT& initial_item)
+{
+	append_enum_items(num_enum_values, m, first_item, last_item, (int)initial_item);
+}
+
 }}}

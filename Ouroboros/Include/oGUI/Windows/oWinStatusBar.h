@@ -26,8 +26,8 @@ int oWinStatusBarGetNumItems(HWND _hStatusBar, int* _pItemWidths = nullptr, size
 
 void oWinStatusBarSetMinHeight(HWND _hStatusBar, int _MinHeight);
 
-void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style::value _BorderStyle, const char* _Format, va_list _Args);
-inline void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style::value _BorderStyle, const char* _Format, ...) { va_list args; va_start(args, _Format); oWinStatusBarSetText(_hStatusBar, _ItemIndex, _BorderStyle, _Format, args); va_end(args); }
+void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style _BorderStyle, const char* _Format, va_list _Args);
+inline void oWinStatusBarSetText(HWND _hStatusBar, int _ItemIndex, ouro::border_style _BorderStyle, const char* _Format, ...) { va_list args; va_start(args, _Format); oWinStatusBarSetText(_hStatusBar, _ItemIndex, _BorderStyle, _Format, args); va_end(args); }
 
 char* oWinStatusBarGetText(char* _StrDestination, size_t _SizeofStrDestination, HWND _hStatusBar, int _ItemIndex);
 template<size_t size> char* oWinStatusBarGetText(char (&_StrDestination)[size], HWND _hStatusBar, int _ItemIndex) { return oWinStatusBarGetText(_StrDestination, size, _hStatusBar, _ItemIndex); }

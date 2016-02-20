@@ -68,7 +68,7 @@ static bool handle_control(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, co
 			oAssert((nmhdr.idFrom & 0xffff) == nmhdr.idFrom, "losing info");
 			control_status status = control_status::count;
 
-			control_type::value type = oWinControlGetType(nmhdr.hwndFrom);
+			control_type type = oWinControlGetType(nmhdr.hwndFrom);
 			switch (type)
 			{
 				case control_type::tab:
@@ -289,8 +289,8 @@ struct window_impl : window
 	std::shared_ptr<basic_window> parent() const override;
 	void owner(const std::shared_ptr<basic_window>& owner) override;
 	std::shared_ptr<basic_window> owner() const override;
-	void sort_order(window_sort_order::value order) override;
-	window_sort_order::value sort_order() const override;
+	void sort_order(window_sort_order order) override;
+	window_sort_order sort_order() const override;
 	void focus(bool f = true) override;
 	bool has_focus() const override;
 
@@ -346,7 +346,7 @@ private:
 	keyboard_t* keyboard;
 	mouse_t* mouse;
 
-	window_sort_order::value SortOrder;
+	window_sort_order SortOrder;
 	bool ClientDragToMove;
 	bool Debug;
 	bool AllowControllers;
@@ -444,7 +444,7 @@ private:
 	}
 
 	void init_window(const init_t& i);
-	void trigger_generic_event(event_type::value _Event, window_shape* _pShape = nullptr);
+	void trigger_generic_event(event_type _Event, window_shape* _pShape = nullptr);
 	void set_cursor();
 	bool handle_input(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, LRESULT* out_lresult);
 	bool handle_sizing(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam, LRESULT* out_lresult);
@@ -722,7 +722,7 @@ std::shared_ptr<basic_window> window_impl::owner() const
 	return const_cast<window_impl*>(this)->Owner;
 }
 
-void window_impl::sort_order(window_sort_order::value order)
+void window_impl::sort_order(window_sort_order order)
 {
 	dispatch_internal(std::move([=]
 	{
@@ -735,7 +735,7 @@ void window_impl::sort_order(window_sort_order::value order)
 	}));
 }
 
-window_sort_order::value window_impl::sort_order() const
+window_sort_order window_impl::sort_order() const
 {
 	return SortOrder;
 }
@@ -1025,7 +1025,7 @@ void window_impl::quit()
 	//dispatch_internal([=] { PostQuitMessage(0); });
 };
 
-void window_impl::trigger_generic_event(event_type::value _Event, window_shape* _pShape)
+void window_impl::trigger_generic_event(event_type _Event, window_shape* _pShape)
 {
 	window_shape s;
 

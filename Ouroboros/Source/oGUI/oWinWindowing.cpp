@@ -517,7 +517,7 @@ void oWinGetProcessTopWindowAndThread(process::id _ProcessID
 
 inline HWND oWinControlGetBuddy(HWND _hControl) { return (HWND)SendMessage(_hControl, UDM_GETBUDDY, 0, 0); }
 
-static DWORD oWinGetStyle(window_style::value _Style, bool _HasParent)
+static DWORD oWinGetStyle(window_style _Style, bool _HasParent)
 {
 	switch (_Style)
 	{
@@ -555,8 +555,8 @@ struct oWndExtra
 	HDEVICECHANGE hDeviceChange; // for device change monitoring, a significant context is needed, this is it (all ouro-defined for kinect/skeleton support)
 	LONG_PTR RestoredPosition; // MAKELPARAM(x,y)
 	LONG_PTR RestoredSize; // MAKELPARAM(w,h)
-	LONG_PTR PreviousState; // window_state::value
-	LONG_PTR PreviousStyle; // window_style::value
+	LONG_PTR PreviousState; // window_state
+	LONG_PTR PreviousStyle; // window_style
 	LONG_PTR ExtraFlags;
 	intptr_t TempCallCounter;
 	uintptr_t LastShowTimestamp;
@@ -572,8 +572,8 @@ struct oWndExtra
 #define oGWLP_DEVICE_CHANGE (offsetof(oWndExtra, hDeviceChange))
 #define oGWLP_RESTORED_POSITION (offsetof(oWndExtra, RestoredPosition)) // use GET_X_LPARAM and GET_Y_LPARAM to decode
 #define oGWLP_RESTORED_SIZE (offsetof(oWndExtra, RestoredSize)) // use GET_X_LPARAM and GET_Y_LPARAM to decode
-#define oGWLP_PREVIOUS_STATE (offsetof(oWndExtra, PreviousState)) // window_state::value
-#define oGWLP_PREVIOUS_STYLE (offsetof(oWndExtra, PreviousStyle)) // window_style::value
+#define oGWLP_PREVIOUS_STATE (offsetof(oWndExtra, PreviousState)) // window_state
+#define oGWLP_PREVIOUS_STYLE (offsetof(oWndExtra, PreviousStyle)) // window_style
 #define oGWLP_EXTRA_FLAGS (offsetof(oWndExtra, ExtraFlags))
 #define oGWLP_TEMP_CALL_COUNTER (offsetof(oWndExtra, TempCallCounter))
 #define oGWLP_LAST_SHOW_TIMESTAMP (offsetof(oWndExtra, LastShowTimestamp))
@@ -587,7 +587,7 @@ struct oWndExtra
 
 HWND oWinCreate(HWND _hParent
 	, const char* _Title
-	, window_style::value _Style
+	, window_style _Style
 	, const int2& _ClientPosition
 	, const int2& _ClientSize
 	, WNDPROC _Wndproc
@@ -807,7 +807,7 @@ LRESULT CALLBACK oWinWindowProc(HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _
 						window_shape Old = oWinGetShape(_hWnd);
 						if (Old.state == window_state::minimized)
 						{
-							s.state = (window_state::value)GetWindowLongPtr(_hWnd, oGWLP_PREVIOUS_STATE);
+							s.state = (window_state)GetWindowLongPtr(_hWnd, oGWLP_PREVIOUS_STATE);
 							if (s.state == window_state::hidden)
 								s.state = window_state::restored;
 						}
@@ -1375,7 +1375,7 @@ RECT oWinGetRelativeRect(HWND _hWnd, HWND _hExplicitParent)
 	return r;	
 }
 
-window_state::value oWinGetState(HWND _hWnd)
+window_state oWinGetState(HWND _hWnd)
 {
 	if (!oWinExists(_hWnd)) return window_state::invalid;
 	
@@ -1391,7 +1391,7 @@ window_state::value oWinGetState(HWND _hWnd)
 	return window_state::restored;
 }
 
-static window_style::value oWinGetStyle(HWND _hWnd)
+static window_style oWinGetStyle(HWND _hWnd)
 {
 	#define oFIXED_STYLE (WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX)
 	#define oSET(_Flag) ((style & (_Flag)) == (_Flag))
@@ -1485,7 +1485,7 @@ void oWinSetShape(HWND _hWnd, const window_shape& _Shape)
 	}
 	else if (Old.state == window_state::fullscreen)
 	{
-		New.style = (window_style::value)GetWindowLongPtr(_hWnd, oGWLP_PREVIOUS_STYLE);
+		New.style = (window_style)GetWindowLongPtr(_hWnd, oGWLP_PREVIOUS_STYLE);
 		SetWindowLongPtr(_hWnd, oGWLP_EXTRA_FLAGS, GetWindowLongPtr(_hWnd, oGWLP_EXTRA_FLAGS) & ~(oEF_FULLSCREEN_COOPERATIVE|oEF_FULLSCREEN_EXCLUSIVE));
 	}
 
@@ -1547,7 +1547,7 @@ void oWinSetShape(HWND _hWnd, const window_shape& _Shape)
 		}
 
 		// This will send a temp WM_SIZE event. Another will be sent below, so 
-		// squelch this one from making it all the way through to an event_type::value.
+		// squelch this one from making it all the way through to an event_type.
 		// However, during a style change to a maximized window, that affects the 
 		// menu other calls won't be made, so let this be the authority in that case.
 		oWinSetTempChange(_hWnd, !(Old.state == window_state::maximized && New.state == window_state::maximized));
@@ -1669,7 +1669,7 @@ bool oWinSetFont(HWND _hWnd, HFONT _hFont)
 bool oWinSetText(HWND _hWnd, const char* _Text, int _SubItemIndex)
 {
 	oWIN_CHECK(_hWnd);
-	control_type::value type = oWinControlGetType(_hWnd);
+	control_type type = oWinControlGetType(_hWnd);
 	switch (type)
 	{
 		case control_type::combotextbox:
@@ -1748,7 +1748,7 @@ char* oWinTruncatePath(char* _StrDestination, size_t _SizeofStrDestination, HWND
 char* oWinGetText(char* _StrDestination, size_t _SizeofStrDestination, HWND _hWnd, int _SubItemIndex)
 {
 	oWINVP(_hWnd);
-	control_type::value type = control_type::unknown;
+	control_type type = control_type::unknown;
 	if (_SubItemIndex != -1)
 		type = oWinControlGetType(_hWnd);
 	switch (type)
@@ -1781,7 +1781,7 @@ char* oWinGetText(char* _StrDestination, size_t _SizeofStrDestination, HWND _hWn
 HICON oWinGetIcon(HWND _hWnd, bool _BigIcon)
 {
 	//oWINVP(_hWnd);
-	control_type::value type = oWinControlGetType(_hWnd);
+	control_type type = oWinControlGetType(_hWnd);
 	switch (type)
 	{
 		case control_type::icon: return (HICON)SendMessage(_hWnd, STM_GETICON, 0, 0);
@@ -1803,7 +1803,7 @@ void send_message(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 void oWinSetIconAsync(HWND _hWnd, HICON _hIcon, bool _BigIcon)
 {
-	control_type::value type = oWinControlGetType(_hWnd);
+	control_type type = oWinControlGetType(_hWnd);
 	if (type == control_type::icon)
 		send_message(_hWnd, STM_SETICON, (WPARAM)_hIcon, 0);
 	else
@@ -2031,7 +2031,7 @@ struct CONTROL_CREATION_DESC
 	int2 (*GetSize)(const control_info& _Desc);
 };
 
-static const CONTROL_CREATION_DESC& oWinControlGetCreationDesc(control_type::value _Type)
+static const CONTROL_CREATION_DESC& oWinControlGetCreationDesc(control_type _Type)
 {
 	// === IF ADDING A NEW TYPE, MAKE SURE YOU ADD AN ENTRY TO oWinControlGetType ===
 
@@ -2062,7 +2062,7 @@ static const CONTROL_CREATION_DESC& oWinControlGetCreationDesc(control_type::val
 		{ WC_LISTBOX, WS_VISIBLE|WS_CHILD|WS_TABSTOP|WS_VSCROLL|WS_HSCROLL|LBS_NOTIFY|LBS_NOINTEGRALHEIGHT|LBS_HASSTRINGS|LBS_USETABSTOPS|WS_BORDER, 0, true, OnCreateAddSubItems, GetSizeExplicit, }, 
 	};
 	match_array_e(sDescs, control_type);
-	return sDescs[_Type];
+	return sDescs[(int)_Type];
 }
 
 HWND oWinControlCreate(const control_info& _Desc)
@@ -2103,7 +2103,7 @@ HWND oWinControlCreate(const control_info& _Desc)
 	return hWnd;
 }
 
-bool oWinControlDefaultOnNotify(HWND _hControl, const NMHDR& _NotifyMessageHeader, LRESULT* _plResult, control_type::value _Type)
+bool oWinControlDefaultOnNotify(HWND _hControl, const NMHDR& _NotifyMessageHeader, LRESULT* _plResult, control_type _Type)
 {
 	oWIN_CHECK(_hControl);
 	bool ShortCircuit = false;
@@ -2161,7 +2161,7 @@ bool oWinControlSetVisible(HWND _hControl, bool _Visible)
 
 int oWinControlGetNumSubItems(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2175,7 +2175,7 @@ int oWinControlGetNumSubItems(HWND _hControl)
 bool oWinControlClearSubItems(HWND _hControl)
 {
 	oWIN_CHECK(_hControl);
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2198,7 +2198,7 @@ bool oWinControlClearSubItems(HWND _hControl)
 int oWinControlInsertSubItem(HWND _hControl, const char* _SubItemText, int _SubItemIndex)
 {
 	oWIN_CHECK(_hControl);
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2249,7 +2249,7 @@ int oWinControlInsertSubItem(HWND _hControl, const char* _SubItemText, int _SubI
 void oWinControlDeleteSubItem(HWND _hControl, const char* _SubItemText, int _SubItemIndex)
 {
 	oWIN_CHECK(_hControl);
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2290,7 +2290,7 @@ bool oWinControlAddSubItems(HWND _hControl, const char* _DelimitedString, char _
 int oWinControlFindSubItem(HWND _hControl, const char* _SubItemText)
 {
 	int index = CB_ERR;
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2341,7 +2341,7 @@ int oWinControlFindSubItem(HWND _hControl, const char* _SubItemText)
 
 bool oWinControlSelectSubItem(HWND _hControl, int _SubItemIndex)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2386,7 +2386,7 @@ bool oWinControlSelectSubItem(HWND _hControl, int _SubItemIndex)
 
 bool oWinControlSelectSubItemRelative(HWND _hControl, int _Offset)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	int next = -1, count = 0;
 	switch (type)
 	{
@@ -2427,7 +2427,7 @@ bool oWinControlSelectSubItemRelative(HWND _hControl, int _Offset)
 
 int oWinControlGetSelectedSubItem(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::combobox:
@@ -2439,7 +2439,7 @@ int oWinControlGetSelectedSubItem(HWND _hControl)
 	return -1;
 }
 
-control_type::value oWinControlGetType(HWND _hControl)
+control_type oWinControlGetType(HWND _hControl)
 {
 	mstring ClassName;
 	if (!GetClassName(_hControl, ClassName, static_cast<int>(ClassName.capacity())))
@@ -2539,7 +2539,7 @@ control_type::value oWinControlGetType(HWND _hControl)
 	return control_type::unknown;
 }
 
-int2 oWinControlGetInitialSize(control_type::value _Type, const int2& _Size)
+int2 oWinControlGetInitialSize(control_type _Type, const int2& _Size)
 {
 	control_info d;
 	d.type = _Type;
@@ -2576,7 +2576,7 @@ RECT oWinControlGetRect(HWND _hControl)
 char* oWinControlGetSelectedText(char* _StrDestination, size_t _SizeofStrDestination, HWND _hControl)
 {
 	oWINVP(_hControl);
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::floatbox_spinner:
@@ -2622,7 +2622,7 @@ char* oWinControlGetSelectedText(char* _StrDestination, size_t _SizeofStrDestina
 
 bool oWinControlSelect(HWND _hControl, int _Start, int _Length)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::floatbox_spinner:
@@ -2653,7 +2653,7 @@ bool oWinControlSetValue(HWND _hControl, float _Value)
 {
 	oWIN_CHECK(_hControl);
 	mstring text;
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::floatbox_spinner:
@@ -2669,7 +2669,7 @@ bool oWinControlSetValue(HWND _hControl, float _Value)
 float oWinControlGetFloat(HWND _hControl)
 {
 	mstring text;
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::floatbox_spinner:
@@ -2688,7 +2688,7 @@ float oWinControlGetFloat(HWND _hControl)
 
 void oWinControlSetIcon(HWND _hControl, HICON _hIcon, int _SubItemIndex)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::icon:
@@ -2703,7 +2703,7 @@ void oWinControlSetIcon(HWND _hControl, HICON _hIcon, int _SubItemIndex)
 
 HICON oWinControlGetIcon(HWND _hControl, int _SubItemIndex)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::icon:
@@ -2720,7 +2720,7 @@ HICON oWinControlGetIcon(HWND _hControl, int _SubItemIndex)
 
 bool oWinControlIsChecked(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::checkbox:
@@ -2737,7 +2737,7 @@ bool oWinControlIsChecked(HWND _hControl)
 bool oWinControlSetChecked(HWND _hControl, bool _Checked)
 {
 	oWIN_CHECK(_hControl);
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::checkbox:
@@ -2751,7 +2751,7 @@ bool oWinControlSetChecked(HWND _hControl, bool _Checked)
 
 bool oWinControlSetRange(HWND _hControl, int _Min, int _Max)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::slider:
@@ -2770,7 +2770,7 @@ bool oWinControlSetRange(HWND _hControl, int _Min, int _Max)
 
 bool oWinControlGetRange(HWND _hControl, int* _pMin, int* _pMax)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::slider:
@@ -2793,7 +2793,7 @@ bool oWinControlGetRange(HWND _hControl, int* _pMin, int* _pMax)
 
 bool oWinControlSetRangePosition(HWND _hControl, int _Position, bool _bNotify /*=true*/)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::slider:
@@ -2811,7 +2811,7 @@ bool oWinControlSetRangePosition(HWND _hControl, int _Position, bool _bNotify /*
 
 int oWinControlGetRangePosition(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::slider:
@@ -2824,7 +2824,7 @@ int oWinControlGetRangePosition(HWND _hControl)
 
 bool oWinControlSetTick(HWND _hControl, int _Position)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch(type)
 	{
 	case control_type::slider_with_ticks:
@@ -2837,7 +2837,7 @@ bool oWinControlSetTick(HWND _hControl, int _Position)
 
 bool oWinControlClearTicks(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch(type)
 	{
 	case control_type::slider_with_ticks:
@@ -2850,7 +2850,7 @@ bool oWinControlClearTicks(HWND _hControl)
 
 bool oWinControlSetErrorState(HWND _hControl, bool _InErrorState)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::progressbar:
@@ -2863,7 +2863,7 @@ bool oWinControlSetErrorState(HWND _hControl, bool _InErrorState)
 
 bool oWinControlGetErrorState(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::progressbar:
@@ -2875,7 +2875,7 @@ bool oWinControlGetErrorState(HWND _hControl)
 
 bool oWinControlClampPositionToSelected(HWND _hControl)
 {
-	control_type::value type = oWinControlGetType(_hControl);
+	control_type type = oWinControlGetType(_hControl);
 	switch (type)
 	{
 		case control_type::slider_selectable:

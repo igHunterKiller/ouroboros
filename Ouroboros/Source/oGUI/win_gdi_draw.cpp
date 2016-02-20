@@ -93,14 +93,14 @@ static void draw_text(HDC _hDC, const text_info& _Desc, const char* _Text, RECT*
 	}
 
 	UINT uFormat = DT_WORDBREAK;
-	switch (_Desc.alignment % 3)
+	switch ((int)_Desc.alignment % 3)
 	{
 		case 0: uFormat |= DT_LEFT; break;
 		case 1: uFormat |= DT_CENTER; break;
 		case 2: uFormat |= DT_RIGHT; break;
 	}
 
-	switch (_Desc.alignment / 3)
+	switch ((int)_Desc.alignment / 3)
 	{
 		case 0: uFormat |= DT_TOP; break;
 		case 1: uFormat |= DT_VCENTER; break;

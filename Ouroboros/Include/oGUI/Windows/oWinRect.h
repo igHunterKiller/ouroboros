@@ -1,33 +1,21 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 // Utilities for working with Windows RECTs
-#pragma once
-#ifndef oWinRect_h
-#define oWinRect_h
 
+#pragma once
 #include <oGUI/oGUI.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-inline int4 oRect(const RECT& _Rect) { int4 r; r.xy() = int2(_Rect.left, _Rect.top); r.zw() = int2(_Rect.right, _Rect.bottom); return r; }
-
-
-inline RECT oWinRect(const int4& _Rect) { RECT r; r.left = _Rect.x; r.top = _Rect.y; r.right = _Rect.z; r.bottom = _Rect.w; return r; }
-inline RECT oWinRect(int _Left, int _Top, int _Right, int _Bottom) { RECT r; r.left = __min(_Left, _Right); r.top = __min(_Top, _Bottom); r.right = __max(_Left, _Right); r.bottom = __max(_Top, _Bottom); return r; }
-inline RECT oWinRect(const int2& _TopLeft, const int2 _BottomRight) { return oWinRect(_TopLeft.x, _TopLeft.y, _BottomRight.x, _BottomRight.y); }
-inline RECT oWinRectWH(int _Left, int _Top, int _Width, int _Height) { return oWinRect(_Left, _Top, _Left + _Width, _Top + _Height); }
-inline RECT oWinRectWH(const int2& _Position, const int2& _Size) { return oWinRectWH(_Position.x, _Position.y, _Size.x, _Size.y); }
-inline int oWinRectW(const RECT& _Rect) { return _Rect.right - _Rect.left; }
-inline int oWinRectH(const RECT& _Rect) { return _Rect.bottom - _Rect.top; }
-inline int2 oWinRectPosition(const RECT& _Rect) { return int2(_Rect.left, _Rect.top); }
-inline int2 oWinRectSize(const RECT& _Rect) { return int2(oWinRectW(_Rect), oWinRectH(_Rect)); }
-
-inline RECT oWinClip(const RECT& _rContainer, const RECT& _ToBeClipped) { RECT r = _ToBeClipped; r.left = __max(r.left, _rContainer.left); r.top = __max(r.top, _rContainer.top); r.right = __min(r.right, _rContainer.right); r.bottom = __min(r.bottom, _rContainer.bottom); return r; }
-inline int2 oWinClip(const RECT& _rContainer, const int2& _ToBeClipped) { int2 r = _ToBeClipped; r.x = __min(__max(r.x, _rContainer.left), _rContainer.right); r.y = __min(__max(r.y, _rContainer.top), _rContainer.bottom); return r; }
-
-// Returns a RECT that is position to accommodate _Size and _Alignment relative 
-// to _Anchor according to _Alignment. For example, a middle center alignment
-// would have a rect whose center was at _Anchor.
-RECT oWinRectResolve(const int2& _Anchor, const int2& _Size, ouro::alignment::value _Alignment);
-
-#endif
+inline int4 oRect(const RECT& rect)                                         { int4 r; r.xy() = int2(rect.left, rect.top); r.zw() = int2(rect.right, rect.bottom); return r; }
+inline RECT oWinRect(const int4& rect)                                      { RECT r; r.left = rect.x; r.top = rect.y; r.right = rect.z; r.bottom = rect.w; return r; }
+inline RECT oWinRect(int left, int top, int right, int bottom)              { RECT r; r.left = __min(left, right); r.top = __min(top, bottom); r.right = __max(left, right); r.bottom = __max(top, bottom); return r; }
+inline RECT oWinRect(const int2& _TopLeft, const int2 bottom_right)         { return oWinRect(_TopLeft.x, _TopLeft.y, bottom_right.x, bottom_right.y); }
+inline RECT oWinRectWH(int left, int top, int width, int height)            { return oWinRect(left, top, left + width, top + height); }
+inline RECT oWinRectWH(const int2& position, const int2& size)              { return oWinRectWH(position.x, position.y, size.x, size.y); }
+inline int  oWinRectW(const RECT& rect)                                     { return rect.right - rect.left; }
+inline int  oWinRectH(const RECT& rect)                                     { return rect.bottom - rect.top; }
+inline int2 oWinRectPosition(const RECT& rect)                              { return int2(rect.left, rect.top); }
+inline int2 oWinRectSize(const RECT& rect)                                  { return int2(oWinRectW(rect), oWinRectH(rect)); }
+inline RECT oWinClip(const RECT& rect_container, const RECT& to_be_clipped) { RECT r = to_be_clipped; r.left = __max(r.left, rect_container.left); r.top = __max(r.top, rect_container.top); r.right = __min(r.right, rect_container.right); r.bottom = __min(r.bottom, rect_container.bottom); return r; }
+inline int2 oWinClip(const RECT& rect_container, const int2& to_be_clipped) { int2 r = to_be_clipped; r.x = __min(__max(r.x, rect_container.left), rect_container.right); r.y = __min(__max(r.y, rect_container.top), rect_container.bottom); return r; }

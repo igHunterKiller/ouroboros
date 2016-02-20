@@ -58,7 +58,6 @@
     <ClCompile Include="oGUI.cpp" />
     <ClCompile Include="oWinControlSet.cpp" />
     <ClCompile Include="oWinDialog.cpp" />
-    <ClCompile Include="oWinRect.cpp" />
     <ClCompile Include="oWinStatusBar.cpp" />
     <ClCompile Include="oWinWindowing.cpp" />
     <ClCompile Include="pch.cpp">

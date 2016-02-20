@@ -21,8 +21,8 @@ public:
 	void quit() override { Window->quit(); }
 	void debug(bool _Debug) override { Window->debug(_Debug); }
 	bool debug() const override { return Window->debug(); }
-	void state(window_state::value _State) override { Window->state(_State); }
-	window_state::value state() const override { return Window->state(); }
+	void state(window_state _State) override { Window->state(_State); }
+	window_state state() const override { return Window->state(); }
 	void client_position(const int2& _ClientPosition) override { Window->client_position(_ClientPosition); }
 	int2 client_position() const override { return Window->client_position(); }
 	int2 client_size() const override { return Window->client_size(); }
@@ -38,8 +38,8 @@ public:
 	std::shared_ptr<basic_window> parent() const override { return Window->parent(); }
 	void owner(const std::shared_ptr<basic_window>& _Owner) override { Window->owner(_Owner); }
 	std::shared_ptr<basic_window> owner() const override { return Window->owner(); }
-	void sort_order(window_sort_order::value _SortOrder) override { Window->sort_order(_SortOrder); }
-	window_sort_order::value sort_order() const override { return Window->sort_order(); }
+	void sort_order(window_sort_order _SortOrder) override { Window->sort_order(_SortOrder); }
+	window_sort_order sort_order() const override { return Window->sort_order(); }
 	void focus(bool _Focus) override { Window->focus(_Focus); }
 	bool has_focus() const override { return Window->has_focus(); }
 
