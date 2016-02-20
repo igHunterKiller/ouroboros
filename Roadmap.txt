@@ -68,10 +68,6 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	107               oGUI        ui          property sheet based on some lightweight osc-like thing
 	108 107           oGfxView    ui          Make the window bigger for the render space and the UI
 	109               ?           ?           Move wang hash to HLSL-compile. Does that mean it needs to be in 2 places?
-	110               Ouroboros   all         Move code to GitHub
-	111 110           Externals               Update Ouroboros website/issues site once moved to GitHub
-	112               Externals               Update bullet source - code.google.com is gone.
-	113               Externals               Update snappy source - code.google.com is gone.
 	114               Externals               Add lz4 to the compression pantheon
 	115               Externals               I hear-tell there's better than lz4 out there... add it to the pantheon
 	116               oBase       scc         Implement a git version
