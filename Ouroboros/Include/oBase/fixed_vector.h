@@ -29,7 +29,7 @@ public:
 
 	fixed_vector() : Size(0) {}
 	fixed_vector(const fixed_vector& _That) { operator=(_That); }
-	fixed_vector(fixed_vector&& _That) { operator=(std::move(_That)); }
+	fixed_vector(fixed_vector&& _That) : Array(std::move(_That.Array)), Size(_That.Size) { _That.Size = 0;  }
 	const array_t& operator=(const array_t& _That) { Array = _That.Array; Size = _That.Size; return *this; }
 	array_t& operator=(array_t&& _That) { if (this != &_That) { Array = std::move(_That.Array); std::move(Size = _That.Size); } return *this; }
 
@@ -53,26 +53,26 @@ public:
 	const_reference at(size_type _Index) const { return Array.at(_Index); }
 	reference operator[](size_type _Index) { return Array[_Index]; }
 	const_reference operator[](size_type _Index) const { return Array[_Index]; }
-	value_type* data() oNOEXCEPT { return Array.data(); }
-	const value_type* data() const oNOEXCEPT { return Array.data(); }
+	value_type* data() noexcept { return Array.data(); }
+	const value_type* data() const noexcept { return Array.data(); }
 
 	reference front() { return Array.front(); }
 	reference back() { return Array.at(Size-1); }
 	const_reference front() const { return Array.front(); }
 	const_reference back() const { return Array.at(Size-1); }
 
-	iterator begin() oNOEXCEPT { return Array.begin(); }
-	iterator end() oNOEXCEPT { return begin() + Size; }
-	const_iterator begin() const oNOEXCEPT { return Array.cbegin(); }
-	const_iterator end() const oNOEXCEPT { return cbegin() + Size; }
-	const_iterator cbegin() const oNOEXCEPT { return Array.cbegin(); }
-	const_iterator cend() const oNOEXCEPT { return cbegin() + Size; }
-	reverse_iterator rbegin() oNOEXCEPT { return rend() + Size; }
-	reverse_iterator rend() oNOEXCEPT { return Array.rend(); }
-	const_reverse_iterator rbegin() const oNOEXCEPT { return rend() + Size; }
-	const_reverse_iterator rend() const oNOEXCEPT { return Array.rend(); }
-	const_reverse_iterator crbegin() const oNOEXCEPT { return crend() + Size; }
-	const_reverse_iterator crend() const oNOEXCEPT { return Array.crend(); }
+	iterator begin() noexcept { return Array.begin(); }
+	iterator end() noexcept { return begin() + Size; }
+	const_iterator begin() const noexcept { return Array.cbegin(); }
+	const_iterator end() const noexcept { return cbegin() + Size; }
+	const_iterator cbegin() const noexcept { return Array.cbegin(); }
+	const_iterator cend() const noexcept { return cbegin() + Size; }
+	reverse_iterator rbegin() noexcept { return rend() + Size; }
+	reverse_iterator rend() noexcept { return Array.rend(); }
+	const_reverse_iterator rbegin() const noexcept { return rend() + Size; }
+	const_reverse_iterator rend() const noexcept { return Array.rend(); }
+	const_reverse_iterator crbegin() const noexcept { return crend() + Size; }
+	const_reverse_iterator crend() const noexcept { return Array.crend(); }
 
 	void resize(size_type _NewSize, value_type _InitialValue = value_type())
 	{
@@ -83,11 +83,11 @@ public:
 		Size = _NewSize;
 	}
 
-	void clear() oNOEXCEPT { resize(0); }
-	bool empty() const oNOEXCEPT { return Size == 0; }
-	size_type max_size() const oNOEXCEPT { return Array.max_size(); }
-	size_type size() const oNOEXCEPT { return Size; }
-	size_type capacity() const oNOEXCEPT { return Array.max_size(); }
+	void clear() noexcept { resize(0); }
+	bool empty() const noexcept { return Size == 0; }
+	size_type max_size() const noexcept { return Array.max_size(); }
+	size_type size() const noexcept { return Size; }
+	size_type capacity() const noexcept { return Array.max_size(); }
 
 	void push_back(const value_type& value)
 	{

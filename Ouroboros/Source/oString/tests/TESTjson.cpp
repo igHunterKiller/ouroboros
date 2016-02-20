@@ -28,11 +28,11 @@ static const char* sJSONTestReferenceResult =
 
 static void TESTjson_node(unit_test::services& srv, const json& _JSON, int _RootNode, int _Node, const char* _Name, json_node_type _Type, json_value_type _ValueType, const char* _Value)
 {
-	auto node = json::node(_Node);
+	auto node = json::node((uintptr_t)_Node);
 	if (_Name)
 	{
 		// Test find
-		oCHECK0(_JSON.first_child((json::node)_RootNode, _Name) == node);
+		oCHECK0(_JSON.first_child((json::node)(uintptr_t)_RootNode, _Name) == node);
 	}
 	const char* NodeName = _JSON.node_name(node);
 	const char* NodeValue = _Type == json_node_type::value ? _JSON.node_value(node) : nullptr;

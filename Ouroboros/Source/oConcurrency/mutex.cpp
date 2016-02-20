@@ -1,4 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
+#include <oCore/assert.h>
 #include <oConcurrency/mutex.h>
 #include <oConcurrency/backoff.h>
 #include <stdexcept>
@@ -10,9 +12,9 @@
 
 static_assert(sizeof(ouro::recursive_mutex) == sizeof(CRITICAL_SECTION), "size mismatch");
 #ifdef _DEBUG
-	static_assert(sizeof(ouro::mutex) == sizeof(SRWLOCK) + sizeof(std::thread::id), "size mismatch");
+	static_assert(sizeof(ouro::mutex) == sizeof(void*)*2, "size mismatch"); // 8 + 4 (thread::id) + padding to alignment of 8
 #else
-	static_assert(sizeof(ouro::mutex) == sizeof(SRWLOCK), "size mismatch");
+	static_assert(sizeof(ouro::mutex) == sizeof(SRWLOCK), "size mismatch"); // 8
 #endif
 
 #ifdef _DEBUG
@@ -20,7 +22,7 @@ static_assert(sizeof(ouro::recursive_mutex) == sizeof(CRITICAL_SECTION), "size m
 	#define ASSIGN_TID_CHECKED() do { if (footprint && tid == std::this_thread::get_id()) { throw std::logic_error("non-recursive already locked on this thread"); } tid = std::this_thread::get_id(); } while(false)
 	#define CLEAR_TID()	tid = std::thread::id()
 	#ifdef oHAS_SLIM_TRY_LOCK
-		#define CHECK_UNLOCKED() if (!try_lock()) throw std::logic_error("mutex locked on destruction")
+		#define CHECK_UNLOCKED() oAssertA(try_lock(), "mutex locked on destruction")
 	#else
 		#define CHECK_UNLOCKED()
 	#endif

@@ -9,7 +9,7 @@
 
 namespace ouro {
 
-const char* as_string(const mesh::primitive_type& type)
+template<> const char* as_string<mesh::primitive_type>(const mesh::primitive_type& type)
 {
 	switch (type)
 	{
@@ -63,7 +63,7 @@ const char* as_string(const mesh::primitive_type& type)
 
 STR_SUPPORT(mesh::primitive_type);
 
-const char* as_string(const mesh::face_type& type)
+template<> const char* as_string<mesh::face_type>(const mesh::face_type& type)
 {
 	switch (type)
 	{

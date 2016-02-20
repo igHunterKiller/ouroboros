@@ -340,7 +340,6 @@ histogramenumerator get_histogramenumerator(const format& f, int bitdepth)
 	}
 
 	oThrow(std::errc::not_supported, "%dbit histogram on %s not supported", bitdepth, as_string(f));
-
 	#undef IO
 }
 

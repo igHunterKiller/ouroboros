@@ -21,7 +21,7 @@ using namespace ouro::gpu;
 
 namespace ouro {
 	
-const char* as_string(const gfx::signature& sig)
+template<> const char* as_string<gfx::signature>(const gfx::signature& sig)
 {
 	const char* s_names[] = 
 	{
@@ -31,7 +31,7 @@ const char* as_string(const gfx::signature& sig)
 	return s_names[(int)sig];
 }
 
-const char* as_string(const gfx::pipeline_state& state)
+template<> const char* as_string<gfx::pipeline_state>(const gfx::pipeline_state& state)
 {
 	const char* s_names[] = 
 	{

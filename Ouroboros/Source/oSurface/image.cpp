@@ -151,7 +151,6 @@ void image::fill(uint32_t argb)
 void image::flatten()
 {
 	oCheck(!is_block_compressed(info_.format), std::errc::not_supported, "block compressed formats not handled yet");
-
 	int rp = row_pitch(info_);
 	size_t sz = size();
 	info_.mip_layout = mip_layout::none;

@@ -76,6 +76,8 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	115               Externals               I hear-tell there's better than lz4 out there... add it to the pantheon
 	116               oBase       scc         Implement a git version
 	117 116           oBase       scc         Rejigger scc, reformat to code standard and try to simplify/unify svn and git methodologies.
+	118               oSystem     filesystem_monitor Remove <functional> and shared_ptr usage
+	119               oString     stringize   Consider promoting as_string to_string from_string to oCore, be choosey about what follows.
 
 
 === Notes ===

@@ -9,7 +9,7 @@
 
 namespace ouro { 
 
-const char* as_string(const gfx::primitive_model& m)
+template<> const char* as_string<gfx::primitive_model>(const gfx::primitive_model& m)
 {
 	static const char* s_names[] =
 	{

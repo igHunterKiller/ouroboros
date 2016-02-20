@@ -10,7 +10,7 @@
 
 namespace ouro {
 
-const char* as_string(const surface::filter& f)
+template<> const char* as_string<surface::filter>(const surface::filter& f)
 {
 	switch (f)
 	{
@@ -197,9 +197,9 @@ void resize_horizontal(const info_t& src_info, const const_mapped_subresource& s
 			{
 				for (size_t i = 0; i < ELEMENT_SIZE; i++)
 				{
-					float src = srcRow[srcX*ELEMENT_SIZE + i];
-					src *= filterEntry.cache[srcX - filterEntry.left];
-					result[i] += src;
+					float val = srcRow[srcX*ELEMENT_SIZE + i];
+					val *= filterEntry.cache[srcX - filterEntry.left];
+					result[i] += val;
 				}
 			}
 			
@@ -237,9 +237,9 @@ void resize_vertical(const info_t& src_info, const const_mapped_subresource& src
 
 				for (size_t i = 0;i < ELEMENT_SIZE; i++)
 				{
-					float src = srcElement[i];
-					src *= filterEntry.cache[srcY - filterEntry.left];
-					result[i] += src;
+					float val = srcElement[i];
+					val *= filterEntry.cache[srcY - filterEntry.left];
+					result[i] += val;
 				}
 			}
 			for (size_t i = 0;i < ELEMENT_SIZE; i++)

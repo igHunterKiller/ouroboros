@@ -22,6 +22,6 @@ int ouro::format_bytes(char* dst, size_t dst_size, uint64_t bytes, size_t num_pr
 		ELIF(TB) ELIF(GB) ELIF(MB) ELIF(KB)
 	#undef ELIF
 
-	const char* plural = (abs(amount - 1.0) < DBL_EPSILON) ? "" : "s";
+	const char* plural = (fabs(amount - 1.0) < DBL_EPSILON) ? "" : "s";
 	return snprintf(dst, dst_size, fmt, amount, type, plural);
 }

@@ -94,7 +94,6 @@ static void expected_fail(const DateT1& _Destination, const DateT2& _Source)
 }
 
 #define oTESTDATENOCONVERT(_Test, src, pdst) do { expected_fail(*pdst, src); } while(false)
-
 #define oTESTDATEMILLI(_Test, _IExpected, _ICalculated) do { oCheck(_IExpected == _ICalculated, std::errc::protocol_error, "Fractional sec should have been %dms for %s", _IExpected, oSAFESTRN(_Test.ExpectedTimeString)); } while(false)
 
 static void test_date_julian()

@@ -1,16 +1,19 @@
-// Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+/**
+*  dwt97.c - Fast discrete biorthogonal CDF 9/7 wavelet forward and inverse transform (lifting implementation)
+*
+*  This code is provided "as is" and is given for educational purposes.
+*  2006 - Gregoire Pau - gregoire.pau@ebi.ac.uk
+*/
 
 #include <malloc.h>
 
-// http://www.embl.de/~gpau/misc/dwt97.c
-// Gregoire Pau
-
 namespace ouro {
-
-// $(CitedCodeBegin)
 
 void cdf97fwd(float* values, unsigned int num_values)
 {
+	// https://github.com/VadimKirilchuk/jawelet/wiki/CDF-9-7-Discrete-Wavelet-Transform
+	// Gregoire Pau
+
 	float a;
 	unsigned int i;
 
@@ -52,7 +55,7 @@ void cdf97fwd(float* values, unsigned int num_values)
 	// Pack
 	float* TempBank = (float*)alloca(sizeof(float) * num_values);
 
-	for (size_t i = 0; i < num_values; i++) 
+	for (i = 0; i < num_values; i++) 
 	{
 		if (i%2==0) 
 			TempBank[i/2]= values[i];
@@ -60,7 +63,7 @@ void cdf97fwd(float* values, unsigned int num_values)
 			TempBank[num_values/2+i/2] = values[i];
 	}
 
-	for (size_t i = 0; i < num_values; i++) 
+	for (i = 0; i < num_values; i++) 
 		values[i]=TempBank[i];
 }
 

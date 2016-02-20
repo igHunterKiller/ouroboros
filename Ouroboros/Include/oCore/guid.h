@@ -31,6 +31,6 @@ static const guid_t null_guid = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
 }
 
 // printf-style format string for data1, data2, data3, data,4
-#define oGUID_FMT "{%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X}"
+#define oGUID_FMT "{%08x-%04hx-%04hx-%02hhx%02hhx-%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx}"
 #define oGUID_DATA_IN(x) (x).data1, (x).data2, (x).data3, (x).data4[0], (x).data4[1], (x).data4[2], (x).data4[3], (x).data4[4], (x).data4[5], (x).data4[6], (x).data4[7]
 #define oGUID_DATA_OUT(x) &((x).data1), &((x).data2), &((x).data3), &((x).data4[0]), &((x).data4[1]), &((x).data4[2]), &((x).data4[3]), &((x).data4[4]), &((x).data4[5]), &((x).data4[6]), &((x).data4[7])

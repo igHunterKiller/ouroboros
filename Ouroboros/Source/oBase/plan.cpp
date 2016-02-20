@@ -16,9 +16,7 @@ struct flushed_tasklist
 
 tasklist::~tasklist()
 {
-	if (tasks || num_tasks)
-		throw std::exception("tasklist must be flushed before deinitialized");
-
+	oAssert(!tasks && !num_tasks, "tasklist must be flushed before deinitialized");
 	tasks = nullptr;
 	num_tasks = 0;
 	phase = 0;
@@ -241,8 +239,8 @@ start:
 	{
 		if (phases[phase].traits & plan_phase_traits::sorted)
 		{
-			auto& master = PhaseTasks[phase];
-			std::stable_sort(master.tasks, master.tasks + master.num_tasks, [](const plan_task& a, const plan_task& b)->bool { return a.priority < b.priority; } );
+			auto& master_tasks = PhaseTasks[phase];
+			std::stable_sort(master_tasks.tasks, master_tasks.tasks + master_tasks.num_tasks, [](const plan_task& a, const plan_task& b)->bool { return a.priority < b.priority; } );
 		}
 	}
 

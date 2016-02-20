@@ -50,12 +50,12 @@ int main(int argc, const char* argv[])
 		{
 			int offset = 0;
 			if ((i%100)==0)
-				offset = snprintf(buf, oNEWLINE "\t");
-			snprintf(buf+offset, sizeof(buf)-offset, "%u,", p[i]);
+				offset = ouro::snprintf(buf, oNEWLINE "\t");
+			ouro::snprintf(buf+offset, sizeof(buf)-offset, "%u,", p[i]);
 			s += buf;
 		}
 
-		snprintf(buf, oNEWLINE "}; // %s %u bytes" oNEWLINE, Name.c_str(), b.size());
+		ouro::snprintf(buf, oNEWLINE "}; // %s %u bytes" oNEWLINE, Name.c_str(), b.size());
 		s += buf;
 
 		filesystem::save(outfile, s.c_str(), s.length(), filesystem::save_option::binary_write);

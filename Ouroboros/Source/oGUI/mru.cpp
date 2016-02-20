@@ -33,7 +33,7 @@ void mru::get_entries(std::vector<uri_string>& _Entries)
 	for (int i = 0; i < NumMRUs; i++)
 	{
 		sstring EntryName = entry_name(i);
-		registry::get(Entry, registry::current_user, Info.registry_key, EntryName);
+		registry::get(Entry, registry::hkey::current_user, Info.registry_key, EntryName);
 		_Entries.push_back(Entry);
 	}
 }
@@ -59,13 +59,13 @@ void mru::add(const char* _Entry)
 	int i = 0;
 	const int n = (int)Entries.size();
 	for (; i < n; i++)
-		registry::set(registry::current_user, Info.registry_key, entry_name(i), Entries[i]);
+		registry::set(registry::hkey::current_user, Info.registry_key, entry_name(i), Entries[i]);
 
 	// and delete any extra stale entries that remain as a result of the Entries
 	// list getting shorter
 	const int NumIDs = Info.last_id-Info.first_id+1;
 	for (; i < NumMRUs; i++)
-		registry::delete_value(registry::current_user, Info.registry_key, entry_name(i));
+		registry::delete_value(registry::hkey::current_user, Info.registry_key, entry_name(i));
 
 	refresh();
 }
@@ -73,7 +73,7 @@ void mru::add(const char* _Entry)
 char* mru::get(char* _StrDestination, size_t _SizeofStrDestination, int _ID)
 {
 	if (_ID >= Info.first_id && _ID <= Info.last_id)
-		return registry::get(_StrDestination, _SizeofStrDestination, registry::current_user, Info.registry_key, entry_name(_ID - Info.first_id));
+		return registry::get(_StrDestination, _SizeofStrDestination, registry::hkey::current_user, Info.registry_key, entry_name(_ID - Info.first_id));
 	return nullptr;
 }
 
@@ -83,7 +83,7 @@ void mru::refresh()
 	uri_string Entry;
 	for (int i = 0; i < NumMRUs; i++)
 	{
-		registry::get(Entry, registry::current_user, Info.registry_key, entry_name(i));
+		registry::get(Entry, registry::hkey::current_user, Info.registry_key, entry_name(i));
 		menu::append_item(Info.menu, Info.first_id + i, Entry);
 	}
 }

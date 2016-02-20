@@ -1,29 +1,21 @@
 /*
-    Copyright 2005-2013 Intel Corporation.  All Rights Reserved.
+    Copyright 2005-2016 Intel Corporation.  All Rights Reserved.
 
-    This file is part of Threading Building Blocks.
+    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
+    you can redistribute it and/or modify it under the terms of the GNU General Public License
+    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
+    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See  the GNU General Public License for more details.   You should have received a copy of
+    the  GNU General Public License along with Threading Building Blocks; if not, write to the
+    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
 
-    Threading Building Blocks is free software; you can redistribute it
-    and/or modify it under the terms of the GNU General Public License
-    version 2 as published by the Free Software Foundation.
-
-    Threading Building Blocks is distributed in the hope that it will be
-    useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Threading Building Blocks; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-    As a special exception, you may use this file as part of a free software
-    library without restriction.  Specifically, if other files instantiate
-    templates or use macros or inline functions from this file, or you compile
-    this file and link it with other files to produce an executable, this
-    file does not by itself cause the resulting executable to be covered by
-    the GNU General Public License.  This exception does not however
-    invalidate any other reasons why the executable file might be covered by
-    the GNU General Public License.
+    As a special exception,  you may use this file  as part of a free software library without
+    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
+    functions from this file, or you compile this file and link it with other files to produce
+    an executable,  this file does not by itself cause the resulting executable to be covered
+    by the GNU General Public License. This exception does not however invalidate any other
+    reasons why the executable file might be covered by the GNU General Public License.
 */
 
 #ifndef __TBB_task_arena_H
@@ -85,8 +77,16 @@ protected:
     //! Reserved master slots
     unsigned my_master_slots;
 
-    //! Reserved for future use
-    intptr_t my_reserved;
+    //! Special settings
+    intptr_t my_version_and_traits;
+
+    enum {
+        default_flags = 0
+#if __TBB_TASK_GROUP_CONTEXT
+        | (task_group_context::default_traits & task_group_context::exact_exception)  // 0 or 1 << 16
+        , exact_exception_flag = task_group_context::exact_exception // used to specify flag for context directly
+#endif
+    };
 
     task_arena_base(int max_concurrency, unsigned reserved_for_masters)
         : my_arena(0)
@@ -95,11 +95,12 @@ protected:
 #endif
         , my_max_concurrency(max_concurrency)
         , my_master_slots(reserved_for_masters)
-        , my_reserved(0)
+        , my_version_and_traits(default_flags)
         {}
 
-    void __TBB_EXPORTED_METHOD internal_initialize( );
-    void __TBB_EXPORTED_METHOD internal_terminate( );
+    void __TBB_EXPORTED_METHOD internal_initialize();
+    void __TBB_EXPORTED_METHOD internal_terminate();
+    void __TBB_EXPORTED_METHOD internal_attach();
     void __TBB_EXPORTED_METHOD internal_enqueue( task&, intptr_t ) const;
     void __TBB_EXPORTED_METHOD internal_execute( delegate_base& ) const;
     void __TBB_EXPORTED_METHOD internal_wait() const;
@@ -121,6 +122,19 @@ public:
 class task_arena : public internal::task_arena_base {
     friend class tbb::internal::task_scheduler_observer_v3;
     bool my_initialized;
+    void mark_initialized() {
+        __TBB_ASSERT( my_arena, "task_arena initialization is incomplete" );
+#if __TBB_TASK_GROUP_CONTEXT
+        __TBB_ASSERT( my_context, "task_arena initialization is incomplete" );
+#endif
+#if TBB_USE_THREADING_TOOLS
+        // Actual synchronization happens in internal_initialize & internal_attach.
+        // The race on setting my_initialized is benign, but should be hidden from Intel(R) Inspector
+        internal::as_atomic(my_initialized).fetch_and_store<release>(true);
+#else
+        my_initialized = true;
+#endif
+    }
 
 public:
     //! Creates task_arena with certain concurrency limits
@@ -140,26 +154,45 @@ public:
         , my_initialized(false)
     {}
 
+    //! Tag class used to indicate the "attaching" constructor
+    struct attach {};
+
+    //! Creates an instance of task_arena attached to the current arena of the thread
+    task_arena( attach )
+        : task_arena_base(automatic, 1) // use default settings if attach fails
+        , my_initialized(false)
+    {
+        internal_attach();
+        if( my_arena ) my_initialized = true;
+    }
+
     //! Forces allocation of the resources for the task_arena as specified in constructor arguments
     inline void initialize() {
         if( !my_initialized ) {
             internal_initialize();
-#if TBB_USE_THREADING_TOOLS
-            // Threading tools respect lock prefix but report false-positive data-race via plain store
-            internal::as_atomic(my_initialized).fetch_and_store<release>(true);
-#else
-            my_initialized = true;
-#endif //TBB_USE_THREADING_TOOLS
+            mark_initialized();
         }
     }
 
     //! Overrides concurrency level and forces initialization of internal representation
     inline void initialize(int max_concurrency, unsigned reserved_for_masters = 1) {
+        // TODO: decide if this call must be thread-safe
         __TBB_ASSERT( !my_arena, "Impossible to modify settings of an already initialized task_arena");
         if( !my_initialized ) {
             my_max_concurrency = max_concurrency;
             my_master_slots = reserved_for_masters;
             initialize();
+        }
+    }
+
+    //! Attaches this instance to the current arena of the thread
+    inline void initialize(attach) {
+        // TODO: decide if this call must be thread-safe
+        __TBB_ASSERT( !my_arena, "Impossible to modify settings of an already initialized task_arena");
+        if( !my_initialized ) {
+            internal_attach();
+            if( !my_arena ) internal_initialize();
+            mark_initialized();
         }
     }
 
@@ -240,7 +273,7 @@ public:
 #endif //__TBB_EXTRA_DEBUG
 
     //! Returns the index, aka slot number, of the calling thread in its current arena
-    inline static int current_slot() {
+    inline static int current_thread_index() {
         return internal_current_slot();
     }
 };

@@ -24,7 +24,7 @@ using namespace ouro::gpu;
 
 namespace ouro { 
 	
-const char* as_string(const tests::pipeline_state& state)
+template<> const char* as_string<tests::pipeline_state>(const tests::pipeline_state& state)
 {
 	const char* s_names[] = 
 	{

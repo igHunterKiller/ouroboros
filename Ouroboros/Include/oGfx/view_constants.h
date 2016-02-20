@@ -55,11 +55,11 @@ protected:
 
 static_assert((sizeof(view_constants) & 0xf) == 0, "sizeof(view_constants) must be 16-byte aligned");
 
-inline void view_constants::set(const float4x4& view, const float4x4& projection, uint32_t target_width, uint32_t target_height, uint32_t array_index)
+inline void view_constants::set(const float4x4& view_, const float4x4& projection_, uint32_t target_width, uint32_t target_height, uint32_t array_index_)
 {
-	this->view = view;
+	view = view_;
 	view_inverse = invert(view);
-	this->projection = projection;
+	projection = projection_;
 	projection_inverse = invert(projection);
 	view_projection = view * projection;
 	view_projection_inverse = invert(view_projection);
@@ -76,11 +76,11 @@ inline void view_constants::set(const float4x4& view, const float4x4& projection
 
 	target_dimensions = float2(uint2(target_width, target_height));
 
-	this->array_index = array_index;
+	array_index = array_index_;
 	padA = 0.0f;
 }
 
-inline void view_constants::set(const pov_t& pov, uint32_t array_index)
+inline void view_constants::set(const pov_t& pov, uint32_t array_index_)
 {
 	view                    = pov.view();
 	view_inverse            = pov.view_inverse();
@@ -100,7 +100,7 @@ inline void view_constants::set(const pov_t& pov, uint32_t array_index)
 	vs_far_planes[3] = float4(corners[oCUBE_RIGHT_BOTTOM_FAR], 0.0f);
 
 	target_dimensions = pov.viewport().dimensions;
-	this->array_index = array_index;
+	array_index = array_index_;
 	padA = 0.0f;
 }
 

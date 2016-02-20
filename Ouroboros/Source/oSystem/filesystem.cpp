@@ -2,6 +2,7 @@
 
 #include <oCore/countof.h>
 #include <oCore/finally.h>
+#include <oCore/stringf.h>
 #include <oSystem/filesystem.h>
 #include <oSystem/process.h>
 #include <oSystem/system.h>
@@ -18,11 +19,14 @@
 #include <windows.h>
 #include <Shlobj.h>
 
-using namespace std;
+// Use these instead of oTHROW_SYSERR for the filesystem category
+#define oERRC(err_code) ouro::filesystem::make_error_code(std::errc::err_code)
+#define oFSTHROW_SYSERR0(err_code) throw std::system_error(oERRC(err_code))
+#define oFSTHROW_SYSERR(err_code, fmt, ...) throw std::system_error(oERRC(err_code), ouro::stringf(fmt, ## __VA_ARGS__))
 
 namespace ouro {
 
-const char* as_string(const filesystem::file_type& t)
+template<> const char* as_string<filesystem::file_type>(const filesystem::file_type& t)
 {
 	switch (t)
 	{
@@ -45,23 +49,23 @@ const char* as_string(const filesystem::file_type& t)
 
 }
 
-#define oFSTHROW0(err_code) throw filesystem_error(make_error_code(errc::err_code))
-#define oFSTHROW01(err_code, path1) throw filesystem_error(path1, make_error_code(errc::err_code))
-#define oFSTHROW02(err_code, path1, path2) throw filesystem_error(path1, path2, make_error_code(errc::err_code))
+#define oFSTHROW0(err_code) throw filesystem_error(oERRC(err_code))
+#define oFSTHROW01(err_code, path1) throw filesystem_error(path1, oERRC(err_code))
+#define oFSTHROW02(err_code, path1, path2) throw filesystem_error(path1, path2, oERRC(err_code))
 
 #define oFSTHROW(err_code, format, ...) do \
 {	lstring msg; vsnprintf(msg, format, # __VA_ARGS__ ); \
-	throw filesystem_error(msg, make_error_code(errc::err_code)); \
+	throw filesystem_error(msg, oERRC(err_code)); \
 } while (false)
 
 #define oFSTHROW1(err_code, path1, format, ...) do \
 {	lstring msg; vsnprintf(msg, format, # __VA_ARGS__ ); \
-	throw filesystem_error(msg, path1, make_error_code(errc::err_code)); \
+	throw filesystem_error(msg, path1, oERRC(err_code)); \
 } while (false)
 
 #define oFSTHROW2(err_code, path1, path2, format, ...) do \
 {	lstring msg; vsnprintf(msg, format, # __VA_ARGS__ ); \
-	throw filesystem_error(msg, path1, path2, make_error_code(errc::err_code)); \
+	throw filesystem_error(msg, path1, path2, oERRC(err_code)); \
 } while (false)
 
 #define oFSTHROWLAST() throw windows::error()
@@ -71,7 +75,7 @@ const char* as_string(const filesystem::file_type& t)
 #define oFSTHROW_FOPEN(err, path) do \
 {	char strerr[256]; \
 	strerror_s(strerr, err); \
-	throw filesystem_error(strerr, path, make_error_code((errc::errc)err)); \
+	throw filesystem_error(strerr, path, ouro::filesystem::make_error_code((std::errc)err)); \
 } while (false)
 
 #define oFSTHROW_FOPEN0() do \
@@ -79,18 +83,18 @@ const char* as_string(const filesystem::file_type& t)
 	_get_errno(&err); \
 	char strerr[256]; \
 	strerror_s(strerr, err); \
-	throw filesystem_error(strerr, make_error_code((errc::errc)err)); \
+	throw filesystem_error(strerr, ouro::filesystem::make_error_code((std::errc)err)); \
 } while (false)
 
 namespace ouro { namespace filesystem { namespace detail {
 
-class filesystem_category_impl : public error_category
+class filesystem_category_impl : public std::error_category
 {
 public:
-	const char* name() const override { return "filesystem"; }
-	string message(int err_code) const override
+	const char* name() const noexcept override { return "filesystem"; }
+	std::string message(int err_code) const override
 	{
-		return generic_category().message(err_code);
+		return std::generic_category().message(err_code);
 	}
 };
 
@@ -370,7 +374,7 @@ Retry:
 			case ERROR_DIR_NOT_EMPTY:
 			{
 				// if a file explorer is open, this may be a false positive
-				this_thread::sleep_for(chrono::milliseconds(100));
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				if (Retried > 1)
 					oFSTHROW01(directory_not_empty, path);
 				Retried++;
@@ -638,7 +642,7 @@ file_handle open(const path_t& path, open_option opt)
 void close(file_handle hfile)
 {
 	if (!hfile)
-		throw filesystem_error(make_error_code(errc::invalid_argument));
+		oFSTHROW_SYSERR0(invalid_argument);
 	if (0 != fclose((FILE*)hfile))
 		oFSTHROW_FOPEN0();
 }

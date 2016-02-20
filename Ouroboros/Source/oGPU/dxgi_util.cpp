@@ -10,7 +10,7 @@
 
 namespace ouro {
 
-const char* as_string(const DXGI_FORMAT& format)
+template<> const char* as_string<DXGI_FORMAT>(const DXGI_FORMAT& format)
 {
 	switch (format)
 	{
@@ -533,7 +533,6 @@ void set_fullscreen_exclusive(IDXGISwapChain* swapchain, bool fullscreen_exclusi
 	DXGI_SWAP_CHAIN_DESC SCD;
 	swapchain->GetDesc(&SCD);
 	oCheck(!GetParent(SCD.OutputWindow), std::errc::operation_not_permitted, "child windows cannot go full screen exclusive");
-
 	oTRACE_FS("[set_fullscreen_exclusive] asking if fullscreen...");
 
 	BOOL FS = FALSE;

@@ -8,7 +8,7 @@
 
 namespace ouro {
 
-const char* as_string(const scc_protocol::value& _Protocol)
+template<> const char* as_string<scc_protocol::value>(const scc_protocol::value& _Protocol)
 {
 	switch (_Protocol)
 	{
@@ -20,7 +20,7 @@ const char* as_string(const scc_protocol::value& _Protocol)
 	return "unrecognized scc_protocol";
 }
 
-const char* as_string(const scc_status::value& _Status)
+template<> const char* as_string<scc_status::value>(const scc_status::value& _Status)
 {
 	switch (_Status)
 	{
@@ -48,7 +48,7 @@ namespace detail {
 class scc_category_impl : public std::error_category
 {
 public:
-	const char* name() const override { return "future"; }
+	const char* name() const noexcept override { return "future"; }
 	std::string message(int _ErrCode) const override
 	{
 		switch (_ErrCode)

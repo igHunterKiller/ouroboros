@@ -12,15 +12,15 @@
 
 namespace ouro {
 
-	const char* as_string(const filesystem::file_event::value& _Event)
+	template<> const char* as_string<filesystem::file_event>(const filesystem::file_event& e)
 	{
-		switch (_Event)
+		switch (e)
 		{
 			case filesystem::file_event::unsupported: return "unsupported";
-			case filesystem::file_event::added: return "added";
-			case filesystem::file_event::removed: return "removed";
-			case filesystem::file_event::modified: return "modified";
-			case filesystem::file_event::accessible: return "accessible";
+			case filesystem::file_event::added:       return "added";
+			case filesystem::file_event::removed:     return "removed";
+			case filesystem::file_event::modified:    return "modified";
+			case filesystem::file_event::accessible:  return "accessible";
 			default: break;
 		}
 		return "?";
@@ -28,13 +28,13 @@ namespace ouro {
 
 	namespace filesystem {
 
-static file_event::value as_event(DWORD _NotifyAction)
+static file_event as_event(DWORD notify_action)
 {
-	switch (_NotifyAction)
+	switch (notify_action)
 	{
-		case FILE_ACTION_ADDED: return file_event::added;
-		case FILE_ACTION_REMOVED: return file_event::removed;
-		case FILE_ACTION_MODIFIED: return file_event::modified;
+		case FILE_ACTION_ADDED:            return file_event::added;
+		case FILE_ACTION_REMOVED:          return file_event::removed;
+		case FILE_ACTION_MODIFIED:         return file_event::modified;
 		case FILE_ACTION_RENAMED_OLD_NAME: return file_event::removed;
 		case FILE_ACTION_RENAMED_NEW_NAME: return file_event::added;
 		default: break;
@@ -94,7 +94,7 @@ private:
 class monitor_impl : public monitor
 {
 public:
-	monitor_impl(const info& _Info, const std::function<void (file_event::value _Event, const path_t& _Path)>& _OnEvent);
+	monitor_impl(const info& _Info, const std::function<void (file_event _Event, const path_t& _Path)>& _OnEvent);
 	~monitor_impl();
 	info get_info() const override { return Info; }
   void watch(const path_t& _Path, size_t _BufferSize, bool _Recursive) override;
@@ -103,11 +103,11 @@ public:
 
 	// API called from class watch
 	void watch_ended() { NumActiveWatches--; }
-	void on_event(const path_t& _Path, file_event::value _Event, double _Timestamp);
+	void on_event(const path_t& _Path, file_event _Event, double _Timestamp);
 
 private:
 
-	std::function<void (file_event::value _Event, const path_t& _Path)> OnEvent;
+	std::function<void (file_event _Event, const path_t& _Path)> OnEvent;
 	mutex WatchesMutex;
 	std::vector<watcher*> Watches;
 	std::vector<path_t> Accessibles;
@@ -124,7 +124,7 @@ private:
 	struct EVENT
 	{
 		double timestamp;
-		file_event::value event;
+		file_event event;
 	};
 
 	mutex EventsMutex;
@@ -245,7 +245,7 @@ void watcher::process(FILE_NOTIFY_INFORMATION* _pNotify)
 	double Now = timer::now();
 	while (true)
 	{
-		file_event::value e = as_event(n->Action);
+		file_event e = as_event(n->Action);
 		if (e != file_event::unsupported)
 		{
 			// *2 for that fact that FileNameLength is # bytes for a wide-char non-
@@ -293,12 +293,12 @@ bool watcher::watching(const path_t& _Path) const
 	return same_i<path_t>()(Directory, ThatDirectory) && same_i<sstring>()(Filename, ThatFilename);
 }
 
-std::shared_ptr<monitor> monitor::make(const info& _Info, const std::function<void (file_event::value _Event, const path_t& _Path)>& _OnEvent)
+std::shared_ptr<monitor> monitor::make(const info& _Info, const std::function<void (file_event _Event, const path_t& _Path)>& _OnEvent)
 {
 	return std::make_shared<monitor_impl>(_Info, _OnEvent);
 }
 
-monitor_impl::monitor_impl(const info& _Info, const std::function<void (file_event::value _Event, const path_t& _Path)>& _OnEvent)
+monitor_impl::monitor_impl(const info& _Info, const std::function<void (file_event _Event, const path_t& _Path)>& _OnEvent)
 		: Info(_Info)
 		, OnEvent(_OnEvent)
 		, hTimerQueue(CreateTimerQueue())
@@ -331,16 +331,16 @@ monitor_impl::~monitor_impl()
 
 	HANDLE hEvent = CreateEventA(0, FALSE, FALSE, nullptr);
 	ResetEvent(hEvent);
-	oVB(DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, hEvent));
+	oVB_NOTHROW(DeleteTimerQueueTimer(hTimerQueue, hTimerQueueTimer, hEvent));
 
 	HRESULT hr = WaitForSingleObject(hEvent, INFINITE);
-	oCheck(hr == WAIT_OBJECT_0, std::errc::protocol_error, "failed waiting for DeleteTimerQueueTimer");
+	oAssertA(hr == WAIT_OBJECT_0, "failed waiting for DeleteTimerQueueTimer");
 
-	oVB(CloseHandle(hEvent));
-	oVB(DeleteTimerQueue(hTimerQueue));
+	oVB_NOTHROW(CloseHandle(hEvent));
+	oVB_NOTHROW(DeleteTimerQueue(hTimerQueue));
 }
 
-void monitor_impl::on_event(const path_t& _Path, file_event::value _Event, double _Timestamp)
+void monitor_impl::on_event(const path_t& _Path, file_event _Event, double _Timestamp)
 {
 	// Files that are added or modified aren't necessarily usable, so queue
 	// such files up for later analysis for accessibility.
@@ -368,7 +368,7 @@ void monitor_impl::check_accessibility()
 	const double Now = timer::now();
 
 	{
-		lock_guard<mutex> lock(EventsMutex);
+		lock_guard<mutex> lock_events(EventsMutex);
 		for (auto it = std::begin(Events); it != std::end(Events); /* no increment */)
 		{
 			const path_t& p = it->first;

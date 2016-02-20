@@ -93,14 +93,14 @@ public:
 
 	// Node API
 	inline node root() const { return node(1); } 
-	inline node parent(node n) const { return node(Node(n).up);  }
-	inline node first_child(node parent_node) const { return node(Node(parent_node).down); }
-	inline node next_sibling(node prior_sibling) const { return node(Node(prior_sibling).next); }
+	inline node parent(node n) const { return node(uintptr_t(Node(n).up));  }
+	inline node first_child(node parent_node) const { return node(uintptr_t(Node(parent_node).down)); }
+	inline node next_sibling(node prior_sibling) const { return node(uintptr_t(Node(prior_sibling).next)); }
 	inline const char_type* node_name(node n) const { return buffer_.c_str() + Node(n).name; }
 	inline const char_type* node_value(node n) const { return buffer_.c_str() + Node(n).value; }
 	
 	// Attribute API
-	inline attr first_attr(node n) const { return attr(Node(n).Attr); }
+	inline attr first_attr(node n) const { return attr(uintptr_t(Node(n).Attr)); }
 	inline attr next_attr(attr a) const { return Attr(a).name ? attr(a + 1) : 0; }
 	inline const char_type* attr_name(attr a) const { return buffer_.c_str() + Attr(a).name; }
 	inline const char_type* attr_value(attr a) const { return buffer_.c_str() + Attr(a).value; }
@@ -164,9 +164,9 @@ public:
 
 	inline bool visit(visitor& visitor) const
 	{
-		detail::text_buffer::std_vector<visitor::attr_type> attrs_;
-		attrs_.reserve(16);
-		return visit(first_child(root()), 0, attrs_, visitor);
+		detail::text_buffer::std_vector<visitor::attr_type> a;
+		a.reserve(16);
+		return visit(first_child(root()), 0, a, visitor);
 	}
 
 	// Helper function to be called from inside visitor functions
@@ -304,18 +304,18 @@ private:
 	inline node make_next_node(char_type*& _xml, node parent_node, node previous, int& open_tag_count, int& close_tag_count);
 	inline void make_next_node_children(char_type*& _xml, node parent_node, int& open_tag_count, int& close_tag_count);
 
-	inline bool visit(node n, int sibling_index, detail::text_buffer::std_vector<visitor::attr_type>& attrs_, visitor& visitor) const
+	inline bool visit(node n, int sibling_index, detail::text_buffer::std_vector<visitor::attr_type>& attrs, visitor& visitor) const
 	{
 		const char_type* nname = node_name(n);
 		const char_type* nval = node_value(n);
-		attrs_.clear();
+		attrs.clear();
 		for (attr a = first_attr(n); a; a = next_attr(a))
-			attrs_.push_back(visitor::attr_type(attr_name(a), attr_value(a)));
+			attrs.push_back(visitor::attr_type(attr_name(a), attr_value(a)));
 
 		mstring xref;
 		make_xref(xref, n);
 
-		if (!visitor.node_begin(nname, xref, attrs_.data(), attrs_.size()))
+		if (!visitor.node_begin(nname, xref, attrs.data(), attrs.size()))
 			return false;
 
 		// note: this should become interspersed with children for cases like this:
@@ -331,7 +331,7 @@ private:
 
 		int i = 0;
 		for (node c = first_child(n); c; c = next_sibling(c), i++)
-			if (!visit(c, i, attrs_, visitor))
+			if (!visit(c, i, attrs, visitor))
 				return false;
 
 		if (!visitor.node_end(nname, xref))
@@ -355,8 +355,8 @@ private:
 
 		for (node c = first_child(n); c; c = next_sibling(c))
 		{
-			node n = find_id(c, id);
-			if (n) return n;
+			node nd = find_id(c, id);
+			if (nd) return nd;
 		}
 
 		return node(0);
@@ -567,7 +567,7 @@ xml::node xml::make_next_node(char_type*& _xml, node parent_node, node previous,
 {
 	open_tag_count++;
 	NODE n;
-	n.up = (index_type)parent_node;
+	n.up = (index_type)(uintptr_t)parent_node;
 	if (parent_node || *_xml == '<') detail::skip_reserved_nodes_(_xml); // base-case where the first char_type of file is '<' and that got nulled for the 0 offset empty value
 	n.name = static_cast<index_type>(std::distance(buffer_.c_str(), ++_xml));
 	_xml += strcspn(_xml, " /\t\r\n>");
@@ -589,7 +589,7 @@ xml::node xml::make_next_node(char_type*& _xml, node parent_node, node previous,
 	detail::ampersand_decode(buffer_.c_str() + n.name), detail::ampersand_decode(buffer_.c_str() + n.value);
 	if (!veryEarlyOut && *_xml != '/') // recurse on children nodes_
 	{
-		node p = node(newNode);
+		node p = node((uintptr_t)newNode);
 		make_next_node_children(_xml, p, open_tag_count, close_tag_count);
 	}
 	else 
@@ -597,7 +597,7 @@ xml::node xml::make_next_node(char_type*& _xml, node parent_node, node previous,
 		close_tag_count++;
 		_xml += strcspn(_xml, "<");
 	}
-	return node(newNode);
+	return node((uintptr_t)newNode);
 }
 
 }

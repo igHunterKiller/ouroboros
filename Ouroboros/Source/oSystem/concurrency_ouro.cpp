@@ -20,8 +20,8 @@ public:
 	ouro_context() {}
 	~ouro_context() { tp.join(); }
 	inline threadpool_type& get_threadpool() { return tp; }
-	inline void dispatch(const std::function<void()>& _Task) { tp.dispatch(_Task); }
-	inline void parallel_for(size_t _Begin, size_t _End, const std::function<void(size_t _Index)>& _Task) { ouro::detail::parallel_for<16>(tp, _Begin, _End, _Task); }
+	inline void dispatch(const std::function<void()>& task) { tp.dispatch(task); }
+	inline void parallel_for(size_t begin, size_t end, const std::function<void(size_t index)>& task) { ouro::detail::parallel_for<16>(tp, begin, end, task); }
 private:
 	threadpool_type tp;
 };
@@ -48,19 +48,19 @@ class task_group_ouro : public task_group
 public:
 	task_group_ouro() : g(ouro_context::singleton().get_threadpool()) {}
 	~task_group_ouro() { wait(); }
-	void run(const std::function<void()>& _Task) override { g.run(_Task); }
+	void run(const std::function<void()>& task) override { g.run(task); }
 	void wait() override { g.wait(); }
 	void cancel() override { g.cancel(); }
 	bool is_canceling() override { return g.is_canceling(); }
 };
 
-ouro::task_group* new_task_group()
+ouro::task_group* newtask_group()
 {
 	void* p = default_allocate(sizeof(task_group_ouro), scheduler_name(), memory_alignment::cacheline);
 	return p ? new (p) task_group_ouro() : nullptr;
 }
 
-void delete_task_group(ouro::task_group* g)
+void deletetask_group(ouro::task_group* g)
 {
 	default_deallocate(g);
 }
@@ -85,17 +85,17 @@ void ensure_scheduler_initialized()
 	ouro_context::singleton();
 }
 
-void dispatch(const std::function<void()>& _Task)
+void dispatch(const std::function<void()>& task)
 {
-	ouro_context::singleton().dispatch(_Task);
+	ouro_context::singleton().dispatch(task);
 }
 
-void parallel_for(size_t _Begin, size_t _End, const std::function<void(size_t _Index)>& _Task)
+void parallel_for(size_t begin, size_t end, const std::function<void(size_t index)>& task)
 {
-	ouro_context::singleton().parallel_for(_Begin, _End, _Task);
+	ouro_context::singleton().parallel_for(begin, end, task);
 }
 
-void at_thread_exit(const std::function<void()>& _Task)
+void at_thread_exit(const std::function<void()>& task)
 {
 	oThrow(std::errc::operation_not_supported, "");
 }

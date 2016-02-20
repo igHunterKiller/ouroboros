@@ -3,7 +3,6 @@
 #include <oArch/compiler.h>
 #include <oCore/assert.h>
 #include <oString/string.h>
-#include <system_error>
 
 namespace ouro {
 

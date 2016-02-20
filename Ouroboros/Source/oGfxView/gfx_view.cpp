@@ -456,8 +456,8 @@ void gfx_view::ui_run()
 				app_win_->set_status_text(ui::statusbar::camera_type, "Maya");
 				app_win_->set_status_text(ui::statusbar::fullscreen_type, "Fullscreen cooperative");
 
-				oDECLARE_ABOUT_INFO(i, load_icon(IDI_APPICON));
-				about_ = about::make(i);
+				oDECLARE_ABOUT_INFO(inf, load_icon(IDI_APPICON));
+				about_ = about::make(inf);
 			}
 		}
 

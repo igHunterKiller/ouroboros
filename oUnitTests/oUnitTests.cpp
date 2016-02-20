@@ -175,7 +175,7 @@ static bool terminate_duplicate_instances(const char* name, bool prompt)
 		if (result == msg_result::no)
 			return false;
 
-		process::terminate(dup_pid, std::errc::operation_canceled);
+		process::terminate(dup_pid, (int)std::errc::operation_canceled);
 		if (!process::wait_for(dup_pid, std::chrono::seconds(5)))
 			msgbox(msg_type::yesno, nullptr, sTITLE, "Cannot terminate stale process %u, please end this process before continuing.", dup_pid);
 

@@ -16,7 +16,7 @@ using namespace ouro::gpu::d3d;
 
 namespace ouro { 
 
-const char* as_string(const gpu::stage_binding::flag& binding)
+template<> const char* as_string<gpu::stage_binding::flag>(const gpu::stage_binding::flag& binding)
 {
 	switch (binding)
 	{
@@ -1318,8 +1318,8 @@ device::device(const device_init& init, window* win)
 
 		const uint32_t capacity_bytes = init.max_persistent_mesh_bytes;
 
-		const size_t bookkeeping_bytes = opts.align(persistent_mesh_alloc_.calc_bookkeeping_size(capacity_bytes));
-		const size_t cpu_bytes = bookkeeping_bytes + capacity_bytes;
+		const size_t persistent_bookkeeping_bytes = opts.align(persistent_mesh_alloc_.calc_bookkeeping_size(capacity_bytes));
+		const size_t cpu_bytes = persistent_bookkeeping_bytes + capacity_bytes;
 
 		void* cpu_mem = alloc_(cpu_bytes, "device persistent mesh bookkeeping", opts);
 
@@ -1420,13 +1420,19 @@ void device::release()
 		win_ = nullptr;
 		supports_deferred_ = false;
 
-		delete this;
+		this->~device();
+		default_deallocate(this);
 	}
 }
 
 ref<device> new_device(const device_init& init, window* win)
 {
-	return ref<device>(new device(init, win), false);
+	allocate_options opts(memory_alignment::align64);
+
+	void* mem = default_allocate(sizeof(device), "gpu device", opts);
+	device* dev = new (mem) device(init, win);
+
+	return ref<device>(dev, false);
 }
 
 void device::on_window_resizing()
@@ -2636,7 +2642,7 @@ void graphics_command_list::set_rtvs(uint32_t num_rtvs, rtv* const* rtvs, dsv* d
 		vp.MaxDepth = 1.0f;
 		dc->RSSetViewports(num_rtvs, &vp);
 
-		D3D11_RECT rect = { 0, 0, desc.width, desc.height };
+		D3D11_RECT rect = { 0, 0, (LONG)desc.width, (LONG)desc.height };
 		dc->RSSetScissorRects(1, &rect);
 	}
 

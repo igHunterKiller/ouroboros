@@ -72,8 +72,8 @@ typedef basic_filesystem_error<wchar_t, default_windows_path_traits<wchar_t>> wi
 
 const std::error_category& filesystem_category();
 
-/*constexpr*/ inline std::error_code make_error_code(std::errc::errc errc) { return std::error_code(static_cast<int>(errc), filesystem_category()); }
-/*constexpr*/ inline std::error_condition make_error_condition(std::errc::errc errc) { return std::error_condition(static_cast<int>(errc), filesystem_category()); }
+/*constexpr*/ inline std::error_code make_error_code(std::errc errc) { return std::error_code(static_cast<int>(errc), filesystem_category()); }
+/*constexpr*/ inline std::error_condition make_error_condition(std::errc errc) { return std::error_condition(static_cast<int>(errc), filesystem_category()); }
 
 enum class open_option
 {

@@ -1,29 +1,21 @@
 /*
-    Copyright 2005-2013 Intel Corporation.  All Rights Reserved.
+    Copyright 2005-2016 Intel Corporation.  All Rights Reserved.
 
-    This file is part of Threading Building Blocks.
+    This file is part of Threading Building Blocks. Threading Building Blocks is free software;
+    you can redistribute it and/or modify it under the terms of the GNU General Public License
+    version 2  as  published  by  the  Free Software Foundation.  Threading Building Blocks is
+    distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+    implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    See  the GNU General Public License for more details.   You should have received a copy of
+    the  GNU General Public License along with Threading Building Blocks; if not, write to the
+    Free Software Foundation, Inc.,  51 Franklin St,  Fifth Floor,  Boston,  MA 02110-1301 USA
 
-    Threading Building Blocks is free software; you can redistribute it
-    and/or modify it under the terms of the GNU General Public License
-    version 2 as published by the Free Software Foundation.
-
-    Threading Building Blocks is distributed in the hope that it will be
-    useful, but WITHOUT ANY WARRANTY; without even the implied warranty
-    of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Threading Building Blocks; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-    As a special exception, you may use this file as part of a free software
-    library without restriction.  Specifically, if other files instantiate
-    templates or use macros or inline functions from this file, or you compile
-    this file and link it with other files to produce an executable, this
-    file does not by itself cause the resulting executable to be covered by
-    the GNU General Public License.  This exception does not however
-    invalidate any other reasons why the executable file might be covered by
-    the GNU General Public License.
+    As a special exception,  you may use this file  as part of a free software library without
+    restriction.  Specifically,  if other files instantiate templates  or use macros or inline
+    functions from this file, or you compile this file and link it with other files to produce
+    an executable,  this file does not by itself cause the resulting executable to be covered
+    by the GNU General Public License. This exception does not however invalidate any other
+    reasons why the executable file might be covered by the GNU General Public License.
 */
 
 #ifndef __TBB_mutex_H
@@ -45,7 +37,7 @@ namespace tbb {
 //! Wrapper around the platform's native reader-writer lock.
 /** For testing purposes only.
     @ingroup synchronization */
-class mutex {
+class mutex : internal::mutex_copy_deprecated_and_disabled {
 public:
     //! Construct unacquired mutex.
     mutex() {
@@ -69,7 +61,7 @@ public:
   #if _WIN32||_WIN64
         DeleteCriticalSection(&impl);
   #else
-        pthread_mutex_destroy(&impl); 
+        pthread_mutex_destroy(&impl);
 
   #endif /* _WIN32||_WIN64 */
 #endif /* TBB_USE_ASSERT */
@@ -83,7 +75,7 @@ public:
         It also nicely provides the "node" for queuing locks. */
     class scoped_lock : internal::no_copy {
     public:
-        //! Construct lock that has not acquired a mutex. 
+        //! Construct lock that has not acquired a mutex.
         scoped_lock() : my_mutex(NULL) {};
 
         //! Acquire lock on given mutex.
@@ -93,7 +85,7 @@ public:
 
         //! Release lock (if lock is held).
         ~scoped_lock() {
-            if( my_mutex ) 
+            if( my_mutex )
                 release();
         }
 
@@ -155,13 +147,15 @@ public:
     //! Acquire lock
     void lock() {
 #if TBB_USE_ASSERT
-        aligned_space<scoped_lock,1> tmp;
+        aligned_space<scoped_lock> tmp;
         new(tmp.begin()) scoped_lock(*this);
 #else
   #if _WIN32||_WIN64
         EnterCriticalSection(&impl);
   #else
-        pthread_mutex_lock(&impl);
+        int error_code = pthread_mutex_lock(&impl);
+        if( error_code )
+            tbb::internal::handle_perror(error_code,"mutex: pthread_mutex_lock failed");
   #endif /* _WIN32||_WIN64 */
 #endif /* TBB_USE_ASSERT */
     }
@@ -170,7 +164,7 @@ public:
     /** Return true if lock acquired; false otherwise. */
     bool try_lock() {
 #if TBB_USE_ASSERT
-        aligned_space<scoped_lock,1> tmp;
+        aligned_space<scoped_lock> tmp;
         scoped_lock& s = *tmp.begin();
         s.my_mutex = NULL;
         return s.internal_try_acquire(*this);
@@ -186,7 +180,7 @@ public:
     //! Release lock
     void unlock() {
 #if TBB_USE_ASSERT
-        aligned_space<scoped_lock,1> tmp;
+        aligned_space<scoped_lock> tmp;
         scoped_lock& s = *tmp.begin();
         s.my_mutex = this;
         s.internal_release();
@@ -214,7 +208,7 @@ public:
     };
 private:
 #if _WIN32||_WIN64
-    CRITICAL_SECTION impl;    
+    CRITICAL_SECTION impl;
     enum state_t state;
 #else
     pthread_mutex_t impl;
@@ -235,6 +229,6 @@ public:
 
 __TBB_DEFINE_PROFILING_SET_NAME(mutex)
 
-} // namespace tbb 
+} // namespace tbb
 
 #endif /* __TBB_mutex_H */

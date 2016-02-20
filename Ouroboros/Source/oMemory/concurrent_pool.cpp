@@ -2,6 +2,7 @@
 
 #include <oMemory/concurrent_pool.h>
 #include <oMemory/allocate.h>
+#include <algorithm>
 #include <stdexcept>
 
 namespace ouro {
@@ -50,8 +51,8 @@ concurrent_pool::concurrent_pool(concurrent_pool&& that)
 	, blocks_(that.blocks_)
 	, stride_(that.stride_)
 	, nblocks_(that.nblocks_)
-	, head_(that.head_)
 { 
+	head_.store(that.head_);
 	that.deinitialize();
 }
 
@@ -78,7 +79,7 @@ concurrent_pool& concurrent_pool::operator=(concurrent_pool&& that)
 		blocks_ = that.blocks_; that.blocks_ = nullptr;
 		stride_ = that.stride_; that.stride_ = 0;
 		nblocks_ = that.nblocks_; that.nblocks_ = 0;
-		head_ = that.head_; that.head_ = nullidx;
+		head_.store(that.head_); that.head_ = nullidx;
 	}
 
 	return *this;

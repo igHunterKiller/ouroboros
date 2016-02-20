@@ -90,14 +90,14 @@ public:
 
 	basic_path_t operator/(const basic_path_t& that) const
 	{
-		basic_path_t p(*this);
-		return p /= that;
+		basic_path_t path(*this);
+		return path /= that;
 	}
 
 	basic_path_t operator/(const char_type* that) const
 	{
-		basic_path_t p(*this);
-		return p.append(that);
+		basic_path_t path(*this);
+		return path.append(that);
 	}
 
 	basic_path_t& operator/=(const char_type* that)

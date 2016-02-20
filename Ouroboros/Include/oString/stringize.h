@@ -8,11 +8,11 @@
 #include <type_traits>
 #include <vector>
 
-#define oDEFINE_AS_STRING(_T, names) const char* as_string(const _T& x) { return ::ouro::detail::counted_enum_as_string(x, names); }
-#define oDEFINE_ENUM_TO_STRING(_T) char* to_string(char* dst, size_t dst_size, const _T& value) { return ::ouro::detail::to_string(dst, dst_size, value); }
-#define oDEFINE_ENUM_FROM_STRING(_T) bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, _T(0)); }
-#define oDEFINE_ENUM_FROM_STRING2(_T, invalid_value) bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, invalid_value); }
-#define oDEFINE_ENUMFLAGS_FROM_STRING2(_T, invalid_value) bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string_enumbits<_T>(out_value, src, invalid_value); }
+#define oDEFINE_AS_STRING(_T, names) template<> const char* as_string<_T>(const _T& x) { return ::ouro::detail::counted_enum_as_string(x, names); }
+#define oDEFINE_ENUM_TO_STRING(_T) template<> char* to_string(char* dst, size_t dst_size, const _T& value) { return ::ouro::detail::to_string(dst, dst_size, value); }
+#define oDEFINE_ENUM_FROM_STRING(_T) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, _T(0)); }
+#define oDEFINE_ENUM_FROM_STRING2(_T, invalid_value) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string<_T>(out_value, src, invalid_value); }
+#define oDEFINE_ENUMFLAGS_FROM_STRING2(_T, invalid_value) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::detail::from_string_enumbits<_T>(out_value, src, invalid_value); }
 #define oDEFINE_TO_FROM_STRING(_T) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
 #define oDEFINE_AS_TO_FROM_STRING(_T, names) oDEFINE_AS_STRING(_T, names) oDEFINE_ENUM_TO_STRING(_T) oDEFINE_ENUM_FROM_STRING(_T)
 
@@ -42,7 +42,7 @@ template<size_t size, typename enumT>
 const char* counted_enum_as_string(const enumT& x, const char* (&names)[size])
 {
 	static_assert(size == (size_t)enumT::count, "array mismatch");
-	return ((int)x >= 0 && (int)x >= (int)enumT::count) ? names[(int)x] : "?";
+	return ((size_t)x >= 0 && (size_t)x <= (size_t)enumT::count) ? names[(size_t)x] : "?";
 }
 
 // enum from_string: this requires the enum have a memory count that is the 

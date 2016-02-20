@@ -1,4 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
 #include <oGUI/progress_bar.h>
 #include <oGUI/Windows/oWinRect.h>
 #include <oGUI/Windows/oWinWindowing.h>

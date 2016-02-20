@@ -45,13 +45,13 @@ struct file_header
 	file_chunk* first_chunk() { return (file_chunk*)(this + 1); }
 	const file_chunk* first_chunk() const { return (const file_chunk*)(this + 1); }
 
-	const file_chunk* find_chunk(const fourcc_t& fourcc) const
+	const file_chunk* find_chunk(const fourcc_t& fcc) const
 	{
 		auto count = num_chunks;
 		auto chk = first_chunk();
 		while (count--)
 		{
-			if (chk->fourcc == fourcc)
+			if (chk->fourcc == fcc)
 				return chk;
 			chk = chk->next();
 		}
@@ -59,7 +59,7 @@ struct file_header
 		return nullptr;
 	}
 
-	file_chunk* find_chunk(const fourcc_t& fourcc) { return const_cast<file_chunk*>(static_cast<const file_header*>(this)->find_chunk(fourcc)); }
+	file_chunk* find_chunk(const fourcc_t& fcc) { return const_cast<file_chunk*>(static_cast<const file_header*>(this)->find_chunk(fcc)); }
 
 };
 static_assert(sizeof(file_header) == 16, "size mismatch");

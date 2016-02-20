@@ -2,6 +2,7 @@
 
 #include <oCore/countof.h>
 #include <oGfx/oGfxShaders.h>
+#include <oString/stringize.h>
 
 typedef unsigned char BYTE;
 
@@ -13,7 +14,7 @@ struct SHADER
 
 #define oSH(x) { #x, x },
 #define oBYTE_CODE(type) const void* byte_code(const type::value& shader) { match_array_e(s_##type, type); return s_##type[shader].byte_code; }
-#define oAS_STRING(type) const char* as_string(const gfx::type::value& shader) { return gfx::s_##type[shader].name; }
+#define oAS_STRING(type) template<> const char* as_string<gfx::type::value>(const gfx::type::value& shader) { return gfx::s_##type[shader].name; }
 
 using namespace ouro::mesh;
 
@@ -83,7 +84,7 @@ oBYTE_CODE(gfx_cs)
 
 	} // namespace gfx
 
-const char* as_string(const gfx::gfx_vl::value& input)
+template<> const char* as_string<gfx::gfx_vl::value>(const gfx::gfx_vl::value& input)
 {
 	static const char* sNames[] = 
 	{

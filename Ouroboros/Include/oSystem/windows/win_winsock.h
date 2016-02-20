@@ -10,6 +10,7 @@
 #include <functional>
 
 #define WIN32_LEAN_AND_MEAN
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <windows.h>
 #include <winsock2.h>
 #include <Mstcpip.h>
@@ -58,7 +59,7 @@ const char* as_string(int _WSAError);
 const char* get_desc(int _WSAError);
 
 // Return the std::errc for the specified WSA error
-std::errc::errc get_errc(int _WSAError);
+std::errc get_errc(int _WSAError);
 
 // These function calls must be initialized from a socket
 LPFN_CONNECTEX getfn_ConnectEx(SOCKET _hSocket);

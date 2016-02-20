@@ -6,7 +6,7 @@ namespace ouro { namespace future_detail {
 class future_category_impl : public std::error_category
 {
 public:
-	const char* name() const { return "future"; }
+	const char* name() const noexcept { return "future"; }
 	std::string message(int _ErrCode) const
 	{
 		switch (_ErrCode)

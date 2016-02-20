@@ -579,7 +579,7 @@ static char* print_style_change(char* dst, size_t dst_size, HWND hwnd, const cha
 		as_string::style_flags(tmp, ((STYLESTRUCT*)lparam)->styleOld);
 		as_string::style_flags(tmp2, ((STYLESTRUCT*)lparam)->styleNew);
 	}
-	snprintf(dst, dst_size, "HWND 0x%x %s %s %s -> %s", hwnd, _MsgName, StyleName, tmp, tmp2);
+	ouro::snprintf(dst, dst_size, "HWND 0x%x %s %s %s -> %s", hwnd, _MsgName, StyleName, tmp, tmp2);
 	return dst;
 }
 
@@ -591,56 +591,56 @@ char* parse_wm_message(char* dst, size_t dst_size, HWND hwnd, UINT msg, WPARAM w
 
 	switch (msg)
 	{ 
-		case WM_ACTIVATE: snprintf(dst, dst_size, "HWND 0x%x WM_ACTIVATE %s, other HWND 0x%x %sactivated", hwnd, as_string::WA((UINT)wparam), lparam, wparam == WA_INACTIVE ? "" : "de"); break;
-		case WM_ACTIVATEAPP: snprintf(dst, dst_size, "HWND 0x%x WM_ACTIVATEAPP %sactivated, other thread %d %sactivated", hwnd, wparam ? "" : "de", lparam, wparam ? "de" : ""); break;
-		case WM_NCACTIVATE: snprintf(dst, dst_size, "HWND 0x%x WM_NCACTIVATE titlebar/icon needs to be changed: %s lParam=%x", hwnd, wparam ? "true" : "false", lparam); break;
-		case WM_SETTEXT: snprintf(dst, dst_size, "HWND 0x%x WM_SETTEXT: lParam=%s", hwnd, lparam); break;
-		case WM_WINDOWPOSCHANGING: { char tmp[1024]; WINDOWPOS& wp = *(WINDOWPOS*)lparam; snprintf(dst, dst_size, "HWND 0x%x WM_WINDOWPOSCHANGING hwndInsertAfter=%x xy=%d,%d wh=%dx%d flags=%s", hwnd, wp.hwndInsertAfter, wp.x, wp.y, wp.cx, wp.cy, as_string::swp_flags(tmp, wp.flags)); break; }
-		case WM_WINDOWPOSCHANGED: { char tmp[1024]; WINDOWPOS& wp = *(WINDOWPOS*)lparam; snprintf(dst, dst_size, "HWND 0x%x WM_WINDOWPOSCHANGED hwndInsertAfter=%x xy=%d,%d wh=%dx%d flags=%s", hwnd, wp.hwndInsertAfter, wp.x, wp.y, wp.cx, wp.cy, as_string::swp_flags(tmp, wp.flags)); break; }
+		case WM_ACTIVATE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_ACTIVATE %s, other HWND 0x%x %sactivated", hwnd, as_string::WA((UINT)wparam), lparam, wparam == WA_INACTIVE ? "" : "de"); break;
+		case WM_ACTIVATEAPP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_ACTIVATEAPP %sactivated, other thread %d %sactivated", hwnd, wparam ? "" : "de", lparam, wparam ? "de" : ""); break;
+		case WM_NCACTIVATE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_NCACTIVATE titlebar/icon needs to be changed: %s lParam=%x", hwnd, wparam ? "true" : "false", lparam); break;
+		case WM_SETTEXT: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SETTEXT: lParam=%s", hwnd, lparam); break;
+		case WM_WINDOWPOSCHANGING: { char tmp[1024]; WINDOWPOS& wp = *(WINDOWPOS*)lparam; ouro::snprintf(dst, dst_size, "HWND 0x%x WM_WINDOWPOSCHANGING hwndInsertAfter=%x xy=%d,%d wh=%dx%d flags=%s", hwnd, wp.hwndInsertAfter, wp.x, wp.y, wp.cx, wp.cy, as_string::swp_flags(tmp, wp.flags)); break; }
+		case WM_WINDOWPOSCHANGED: { char tmp[1024]; WINDOWPOS& wp = *(WINDOWPOS*)lparam; ouro::snprintf(dst, dst_size, "HWND 0x%x WM_WINDOWPOSCHANGED hwndInsertAfter=%x xy=%d,%d wh=%dx%d flags=%s", hwnd, wp.hwndInsertAfter, wp.x, wp.y, wp.cx, wp.cy, as_string::swp_flags(tmp, wp.flags)); break; }
 		case WM_STYLECHANGING: { print_style_change(dst, dst_size, hwnd, "WM_STYLECHANGING", wparam, lparam); break; }
 		case WM_STYLECHANGED: { print_style_change(dst, dst_size, hwnd, "WM_STYLECHANGED", wparam, lparam); break; }
-		case WM_DISPLAYCHANGE: snprintf(dst, dst_size, "HWND 0x%x WM_DISPLAYCHANGE %dx%dx%d", hwnd, static_cast<int>(GET_X_LPARAM(lparam)), static_cast<int>(GET_Y_LPARAM(lparam)), wparam); break;
-		case WM_DWMCOLORIZATIONCOLORCHANGED: snprintf(dst, dst_size, "HWND 0x%x WM_DWMCOLORIZATIONCOLORCHANGED", hwnd); break;
-		case WM_DWMCOMPOSITIONCHANGED: snprintf(dst, dst_size, "HWND 0x%x WM_DWMCOMPOSITIONCHANGED", hwnd); break;
-		case WM_DWMNCRENDERINGCHANGED: snprintf(dst, dst_size, "HWND 0x%x WM_DWMNCRENDERINGCHANGED Desktop Window Manager (DWM) %s", hwnd, (BOOL)wparam ? "enabled" : "disabled"); break;
-		case WM_DWMWINDOWMAXIMIZEDCHANGE: snprintf(dst, dst_size, "HWND 0x%x WM_DWMWINDOWMAXIMIZEDCHANGE", hwnd); break;
-		case WM_MOVE: snprintf(dst, dst_size, "HWND 0x%x WM_MOVE %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_SETCURSOR: snprintf(dst, dst_size, "HWND 0x%x WM_SETCURSOR %s hit=%s, id=%s", hwnd, (HWND)wparam == hwnd ? "In Window" : "Out of Window", as_string::HT(GET_X_LPARAM(lparam)), as_string::WM(GET_Y_LPARAM(lparam))); break;
-		case WM_SHOWWINDOW: snprintf(dst, dst_size, "HWND 0x%x WM_SHOWWINDOW: wParam=%s lParam=%s", hwnd, wparam ? "shown" : "hidden", as_string::WMSW(lparam)); break;
-		case WM_SIZE: snprintf(dst, dst_size, "HWND 0x%x WM_SIZE %dx%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_SYSCOMMAND: snprintf(dst, dst_size, "HWND 0x%x WM_SYSCOMMAND: wParam=%s screenpos=%d,%d", hwnd, as_string::SC((UINT)(wparam&0xfff0)), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_SYSKEYDOWN: snprintf(dst, dst_size, "HWND 0x%x WM_SYSKEYDOWN: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
-		case WM_SYSKEYUP: snprintf(dst, dst_size, "HWND 0x%x WM_SYSKEYUP: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
-		case WM_KEYDOWN: snprintf(dst, dst_size, "HWND 0x%x WM_KEYDOWN: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
-		case WM_KEYUP: snprintf(dst, dst_size, "HWND 0x%x WM_KEYUP: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
-		case WM_MOUSEMOVE: snprintf(dst, dst_size, "HWND 0x%x WM_MOUSEMOVE %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_LBUTTONDOWN: snprintf(dst, dst_size, "HWND 0x%x WM_LBUTTONDOWN %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_LBUTTONUP: snprintf(dst, dst_size, "HWND 0x%x WM_LBUTTONUP %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_MBUTTONDOWN: snprintf(dst, dst_size, "HWND 0x%x WM_MBUTTONDOWN %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_MBUTTONUP: snprintf(dst, dst_size, "HWND 0x%x WM_MBUTTONUP %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_RBUTTONDOWN: snprintf(dst, dst_size, "HWND 0x%x WM_RBUTTONDOWN %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_RBUTTONUP: snprintf(dst, dst_size, "HWND 0x%x WM_RBUTTONUP %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_XBUTTONDOWN: snprintf(dst, dst_size, "HWND 0x%x WM_XBUTTONDOWN(%d) %d,%d", hwnd, GET_XBUTTON_WPARAM(wparam), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_XBUTTONUP: snprintf(dst, dst_size, "HWND 0x%x WM_XBUTTONUP(%d) %d,%d", hwnd, GET_XBUTTON_WPARAM(wparam), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
-		case WM_MOUSEWHEEL: snprintf(dst, dst_size, "HWND 0x%x WM_MOUSEWHEEL %d", hwnd, GET_WHEEL_DELTA_WPARAM(wparam)); break;
-		case WM_MOUSEHWHEEL: snprintf(dst, dst_size, "HWND 0x%x WM_MOUSEHWHEEL %d", hwnd, GET_WHEEL_DELTA_WPARAM(wparam)); break;
-		case WM_INPUT: snprintf(dst, dst_size, "HWND 0x%x WM_INPUT %s", hwnd, wparam == RIM_INPUT ? "RIM_INPUT" : "RIM_INPUTSINK"); break;
-		case WM_IME_SETCONTEXT: snprintf(dst, dst_size, "HWND 0x%x WM_IME_SETCONTEXT window %sactive... display flags 0x%x", hwnd, wparam ? "" : "in", lparam); break;
-		case WM_IME_NOTIFY: snprintf(dst, dst_size, "HWND 0x%x WM_IME_NOTIFY wParam == 0x%x lParam = 0x%x", hwnd, wparam, lparam); break;
-		case WM_CTLCOLORBTN: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORBTN HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
-		case WM_CTLCOLORDLG: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORDLG HDC 0x%x Dlghwnd = %p", hwnd, wparam, lparam); break;
-		case WM_CTLCOLOREDIT: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLOREDIT HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
-		case WM_CTLCOLORLISTBOX: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORLISTBOX HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
-		case WM_CTLCOLORMSGBOX: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORMSGBOX HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
-		case WM_CTLCOLORSCROLLBAR: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORSCROLLBAR HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
-		case WM_CTLCOLORSTATIC: snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORSTATIC HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
-		case WM_NOTIFY: { const NMHDR& h = *(NMHDR*)lparam; snprintf(dst, dst_size, "HWND 0x%x WM_NOTIFY WPARAM=%u from hwndFrom=0x%x idFrom=%d notification code=%s", hwnd, wparam, h.hwndFrom, h.idFrom, as_string::NM(h.code)); break; }
+		case WM_DISPLAYCHANGE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DISPLAYCHANGE %dx%dx%d", hwnd, static_cast<int>(GET_X_LPARAM(lparam)), static_cast<int>(GET_Y_LPARAM(lparam)), wparam); break;
+		case WM_DWMCOLORIZATIONCOLORCHANGED: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DWMCOLORIZATIONCOLORCHANGED", hwnd); break;
+		case WM_DWMCOMPOSITIONCHANGED: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DWMCOMPOSITIONCHANGED", hwnd); break;
+		case WM_DWMNCRENDERINGCHANGED: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DWMNCRENDERINGCHANGED Desktop Window Manager (DWM) %s", hwnd, (BOOL)wparam ? "enabled" : "disabled"); break;
+		case WM_DWMWINDOWMAXIMIZEDCHANGE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DWMWINDOWMAXIMIZEDCHANGE", hwnd); break;
+		case WM_MOVE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_MOVE %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_SETCURSOR: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SETCURSOR %s hit=%s, id=%s", hwnd, (HWND)wparam == hwnd ? "In Window" : "Out of Window", as_string::HT(GET_X_LPARAM(lparam)), as_string::WM(GET_Y_LPARAM(lparam))); break;
+		case WM_SHOWWINDOW: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SHOWWINDOW: wParam=%s lParam=%s", hwnd, wparam ? "shown" : "hidden", as_string::WMSW(lparam)); break;
+		case WM_SIZE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SIZE %dx%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_SYSCOMMAND: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SYSCOMMAND: wParam=%s screenpos=%d,%d", hwnd, as_string::SC((UINT)(wparam&0xfff0)), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_SYSKEYDOWN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SYSKEYDOWN: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
+		case WM_SYSKEYUP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_SYSKEYUP: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
+		case WM_KEYDOWN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_KEYDOWN: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
+		case WM_KEYUP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_KEYUP: wParam=%s lParam=%0x", hwnd, KEYSTR, lparam); break;
+		case WM_MOUSEMOVE: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_MOUSEMOVE %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_LBUTTONDOWN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_LBUTTONDOWN %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_LBUTTONUP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_LBUTTONUP %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_MBUTTONDOWN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_MBUTTONDOWN %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_MBUTTONUP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_MBUTTONUP %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_RBUTTONDOWN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_RBUTTONDOWN %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_RBUTTONUP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_RBUTTONUP %d,%d", hwnd, GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_XBUTTONDOWN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_XBUTTONDOWN(%d) %d,%d", hwnd, GET_XBUTTON_WPARAM(wparam), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_XBUTTONUP: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_XBUTTONUP(%d) %d,%d", hwnd, GET_XBUTTON_WPARAM(wparam), GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)); break;
+		case WM_MOUSEWHEEL: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_MOUSEWHEEL %d", hwnd, GET_WHEEL_DELTA_WPARAM(wparam)); break;
+		case WM_MOUSEHWHEEL: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_MOUSEHWHEEL %d", hwnd, GET_WHEEL_DELTA_WPARAM(wparam)); break;
+		case WM_INPUT: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_INPUT %s", hwnd, wparam == RIM_INPUT ? "RIM_INPUT" : "RIM_INPUTSINK"); break;
+		case WM_IME_SETCONTEXT: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_IME_SETCONTEXT window %sactive... display flags 0x%x", hwnd, wparam ? "" : "in", lparam); break;
+		case WM_IME_NOTIFY: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_IME_NOTIFY wParam == 0x%x lParam = 0x%x", hwnd, wparam, lparam); break;
+		case WM_CTLCOLORBTN: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORBTN HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
+		case WM_CTLCOLORDLG: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORDLG HDC 0x%x Dlghwnd = %p", hwnd, wparam, lparam); break;
+		case WM_CTLCOLOREDIT: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLOREDIT HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
+		case WM_CTLCOLORLISTBOX: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORLISTBOX HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
+		case WM_CTLCOLORMSGBOX: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORMSGBOX HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
+		case WM_CTLCOLORSCROLLBAR: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORSCROLLBAR HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
+		case WM_CTLCOLORSTATIC: ouro::snprintf(dst, dst_size, "HWND 0x%x WM_CTLCOLORSTATIC HDC 0x%x DlgItemhwnd = %p", hwnd, wparam, lparam); break;
+		case WM_NOTIFY: { const NMHDR& h = *(NMHDR*)lparam; ouro::snprintf(dst, dst_size, "HWND 0x%x WM_NOTIFY WPARAM=%u from hwndFrom=0x%x idFrom=%d notification code=%s", hwnd, wparam, h.hwndFrom, h.idFrom, as_string::NM(h.code)); break; }
 		case WM_DROPFILES:
 		{
 			path_string p;
 			UINT nFiles = DragQueryFileA((HDROP)wparam, ~0u, p, (uint32_t)p.capacity());
 			DragQueryFileA((HDROP)wparam, 0, p, static_cast<UINT>(p.capacity()));
-			snprintf(dst, dst_size, "HWND 0x%x WM_DROPFILES hDrop=0x%x %u files starting with \"%s\"", hwnd, wparam, nFiles, p.c_str());
+			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DROPFILES hDrop=0x%x %u files starting with \"%s\"", hwnd, wparam, nFiles, p.c_str());
 			break;
 		}
 		case oWM_INPUT_DEVICE_CHANGE:
@@ -664,7 +664,7 @@ char* parse_wm_message(char* dst, size_t dst_size, HWND hwnd, UINT msg, WPARAM w
 			}
 
 			sstring StrType;
-			snprintf(dst, dst_size, "HWND 0x%x WM_input_type_CHANGE %s type=%s devname=%s", hwnd, type, to_string(StrType, InpType), Name.c_str());
+			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_input_type_CHANGE %s type=%s devname=%s", hwnd, type, to_string(StrType, InpType), Name.c_str());
 			break;
 		}
 
@@ -722,15 +722,15 @@ char* parse_wm_message(char* dst, size_t dst_size, HWND hwnd, UINT msg, WPARAM w
 			}
 
 			sstring StrGUID;
-			snprintf(dst, dst_size, "HWND 0x%x WM_DEVICECHANGE %s devtype=%s GUID=%s name=%s", hwnd, as_string::DBT((int)wparam), devtype, to_string(StrGUID, *pGUID), name);
+			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DEVICECHANGE %s devtype=%s GUID=%s name=%s", hwnd, as_string::DBT((int)wparam), devtype, to_string(StrGUID, *pGUID), name);
 			break;
 		}
 		default:
 		{
 			const char* WMStr = as_string::WM(msg);
-			snprintf(dst, dst_size, "HWND 0x%x %s", hwnd, WMStr);
+			ouro::snprintf(dst, dst_size, "HWND 0x%x %s", hwnd, WMStr);
 			if (*WMStr == 'u') // unrecognized
-				snprintf(dst, dst_size, "HWND 0x%x Unrecognized uMsg=0x%x (%u)", hwnd, msg, msg); break;
+				ouro::snprintf(dst, dst_size, "HWND 0x%x Unrecognized uMsg=0x%x (%u)", hwnd, msg, msg); break;
 			break;
 		}
 	}

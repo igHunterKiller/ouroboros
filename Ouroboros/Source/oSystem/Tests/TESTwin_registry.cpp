@@ -9,7 +9,7 @@ using namespace ouro::windows;
 
 oTEST(oSystem_win_registry)
 {
-	static const registry::hkey hKey = registry::current_user;
+	static const registry::hkey hKey = registry::hkey::current_user;
 	static const char* KeyPath = "Software/Ouroboros/oUnitTests/TESTwin_registry";
 	static const char* ValueName = "TestValue";
 	static const char* TestValue = "Value";

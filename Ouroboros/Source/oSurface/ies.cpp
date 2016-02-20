@@ -17,7 +17,7 @@ static void move_to_next_line(const char*& cur)
 	while (*cur && (*cur == '\r' || *cur == '\n')) cur++;
 }
 	
-const char* as_string(const ies_format& f)
+template<> const char* as_string<ies_format>(const ies_format& f)
 {
 	static const char* s_names[] = 
 	{
@@ -31,7 +31,7 @@ const char* as_string(const ies_format& f)
 	return detail::counted_enum_as_string(f, s_names);
 }
 
-const char* as_string(const ies_units& u)
+template<> const char* as_string<ies_units>(const ies_units& u)
 {
 	static const char* s_names[] = 
 	{
@@ -105,7 +105,7 @@ ies_header to_header(const char* ies_string, const char** out_data = nullptr)
 
 	move_to_next_line(cur);
 
-	if (10 != sscanf_s(cur, "%d %f %f %d %d %d %d %f %f %f", &h.num_lamps, &h.lumens_per_lamp, &h.candela_multiplier, &h.num_vangles, &h.num_hangles, &h.photometric_type, &h.units, &h.geometry, &h.width, &h.length, &h.height))
+	if (10 != sscanf_s(cur, "%d %f %f %d %d %hhu %hhu %hhu %f %f %f", &h.num_lamps, &h.lumens_per_lamp, &h.candela_multiplier, &h.num_vangles, &h.num_hangles, &h.photometric_type, &h.units, &h.geometry, &h.width, &h.length, &h.height))
 		oThrow(std::errc::invalid_argument, "invalid ies meta data (line 10)");
 
 	move_to_next_line(cur);

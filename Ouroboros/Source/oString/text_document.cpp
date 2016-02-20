@@ -10,7 +10,7 @@ namespace ouro
 		class text_document_category_impl : public std::error_category
 		{
 		public:
-			const char* name() const override { return "text_document"; }
+			const char* name() const noexcept override { return "text_document"; }
 			std::string message(int errcode) const override
 			{
 				switch (errcode)

@@ -38,7 +38,7 @@
 
 namespace ouro {
 
-	const char* as_string(const windows::exception::type::value& _Type)
+	template<> const char* as_string<windows::exception::type::value>(const windows::exception::type::value& _Type)
 	{
 		switch (_Type)
 		{

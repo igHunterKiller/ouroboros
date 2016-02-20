@@ -735,7 +735,7 @@ static void parse_materials(std::vector<material_info>& materials, const path_t&
 			case 'n':
 				r += 6; // "newmtl"
 				move_past_line_whitespace(&r);
-				sscanf_s(r, "%[^\r|^\n]", buf, countof(buf));
+				sscanf_s(r, "%[^\r|^\n]", buf, (int)countof(buf));
 				materials.resize(materials.size() + 1);
 				materials.back().name = buf;
 				break;
@@ -747,8 +747,8 @@ static void parse_materials(std::vector<material_info>& materials, const path_t&
 				type = *(++r);
 				if (type == 'f')
 				{
-					float3* pColor = (float3*)&materials.back().transmission_color;
-					sscanf_s(++r, "%f %f %f", &pColor->x, &pColor->y, &pColor->z);
+					float3* col = (float3*)&materials.back().transmission_color;
+					sscanf_s(++r, "%f %f %f", &col->x, &col->y, &col->z);
 				}
 				else if (type == 'r') 
 					sscanf_s(++r, "%f", &materials.back().transparency); // 'd' or 'Tr' are the same (transparency)
@@ -769,7 +769,7 @@ static void parse_materials(std::vector<material_info>& materials, const path_t&
 				sscanf_s(r+2, "%f %f %f", &pColor->x, &pColor->y, &pColor->z);
 				break;
 			case 'm':
-				sscanf_s(r + strcspn(r, "\t "), "%[^\r|^\n]", buf, countof(buf));
+				sscanf_s(r + strcspn(r, "\t "), "%[^\r|^\n]", buf, (int)countof(buf));
 
 				#define oOBJTEX(_Name) do \
 				{	oCheck(parse_texture_info(buf + 1, &materials.back()._Name), std::errc::io_error, "Failed to parse \"%s\"", r); \
@@ -784,7 +784,7 @@ static void parse_materials(std::vector<material_info>& materials, const path_t&
 			case 'i':
 				r += 5; // "illum"
 				move_past_line_whitespace(&r);
-				sscanf_s(r, "%d", &materials.back().illum);
+				sscanf_s(r, "%hhu", &materials.back().illum);
 				break;
 			default:
 				break;

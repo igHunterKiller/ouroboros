@@ -37,7 +37,7 @@ public:
 	static const memory_alignment required_alignment = resource_registry_t::required_alignment;
 
 	device_resource_registry_t() : dev_(nullptr) {}
-	~device_resource_registry_t() { if (dev_) throw std::runtime_error("must call deinitialize in derived dtor or earlier"); }
+	~device_resource_registry_t() { oAssert(!dev_, "must call deinitialize in derived dtor or earlier"); }
 
 	static size_type calc_size(size_type capacity)
 	{

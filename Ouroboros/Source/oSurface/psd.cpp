@@ -120,12 +120,12 @@ image decode_psd(const void* buffer, size_t size, const allocator& texel_alloc, 
 
 		case psd_compression::rle:
 		{
-			size_t size = byte_dimensions.x * byte_dimensions.y;
+			size_t rle_bytes = byte_dimensions.x * byte_dimensions.y;
 			void* d = mapped.data;
 			
 			for (uint16_t i = 0; i < h.num_channels; i++)
 			{
-				bits = rle_decoden(d, size, pixel_bytes, channel_bytes, bits);
+				bits = rle_decoden(d, rle_bytes, pixel_bytes, channel_bytes, bits);
 				d = (uint8_t*)d + channel_bytes;
 			}
 

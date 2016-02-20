@@ -8,7 +8,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#pragma warning(disable:4091) // warning C4091: 'typedef ': ignored on left of '' when no variable is declared
 #include <Imagehlp.h>
+#pragma warning(default:4091) // warning C4091: 'typedef ': ignored on left of '' when no variable is declared
 
 namespace ouro { namespace module {
 
@@ -23,9 +25,9 @@ template <class T> static void* peimage_get_pointer(void* image_base, T* nt_head
 		while (section < end)
 		{
 			const uint32_t start = section->VirtualAddress;
-			const uint32_t end = start + section->Misc.VirtualSize;
+			const uint32_t finish = start + section->Misc.VirtualSize;
 
-			if (offset >= start && offset < end)
+			if (offset >= start && offset < finish)
 			{
 				header = section;
 				break;

@@ -60,8 +60,8 @@ public:
 
 	// Node API
 	inline node root() const { return node(1); } 
-	inline node first_child(node parent_node) const { return node(Node(parent_node).down); }
-	inline node next_sibling(node prior_sibling) const { return node(Node(prior_sibling).next); }
+	inline node first_child(node parent_node) const { return node(uintptr_t(Node(parent_node).down)); }
+	inline node next_sibling(node prior_sibling) const { return node(uintptr_t(Node(prior_sibling).next)); }
 	inline const char* node_name(node n) const { return buffer_.c_str() + Node(n).name; }
 	inline const char* node_value(node n) const { return buffer_.c_str() + Node(n).value; }
 	json_node_type node_type(node n) const { return Node(n).type; }
@@ -188,7 +188,7 @@ json::node json::make_next_node(char*& json_buffer, node parent, node previous, 
 		// Push new node
 		nodes_.push_back(n);
 
-		node parent = node(newNode);
+		parent = node(uintptr_t(newNode));
 		node prev = 0;
 
 		// Determine node type and process it
@@ -263,13 +263,13 @@ json::node json::make_next_node(char*& json_buffer, node parent, node previous, 
 		// guaranteed room for a zero terminator until we've parsed until here.
 		memset(Marker, 0, std::distance(Marker, ++json_buffer));
 
-		hPreviousNode = node(newNode);
+		hPreviousNode = node(uintptr_t(newNode));
 
 	} while (hasMoreSiblings);
 
 	close_tag_count++;
 
-	return (*json_buffer != 0) ? node(newNode) : 0;
+	return (*json_buffer != 0) ? node(uintptr_t(newNode)) : 0;
 }
 
 }

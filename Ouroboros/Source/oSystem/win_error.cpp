@@ -223,7 +223,7 @@ std::error_condition make_error_condition(long _hResult)
 class category_impl : public std::error_category
 {
 public:
-	const char* name() const { return "windows"; }
+	const char* name() const noexcept override { return "windows"; }
 	std::string message(int _ErrCode) const
 	{
 		errno_t e = errno_from_hresult((HRESULT)_ErrCode);

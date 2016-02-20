@@ -10,9 +10,9 @@
 
 namespace ouro {
 
-const char* as_string(const serial_port::port& _Port)
+template<> const char* as_string(const serial_port::port& port)
 {
-	switch (_Port)
+	switch (port)
 	{
 		case serial_port::com1: return "COM1";
 		case serial_port::com2: return "COM2";

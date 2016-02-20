@@ -3,6 +3,7 @@
 #include <oConcurrency/concurrent_hash_map.h>
 #include <oCore/assert.h>
 #include <oCore/bit.h>
+#include <algorithm>
 
 namespace ouro {
 

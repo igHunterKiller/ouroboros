@@ -8,7 +8,7 @@
 
 namespace ouro { namespace windows { namespace registry {
 
-enum hkey
+enum class hkey
 {
 	classes_root,
 	current_user,
@@ -16,26 +16,26 @@ enum hkey
 	users,
 };
 
-void delete_value(hkey _hKey, const char* _KeyPath, const char* _ValueName);
-void delete_key(hkey _hKey, const char*_KeyPath, bool _Recursive = true);
+void delete_value(hkey hkey, const char* keypath, const char* value_name);
+void delete_key(hkey hkey, const char*keypath, bool recursive = true);
 
 // Sets the specified key's value to _pValue as a string. If the key path does 
 // not exist, it is created. If _pValueName is null or "", then the (default) 
 // value key.
-void set(hkey _hKey, const char* _KeyPath, const char* _ValueName, const char* _Value);
+void set(hkey hkey, const char* keypath, const char* value_name, const char* value);
 
-// Fills _StrDestination with the specified Key's path. Returns _StrDestination
+// Fills dst with the specified Key's path. Returns dst
 // or nullptr if the specified key does not exist.
-char* get(char* _StrDestination, size_t _SizeofStrDestination, hkey _hKey, const char* _KeyPath, const char* _ValueName);
-template<size_t size> char* get(char (&_StrDestination)[size], hkey _hKey, const char* _KeyPath, const char* _ValueName) { return get(_StrDestination, size, _hKey, _KeyPath, _ValueName); }
-template<size_t capacity> char* get(ouro::fixed_string<char, capacity>& _StrDestination, hkey _hKey, const char* _KeyPath, const char* _ValueName) { return get(_StrDestination, _StrDestination.capacity(), _hKey, _KeyPath, _ValueName); }
+char* get(char* dst, size_t dst_size, hkey hkey, const char* keypath, const char* value_name);
+template<size_t size> char* get(char (&dst)[size], hkey hkey, const char* keypath, const char* value_name) { return get(dst, size, hkey, keypath, value_name); }
+template<size_t capacity> char* get(ouro::fixed_string<char, capacity>& dst, hkey hkey, const char* keypath, const char* value_name) { return get(dst, dst.capacity(), hkey, keypath, value_name); }
 
-template<typename T> bool get(T* _pTypedValue, hkey _hKey, const char* _KeyPath, const char* _ValueName)
+template<typename T> bool get(T* p_typed_value, hkey hkey, const char* keypath, const char* value_name)
 {
 	sstring buf;
-	if (!get(buf, _Root, _KeyPath, _ValueName))
+	if (!get(buf, _Root, keypath, value_name))
 		return false;
-	return from_string(_pTypedValue, buf);
+	return from_string(p_typed_value, buf);
 }
 
 }}}

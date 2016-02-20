@@ -74,7 +74,7 @@ oOPT ParseOptions(int argc, const char* argv[])
 			case 'h': o.ShowHelp = true; break;
 			case 'o': o.Output = value; break;
 			case '?': oThrow(std::errc::invalid_argument, "unrecognized switch \"%s\"", value);
-			case ':': oThrow(std::errc::invalid_argument, "missing parameter option for argument %d", (int)value);
+			case ':': oThrow(std::errc::invalid_argument, "missing parameter option for argument %d", (intptr_t)value);
 		}
 
 		ch = opttok(&value);

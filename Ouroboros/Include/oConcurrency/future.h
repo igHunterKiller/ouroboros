@@ -8,15 +8,14 @@
 // robust scheduler.
 
 #pragma once
+#include <oCore/assert.h>
 #include <oConcurrency/concurrency.h>
 #include <oMemory/std_allocator.h>
 
 #include <chrono>
 #include <condition_variable>
-#include <exception>
 #include <memory>
 #include <mutex>
-#include <system_error>
 
 // Vardiatic templates replaces this, but until they're available use callable
 // macros even though it pokes back into oBase.
@@ -79,8 +78,7 @@ namespace future_detail {
 				task = nullptr;
 			}
 
-			if (!is_ready())
-				throw future_error(future_errc::broken_promise);
+			oAssert(is_ready(), "broken promise");
 		}
 
 		bool is_ready() const { return state.ready; }
@@ -390,7 +388,7 @@ protected:
 		template <typename> friend class shared_future; \
 		template <typename> friend class packaged_task; \
 
-	#define oPROMISE_CTORS() ~promise() { if (commitment && !commitment->is_ready() && commitment->has_future()) throw future_error(future_errc::broken_promise); } oFUTURE_MOVE_CTOR(promise)
+	#define oPROMISE_CTORS() ~promise() { if (commitment && !commitment->is_ready() && commitment->has_future()) oAssert(0, "broken promise"); } oFUTURE_MOVE_CTOR(promise)
 
 	#define oPROMISE_SET_EXCEPTION() \
 		void set_exception(std::exception_ptr e) { if (!commitment) throw future_error(future_errc::no_state); commitment->set_exception(e); } \
@@ -493,7 +491,7 @@ namespace future_detail {
 			func = std::move(oCALLABLE_PASS0); \
 		} \
 		\
-		bool valid() const { return func; } \
+		bool valid() const { return !!func; } \
 		void swap(packaged_task& _Other) { if (this != &_Other) { std::swap(commitment, _Other.commitment); std::swap(func, _Other.func); } } \
 		\
 		future<result_type> get_future() { oFUTURE_CHECK(!commitment->has_future(), future_already_retrieved); return std::move(future<result_type>(commitment)); } \

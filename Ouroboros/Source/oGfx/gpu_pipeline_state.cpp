@@ -12,7 +12,7 @@ using namespace ouro::gpu;
 
 namespace ouro { 
 
-const char* as_string(const gfx2::pipeline_state& state)
+template<> const char* as_string<gfx2::pipeline_state>(const gfx2::pipeline_state& state)
 {
 	const char* s_names[] = 
 	{

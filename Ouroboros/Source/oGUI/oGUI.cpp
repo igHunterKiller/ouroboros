@@ -5,7 +5,7 @@
 
 namespace ouro {
 
-const char* as_string(const alignment::value& _Alignment)
+template<> const char* as_string<alignment::value>(const alignment::value& _Alignment)
 {
 	switch (_Alignment)
 	{
@@ -29,7 +29,7 @@ const char* as_string(const alignment::value& _Alignment)
 oDEFINE_ENUM_TO_STRING(alignment::value);
 oDEFINE_ENUM_FROM_STRING(alignment::value);
 
-const char* as_string(const window_state::value& _State)
+template<> const char* as_string<window_state::value>(const window_state::value& _State)
 {
 	switch (_State)
 	{
@@ -47,7 +47,7 @@ const char* as_string(const window_state::value& _State)
 oDEFINE_ENUM_TO_STRING(window_state::value);
 oDEFINE_ENUM_FROM_STRING(window_state::value);
 
-const char* as_string(const window_style::value& _Style)
+template<> const char* as_string<window_style::value>(const window_style::value& _Style)
 {
 	switch (_Style)
 	{
@@ -70,7 +70,7 @@ const char* as_string(const window_style::value& _Style)
 oDEFINE_ENUM_TO_STRING(window_style::value);
 oDEFINE_ENUM_FROM_STRING(window_style::value);
 
-const char* as_string(const window_sort_order::value& _SortOrder)
+template<> const char* as_string<window_sort_order::value>(const window_sort_order::value& _SortOrder)
 {
 	switch (_SortOrder)
 	{
@@ -85,7 +85,7 @@ const char* as_string(const window_sort_order::value& _SortOrder)
 oDEFINE_ENUM_TO_STRING(window_sort_order::value);
 oDEFINE_ENUM_FROM_STRING(window_sort_order::value);
 
-const char* as_string(const control_type::value& _Control)
+template<> const char* as_string<control_type::value>(const control_type::value& _Control)
 {
 	switch (_Control)
 	{
@@ -120,7 +120,7 @@ const char* as_string(const control_type::value& _Control)
 oDEFINE_ENUM_TO_STRING(control_type::value);
 oDEFINE_ENUM_FROM_STRING(control_type::value);
 
-const char* as_string(const event_type::value& _Event)
+template<> const char* as_string<event_type::value>(const event_type::value& _Event)
 {
 	switch (_Event)
 	{

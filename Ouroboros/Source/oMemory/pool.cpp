@@ -3,6 +3,7 @@
 #include <oCore/assert.h>
 #include <oMemory/pool.h>
 #include <oMemory/allocate.h>
+#include <algorithm>
 #include <stdexcept>
 
 namespace ouro {

@@ -7,7 +7,7 @@
 
 namespace ouro {
 
-const char* as_string(const mime& m)
+template<> const char* as_string<mime>(const mime& m)
 {
 	switch (m)
 	{

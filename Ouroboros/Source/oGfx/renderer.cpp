@@ -19,7 +19,7 @@
 
 namespace ouro {
 	
-const char* as_string(const gfx::fullscreen_mode& m)
+template<> const char* as_string<gfx::fullscreen_mode>(const gfx::fullscreen_mode& m)
 {
 	static const char* s_strings[] = 
 	{
@@ -33,7 +33,7 @@ const char* as_string(const gfx::fullscreen_mode& m)
 	return s_strings[(int)m];
 }
 
-const char* as_string(const gfx::render_pass& pass)
+template<> const char* as_string<gfx::render_pass>(const gfx::render_pass& pass)
 {
 	const char* s_strings[] = 
 	{
@@ -48,7 +48,7 @@ const char* as_string(const gfx::render_pass& pass)
 	return s_strings[(int)pass];
 }
 
-const char* as_string(const gfx::render_technique& technique)
+template<> const char* as_string<gfx::render_technique>(const gfx::render_technique& technique)
 {
 	const char* s_strings[] = 
 	{
@@ -68,11 +68,12 @@ const char* as_string(const gfx::render_technique& technique)
 
 	namespace gfx {
 
-uint32_t renderer_t::local_tasklist_frame_id_;
-void*    renderer_t::local_tasklist_;
-uint32_t renderer_t::local_heap_frame_id_;
-void*    renderer_t::local_heap_;
-void*    renderer_t::local_heap_end_;
+
+oTHREAD_LOCAL uint32_t renderer_t::local_tasklist_frame_id_;
+oTHREAD_LOCAL void*    renderer_t::local_tasklist_;
+oTHREAD_LOCAL uint32_t renderer_t::local_heap_frame_id_;
+oTHREAD_LOCAL void*    renderer_t::local_heap_;
+oTHREAD_LOCAL void*    renderer_t::local_heap_end_;
 
 static const uint16_t pass_shift      = 56;
 static const uint16_t technique_shift = 48;

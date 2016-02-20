@@ -15,7 +15,7 @@
 
 namespace ouro {
 
-const char* as_string(const assert_type& type)
+template<> const char* as_string(const assert_type& type)
 {
 	switch (type)
 	{

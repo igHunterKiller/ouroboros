@@ -7,6 +7,7 @@
 // NTP v4: http://tools.ietf.org/html/rfc5905#section-6
 
 #pragma once
+#include <oString/stringize.h> // as_string
 #include <oCore/uint128.h>
 #include <chrono>
 #include <climits>
@@ -62,13 +63,13 @@ private:
 enum class weekday { Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Unknown, };
 enum class month { January = 1, February, March, April, May, June, July, August, September, October, November, December, };
 
-inline const char* as_string(const weekday& _weekday)
+template<> inline const char* as_string<weekday>(const weekday& _weekday)
 {
 	static const char* sWeekdayStrings[7] = { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 	return sWeekdayStrings[(int)_weekday];
 }
 
-inline const char* as_string(const month& _month)
+template<> inline const char* as_string<month>(const month& _month)
 {
 	static const char* sMonthStrings[13] = { "invalid", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
 	return sMonthStrings[(int)_month];

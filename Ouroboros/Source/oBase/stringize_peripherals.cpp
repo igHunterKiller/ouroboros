@@ -5,7 +5,7 @@
 
 namespace ouro {
 
-const char* as_string(const peripheral_status& s)
+template<> const char* as_string<peripheral_status>(const peripheral_status& s)
 {
 	switch (s)
 	{
@@ -25,7 +25,7 @@ const char* as_string(const peripheral_status& s)
 
 oDEFINE_TO_FROM_STRING(peripheral_status);
 
-const char* as_string(const key& k)
+template<> const char* as_string<key>(const key& k)
 {
 	switch (k)
 	{
@@ -163,7 +163,7 @@ const char* as_string(const key& k)
 
 oDEFINE_TO_FROM_STRING(key);
 
-const char* as_string(const key_modifier& m)
+template<> const char* as_string<key_modifier>(const key_modifier& m)
 {
 	switch (m)
 	{
@@ -182,7 +182,7 @@ const char* as_string(const key_modifier& m)
 
 oDEFINE_TO_FROM_STRING(key_modifier);
 
-const char* as_string(const mouse_button& b)
+template<> const char* as_string<mouse_button>(const mouse_button& b)
 {
 	switch (b)
 	{
@@ -201,7 +201,7 @@ const char* as_string(const mouse_button& b)
 
 oDEFINE_TO_FROM_STRING(mouse_button);
 
-const char* as_string(const mouse_capture& c)
+template<> const char* as_string<mouse_capture>(const mouse_capture& c)
 {
 	switch (c)
 	{
@@ -215,7 +215,7 @@ const char* as_string(const mouse_capture& c)
 
 oDEFINE_TO_FROM_STRING(mouse_capture);
 
-const char* as_string(const mouse_cursor& c)
+template<> const char* as_string<mouse_cursor>(const mouse_cursor& c)
 {
 	switch (c)
 	{
@@ -234,7 +234,7 @@ const char* as_string(const mouse_cursor& c)
 
 oDEFINE_TO_FROM_STRING(mouse_cursor);
 
-const char* as_string(const pad_button& b)
+template<> const char* as_string<pad_button>(const pad_button& b)
 {
 	switch (b)
 	{

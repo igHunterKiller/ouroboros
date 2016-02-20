@@ -3,6 +3,7 @@
 #include <oMemory/sbb_allocator.h>
 #include <oCore/bit.h>
 #include <oMemory/sbb.h>
+#include <algorithm>
 
 #define USE_ALLOCATOR_STATS 1
 #define USE_ALLOCATION_STATS 1

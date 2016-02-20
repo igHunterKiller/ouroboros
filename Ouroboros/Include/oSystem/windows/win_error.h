@@ -21,30 +21,31 @@ namespace ouro { namespace windows {
 
 const std::error_category& category();
 
-std::error_code make_error_code(long _hResult);
-std::error_condition make_error_condition(long _hResult);
+std::error_code make_error_code(long hresult);
+std::error_condition make_error_condition(long hresult);
 
 class error : public std::system_error
 {
 public:
-	error(const error& _That) : std::system_error(_That) {}
-	error() : system_error(make_error_code(GetLastError()), make_error_code(GetLastError()).message()) { trace(); }
-	error(const char* _Message) : system_error(make_error_code(GetLastError()), _Message) { trace(); }
-	error(long _hResult) : system_error(make_error_code(_hResult), make_error_code(_hResult).message()) { trace(); }
-	error(long _hResult, const char* _Message) : system_error(make_error_code(_hResult), _Message) { trace(); }
-	error(long _hResult, const std::string& _Message) : system_error(make_error_code(_hResult), _Message) { trace(); }
+	error(const error& that)                    : system_error(that)                                                                       {}
+	error()                                     : system_error(make_error_code(GetLastError()), make_error_code(GetLastError()).message()) { trace(); }
+	error(const char* msg)                      : system_error(make_error_code(GetLastError()), msg)                                       { trace(); }
+	error(long hresult)                         : system_error(make_error_code(hresult), make_error_code(hresult).message())               { trace(); }
+	error(long hresult, const char* msg)        : system_error(make_error_code(hresult), msg)                                              { trace(); }
+	error(long hresult, const std::string& msg) : system_error(make_error_code(hresult), msg)                                              { trace(); }
 private:
 	void trace() { char msg[1024]; _snprintf_s(msg, sizeof(msg), "\nouro::windows::error: 0x%08x: %s\n\n", code().value(), what()); OutputDebugStringA(msg); }
 };
 
 }}
 
-// For Windows API that returns an HRESULT, this captures that value and throws 
-// on failure.
-#define oV(_HRWinFn) do { long HR__ = _HRWinFn; if (HR__) throw ouro::windows::error(HR__); } while(false)
+// For Windows API that returns an HRESULT, this captures that value and throws on failure.
+#define oV(hr_fn) do { long HR__ = hr_fn; if (HR__) throw ouro::windows::error(HR__); } while(false)
+#define oVB(bool_fn) do { if (!(bool_fn)) throw ::ouro::windows::error(); } while(false)
+#define oVB_MSG(bool_fn, fmt, ...) do { if (!(bool_fn)) { char msg[1024]; _snprintf_s(msg, sizeof(msg), fmt, ## __VA_ARGS__); throw ::ouro::windows::error(msg); } } while(false)
 
-// For Windows API that returns BOOL and uses GetLastError(), this throws on 
-// failure.
-#define oVB(_BoolWinFn) do { if (!(_BoolWinFn)) throw ::ouro::windows::error(); } while(false)
+// Nothrow versions
+#define oV_NOTHROW(hr_fn) do { long HR__ = hr_fn; if (HR__) { ::ouro::windows::error err(HR__); __debugbreak(); } } while(false)
+#define oVB_NOTHROW(bool_fn) do { if (!(bool_fn)) { ::ouro::windows::error err; __debugbreak(); } } while(false)
+#define oVB_MSG_NOTHROW(bool_fn, fmt, ...) do { if (!(bool_fn)) { char msg[1024]; _snprintf_s(msg, sizeof(msg), fmt, ## __VA_ARGS__); ::ouro::windows::error err(msg); __debugbreak(); } } while(false)
 
-#define oVB_MSG(_BoolWinFn, _Format, ...) do { if (!(_BoolWinFn)) { char msg[1024]; _snprintf_s(msg, sizeof(msg), _Format, ## __VA_ARGS__); throw ::ouro::windows::error(msg); } } while(false)

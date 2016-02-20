@@ -53,8 +53,8 @@ enum oUS_USAGE
 };
 
 #define oWIN_CHECK(_hWnd) do \
-	{	if (!oWinExists(_hWnd)) oThrow(std::errc::invalid_argument, "Invalid HWND 0x%x specified", _hWnd); \
-		if (!oWinIsWindowThread(_hWnd)) oThrow(std::errc::operation_not_permitted, "This function must be called on the window thread %d for HWND 0x%x", asdword(std::this_thread::get_id()), _hWnd); \
+	{	oCheck(oWinExists(_hWnd), std::errc::invalid_argument, "Invalid HWND 0x%x specified", _hWnd); \
+		oCheck(oWinIsWindowThread(_hWnd), std::errc::operation_not_permitted, "This function must be called on the window thread %d for HWND 0x%x", asdword(std::this_thread::get_id()), _hWnd); \
 	} while (false)
 
 static const char* kRegisteredWindowMessages[] = 
@@ -668,7 +668,7 @@ void oWinDestroy(HWND _hWnd)
 
 char* oWinMakeClassName(char* _StrDestination, size_t _SizeofStrDestination, WNDPROC _Wndproc)
 {
-	int written = snprintf(_StrDestination, _SizeofStrDestination, "Ouroboros.Window.WndProc.%x", _Wndproc);
+	int written = ouro::snprintf(_StrDestination, _SizeofStrDestination, "Ouroboros.Window.WndProc.%x", _Wndproc);
 	return (size_t)written < _SizeofStrDestination ? _StrDestination : nullptr;
 }
 
@@ -1061,7 +1061,7 @@ int oWinDispatchMessage(HWND _hWnd, HACCEL _hAccel, bool wait_for_next)
 	if (wait_for_next)
 	{
 		int n = GetMessage(&msg, nullptr, 0, 0);
-		if (n == 0 || msg.message == oWM_QUIT)
+		if (n == 0 || msg.message == WM_QUIT || msg.message == oWM_QUIT)
 			return -1;
 		HasMessage = n > 0;
 	}
@@ -1727,7 +1727,7 @@ char* oWinTruncateLeft(char* _StrDestination, size_t _SizeofStrDestination, HWND
 		uri_string Truncated;
 		const char* pCopy = _StrSource + strlen(_StrSource) - TruncatedLength + 3;
 		oAssert(pCopy >= _StrSource, "");
-		oCheck(-1 == snprintf(_StrDestination, _SizeofStrDestination, "...%s", pCopy), std::errc::no_buffer_space, "");
+		oCheck(-1 == ouro::snprintf(_StrDestination, _SizeofStrDestination, "...%s", pCopy), std::errc::no_buffer_space, "");
 	}
 
 	return _StrDestination;
@@ -1884,8 +1884,8 @@ static LRESULT CALLBACK oSubclassProcFloatBox(HWND _hControl, UINT _uMsg, WPARAM
 
 				// allow only one '.', unless it's in the selecte d text about to be replaced
 				bool selHasDot = false;
-				for (DWORD i = dwStart; i < dwEnd; i++)
-					if (text[i] == '.')
+				for (DWORD j = dwStart; j < dwEnd; j++)
+					if (text[j] == '.')
 					{
 						selHasDot = true;
 						break;
@@ -2296,14 +2296,14 @@ int oWinControlFindSubItem(HWND _hControl, const char* _SubItemText)
 		case control_type::combobox:
 		case control_type::combotextbox:
 		{
-			int index = ComboBox_FindStringExact(_hControl, 0, _SubItemText);
+			index = ComboBox_FindStringExact(_hControl, 0, _SubItemText);
 			oCheck(index != CB_ERR, std::errc::invalid_argument, "Text %s was not found in %s %p (%d)", oSAFESTRN(_SubItemText), as_string(type), _hControl, GetDlgCtrlID(_hControl));
 			break;
 		}
 
 		case control_type::listbox:
 		{
-			int index = ListBox_FindStringExact(_hControl, 0, _SubItemText);
+			index = ListBox_FindStringExact(_hControl, 0, _SubItemText);
 			oCheck(index != CB_ERR, std::errc::invalid_argument, "Text %s was not found in %s %p (%d)", oSAFESTRN(_SubItemText), as_string(type), _hControl, GetDlgCtrlID(_hControl));
 			break;
 		}

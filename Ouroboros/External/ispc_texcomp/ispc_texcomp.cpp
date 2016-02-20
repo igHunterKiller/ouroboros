@@ -426,6 +426,11 @@ void GetProfile_bc6h_veryslow(bc6h_enc_settings* settings)
     settings->refineIterations_2p = 2;
 }
 
+void GetProfile_etc_slow(etc_enc_settings* settings)
+{
+    settings->fastSkipTreshold = 6;
+}
+
 void CompressBlocksBC1(const rgba_surface* src, uint8_t* dst)
 {
 	ispc::CompressBlocksBC1_ispc((ispc::rgba_surface*)src, dst);
@@ -444,4 +449,9 @@ void CompressBlocksBC7(const rgba_surface* src, uint8_t* dst, bc7_enc_settings* 
 void CompressBlocksBC6H(const rgba_surface* src, uint8_t* dst, bc6h_enc_settings* settings)
 {
     ispc::CompressBlocksBC6H_ispc((ispc::rgba_surface*)src, dst, (ispc::bc6h_enc_settings*)settings);
+}
+
+void CompressBlocksETC1(const rgba_surface* src, uint8_t* dst, etc_enc_settings* settings)
+{
+    ispc::CompressBlocksETC1_ispc((ispc::rgba_surface*)src, dst, (ispc::etc_enc_settings*)settings);
 }

@@ -3,6 +3,7 @@
 #include <oMemory/tlsf_allocator.h>
 #include <oCore/byte.h>
 #include <tlsf/tlsf.h>
+#include <algorithm>
 
 #define USE_ALLOCATOR_STATS 1
 #define USE_ALLOCATION_STATS 1

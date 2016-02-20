@@ -2,10 +2,11 @@
 
 #include <oCore/version.h>
 #include <oCore/snprintf.h>
+#include <oString/stringize.h>
 
 namespace ouro {
 
-char* to_string(char* dst, size_t dst_size, const version_t& ver)
+template<> char* to_string(char* dst, size_t dst_size, const version_t& ver)
 {
 	static const char* fmt[] = { "%u", "%u.%u", "%u.%u.%u", "%u.%u.%u.%u" };
 	
@@ -17,7 +18,7 @@ char* to_string(char* dst, size_t dst_size, const version_t& ver)
 	return -1 != snprintf(dst, dst_size, "%u.%u.%u", ver.major, ver.minor, ver.build, ver.revision) ? dst : nullptr;
 }
 
-bool from_string(version_t* out_ver, const char* src)
+template<> bool from_string(version_t* out_ver, const char* src)
 {
 	uint32_t major=0, minor=version_t::invalid, build=version_t::invalid, revision=version_t::invalid;
 	int nscanned = sscanf_s(src, "%u.%u.%u.%u", &major, &minor, &build, &revision);

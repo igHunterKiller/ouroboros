@@ -3,6 +3,7 @@
 #include <oMath/primitive.h>
 #include <oCore/byte.h>
 #include <oCore/countof.h>
+#include <algorithm>
 #include <stdexcept>
 
 #include <oCore/assert.h>
@@ -585,12 +586,12 @@ static void circle_tessellate1(mesh_t* out_mesh, const tessellation_type& type, 
 
 			// unstrip
 			uint16_t* face = out_mesh->indices;
-			for (uint16_t i = 0; i < nfaces; i++)
+			for (uint16_t f = 0; f < nfaces; f++)
 			{
-				uint16_t a = i & 0x1;
-				*face++ = base_index + strip[i+0];
-				*face++ = base_index + strip[i+1+a];
-				*face++ = base_index + strip[i+2-a];
+				uint16_t a = f & 0x1;
+				*face++ = base_index + strip[f+0];
+				*face++ = base_index + strip[f+1+a];
+				*face++ = base_index + strip[f+2-a];
 			}
 		}
 	}

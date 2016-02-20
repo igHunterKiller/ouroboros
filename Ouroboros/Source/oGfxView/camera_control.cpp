@@ -8,7 +8,7 @@
 
 namespace ouro {
 
-const char* as_string(const camera_control::type_t& type)
+template<> const char* as_string<camera_control::type_t>(const camera_control::type_t& type)
 {
 	switch (type)
 	{

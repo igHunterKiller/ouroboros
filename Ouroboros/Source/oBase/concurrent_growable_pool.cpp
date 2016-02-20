@@ -113,7 +113,6 @@ concurrent_pool* concurrent_growable_pool::find_pool(void* _Pointer) const
 void concurrent_growable_pool::grow(size_type capacity)
 {
 	const size_type target_nchunks = (capacity + capacity_per_chunk - 1) / capacity_per_chunk;
-	chunk_t* c = chunks.peek();
 	size_type nchunks = num_chunks();
 	while (nchunks++ < target_nchunks)
 	{

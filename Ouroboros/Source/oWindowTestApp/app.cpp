@@ -51,7 +51,7 @@ void app::deinitialize()
 		c.deinitialize();
 }
 
-void app::internal_on_dir_event(filesystem::file_event::value e, const path_t& p)
+void app::internal_on_dir_event(filesystem::file_event e, const path_t& p)
 {
 	on_dir_event(e, p);
 }

@@ -5,11 +5,11 @@
 
 namespace ouro {
 
-const char* as_string(const D3D11_BIND_FLAG& flag);
-const char* as_string(const D3D11_CPU_ACCESS_FLAG& flag);
-const char* as_string(const D3D11_RESOURCE_MISC_FLAG& flag);
-const char* as_string(const D3D11_RESOURCE_DIMENSION& type);
-const char* as_string(const D3D11_UAV_DIMENSION& type);
-const char* as_string(const D3D11_USAGE& usage);
+template<> const char* as_string<D3D11_BIND_FLAG>(const D3D11_BIND_FLAG& flag);
+template<> const char* as_string<D3D11_CPU_ACCESS_FLAG>(const D3D11_CPU_ACCESS_FLAG& flag);
+template<> const char* as_string<D3D11_RESOURCE_MISC_FLAG>(const D3D11_RESOURCE_MISC_FLAG& flag);
+template<> const char* as_string<D3D11_RESOURCE_DIMENSION>(const D3D11_RESOURCE_DIMENSION& type);
+template<> const char* as_string<D3D11_UAV_DIMENSION>(const D3D11_UAV_DIMENSION& type);
+template<> const char* as_string<D3D11_USAGE>(const D3D11_USAGE& usage);
 
 }

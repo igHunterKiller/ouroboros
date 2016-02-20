@@ -19,7 +19,7 @@ using namespace std;
 
 namespace ouro {
 
-const char* as_string(const camera::format& _Format)
+template<> const char* as_string<camera::format>(const camera::format& _Format)
 {
 	switch (_Format)
 	{
@@ -337,7 +337,7 @@ directshow_camera::directshow_camera(IGraphBuilder* _pGraphBuilder, IAMStreamCon
 directshow_camera::~directshow_camera()
 {
 	ref<IMediaControl> MediaControl;
-	oV(GraphBuilder->QueryInterface(IID_PPV_ARGS(&MediaControl)));
+	oV_NOTHROW(GraphBuilder->QueryInterface(IID_PPV_ARGS(&MediaControl)));
 	MediaControl->Stop();
 }
 
@@ -385,8 +385,7 @@ void directshow_camera::recreate_output(const mode& _Mode)
 			break;
 		}
 	}
-	if (!connectedFilters)
-		oThrow(std::errc::function_not_supported, "Could not connect VideoOutput filter");
+	oCheck(connectedFilters, std::errc::function_not_supported, "Could not connect VideoOutput filter");
 
 	// Now get it as a SampleGrabber and set up its parameters
 	oV(VideoOutput->QueryInterface(IID_PPV_ARGS(&SampleGrabber)));
@@ -396,8 +395,7 @@ void directshow_camera::recreate_output(const mode& _Mode)
 	memset(&outputType, 0, sizeof(outputType));
 	outputType.majortype = (const GUID&)GUID_MEDIATYPE_Video;
 	outputType.subtype = media_subtype(_Mode.format);
-	if (outputType.subtype == GUID_NULL)
-		oThrow(std::errc::not_supported, "Unsupported format: %s", as_string(_Mode.format));
+	oCheck(outputType.subtype != GUID_NULL, std::errc::not_supported, "Unsupported format: %s", as_string(_Mode.format));
 
 	oV(SampleGrabber->SetMediaType(&outputType));
 }

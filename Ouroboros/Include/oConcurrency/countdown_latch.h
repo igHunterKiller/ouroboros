@@ -71,7 +71,7 @@ public:
 	// Block the calling thread for a time or until the number of outstanding 
 	// items reaches zero.
 	template<typename Rep, typename Period>
-	std::cv_status::cv_status wait_for(const std::chrono::duration<Rep, Period>& relative_time);
+	std::cv_status wait_for(const std::chrono::duration<Rep, Period>& relative_time);
 
 private:
 	std::condition_variable zero_references;
@@ -163,9 +163,9 @@ inline void countdown_latch::wait()
 }
 
 template<typename Rep, typename Period>
-std::cv_status::cv_status countdown_latch::wait_for(const std::chrono::duration<Rep, Period>& relative_time)
+std::cv_status countdown_latch::wait_for(const std::chrono::duration<Rep, Period>& relative_time)
 {
-	std::cv_status::cv_status status = std::cv_status::no_timeout;
+	std::cv_status status = std::cv_status::no_timeout;
 	std::unique_lock<std::mutex> Lock(mtx);
 	while (std::cv_status::no_timeout == status && num_outstanding > 0) // Guarded Suspension
 		status = zero_references.wait_for(Lock, relative_time);

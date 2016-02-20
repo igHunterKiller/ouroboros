@@ -50,12 +50,21 @@ public:
 	flexible_array_t() : flexible_array_base_t() {}
 	flexible_array_t(const flexible_array_bytes_t&, uint32_t capacity, flexible_array_t* next = nullptr) : flexible_array_base_t(capacity - sizeof(flexible_array_t) + sizeof(T), next) {}
 	flexible_array_t(const flexible_array_count_t&, uint32_t capacity, flexible_array_t* next = nullptr) : flexible_array_base_t(capacity, next) {}
-	
+	flexible_array_t& operator=(flexible_array_t&& that)
+	{
+		if (this != &that)
+		{
+			next_     = that.next_;     that.next_ = nullptr;
+			size_.store(that.size_);    that.size_.store(0);
+			capacity_ = that.capacity_; that.capacity_ = 0;
+		}
+		return *this;
+	}
 
 	// == non-concurrent apis ==
 
-	void initialize(const flexible_array_bytes_t& b, uint32_t capacity, flexible_array_t* next = nullptr) { *this = flexible_array_t(b, capacity, next); }
-	void initialize(const flexible_array_count_t& c, uint32_t capacity, flexible_array_t* next = nullptr) { *this = flexible_array_t(c, capacity, next); }
+	void initialize(const flexible_array_bytes_t& b, uint32_t capacity, flexible_array_t* next = nullptr) { *this = std::move(flexible_array_t(b, capacity, next)); }
+	void initialize(const flexible_array_count_t& c, uint32_t capacity, flexible_array_t* next = nullptr) { *this = std::move(flexible_array_t(c, capacity, next)); }
 
 	void* deinitialize() { clear(); return this; }
 

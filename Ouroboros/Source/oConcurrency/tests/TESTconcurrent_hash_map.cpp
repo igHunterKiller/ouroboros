@@ -19,7 +19,7 @@ static void generate_strings(unit_test::services& services, std::vector<std::str
 		std::string s;
 		s.reserve(StringLength);
 
-		for (size_t i = 0; i < StringLength; i++)
+		for (size_t j = 0; j < StringLength; j++)
 			s += (char)services.rand();
 
 		_Strings.push_back(s);

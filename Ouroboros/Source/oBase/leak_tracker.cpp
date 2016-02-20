@@ -214,9 +214,9 @@ size_t leak_tracker::report(bool current_context_only)
 	size_t CheckedNumLeaks = num_outstanding_allocations(current_context_only);
 	if (CheckedNumLeaks > 0)
 	{
-		char buf[256];
-		snprintf(buf, "There are potentially %u leaks(s), sleeping and checking again to eliminate async false positives...\n", CheckedNumLeaks);
-		init.print(buf);
+		char msg[256];
+		snprintf(msg, "There are potentially %u leaks(s), sleeping and checking again to eliminate async false positives...\n", CheckedNumLeaks);
+		init.print(msg);
 		this_thread::sleep_for(chrono::milliseconds(init.unexpected_delay_ms));
 		RecoveredFromAsyncLeaks = true;
 	}

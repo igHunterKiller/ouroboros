@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <oArch/compiler.h>
 #include <oArch/intrin.h>
 #include <assert.h>
 #include <float.h>
@@ -132,12 +133,12 @@ template<typename T> struct oHLSL2
 {
 	T x,y;
 	typedef T element_type;
-	inline                        oHLSL2()                                                                             {}
-	inline                        oHLSL2(const oHLSL2& that)    : x(that.x),                 y(that.y)                 {}
-	inline                        oHLSL2(T xy)                  : x(xy),                     y(xy)                     {}
-	inline                        oHLSL2(T _x, T _y)            : x(_x),                     y(_y)                     {}
-	template<typename U>          oHLSL2(const oHLSL2<U>& that) : x(static_cast<T>(that.x)), y(static_cast<T>(that.y)) {}
-	template<typename U> explicit oHLSL2(U xy)                  : x(static_cast<T>(xy)),     y(static_cast<T>(xy))     {}
+	inline                        oHLSL2()                      noexcept                                                        {}
+	inline                        oHLSL2(const oHLSL2& that)    noexcept : x(that.x),                 y(that.y)                 {}
+	inline                        oHLSL2(T xy)                  noexcept : x(xy),                     y(xy)                     {}
+	inline                        oHLSL2(T _x, T _y)            noexcept : x(_x),                     y(_y)                     {}
+	template<typename U>          oHLSL2(const oHLSL2<U>& that) noexcept : x(static_cast<T>(that.x)), y(static_cast<T>(that.y)) {}
+	template<typename U> explicit oHLSL2(U xy)                  noexcept : x(static_cast<T>(xy)),     y(static_cast<T>(xy))     {}
 	oHLSL2 operator-() const { return oHLSL2(-x, -y); }
 	oHLSL_MEMBERS(2)
 };
@@ -146,13 +147,13 @@ template<typename T> struct oHLSL3
 {
 	T x,y,z;
 	typedef T element_type;
-	inline                        oHLSL3()                                                                                                            {}
-	inline                        oHLSL3(const oHLSL3& that)        : x(that.x),                 y(that.y),                 z(that.z)                 {}
-	inline                        oHLSL3(T xyz)                     : x(xyz),                    y(xyz),                    z(xyz)                    {}
-	inline                        oHLSL3(T _x, T _y, T _z)          : x(_x),                     y(_y),                     z(_z)                     {}
-	inline                        oHLSL3(const oHLSL2<T>& xy, T _z) : x(xy.x),                   y(xy.y),                   z(_z)                     {}
-	template<typename U>          oHLSL3(const oHLSL3<U>& that)     : x(static_cast<T>(that.x)), y(static_cast<T>(that.y)), z(static_cast<T>(that.z)) {}
-	template<typename U> explicit oHLSL3(U xyz)                     : x(static_cast<T>(xyz)),    y(static_cast<T>(xyz)),    z(static_cast<T>(xyz))    {}
+	inline                        oHLSL3()                          noexcept                                                                                   {}
+	inline                        oHLSL3(const oHLSL3& that)        noexcept : x(that.x),                 y(that.y),                 z(that.z)                 {}
+	inline                        oHLSL3(T xyz)                     noexcept : x(xyz),                    y(xyz),                    z(xyz)                    {}
+	inline                        oHLSL3(T _x, T _y, T _z)          noexcept : x(_x),                     y(_y),                     z(_z)                     {}
+	inline                        oHLSL3(const oHLSL2<T>& xy, T _z) noexcept : x(xy.x),                   y(xy.y),                   z(_z)                     {}
+	template<typename U>          oHLSL3(const oHLSL3<U>& that)     noexcept : x(static_cast<T>(that.x)), y(static_cast<T>(that.y)), z(static_cast<T>(that.z)) {}
+	template<typename U> explicit oHLSL3(U xyz)                     noexcept : x(static_cast<T>(xyz)),    y(static_cast<T>(xyz)),    z(static_cast<T>(xyz))    {}
 	oHLSL3 operator-() const { return oHLSL3(-x, -y, -z); }
 	oHLSL_MEMBERS(3)
 };
@@ -161,18 +162,18 @@ template<typename T> struct oHLSL4
 {
 	T x,y,z,w;
 	typedef T element_type;
-	inline                        oHLSL4()                                                                                                                                                           {}
-	inline                        oHLSL4(const oHLSL4& that)                            : x(that.x),                 y(that.y),                 z(that.z),                 w(that.w)                 {}
-	inline                        oHLSL4(T xyzw)                                        : x(xyzw),                   y(xyzw),                   z(xyzw),                   w(xyzw)                   {}
-	inline                        oHLSL4(const oHLSL2<T>& xy, T _z, T _w)               : x(xy.x),                   y(xy.y),                   z(_z),                     w(_w)                     {}
-	inline                        oHLSL4(const oHLSL3<T>& xyz, T _w)                    : x(xyz.x),                  y(xyz.y),                  z(xyz.z),                  w(_w)                     {}
-	inline                        oHLSL4(const oHLSL2<T>& xy, const oHLSL2<T>& zw)      : x(xy.x),                   y(xy.y),                   z(zw.x),                   w(zw.y)                   {}
-	inline                        oHLSL4(T _x, const oHLSL3<T>& yzw)                    : x(_x),                     y(yzw.y),                  z(yzw.z),                  w(yzw.w)                  {}
-	inline                        oHLSL4(T _x, T _y, T _z, T _w)                        : x(_x),                     y(_y),                     z(_z),                     w(_w)                     {}
-	template<typename U>          oHLSL4(const oHLSL4<U>& that)                         : x(static_cast<T>(that.x)), y(static_cast<T>(that.y)), z(static_cast<T>(that.z)), w(static_cast<T>(that.w)) {}
-	template<typename U> explicit oHLSL4(U xyzw)                                        : x(static_cast<T>(xyzw)),   y(static_cast<T>(xyzw)),   z(static_cast<T>(xyzw)),   w(static_cast<T>(xyzw))   {}
-	template<typename U> explicit oHLSL4(const oHLSL3<U>& xyz, U _w)                    : x((T)xyz.x),               y((T)xyz.y),               z((T)xyz.z),               w((T)_w)                  {}
-	template<typename U> explicit oHLSL4(const oHLSL3<U>& xy, U _z, U _w)               : x((T)xy.x),                y((T)xy.y),                z((T)_z),                  w((T)_w)                  {}
+	inline                        oHLSL4()                                              noexcept                                                                                                              {}
+	inline                        oHLSL4(const oHLSL4& that)                            noexcept : x(that.x),                 y(that.y),                 z(that.z),                 w(that.w)                 {}
+	inline                        oHLSL4(T xyzw)                                        noexcept : x(xyzw),                   y(xyzw),                   z(xyzw),                   w(xyzw)                   {}
+	inline                        oHLSL4(const oHLSL2<T>& xy, T _z, T _w)               noexcept : x(xy.x),                   y(xy.y),                   z(_z),                     w(_w)                     {}
+	inline                        oHLSL4(const oHLSL3<T>& xyz, T _w)                    noexcept : x(xyz.x),                  y(xyz.y),                  z(xyz.z),                  w(_w)                     {}
+	inline                        oHLSL4(const oHLSL2<T>& xy, const oHLSL2<T>& zw)      noexcept : x(xy.x),                   y(xy.y),                   z(zw.x),                   w(zw.y)                   {}
+	inline                        oHLSL4(T _x, const oHLSL3<T>& yzw)                    noexcept : x(_x),                     y(yzw.y),                  z(yzw.z),                  w(yzw.w)                  {}
+	inline                        oHLSL4(T _x, T _y, T _z, T _w)                        noexcept : x(_x),                     y(_y),                     z(_z),                     w(_w)                     {}
+	template<typename U>          oHLSL4(const oHLSL4<U>& that)                         noexcept : x(static_cast<T>(that.x)), y(static_cast<T>(that.y)), z(static_cast<T>(that.z)), w(static_cast<T>(that.w)) {}
+	template<typename U> explicit oHLSL4(U xyzw)                                        noexcept : x(static_cast<T>(xyzw)),   y(static_cast<T>(xyzw)),   z(static_cast<T>(xyzw)),   w(static_cast<T>(xyzw))   {}
+	template<typename U> explicit oHLSL4(const oHLSL3<U>& xyz, U _w)                    noexcept : x((T)xyz.x),               y((T)xyz.y),               z((T)xyz.z),               w((T)_w)                  {}
+	template<typename U> explicit oHLSL4(const oHLSL3<U>& xy, U _z, U _w)               noexcept : x((T)xy.x),                y((T)xy.y),                z((T)_z),                  w((T)_w)                  {}
 	oHLSL4 operator-() const { return oHLSL4(-x, -y, -z, -w); }
 	oHLSL_MEMBERS(4)
 	inline oHLSL2<T>& xy()  { return *(oHLSL2<T>*)&x; }
@@ -553,41 +554,44 @@ oHLSL_FN2S(frexp, frexp);
 oHLSL_FN2S(fmod, fmod);
 oHLSL_FN1S(rcp);
 
-template<typename T> T         round(const T& a)                       { return floor(a + T(0.5)); }
-template<typename T> T         frac(const T& a)                        { return a - floor(a); }
-template<typename T> T         trunc(const T& x)                       { return floor(x); }
-inline               double    log2(double a)                          { static const double sCONV = 1.0/log(2.0); return log(a) * sCONV; }
-inline               float     exp2(float a)                           { return powf(2.0f, a); }
-inline               double    exp2(double a)                          { return pow(2.0, a); }
-template<typename T> T         frexp(const T& x, T& exp)               { int e; T ret = ::frexp(x, &e); exp = static_cast<T>(e); return ret; }
-inline               float     modf(const float& x, float& ip)         { return ::modf(x, &ip); }
-inline               double    modf(const double& x, double& ip)       { return ::modf(x, &ip); }
-template<typename T> oHLSL2<T> modf(const oHLSL2<T>& x, oHLSL2<T>& ip) { return oHLSL2<T>(modf(x.x, ip.x), modf(x.y, ip.y)); }
-template<typename T> oHLSL3<T> modf(const oHLSL3<T>& x, oHLSL3<T>& ip) { return oHLSL3<T>(modf(x.x, ip.x), modf(x.y, ip.y), modf(x.z, ip.z)); }
-template<typename T> oHLSL4<T> modf(const oHLSL4<T>& x, oHLSL4<T>& ip) { return oHLSL4<T>(modf(x.x, ip.x), modf(x.y, ip.y), modf(x.z, ip.z), modf(x.w, ip.w)); }
-template<typename T> T         rsqrt(T x)                              { return T(1) / sqrt(x); }
-template<typename T> T         rcp(const T& value)                     { return T(1) / value; }
-
-inline float log2(float val)
+template<typename T> T         round(const T& a)                                 { return floor(a + T(0.5)); }
+template<typename T> T         frac(const T& a)                                  { return a - floor(a); }
+template<typename T> T         trunc(const T& x)                                 { return floor(x); }
+template<typename T> T         frexp(const T& x, T& exp)                         { int e; T ret = ::frexp(x, &e); exp = static_cast<T>(e); return ret; }
+inline               float     modf(const float& x, float& ip)          noexcept { return modff(x, &ip); }
+inline               double    modf(const double& x, double& ip)        noexcept { return modf(x, &ip); }
+template<typename T> oHLSL2<T> modf(const oHLSL2<T>& x, oHLSL2<T>& ip)  noexcept { return oHLSL2<T>(modf(x.x, ip.x), modf(x.y, ip.y)); }
+template<typename T> oHLSL3<T> modf(const oHLSL3<T>& x, oHLSL3<T>& ip)  noexcept { return oHLSL3<T>(modf(x.x, ip.x), modf(x.y, ip.y), modf(x.z, ip.z)); }
+template<typename T> oHLSL4<T> modf(const oHLSL4<T>& x, oHLSL4<T>& ip)  noexcept { return oHLSL4<T>(modf(x.x, ip.x), modf(x.y, ip.y), modf(x.z, ip.z), modf(x.w, ip.w)); }
+template<typename T> T         rsqrt(T x)                                        { return T(1) / sqrt(x); }
+template<typename T> T         rcp(const T& value)                               { return T(1) / value; }
+#if oHAS_EXP2 == 0
+inline               float     exp2(float a)                                     { return powf(2.0f, a); }
+inline               double    exp2(double a)                                    { return pow(2.0, a); }
+#endif
+#if oHAS_LOG2 == 0
+inline               double    log2(double a)                                    { static const double sCONV = 1.0/log(2.0); return log(a) * sCONV; }
+inline               float     log2(float val)
 {
-	#if oHLSL_USE_FAST_LOG2
-		// Blaxill
-		// http://www.devmaster.net/forums/showthread.php?t=12765
-		int * const    exp_ptr = reinterpret_cast <int *>(&val);
-		int            x = *exp_ptr;
-		const int      log_2 = ((x >> 23) & 255) - 128;
-		x &= ~(255 << 23);
-		x += 127 << 23;
-		*exp_ptr = x;
+#if oHLSL_USE_FAST_LOG2
+	// Blaxill http://www.devmaster.net/forums/showthread.php?t=12765
+	int * const    exp_ptr = reinterpret_cast <int *>(&val);
+	int            x = *exp_ptr;
+	const int      log_2 = ((x >> 23) & 255) - 128;
+	x &= ~(255 << 23);
+	x += 127 << 23;
+	*exp_ptr = x;
 
-		val = ((-1.0f/3) * val + 2) * val - 2.0f/3; //(1)
+	val = ((-1.0f/3) * val + 2) * val - 2.0f/3; //(1)
 
-		return (val + log_2);
-	#else
-		static const double sCONV = 1.0/log(2.0);
-		return static_cast<float>(log(val) * sCONV);
-	#endif
+	return (val + log_2);
+#else
+	static const double sCONV = 1.0/log(2.0);
+	return static_cast<float>(log(val) * sCONV);
+#endif
 }
+
+#endif
 
 template<> inline float rcp(const float& x)
 {

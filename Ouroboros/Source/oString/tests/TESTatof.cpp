@@ -58,8 +58,8 @@ oTEST(oString_atof)
 	for (size_t i = 0; i < kNumFloats; i++)
 	{
 		float rand01 = (srv.rand() % RAND_MAX) / static_cast<float>(RAND_MAX - 1);
-		float f = -1000.0f + (2000.0f * rand01);
-		size_t len = snprintf(fstr, std::distance(fstr, end), "%f\n", f);
+		float ff = -1000.0f + (2000.0f * rand01);
+		size_t len = snprintf(fstr, std::distance(fstr, end), "%f\n", ff);
 		fstr += len + 1;
 	}
 
@@ -73,8 +73,8 @@ oTEST(oString_atof)
 	timer tm;
 	while (fstr < end)
 	{
-		float f = static_cast<float>(::atof(fstr));
-		flist.push_back(f);
+		float ff = static_cast<float>(::atof(fstr));
+		flist.push_back(ff);
 		fstr += strcspn(fstr, "\n") + 1;
 	}
 		
@@ -88,9 +88,9 @@ oTEST(oString_atof)
 	tm.reset();
 	while (fstr < end)
 	{
-		float f;
-		atof(fstr, &f);
-		flist.push_back(f);
+		float ff;
+		atof(fstr, &ff);
+		flist.push_back(ff);
 		fstr += strcspn(fstr, "\n") + 1;
 	}
 		

@@ -171,7 +171,7 @@ void TESTfilesystem_async2(unit_test::services& services)
 	ctx.p = &p;
 	ctx.e = &e;
 
-	load_async(TestPath, [&](const path_t& path, blob& buffer, const std::system_error* syserr, void* user)
+	load_async(TestPath, [](const path_t& path, blob& buffer, const std::system_error* syserr, void* user)
 	{
 		if (syserr)
 			throw *syserr;

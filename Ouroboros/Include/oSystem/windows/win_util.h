@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #pragma once
+#include <oArch/compiler.h>
 #include <oSystem/windows/win_error.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -58,9 +59,13 @@ template<typename T> DWORD asdword(const T& _ID) { return *((DWORD*)&_ID); }
 template<> inline DWORD asdword(const std::thread::id& _ID) { return ((_Thrd_t*)&_ID)->_Id; }
 inline std::thread::id astid(DWORD _ID)
 {
+#if _MSC_VER >= oVS2015_VER
+	return *(std::thread::id*)&_ID;
+#else
 	_Thrd_t tid; 
 	ouro::windows::scoped_handle h(OpenThread(THREAD_QUERY_LIMITED_INFORMATION, FALSE, _ID));
 	tid._Hnd = h;
 	tid._Id = _ID;
 	return *(std::thread::id*)&tid;
+#endif
 }

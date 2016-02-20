@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oGfx/bytecode.h>
+#include <oString/stringize.h>
 #include "bytecode_util.h"
 
 #include <VSpos.h>
@@ -186,7 +187,7 @@ oSH_END(compute_shader)
 
 }
 
-const char* as_string(const gfx::vertex_layout& layout)
+template<> const char* as_string<gfx::vertex_layout>(const gfx::vertex_layout& layout)
 {
 	const char* s_layouts[] = 
 	{

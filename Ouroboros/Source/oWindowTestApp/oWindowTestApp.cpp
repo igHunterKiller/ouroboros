@@ -120,7 +120,7 @@ private:
 	void CreateControls(const window::create_event& _CreateEvent);
 	void CheckState(window_state::value _State);
 	void CheckStyle(window_style::value _Style);
-	void OnDirectoryEvent(filesystem::file_event::value _Event, const path_t& _Path);
+	void OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path);
 };
 
 oWindowTestApp::oWindowTestApp()
@@ -230,7 +230,7 @@ void oWindowTestApp::CheckStyle(window_style::value _Style)
 	, oWMI_VIEW_STYLE_FIRST, oWMI_VIEW_STYLE_LAST, oWMI_VIEW_STYLE_FIRST + _Style);
 }
 
-void oWindowTestApp::OnDirectoryEvent(filesystem::file_event::value _Event, const path_t& _Path)
+void oWindowTestApp::OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path)
 {
 	static std::atomic<int> counter = 0;
 
@@ -357,6 +357,7 @@ void oWindowTestApp::InputHook(const input_t& _Input)
 			switch (_Input.menu.id)
 			{
 				case oWMI_FILE_EXIT:
+					Running = false;
 					Window->quit();
 					break;
 				case oWMI_HELP_ABOUT:
@@ -549,7 +550,7 @@ public:
 
 	void EventHook(const window::basic_event& e) {}
 
-	void on_dir_event(filesystem::file_event::value e, const path_t& p) override
+	void on_dir_event(filesystem::file_event e, const path_t& p) override
 	{
 		static std::atomic<int> counter = 0;
 

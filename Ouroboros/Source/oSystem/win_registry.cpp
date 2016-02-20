@@ -7,73 +7,71 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-namespace ouro {
-	namespace windows {
-		namespace registry {
+namespace ouro { namespace windows { namespace registry {
 
 // The return values of Reg* is NOT an HRESULT, but can be parsed in the same
 // manner. FAILED() does not work because the error results for Reg* are >0.
 
 static HKEY sRoots[] = { HKEY_CLASSES_ROOT, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_USERS, HKEY_PERFORMANCE_DATA, HKEY_PERFORMANCE_TEXT, HKEY_PERFORMANCE_NLSTEXT, HKEY_CURRENT_CONFIG, HKEY_DYN_DATA, HKEY_CURRENT_USER_LOCAL_SETTINGS };
 
-void delete_value(hkey _hKey, const char* _KeyPath, const char* _ValueName)
+void delete_value(hkey hkey, const char* keypath, const char* value_name)
 {
 	path_string KP;
-	replace(KP, _KeyPath, "/", "\\");
-	HKEY hKey = nullptr;
-	oV(RegOpenKeyEx(sRoots[_hKey], KP, 0, KEY_ALL_ACCESS, &hKey));
-	oFinally { RegCloseKey(hKey); };
-	oV(RegDeleteValue(hKey, _ValueName));
+	replace(KP, keypath, "/", "\\");
+	HKEY hk = nullptr;
+	oV(RegOpenKeyEx(sRoots[(int)hkey], KP, 0, KEY_ALL_ACCESS, &hk));
+	oFinally { RegCloseKey(hk); };
+	oV(RegDeleteValue(hk, value_name));
 }
 
-void delete_key(hkey _hKey, const char* _KeyPath, bool _Recursive)
+void delete_key(hkey hkey, const char* keypath, bool recursive)
 {
 	path_string KP;
-	replace(KP, _KeyPath, "/", "\\");
-	long err = RegDeleteKey(sRoots[_hKey], KP);
+	replace(KP, keypath, "/", "\\");
+	long err = RegDeleteKey(sRoots[(int)hkey], KP);
 	if (err)
 	{
-		if (!_Recursive)
+		if (!recursive)
 			oV(err);
 
-		HKEY hKey = nullptr;
-		oV(RegOpenKeyEx(sRoots[_hKey], KP, 0, KEY_READ, &hKey));
-		oFinally { RegCloseKey(hKey); };
+		HKEY hk = nullptr;
+		oV(RegOpenKeyEx(sRoots[(int)hkey], KP, 0, KEY_READ, &hk));
+		oFinally { RegCloseKey(hk); };
 		if (KP[KP.length()-1] != '\\')
 			strlcat(KP, "\\");
 		size_t KPLen = KP.length();
 		DWORD dwSize = DWORD(KP.capacity() - KPLen);
-		err = RegEnumKeyEx(hKey, 0, &KP[KPLen], &dwSize, nullptr, nullptr, nullptr, nullptr);
+		err = RegEnumKeyEx(hk, 0, &KP[KPLen], &dwSize, nullptr, nullptr, nullptr, nullptr);
 		while (!err)
 		{
-			delete_key(_hKey, KP, _Recursive);
-			DWORD dwSize = DWORD(KP.capacity() - KPLen);
-			err = RegEnumKeyEx(hKey, 0, &KP[KPLen], &dwSize, nullptr, nullptr, nullptr, nullptr);
+			delete_key(hkey, KP, recursive);
+			DWORD dwKeySize = DWORD(KP.capacity() - KPLen);
+			err = RegEnumKeyEx(hk, 0, &KP[KPLen], &dwKeySize, nullptr, nullptr, nullptr, nullptr);
 		}
 
 		KP[KPLen] = 0;
 		// try again to delete original
-		oV(RegDeleteKey(sRoots[_hKey], KP));
+		oV(RegDeleteKey(sRoots[(int)hkey], KP));
 	}
 }
 
-void set(hkey _hKey, const char* _KeyPath, const char* _ValueName, const char* _Value)
+void set(hkey hkey, const char* keypath, const char* value_name, const char* _Value)
 {
 	path_string KP;
-	replace(KP, _KeyPath, "/", "\\");
-	HKEY hKey = nullptr;
-	oV(RegCreateKeyEx(sRoots[_hKey], KP, 0, 0, 0, KEY_SET_VALUE, 0, &hKey, 0));
-	oFinally { RegCloseKey(hKey); };
-	oV(RegSetValueEx(hKey, _ValueName, 0, REG_SZ, (BYTE*)_Value, (DWORD) (strlen(_Value) + 1))); // +1 for null terminating, the null character must also be counted
+	replace(KP, keypath, "/", "\\");
+	HKEY hk = nullptr;
+	oV(RegCreateKeyEx(sRoots[(int)hkey], KP, 0, 0, 0, KEY_SET_VALUE, 0, &hk, 0));
+	oFinally { RegCloseKey(hk); };
+	oV(RegSetValueEx(hk, value_name, 0, REG_SZ, (BYTE*)_Value, (DWORD) (strlen(_Value) + 1))); // +1 for null terminating, the null character must also be counted
 }
 
-char* get(char* _StrDestination, size_t _SizeofStrDestination, hkey _hKey, const char* _KeyPath, const char* _ValueName)
+char* get(char* dst, size_t dst_size, hkey hkey, const char* keypath, const char* value_name)
 {
 	path_string KP;
-	replace(KP, _KeyPath, "/", "\\");
+	replace(KP, keypath, "/", "\\");
 
 	DWORD type = 0;
-	if (FAILED(RegGetValue(sRoots[_hKey], KP, _ValueName, RRF_RT_ANY, &type, _StrDestination, (LPDWORD)&_SizeofStrDestination)))
+	if (FAILED(RegGetValue(sRoots[(int)hkey], KP, value_name, RRF_RT_ANY, &type, dst, (LPDWORD)&dst_size)))
 		return nullptr;
 
 	switch (type)
@@ -82,24 +80,22 @@ char* get(char* _StrDestination, size_t _SizeofStrDestination, hkey _hKey, const
 			break;
 
 		case REG_DWORD_LITTLE_ENDIAN: // REG_DWORD
-			to_string(_StrDestination, _SizeofStrDestination, *(unsigned int*)_StrDestination);
+			to_string(dst, dst_size, *(unsigned int*)dst);
 			break;
 
 		case REG_DWORD_BIG_ENDIAN:
-			to_string(_StrDestination, _SizeofStrDestination, endian_swap(*(unsigned int*)_StrDestination));
+			to_string(dst, dst_size, endian_swap(*(unsigned int*)dst));
 			break;
 
 		case REG_QWORD:
-			to_string(_StrDestination, _SizeofStrDestination, *(unsigned long long*)_StrDestination);
+			to_string(dst, dst_size, *(unsigned long long*)dst);
 			break;
 
 		default:
 			oThrow(std::errc::operation_not_supported, "");
 	}
 
-	return _StrDestination;
+	return dst;
 }
 
-		} // namespace registry
-	}
-}
+}}}

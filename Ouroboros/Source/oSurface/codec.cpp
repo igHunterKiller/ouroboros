@@ -5,17 +5,17 @@
 #include <oMemory/memory.h>
 #include <oString/stringize.h>
 
-namespace ouro { namespace surface {
-
-// === ADDING A FILE FORMAT ===
-//
-// add format extension to this list and it will propagate to all the apis below.
-// Implement all functions declared by DECLARE_CODEC.
-// note: tga doesn't have a signature so keep it last since it's the weakest to authenticate
-#define FOREACH_EXT(macro) macro(oimg) macro(bmp) macro(dds) macro(jpg) macro(png) macro(psd) macro(tga)
-
 // _____________________________________________________________________________
 // Boilerplate (don't use directly, they're registered with the functions below)
+
+namespace ouro { namespace surface {
+
+		// === ADDING A FILE FORMAT ===
+		//
+		// add format extension to this list and it will propagate to all the apis below.
+		// Implement all functions declared by DECLARE_CODEC.
+		// note: tga doesn't have a signature so keep it last since it's the weakest to authenticate
+#define FOREACH_EXT(macro) macro(oimg) macro(bmp) macro(dds) macro(jpg) macro(png) macro(psd) macro(tga)
 
 #define DECLARE_CODEC(ext) \
 	bool is_##ext(const void* buffer, size_t size); \
@@ -32,7 +32,29 @@ namespace ouro { namespace surface {
 #define DECODE(ext) case file_format::##ext: decoded = decode_##ext(buffer, size, texel_alloc, temp_alloc, layout); break;
 #define AS_STRING(ext) case surface::file_format::##ext: return #ext;
 
-FOREACH_EXT(DECLARE_CODEC)
+		FOREACH_EXT(DECLARE_CODEC)
+
+}}
+
+// _____________________________________________________________________________
+// as_string
+namespace ouro {
+
+	template<> const char* as_string(const surface::file_format& ff)
+	{
+		switch (ff)
+		{
+			FOREACH_EXT(AS_STRING)
+		default: break;
+		}
+		return "?";
+	}
+}
+
+// _____________________________________________________________________________
+// Definitions
+
+namespace ouro { namespace surface {
 
 file_format get_file_format(const char* path)
 {
@@ -130,15 +152,4 @@ image decode(const void* buffer
 }
 
 	}
-
-const char* as_string(const surface::file_format& ff)
-{
-	switch (ff)
-	{
-		FOREACH_EXT(AS_STRING)
-		default: break;
-	}
-	return "?";
-}
-
 }

@@ -3,6 +3,7 @@
 #include <oCore/assert.h>
 #include <oMemory/sbb.h>
 #include <oCore/cbtree.h>
+#include <algorithm>
 #include <stdexcept>
 
 #define SBB_FATAL(msg) oThrow(std::errc::invalid_argument, msg)

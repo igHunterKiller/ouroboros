@@ -5,6 +5,7 @@
 
 #pragma once
 #include <oArch/compiler.h>
+#include <oCore/assert.h>
 #include <oConcurrency/tagged_pointer.h>
 #include <atomic>
 #include <cstdint>
@@ -79,8 +80,7 @@ concurrent_stack<T>::concurrent_stack(concurrent_stack&& that)
 template<typename T>
 concurrent_stack<T>::~concurrent_stack()
 {
-	if (!empty())
-		throw std::length_error("concurrent_stack not empty");
+	oAssert(empty(), "concurrent_stack not empty");
 }
 
 template<typename T>

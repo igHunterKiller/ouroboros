@@ -1,14 +1,14 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oCore/bit.h>
 #include <oCore/countof.h>
 #include <oSystem/cpu.h>
 #include <oSystem/windows/win_error.h>
 #include <oSystem/windows/win_version.h>
-#include <oCore/bit.h>
 
 namespace ouro {
 
-const char* as_string(const ouro::cpu::type& type)
+template<> const char* as_string<ouro::cpu::type>(const ouro::cpu::type& type)
 {
 	switch (type)
 	{
@@ -22,7 +22,7 @@ const char* as_string(const ouro::cpu::type& type)
 	return "?";
 }
 
-const char* as_string(const ouro::cpu::support& support)
+template<> const char* as_string<ouro::cpu::support>(const ouro::cpu::support& support)
 {
 	switch (support)
 	{

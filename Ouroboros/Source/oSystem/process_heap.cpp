@@ -1,11 +1,12 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
+#include <oCore/guid.h>
+#include <oMemory/fnv1a.h>
 #include <oSystem/process_heap.h>
 #include <oSystem/debugger.h>
 #include <oSystem/module.h>
 #include <oSystem/process.h>
 #include <oSystem/system.h>
-#include <oCore/guid.h>
-#include <oMemory/fnv1a.h>
 #include <oSystem/windows/win_util.h>
 #include <mutex>
 #include <thread>
@@ -134,8 +135,8 @@ context::context()
 	, DtorOrdinal(0)
 {
 	// From oGSReport.cpp: This touches the CPP file ensuring our __report_gsfailure is installed
-	extern void oGSReportInstaller();
-	oGSReportInstaller();
+	//extern void oGSReportInstaller();
+	//oGSReportInstaller();
 
 	sAtExitInstance = this;
 	atexit(at_exit);

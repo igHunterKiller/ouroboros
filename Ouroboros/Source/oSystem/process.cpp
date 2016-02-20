@@ -172,7 +172,7 @@ public:
 	~windows_process()
 	{
 		if (Suspended)
-			kill(errc::timed_out);
+			kill((int)errc::timed_out);
 		oCLOSE(ProcessInfo.hProcess);
 		oCLOSE(ProcessInfo.hThread);
 		oCLOSE(hOutputRead);

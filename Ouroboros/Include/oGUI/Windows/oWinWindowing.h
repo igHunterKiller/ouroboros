@@ -60,7 +60,7 @@ enum oWM
 	oWM_DESTROY,
 
 	/**
-		This exists the currently running oWinDispatchMessage, but does not exit
+		This exits the currently running oWinDispatchMessage, but does not exit
 		the Windows message pump for the thread. This way modal windows can run 
 		their own blocking oWinDispatchMessage and exit it, yielding control back
 		to any calling oWinDispatchMesage.

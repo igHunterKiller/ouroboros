@@ -71,7 +71,7 @@ static void test_mipchain(unit_test::services& services, const surface::image& _
 	surface::image mipchain(si);
 	mipchain.clear();
 
-	int nSlices = max(si.array_size, si.dimensions.z);
+	uint32_t nSlices = max(si.array_size, si.dimensions.z);
 	int nMips = surface::num_mips(si.mip_layout, si.dimensions);
 
 	if (si.dimensions.z != 1)
@@ -81,7 +81,7 @@ static void test_mipchain(unit_test::services& services, const surface::image& _
 		region.right = si.dimensions.x;
 		region.bottom = si.dimensions.y;
 		surface::shared_lock lock(_Image, subresource);
-		for (int i = 0; i < nSlices; i++)
+		for (uint32_t i = 0; i < nSlices; i++)
 		{
 			region.front = i;
 			region.back = i + 1;
@@ -93,8 +93,8 @@ static void test_mipchain(unit_test::services& services, const surface::image& _
 
 	else
 	{
-		uint nSlices = max(1u, si.array_size);
-		for (uint i = 0; i < nSlices; i++)
+		nSlices = max(1u, si.array_size);
+		for (uint32_t i = 0; i < nSlices; i++)
 		{
 			int DstSubresource = surface::calc_subresource(0, i, 0, nMips, nSlices);
 			int SrcSubresource = surface::calc_subresource(0, i, 0, 0, nSlices);

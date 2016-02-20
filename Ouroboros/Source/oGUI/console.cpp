@@ -82,7 +82,7 @@ int2 size_characters()
 
 void cursor_position(const int2& position)
 {
-	COORD c = { static_cast<unsigned short>(position.x), static_cast<unsigned short>(position.y) };
+	COORD c = { static_cast<short>(position.x), static_cast<short>(position.y) };
 	if (c.X == use_default || c.Y == use_default)
 	{
 		CONSOLE_SCREEN_BUFFER_INFO inf;

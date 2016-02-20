@@ -45,9 +45,6 @@
     <ClCompile Include="shader_registries.cpp">
       <Filter>Source\Needs Code Review</Filter>
     </ClCompile>
-    <ClCompile Include="techniques.cpp">
-      <Filter>Source\Needs Code Review</Filter>
-    </ClCompile>
     <ClCompile Include="gpu_fixed_state.cpp">
       <Filter>Source\Needs Code Review</Filter>
     </ClCompile>
@@ -111,9 +108,6 @@
       <Filter>oGfx\Needs Code Review</Filter>
     </ClInclude>
     <ClInclude Include="bytecode_util.h">
-      <Filter>Source\Needs Code Review</Filter>
-    </ClInclude>
-    <ClInclude Include="techniques.h">
       <Filter>Source\Needs Code Review</Filter>
     </ClInclude>
     <ClInclude Include="gpu_fixed_state.h">

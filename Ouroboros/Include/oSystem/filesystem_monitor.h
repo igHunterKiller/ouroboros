@@ -8,16 +8,15 @@
 
 namespace ouro { namespace filesystem {
 
-/* enum class */ namespace file_event
-{	enum value {
-
+enum class file_event
+{
 	unsupported,
 	added,
 	removed,
 	modified,
 	accessible,
 
-};}
+};
 
 class monitor
 {
@@ -36,7 +35,7 @@ public:
     unsigned int accessibility_timeout_ms;
   };
 
-  static std::shared_ptr<monitor> make(const info& _Info, const std::function<void(file_event::value _Event, const path_t& _Path)>& _OnEvent);
+  static std::shared_ptr<monitor> make(const info& _Info, const std::function<void(file_event _Event, const path_t& _Path)>& _OnEvent);
 
   virtual info get_info() const = 0;
   

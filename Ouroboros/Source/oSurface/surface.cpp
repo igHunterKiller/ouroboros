@@ -14,7 +14,7 @@ namespace ouro { namespace surface {
 
 	} // namespace surface
 
-const char* as_string(const surface::cube_face& f)
+template<> const char* as_string<surface::cube_face>(const surface::cube_face& f)
 {
 	switch (f)
 	{
@@ -32,7 +32,7 @@ const char* as_string(const surface::cube_face& f)
 oDEFINE_ENUM_TO_STRING(surface::cube_face)
 oDEFINE_ENUM_FROM_STRING(surface::cube_face)
 
-const char* as_string(const surface::semantic& s)
+template<> const char* as_string<surface::semantic>(const surface::semantic& s)
 {
 	switch (s)
 	{

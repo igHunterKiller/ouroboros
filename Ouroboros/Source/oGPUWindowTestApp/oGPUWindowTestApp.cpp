@@ -484,8 +484,8 @@ void gpu_test_app::ui_run()
 				app_win_->set_status_text(0, "F3 for default style");
 				app_win_->set_status_text(1, "Fullscreen cooperative");
 
-				oDECLARE_ABOUT_INFO(i, load_icon(IDI_APPICON));
-				about_ = about::make(i);
+				oDECLARE_ABOUT_INFO(inf, load_icon(IDI_APPICON));
+				about_ = about::make(inf);
 			}
 		}
 

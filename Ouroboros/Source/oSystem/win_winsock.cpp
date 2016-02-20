@@ -12,7 +12,7 @@ struct WSA_ERR
 {
 	HRESULT hresult;
 	const char* errstr;
-	std::errc::errc err;
+	std::errc err;
 	const char* errdesc;
 };
 
@@ -24,7 +24,7 @@ struct WSA_ERR
 #endif
 
 #define WSAERR(x) x, #x
-#define WSAERRNO(x) WSA##x, "WSA" #x, std::errc::errc(x)
+#define WSAERRNO(x) WSA##x, "WSA" #x, std::errc(x)
 #define WSAERRNOX(x) WSA##x, "WSA" #x, std::errc::protocol_error
 static const WSA_ERR sWSAErrors[] =
 {
@@ -77,7 +77,7 @@ const char* get_desc(int _WSAError)
 	return "See http://msdn.microsoft.com/en-us/library/ms740668(v=vs.85).aspx for more information.";
 }
 
-std::errc::errc get_errc(int _WSAError)
+std::errc get_errc(int _WSAError)
 {
 	for (const auto& err : sWSAErrors)
 		if (_WSAError == err.hresult)
@@ -531,7 +531,7 @@ size_t receive(SOCKET _hSocket, WSAEVENT _hEvent, void* _pDestination, size_t _S
 
 		if (bytesReceived == SOCKET_ERROR)
 		{
-			err = get_errc(WSAGetLastError());
+			err = (int)get_errc(WSAGetLastError());
 			bytesReceived = 0;
 		}
 

@@ -5,8 +5,11 @@
 #include <oSystem/process_heap.h>
 #include <oSystem/thread_traits.h>
 #include <oMemory/allocate.h>
+
+#pragma warning(disable:4297) // warning C4297: 'dtor': function assumed not to throw an exception but does
 #include <tbb/tbb.h>
 #include <tbb/task_scheduler_init.h>
+#pragma warning(default:4297) // warning C4297: 'dtor': function assumed not to throw an exception but does
 
 namespace ouro {
 
@@ -98,7 +101,7 @@ class task_group_tbb : public task_group
 {
 	::tbb::task_group g;
 public:
-	~task_group_tbb() { wait(); }
+	~task_group_tbb() noexcept { wait(); }
 	void run(const std::function<void()>& _Task) override { g.run(_Task); }
 	void wait() override { g.wait(); }
 	void cancel() override { g.cancel(); }

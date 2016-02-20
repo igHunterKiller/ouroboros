@@ -5,7 +5,7 @@
 
 namespace ouro {
 
-const char* as_string(const gpu_api& value)
+template<> const char* as_string<gpu_api>(const gpu_api& value)
 {
 	switch (value)
 	{

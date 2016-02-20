@@ -15,18 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\snappy.h">
+    <ClInclude Include="snappy-sinksource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\snappy-sinksource.h">
+    <ClInclude Include="snappy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\snappy.cc">
+    <ClCompile Include="snappy-sinksource.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\snappy-sinksource.cc">
+    <ClCompile Include="snappy.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

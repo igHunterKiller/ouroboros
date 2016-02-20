@@ -2,11 +2,9 @@
 
 #include <oGUI/notification_area.h>
 #include <oGUI/windows/oWinWindowing.h>
+#include <oCore/algorithm.h>
 #include <oCore/assert.h>
 #include <oCore/countof.h>
-
-#include <oCore/algorithm.h>
-
 #include <oSystem/reporting.h>
 #include <oSystem/windows/win_error.h>
 #include <oSystem/windows/win_version.h>

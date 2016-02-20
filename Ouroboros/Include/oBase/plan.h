@@ -156,8 +156,8 @@ private:
 	tasklist internal_make_tasklist(uint32_t phase);
 
 	void* lists;
-	std::atomic_uint num_lists;
 	plan* plan;
+	std::atomic_uint num_lists;
 	uint32_t max_lists;
 	bool overflow;
 };

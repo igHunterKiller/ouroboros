@@ -50,7 +50,7 @@ oTEST(oSystem_filesystem_monitor)
 	filesystem::monitor::info fsmi;
 	fsmi.accessibility_poll_rate_ms = 1000; // crank this up for testing since we're not doing anything else
 	std::shared_ptr<filesystem::monitor> Monitor = filesystem::monitor::make(fsmi,
-		[startTime, Events, &srv](filesystem::file_event::value _Event, const path_t& _Path)
+		[startTime, Events, &srv](filesystem::file_event _Event, const path_t& _Path)
 		{
 			int timeMS = static_cast<int>((timer::now() - startTime) * 1000);
 			switch (_Event)

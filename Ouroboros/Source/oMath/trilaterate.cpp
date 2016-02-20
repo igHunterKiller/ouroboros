@@ -48,13 +48,13 @@ float trilaterate(const float3 in_observers[4], const float in_distances[4], flo
 			float3 translation = -observers[0];
 			float4x4 completeTransform = translate(translation);
 
-			for (int i = 0; i < 4; i++)
-				transformedObservers[i] = observers[i] + translation;
+			for (int j = 0; j < 4; j++)
+				transformedObservers[j] = observers[j] + translation;
 
 			// Rotate everything such that the second point lies on the X-axis (collapsing the y and z components)
 			float4x4 rot =  rotate(normalize(transformedObservers[1]), float3(1.0f, 0.0f, 0.0f)); 
-			for (int i = 1; i < 4; i++)
-				transformedObservers[i] = mul(rot, float4(transformedObservers[i], 1.0f)).xyz();
+			for (int j = 1; j < 4; j++)
+				transformedObservers[j] = mul(rot, float4(transformedObservers[j], 1.0f)).xyz();
 
 			// Add the rotation to our transform
 			completeTransform = mul(rot, completeTransform);

@@ -11,7 +11,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#pragma warning(disable:4091) // warning C4091: 'typedef ': ignored on left of '' when no variable is declared
 #include <DbgHelp.h>
+#pragma warning(default:4091) // warning C4091: 'typedef ': ignored on left of '' when no variable is declared
 
 using namespace std;
 

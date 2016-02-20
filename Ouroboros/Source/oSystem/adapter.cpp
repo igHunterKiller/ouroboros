@@ -1,10 +1,11 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
+#include <oCore/guid.h>
+#include <oCore/ref.h>
 #include <oSystem/adapter.h>
 #include <oSystem/display.h>
 #include <oSystem/windows/win_com.h>
 #include <oSystem/windows/win_util.h>
-#include <oCore/guid.h>
-#include <oCore/ref.h>
 #include <oMath/hlsl.h>
 #include <regex>
 
@@ -259,7 +260,6 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 	const bool LookForOutput = all(virtual_desktop_position != int2(oDEFAULT, oDEFAULT));
 
 	int adapter_index = 0;
-	ref<IDXGIOutput> Output;
 	ref<IDXGIAdapter> adapter;
 	while (DXGI_ERROR_NOT_FOUND != Factory->EnumAdapters(adapter_index, &adapter))
 	{
@@ -268,14 +268,14 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 		if (required_version == version_t())
 			required_version = minimum_version(adapter_info.vendor);
 
-		ref<IDXGIOutput> Output;
+		ref<IDXGIOutput> output;
 		if (LookForOutput)
 		{
 			int o = 0;
-			while (DXGI_ERROR_NOT_FOUND != adapter->EnumOutputs(o, &Output))
+			while (DXGI_ERROR_NOT_FOUND != adapter->EnumOutputs(o, &output))
 			{
 				DXGI_OUTPUT_DESC od;
-				Output->GetDesc(&od);
+				output->GetDesc(&od);
 				if (virtual_desktop_position.x >= od.DesktopCoordinates.left 
 					&& virtual_desktop_position.x <= od.DesktopCoordinates.right 
 					&& virtual_desktop_position.y >= od.DesktopCoordinates.top 
@@ -290,7 +290,7 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 					return adapter_info;
 				}
 				o++;
-				Output = nullptr;
+				output = nullptr;
 			}
 		}
 
@@ -316,20 +316,19 @@ info_t find(const display::id& display_id)
 	oV(CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&Factory));
 
 	int adapter_index = 0;
-	ref<IDXGIOutput> Output;
 	ref<IDXGIAdapter> adapter;
 	while (DXGI_ERROR_NOT_FOUND != Factory->EnumAdapters(adapter_index, &adapter))
 	{
-		ref<IDXGIOutput> Output;
+		ref<IDXGIOutput> output;
 		int o = 0;
-		while (DXGI_ERROR_NOT_FOUND != adapter->EnumOutputs(o, &Output))
+		while (DXGI_ERROR_NOT_FOUND != adapter->EnumOutputs(o, &output))
 		{
 			DXGI_OUTPUT_DESC od;
-			Output->GetDesc(&od);
+			output->GetDesc(&od);
 			if (od.Monitor == (HMONITOR)di.native_handle)
 				return get_info(adapter_index, adapter);
 			o++;
-			Output = nullptr;
+			output = nullptr;
 		}
 
 		adapter_index++;

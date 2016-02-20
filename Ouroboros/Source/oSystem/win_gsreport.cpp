@@ -6,6 +6,7 @@ namespace ouro { namespace debugger { void dump_and_terminate(void* _Exceptions,
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#if 0
 
 /***
 *gs_cookie.c - defines buffer overrun security cookie
@@ -345,3 +346,5 @@ void oGSReportInstaller()
 {
 	// NOP Function that merely causes this file to be compiled thus injecting our __report_gsfailure
 }
+
+#endif

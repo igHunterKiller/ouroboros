@@ -27,7 +27,9 @@ void noop_deallocate(void* pointer)
 allocator default_allocator(default_allocate, default_deallocate);
 allocator noop_allocator(noop_allocate, noop_deallocate);
 	
-const char* as_string(const memory_alignment& alignment)
+template<typename T> const char* as_string(const T& value);
+
+template<> const char* as_string<memory_alignment>(const memory_alignment& alignment)
 {
 	static const char* names[] = 
 	{
@@ -53,7 +55,7 @@ const char* as_string(const memory_alignment& alignment)
 	return names[(uint32_t)alignment];
 }
 
-const char* as_string(const memory_type& type)
+template<> const char* as_string<memory_type>(const memory_type& type)
 {
 	static const char* names[] = 
 	{
@@ -78,7 +80,7 @@ namespace detail
 	class allocate_category_impl : public std::error_category
 	{
 	public:
-		const char* name() const override { return "allocate"; }
+		const char* name() const noexcept override { return "allocate"; }
 		std::string message(int errcode) const override
 		{
 			switch (errcode)

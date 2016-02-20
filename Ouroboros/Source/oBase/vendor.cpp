@@ -1,31 +1,33 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
+#include <oString/stringize.h>
 #include <oBase/vendor.h>
 
 namespace ouro {
 
-const char* as_string(const vendor& _Vendor)
+template<> const char* as_string<vendor>(const vendor& v)
 {
-	switch (_Vendor)
+	const char* s_names[] =
 	{
-		case vendor::unknown: return "unknown";
-		case vendor::amd: return "amd";
-		case vendor::apple: return "Apple";
-		case vendor::arm: return "ARM";
-		case vendor::intel: return "Intel";
-		case vendor::internal: return "internal";
-		case vendor::lg: return "LG";
-		case vendor::maxtor: return "Maxtor";
-		case vendor::microsoft: return "Microsoft";
-		case vendor::nintendo: return "Nintendo";
-		case vendor::nvidia: return "NVIDIA";
-		case vendor::sandisk: return "SanDisk";
-		case vendor::samsung: return "Samsung";
-		case vendor::sony: return "Sony";
-		case vendor::vizio: return "Vizio";
-		case vendor::western_digital: return "Western Digital";
-		default: break;
-	}
-	return "?";
+		"unknown",
+		"amd",
+		"Apple",
+		"ARM",
+		"Intel",
+		"internal",
+		"LG",
+		"Maxtor",
+		"Microsoft",
+		"Nintendo",
+		"NVIDIA",
+		"SanDisk",
+		"Samsung",
+		"Sony",
+		"Vizio",
+		"Western Digital",
+	};
+
+	return detail::counted_enum_as_string(v, s_names);
 }
 
 }

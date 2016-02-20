@@ -6,28 +6,28 @@
 #include <oMath/hlsl.h>
 #include <oString/opttok.h>
 #include <oString/string.h>
+#include <oString/stringize.h>
 #include <array>
 #include <chrono>
 
 namespace ouro {
 
-const char* as_string(const unit_test::result& r)
+template<> const char* as_string<unit_test::result>(const unit_test::result& r)
 {
-	switch (r)
+	const char* s_names[] =
 	{
-		case unit_test::result::success: return "success";
-		case unit_test::result::failure: return "failure";
-		case unit_test::result::notfound: return "not found";
-		case unit_test::result::filtered: return "filtered";
-		case unit_test::result::skipped: return "skipped";
-		case unit_test::result::bugged: return "bugged";
-		case unit_test::result::notready: return "not ready";
-		case unit_test::result::leaks: return "leaks";
-		case unit_test::result::perftest: return "perf test";
-		default: break;
-	}
+		"success",
+		"failure",
+		"not found",
+		"filtered",
+		"skipped",
+		"bugged",
+		"not ready",
+		"leaks",
+		"perf test",
+	};
 
-	return "?";
+	return detail::counted_enum_as_string(r, s_names);
 }
 
 namespace unit_test {
@@ -225,7 +225,7 @@ static result run(framework_services& fw, const info_t& info, const registered* 
 					srv.status(e.what());
 				}
 
-				double test_run_time = test_timer.seconds();
+				test_run_time = test_timer.seconds();
 
 				fw.post_test(info);
 

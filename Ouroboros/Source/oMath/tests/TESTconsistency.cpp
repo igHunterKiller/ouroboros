@@ -106,17 +106,17 @@ oTEST(oMath_consistency)
 	}
 
 	{
-		float4x4 proj = proj_fovy_lh(radians(60.0f), 1.0f, 0.1f, 1000.0f);
+		float4x4 proj2 = proj_fovy_lh(radians(60.0f), 1.0f, 0.1f, 1000.0f);
 		float4x4 proj_inv = proj_inv_fovy_lh(radians(60.0f), 1.0f, 0.1f, 1000.0f);
-		float4x4 test_proj_inv = invert(proj);
+		float4x4 test_proj_inv = invert(proj2);
 
 		oCHECK(equal(test_proj_inv, proj_inv), "fused proj + inv calc not the same as inverting proj lh");
 	}
 
 	{
-		float4x4 proj = proj_fovy_rh(radians(60.0f), 1.0f, 0.1f, 1000.0f);
+		float4x4 proj2 = proj_fovy_rh(radians(60.0f), 1.0f, 0.1f, 1000.0f);
 		float4x4 proj_inv = proj_inv_fovy_rh(radians(60.0f), 1.0f, 0.1f, 1000.0f);
-		float4x4 test_proj_inv = invert(proj);
+		float4x4 test_proj_inv = invert(proj2);
 
 		oCHECK(equal(test_proj_inv, proj_inv), "fused proj + inv calc not the same as inverting proj rh");
 	}

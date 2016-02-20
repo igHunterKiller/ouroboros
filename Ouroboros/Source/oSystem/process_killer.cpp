@@ -65,7 +65,7 @@ bool process_killer::kill(const char* msgbox_title, bool prompt_user)
 		if (process::has_debugger_attached(id))
 			continue;
 
-		process::terminate(id, std::errc::operation_canceled);
+		process::terminate(id, (int)std::errc::operation_canceled);
 		if (!process::wait_for(id, std::chrono::seconds(5)))
 			inform.push_back(id);
 	}
@@ -83,7 +83,7 @@ TryAgain:
 			try { process::terminate(pid, 0x0D1EC0DE); }
 			catch (std::system_error& e)
 			{
-				if (e.code().value() != std::errc::no_such_process)
+				if (e.code().value() != (int)std::errc::no_such_process)
 				{
 					path_t name;
 					try { name = process::get_name(pid); }
@@ -112,12 +112,12 @@ TryAgain:
 	r = msg_result::yes;
 	if (prompt_user && !inform.empty())
 	{
-		int start = snprintf(msg, "The following processes could not be terminated:\n");
+		int off = snprintf(msg, "The following processes could not be terminated:\n");
 
 		for (const auto& pid : inform)
-			start += snprintf(msg + start, countof(msg) - start, "%s pid %d (%x)\n", process::get_name(pid), pid, pid);
+			off += snprintf(msg + off, countof(msg) - off, "%s pid %d (%x)\n", process::get_name(pid), pid, pid);
 		
-		snprintf(msg + start, countof(msg) - start, "\nWould you like continue anyway?");
+		snprintf(msg + off, countof(msg) - off, "\nWould you like continue anyway?");
 		r = msgbox(msg_type::yesno, nullptr, msgbox_title, msg);
 	}
 

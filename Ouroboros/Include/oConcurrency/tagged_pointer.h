@@ -12,7 +12,7 @@
 #if o32BIT == 1
 	#define oTAGGED_POINTER_ALIGNMENT 16
 #else
-	#define oTAGGED_POINTER_ALIGNMENT 1
+	#define oTAGGED_POINTER_ALIGNMENT 8
 #endif
 
 namespace ouro {

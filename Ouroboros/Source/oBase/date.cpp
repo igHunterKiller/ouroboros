@@ -478,14 +478,14 @@ size_t strftime(char* dst, size_t dst_size, const char* format, const ntp_date& 
 	} while(false)
 
 #define ADDDUR(durationT) do \
-	{ durationT d = duration_cast<durationT>(fractional); \
-	len = snprintf(w, std::distance(w, wend), "%llu", d.count()); \
+	{ durationT dd = duration_cast<durationT>(fractional); \
+	len = snprintf(w, std::distance(w, wend), "%llu", dd.count()); \
 	ADD_CHECK(); \
 	} while(false)
 
 #define ADDDUR0(pad, durationT) do \
-	{ durationT d = duration_cast<durationT>(fractional); \
-	len = snprintf(w, std::distance(w, wend), "%0" #pad "llu", d.count()); \
+	{ durationT dd = duration_cast<durationT>(fractional); \
+	len = snprintf(w, std::distance(w, wend), "%0" #pad "llu", dd.count()); \
 	ADD_CHECK(); \
 	} while(false)
 

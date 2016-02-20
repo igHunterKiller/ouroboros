@@ -28,7 +28,8 @@ ipch/
 *.opendb 
 *.opensdf 
 *.sdf 
-*.cachefile 
+*.cachefile
+*.VC.opendb
 
 # Build artifacts (careful here, some of the bins and libs are checked in)
 Temp/

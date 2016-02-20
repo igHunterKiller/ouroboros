@@ -147,9 +147,6 @@
     <ClInclude Include="..\..\Include\oBase\scoped_timer.h">
       <Filter>oBase</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\oBase\atomic_type_traits.h">
-      <Filter>oBase\___for_promotion</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\oBase\growable_hash_map.h">
       <Filter>oBase\containers</Filter>
     </ClInclude>

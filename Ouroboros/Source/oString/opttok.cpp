@@ -54,7 +54,7 @@ char opttok(const char** out_value, int argc, const char* argv[], const option* 
 					if (i == argc-1 || isopt(nextarg))
 					{
 						i++;
-						*out_value = (const char*)i;
+						*out_value = (const char*)(uintptr_t)i;
 						return ':';
 					}
 

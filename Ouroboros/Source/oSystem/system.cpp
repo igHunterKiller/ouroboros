@@ -45,21 +45,21 @@ static void now(FILETIME* out_filetime, bool is_utc)
 	}
 }
 
-void now(ntp_timestamp* out_ntp_timestamp)
+template<> void now(ntp_timestamp* out_ntp_timestamp)
 {
 	FILETIME ft;
 	now(&ft, true);
 	*out_ntp_timestamp = date_cast<ntp_timestamp>(ft);
 }
 
-void now(ntp_date* out_ntp_date)
+template<> void now(ntp_date* out_ntp_date)
 {
 	FILETIME ft;
 	now(&ft, true);
 	*out_ntp_date = date_cast<ntp_date>(ft);
 }
 
-void now(date* out_date)
+template<> void now(date* out_date)
 {
 	FILETIME ft;
 	now(&ft, true);
@@ -552,11 +552,11 @@ int spawn_for(const char* cmdline
 		get_line(buffer.data(), user);
 
 	if (timeout_so_far >= timeout)
-		return std::errc::timed_out;
+		return (int)std::errc::timed_out;
 
 	int exit_code = 0;
 	if (!P->exit_code(&exit_code))
-		exit_code = std::errc::operation_in_progress;
+		exit_code = (int)std::errc::operation_in_progress;
 	
 	return exit_code;
 }
@@ -571,9 +571,9 @@ int spawn(const char* cmdline
 
 void spawn_associated_application(const char* document_path, bool for_edit)
 {
-	int hr = (int)ShellExecuteA(nullptr, for_edit ? "edit" : "open", document_path, nullptr, nullptr, SW_SHOW);
+	int hr = (int)(intptr_t)ShellExecuteA(nullptr, for_edit ? "edit" : "open", document_path, nullptr, nullptr, SW_SHOW);
 	if (hr < 32)
-		oThrow(std::errc::no_buffer_space, "The operating system is out of memory or resources.");
+		oThrow(std::errc::no_buffer_space, "ShellExecuteA failed with hr %d", hr);
 }
 
 }}

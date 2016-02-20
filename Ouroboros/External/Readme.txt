@@ -1,13 +1,18 @@
 === oExternals ===
 
-Ouroboros uses certain 3rd-party libraries. They are provided here in a form that compiles with compatible settings by using the same property sheets and same lib/bin directories as the internal Ouroboros code.
+Ouroboros uses 3rd-party libraries in the folling way:
+LINK: link to a lib built in Ourobouros/Externals/oExternals.sln
+BIN:  binary built from provider
+SRC:  source is small enough to be included direction in oProjects.sln
 
-The oExternals solution contains:
-ispc_texcomp libjpegTurbo libpng lzma snappy zlib for building
-
-These are built to Ouroboros/Lib/...
-
-The following 3rd-party source is so small, it's included directly in oProjects projects:
-bullet calfaq OpenBSD tlsf
-
-TBB is used from its binary build. See TBB/oNotes for more info.
+LINK ispc_texcomp
+LINK libjpegTurbo 
+LINK libpng 
+LINK lzma 
+LINK snappy 
+LINK zlib
+SRC  bullet
+SRC  calfaq
+SRC  OpenBSD
+SRC  tlsf
+BIN  TBB

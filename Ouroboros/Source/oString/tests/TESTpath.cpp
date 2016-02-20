@@ -98,10 +98,10 @@ static void TESTpath_standard_cases(unit_test::services& services)
 			test_path P(c.CtorArgument);
 
 			#define TEST_CASE(_API, _Field) do \
-			{	auto test = P._API(); \
-				oCHECK(c._Field || !P.has_##_API(), "\"%s\"." "has_" #_API "() returned true when it should be false (thinks its \"%s\")", c.CtorArgument ? c.CtorArgument : "(empty)", test.c_str()); \
-				oCHECK(!c._Field || !strcmp(test, c._Field), "\"%s\"." #_API "(): expected \"%s\", got \"%s\"" \
-						, c.CtorArgument ? c.CtorArgument : "(empty)", c._Field ? c._Field : "empty", test.empty() ? "(empty)" : test.c_str()); \
+			{	auto test__ = P._API(); \
+				oCHECK(c._Field || !P.has_##_API(), "\"%s\"." "has_" #_API "() returned true when it should be false (thinks its \"%s\")", c.CtorArgument ? c.CtorArgument : "(empty)", test__.c_str()); \
+				oCHECK(!c._Field || !strcmp(test__, c._Field), "\"%s\"." #_API "(): expected \"%s\", got \"%s\"" \
+						, c.CtorArgument ? c.CtorArgument : "(empty)", c._Field ? c._Field : "empty", test__.empty() ? "(empty)" : test__.c_str()); \
 			} while (false)
 
 			path_t::string_type test = P.string();

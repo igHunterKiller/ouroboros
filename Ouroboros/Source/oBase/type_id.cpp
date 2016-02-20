@@ -4,7 +4,7 @@
 
 namespace ouro {
 
-const char* as_string(const type::value& _TypeID)
+template<> const char* as_string<type::value>(const type::value& _TypeID)
 {
 	switch (_TypeID)
 	{

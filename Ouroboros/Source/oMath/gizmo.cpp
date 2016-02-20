@@ -16,23 +16,25 @@
 
 namespace ouro {
 
-const char* as_string(const gizmo::space_t& s)
+template<typename T> const char* as_string(const T& value);
+
+template<> const char* as_string<gizmo::space_t>(const gizmo::space_t& s)
 {
 	static const char* s_names[] = { "local", "world", };
 	return s_names[(int)s];
 }
 
 namespace vector_component
-{	enum value : int8_t
-	{
-		none  = -1,
-		x     =  0,
-		y     =  1,
-		z     =  2,
-		w     =  3,
-		count =  4,
-	};
-}
+{	enum value : int8_t {
+
+	none  = -1,
+	x     =  0,
+	y     =  1,
+	z     =  2,
+	w     =  3,
+	count =  4,
+
+};}
 
 // define constants for scaling, color, etc.
 static const uint32_t s_selected_color                            = color::white;
@@ -102,17 +104,17 @@ vector_component::value initial_pick(
 					{
 						// uniform scale: offset is distance from sphere intersection to center
 
-						const float3 pt = ws_pick0 + t0 * (ws_pick1 - ws_pick0);
-						*out_offset = pt - center;
+						const float3 point = ws_pick0 + t0 * (ws_pick1 - ws_pick0);
+						*out_offset = point - center;
 					}
 
 					else
 					{
 						// axis scale: offset is distance from center to the pick point projected onto the axis
 
-						const float3 end = sphere.xyz();
-						seg_closest_points(center, end, ws_pick0, ws_pick1, &t0, &t1);
-						*out_offset = lerp(center, end, t0) - center;
+						const float3 p1 = sphere.xyz();
+						seg_closest_points(center, p1, ws_pick0, ws_pick1, &t0, &t1);
+						*out_offset = lerp(center, p1, t0) - center;
 					}
 
 					picked = component;
@@ -534,10 +536,10 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 	// Prepare ring template
 	float3* ring_verts = nullptr;
 	{
-		auto info = primitive::circle_info(primitive::tessellation_type::lines, s_facet);
-		auto mem  = alloca(info.total_bytes());
-		primitive::mesh_t indexed(info, mem);
-		primitive::circle_tessellate(&indexed, info.type, s_facet, 1.0f);
+		auto inf = primitive::circle_info(primitive::tessellation_type::lines, s_facet);
+		auto mem = alloca(inf.total_bytes());
+		primitive::mesh_t indexed(inf, mem);
+		primitive::circle_tessellate(&indexed, inf.type, s_facet, 1.0f);
 		ring_verts = (float3*)indexed.positions;
 	}
 
@@ -564,21 +566,21 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 				float4x4 tx = cap_scale * translate(trans) * visual_tx;
 
 				{
-					auto info = primitive::cube_info(primitive::tessellation_type::solid);
-					auto mem  = alloca(info.total_bytes());
+					auto inf = primitive::cube_info(primitive::tessellation_type::solid);
+					auto mem  = alloca(inf.total_bytes());
 
-					primitive::mesh_t indexed(info, mem);
-					primitive::cube_tessellate(&indexed, info.type);
+					primitive::mesh_t indexed(inf, mem);
+					primitive::cube_tessellate(&indexed, inf.type);
 
 					// deindex into output
 					const uint32_t  color     = colors[i];
-					const uint16_t  nindices  = info.nindices;
+					const uint16_t  nindices  = inf.nindices;
 					const uint16_t* indices   = indexed.indices;
 					const float3*   positions = (float3*)indexed.positions;
 
-					for (uint16_t i = 0; i < nindices; i++, out_faces++)
+					for (uint16_t j = 0; j < nindices; j++, out_faces++)
 					{
-						out_faces->position = mul(tx, positions[indices[i]]);
+						out_faces->position = mul(tx, positions[indices[j]]);
 						out_faces->color = color;
 					}
 				}
@@ -649,17 +651,17 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 			uint16_t cone_nverts       = 0;
 			float3* cone_verts         = nullptr;
 			{
-				auto info = primitive::cone_info(primitive::tessellation_type::solid, s_facet);
-				auto mem  = alloca(info.total_bytes());
+				auto inf = primitive::cone_info(primitive::tessellation_type::solid, s_facet);
+				auto mem = alloca(inf.total_bytes());
 		
-				primitive::mesh_t indexed(info, mem);
+				primitive::mesh_t indexed(inf, mem);
 				primitive::mesh_t unindexed;
 
-				cone_nverts         = info.nindices;
+				cone_nverts         = inf.nindices;
 				unindexed.positions = (float*)alloca(sizeof(float3) * cone_nverts);
 		
-				primitive::cone_tessellate(&indexed, info.type, s_facet);
-				primitive::deindex(&unindexed, indexed, info);
+				primitive::cone_tessellate(&indexed, inf.type, s_facet);
+				primitive::deindex(&unindexed, indexed, inf);
 
 				cone_verts = (float3*)unindexed.positions;
 			}

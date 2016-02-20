@@ -1,4 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
+
 #include <oSystem/display.h>
 #include <oSystem/windows/win_error.h>
 
@@ -40,7 +41,6 @@ id get_id(void* _NativeHandle)
 	});
 
 	oCheck(ID != id(), std::errc::no_such_device, "");
-
 	return ID;
 }
 
@@ -132,7 +132,6 @@ void enumerate(const std::function<bool(const info& _Info)>& _Enumerator)
 	dev.cb = sizeof(dev);
 	int index = 0;
 
-	info di;
 	while (EnumDisplayDevices(0, index, &dev, 0))
 	{
 		info di = get_info(index, dev);

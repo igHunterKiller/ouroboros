@@ -36,10 +36,10 @@ public:
 	void stop() { running = false; }
 
 	
-	virtual void on_dir_event(filesystem::file_event::value e, const path_t& p) {}
+	virtual void on_dir_event(filesystem::file_event e, const path_t& p) {}
 
 protected:
-	void internal_on_dir_event(filesystem::file_event::value e, const path_t& p);
+	void internal_on_dir_event(filesystem::file_event e, const path_t& p);
 
 	std::shared_ptr<window> window;
 	pad_t pads[pad_t::max_num_pads];

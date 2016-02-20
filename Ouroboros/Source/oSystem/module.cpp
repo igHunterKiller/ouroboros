@@ -7,11 +7,13 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#pragma warning(disable:4091) // warning C4091: 'typedef ': ignored on left of '' when no variable is declared
 #include <Dbghelp.h>
+#pragma warning(default:4091) // warning C4091: 'typedef ': ignored on left of '' when no variable is declared
 
 namespace ouro {
 
-const char* as_string(const module::type& type)
+template<> const char* as_string(const module::type& type)
 {
 	switch (type)
 	{
