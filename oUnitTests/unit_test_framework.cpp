@@ -3,7 +3,7 @@
 #include "unit_test_framework.h"
 #include <oCore/countof.h>
 #include <oCore/color.h>
-#include <oBase/scc.h>
+#include <oBase/vcs_git.h>
 #include <oConcurrency/concurrency.h>
 #include <oSystem/adapter.h>
 #include <oSystem/cpu.h>
@@ -67,36 +67,31 @@ static void print_header(const unit_test::info_t& info, unit_test::services& srv
 		srv.printf(unit_test::print_type::info, "Video Driver: %s v%s\n", adapter_info.description.c_str(), to_string(buf, adapter_info.version));
 	}
 
-	auto scc = make_scc(scc_protocol::svn, 
-	[](const char* cmdline, scc_get_line_fn get_line, void* user, uint32_t timeout_ms)->int
-	{
-		return system::spawn_for(cmdline, get_line, user, false, timeout_ms);
+	vcs_init_t init;
+	system::default_vcs_init(&init);
 
-	}, nullptr);
+	git_t vcs(init);
 
 	path_t dev = filesystem::dev_path();
-	lstring CLStr;
-	uint CL = 0;//scc->revision(dev); //@tony  this takes too long
-	if (CL)
+	char rev_str[128];
+	auto revision = vcs.revision(dev);
+	revision.to_string(rev_str);
+	if (!!revision)
 	{
 		try
 		{
-			if (scc->is_up_to_date(dev, CL))
-				snprintf(CLStr, "%d", CL);
-			else
-				snprintf(CLStr, "%d + modifications", CL);
+			if (!vcs.is_up_to_date(dev/*, revision*/)) // specific revision not yet implemented
+				strlcat(rev_str, " + modifications");
 		}
 
 		catch (std::exception& e)
 		{
-			snprintf(CLStr, "%d + ???", CL);
+			strlcat(rev_str, " + ???");
 			srv.trace("scc failure: %s", e.what());
 		}
 	}
-	else
-		snprintf(CLStr, "???");
 
-	srv.printf(unit_test::print_type::info, "SCC Revision: %s\n", CLStr.c_str());
+	srv.printf(unit_test::print_type::info, "SCC Revision: %s\n", rev_str);
 }
 
 void ouro_unit_test_framework::check_system_requirements(const unit_test::info_t& info)
@@ -267,39 +262,37 @@ void ouro_unit_test_framework::check(const ouro::surface::image& img, int nth, f
 	golden_image_.test(test_name_, img, nth, max_rms_error, unit_test_info_.diff_image_mult);
 }
 
-static bool scc_push_modified(std::vector<scc_file>& modified)
+static bool vcs_push_modified(std::vector<vcs_file>& modified)
 {
 	modified.clear();
 	modified.reserve(128);
 
-	auto scc = make_scc(scc_protocol::svn, 
-	[](const char* cmdline, scc_get_line_fn get_line, void* user, uint32_t timeout_ms)->int
-	{
-		return system::spawn_for(cmdline, get_line, user, false, timeout_ms);
+	vcs_init_t init;
+	system::default_vcs_init(&init);
 
-	}, nullptr);
+	git_t vcs(init);
 
 	path_t branch_path = filesystem::dev_path();
 
 	try
 	{ 
-		scc->status(branch_path, 0, scc_visit_option::modified_only, [](const scc_file& file, void* user)
+		vcs.status(branch_path, [](const vcs_file& file, void* user)
 		{
-			auto& modified = *(std::vector<scc_file>*)user;
-
+			auto& modified = *(std::vector<vcs_file>*)user;
 			modified.push_back(file);
-		}, &modified);
+
+		}, &modified, vcs_visit_option::modified);
 	}
 
 	catch (std::system_error& e)
 	{
 		if (e.code() == std::errc::no_such_file_or_directory)
 		{
-			oTraceA("'%s' must be in the path for filtering to work", as_string(scc->protocol()));
+			oTraceA("%s executable must be in the path for filtering to work", as_string(vcs.protocol()));
 			return false;
 		}
 		else
-			oTraceA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(scc->protocol()), e.what());
+			oTraceA("vcs could not find modified files. This may indicate %s is not accessible. (%s)", as_string(vcs.protocol()), e.what());
 
 		return false;
 	}
@@ -307,17 +300,17 @@ static bool scc_push_modified(std::vector<scc_file>& modified)
 	catch (std::exception& e)
 	{
 		e;
-		oTraceA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(scc->protocol()), e.what());
+		oTraceA("scc could not find modified files. This may indicate '%s' is not accessible. (%s)", as_string(vcs.protocol()), e.what());
 		return false;
 	}
 
 	return true;
 }
 
-static void scc_scan_for_changes(const char** paths, bool* has_changes, size_t num_paths)
+static void vcs_scan_for_changes(const char** paths, bool* has_changes, size_t num_paths)
 {
-	std::vector<scc_file> modified;
-	if (!scc_push_modified(modified))
+	std::vector<vcs_file> modified;
+	if (!vcs_push_modified(modified))
 	{
 		// cannot verify state, so assume its all dirty
 		memset(has_changes, true, sizeof(bool) * num_paths);
@@ -408,9 +401,7 @@ void auto_filter_libs(std::vector<ouro::filter_chain::filter_t>& filters)
 	static_assert(countof(s_libs) == countof(s_patterns), "array mismatch");
 
 	bool has_changes[countof(s_libs)];
-	scc_scan_for_changes(s_libs, has_changes, countof(s_libs));
-
-	oTrace("scc changes will not be detected until a git implementation is done");
+	vcs_scan_for_changes(s_libs, has_changes, countof(s_libs));
 
 	// append an exclusion filter for anything that hasn't changed
 	for (size_t i = 0; i < countof(has_changes); i++)

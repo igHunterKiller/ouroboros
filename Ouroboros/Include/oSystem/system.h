@@ -4,9 +4,14 @@
 
 #pragma once
 #include <oBase/date.h>
+#include <oString/fixed_string.h>
 #include <cstdint>
 
-namespace ouro { namespace system {
+namespace ouro { 
+
+struct vcs_init_t;
+
+namespace system {
 
 enum class privilege
 {
@@ -125,12 +130,11 @@ template<size_t capacity> char* envstr(fixed_string<char, capacity>& env_string)
 // Set the specified privilege for this process, if allowed by the system.
 void set_privilege(privilege privilege, bool enabled = true);
 
-// Spawns a child process to execute the specified command line. For each line
-// emitted to stdout by the process, _GetLine is called so this calling process
-// can react to the child's output. This returns the exit code of the process,
-// or if the timeout is reached, this will return std::errc::timed_out. This 
-// can also return std::errc::operation_in_process if the process did not time 
-// out but still is not ready to return an exit code.
+// Spawns a child process to execute the specified command line. get_line is 
+// called on each line emitted to stdout by the process. This returns the 
+// exit code of the process, or std::errc::timed_out if the timeout is reached.
+// This can also return std::errc::operation_in_process if the process did not 
+// time  out but still is not ready to return an exit code.
 
 typedef void (*get_line_fn)(char* line, void* user);
 
@@ -160,5 +164,8 @@ int spawn(const char* cmdline
 // Spawns the application associated with the specified document_name by the 
 // operating system and opens or edits that document.
 void spawn_associated_application(const char* document_path, bool for_edit = false);
+
+// configures a vcs_init to use spawn_for with a 5-sec timeout
+void default_vcs_init(vcs_init_t* out_init);
 
 }}

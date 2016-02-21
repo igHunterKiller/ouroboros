@@ -1,8 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oMesh/codec.h>
-//#include <oMemory/memory.h>
-//#include <oString/string.h>
+#include <oString/string.h>
 
 namespace ouro { namespace mesh {
 

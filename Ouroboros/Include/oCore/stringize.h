@@ -127,7 +127,7 @@ template<> inline       char* to_string(char* dst, size_t dst_size, const char* 
 template<> inline       char* to_string(char* dst, size_t dst_size, const bool& value)        { return -1 != snprintf(dst, dst_size, "%s", value ? "true" : "false") ? dst : nullptr; }
 template<> inline       char* to_string(char* dst, size_t dst_size, const char& value)        { if (!dst || dst_size < 2) return nullptr; dst[0] = value; dst[1] = '\0'; return dst; }
 template<> inline       char* to_string(char* dst, size_t dst_size, const uint8_t& value)     { if (!dst || dst_size < 2) return nullptr; dst[0] = (char)value; dst[1] = '\0'; return dst; }
-#define oDEFINE_TO_STRING_BUILTIN(_T, _Tfmt) template<> inline char* to_string(char* dst, size_t dst_size, const _T& value) { return -1 != snprintf(dst, dst_size, _Tfmt) ? dst : nullptr; }
+#define oDEFINE_TO_STRING_BUILTIN(_T, _Tfmt) template<> inline char* to_string(char* dst, size_t dst_size, const _T& value) { return -1 != snprintf(dst, dst_size, _Tfmt, value) ? dst : nullptr; }
 oDEFINE_TO_STRING_BUILTIN(int16_t, "%hd" ) oDEFINE_TO_STRING_BUILTIN(uint16_t,      "%hu" )
 oDEFINE_TO_STRING_BUILTIN(int32_t, "%d"  ) oDEFINE_TO_STRING_BUILTIN(uint32_t,      "%u"  )
 oDEFINE_TO_STRING_BUILTIN(long,    "%d"  ) oDEFINE_TO_STRING_BUILTIN(unsigned long, "%u"  )

@@ -120,7 +120,7 @@ private:
 	void CreateControls(const window::create_event& _CreateEvent);
 	void CheckState(window_state _State);
 	void CheckStyle(window_style _Style);
-	void OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path);
+	static void OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path, void* _User);
 };
 
 oWindowTestApp::oWindowTestApp()
@@ -132,7 +132,8 @@ oWindowTestApp::oWindowTestApp()
 		filesystem::monitor::info i;
 		i.accessibility_poll_rate_ms = 2000;
 		i.accessibility_timeout_ms = 5000;
-		DirWatcher = filesystem::monitor::make(i, std::bind(&oWindowTestApp::OnDirectoryEvent, this, std::placeholders::_1, std::placeholders::_2));
+
+		DirWatcher = filesystem::monitor::make(i, &oWindowTestApp::OnDirectoryEvent, this);
 	}
 
 	{
@@ -230,7 +231,7 @@ void oWindowTestApp::CheckStyle(window_style _Style)
 	, oWMI_VIEW_STYLE_FIRST, oWMI_VIEW_STYLE_LAST, oWMI_VIEW_STYLE_FIRST + (int)_Style);
 }
 
-void oWindowTestApp::OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path)
+void oWindowTestApp::OnDirectoryEvent(filesystem::file_event _Event, const path_t& _Path, void* _User)
 {
 	static std::atomic<int> counter = 0;
 

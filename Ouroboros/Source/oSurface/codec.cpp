@@ -1,5 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+#include <oString/string.h>
 #include <oSurface/codec.h>
 #include <oSurface/convert.h>
 #include <oMemory/memory.h>

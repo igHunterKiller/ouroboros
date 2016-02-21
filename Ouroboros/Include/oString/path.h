@@ -176,7 +176,8 @@ public:
 		auto tmp = extension();
 		if (has_extension())
 			p[extension_offset_] = 0;
-		p.append(new_suffix).append(tmp);
+		p.append(new_suffix);
+		p.append(tmp);
 		parse();
 		return *this;
 	}

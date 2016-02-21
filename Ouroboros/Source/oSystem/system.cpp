@@ -7,6 +7,7 @@
 #include <oSystem/windows/win_util.h>
 #include <oSystem/windows/win_version.h>
 #include <oBase/date.h>
+#include <oBase/vcs.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -471,13 +472,16 @@ static size_t line_enumerator(char* buffer, size_t read_size, get_line_fn get_li
 	char* line = buffer;
 	size_t eol = strcspn(line, oNEWLINE);
 
-	while (line[eol] != '\0')
+	size_t visited_offset = 0;
+
+	while (visited_offset < read_size || line[eol] != '\0')
 	{
 		line[eol] = '\0';
 		get_line(line, user);
 		line += eol + 1;
 		line += strspn(line, oNEWLINE);
 		eol = strcspn(line, oNEWLINE);
+		visited_offset = size_t(line - buffer);
 	}
 
 	return strlcpy(buffer, line, read_size);
@@ -514,19 +518,19 @@ int spawn_for(const char* cmdline
 
 	// need to flush stdout once in a while or it can hang the process if we are 
 	// redirecting output
-	bool once = false;
 
 	static const uint32_t ktimeoutPerFlushMS = 50;
-	double timeout = execution_timeout_ms == INFINITE ? DBL_MAX : (1000.0 * static_cast<double>(execution_timeout_ms));
+	double timeout = execution_timeout_ms == INFINITE ? DBL_MAX : (0.001 * static_cast<double>(execution_timeout_ms));
 	double timeout_so_far = 0.0;
+	//bool once = false;
 	timer t;
 	do
 	{
-		if (!once)
-		{
-			oTraceA("spawn stdout: >>> %s <<<", oSAFESTRN(cmdline));
-			once = true;
-		}
+		//if (!once)
+		//{
+		//	oTraceA("spawn stdout: >>> %s <<<", oSAFESTRN(cmdline));
+		//	once = true;
+		//}
 		
 		size_t read_size = P->from_stdout((void*)buffer.data(), buffer.size() - 1);
 		while (read_size && get_line)
@@ -574,6 +578,12 @@ void spawn_associated_application(const char* document_path, bool for_edit)
 	int hr = (int)(intptr_t)ShellExecuteA(nullptr, for_edit ? "edit" : "open", document_path, nullptr, nullptr, SW_SHOW);
 	if (hr < 32)
 		oThrow(std::errc::no_buffer_space, "ShellExecuteA failed with hr %d", hr);
+}
+
+void default_vcs_init(vcs_init_t* out_init)
+{
+	out_init->spawn = [](const char* cmdline, vcs_get_line_fn get_line, void* user, uint32_t timeout_ms)->int { return system::spawn_for(cmdline, (system::get_line_fn)get_line, user, false, timeout_ms); };
+	out_init->timeout_ms = 5000;
 }
 
 }}

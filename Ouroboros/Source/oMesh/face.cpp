@@ -168,8 +168,8 @@ template<typename T> void min_max_indicesT(const T* oRESTRICT indices
 		const uint32_t end = start_index + num_indices;
 		for (uint32_t i = start_index; i < end; i++)
 		{
-			*out_min_vertex = min(*out_min_vertex, indices[i]);
-			*out_max_vertex = max(*out_max_vertex, indices[i]);
+			*out_min_vertex = __min(*out_min_vertex, indices[i]);
+			*out_max_vertex = __max(*out_max_vertex, indices[i]);
 		}
 	}
 

@@ -6,6 +6,7 @@
 #pragma once
 #include <array>
 #include <functional>
+#include <oMath/hlsl.h>
 
 namespace ouro { namespace windows { namespace skeleton {
 

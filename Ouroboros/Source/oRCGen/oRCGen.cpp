@@ -1,7 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oString/opttok.h>
-#include <oBase/scc.h>
+#include <oBase/vcs.h>
 #include <oCore/assert.h>
 #include <oCore/version.h>
 #include <oSystem/filesystem.h>
@@ -97,6 +97,8 @@ int ShowHelp(const char* argv0)
 
 int main(int argc, const char* argv[])
 {
+		throw std::exception("needs scc -> vcs migration");
+#if 0
 	try
 	{
 		oOPT opt = ParseOptions(argc, argv);
@@ -151,6 +153,7 @@ int main(int argc, const char* argv[])
 		if (opt.Description) sncatf(s, "#define oRC_DESCRIPTION \"%s\"\n", opt.Description);
 
 		filesystem::save(opt.Output, s, s.length(), filesystem::save_option::text_write);
+
 	}
 
 	catch (std::exception& e)
@@ -161,4 +164,5 @@ int main(int argc, const char* argv[])
 	}
 
 	return 0;
+#endif
 }

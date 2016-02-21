@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="scc.cpp">
-      <Filter>Source\scc</Filter>
-    </ClCompile>
-    <ClCompile Include="scc_svn.cpp">
-      <Filter>Source\scc</Filter>
-    </ClCompile>
     <ClCompile Include="vendor.cpp">
       <Filter>Source\types</Filter>
     </ClCompile>
@@ -79,6 +73,15 @@
     <ClCompile Include="stringize_base.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="vcs.cpp">
+      <Filter>Source\vcs</Filter>
+    </ClCompile>
+    <ClCompile Include="vcs_svn.cpp">
+      <Filter>Source\vcs</Filter>
+    </ClCompile>
+    <ClCompile Include="vcs_git.cpp">
+      <Filter>Source\vcs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\oBase\fixed_vector.h">
@@ -89,9 +92,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\all.h">
       <Filter>oBase</Filter>
-    </ClInclude>
-    <ClInclude Include="scc_svn.h">
-      <Filter>Source\scc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\vendor.h">
       <Filter>oBase\types</Filter>
@@ -116,9 +116,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\all_libc.h">
       <Filter>oBase\c++ support</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\oBase\scc.h">
-      <Filter>oBase\scc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\concurrent_growable_object_pool.h">
       <Filter>oBase\allocator</Filter>
@@ -171,6 +168,15 @@
     <ClInclude Include="..\..\Include\oBase\compression.h">
       <Filter>oBase</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\vcs.h">
+      <Filter>oBase\vcs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\vcs_git.h">
+      <Filter>oBase\vcs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\vcs_svn.h">
+      <Filter>oBase\vcs</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source">
@@ -178,9 +184,6 @@
     </Filter>
     <Filter Include="oBase">
       <UniqueIdentifier>{d637e98e-1add-49e9-95e0-bd1b71955a2e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\scc">
-      <UniqueIdentifier>{faf8a815-382c-4877-ac89-9124ec38fd94}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source\types">
       <UniqueIdentifier>{c27deb6f-a0b6-4c75-a1d1-93fb595d0465}</UniqueIdentifier>
@@ -209,14 +212,17 @@
     <Filter Include="oBase\c++ support">
       <UniqueIdentifier>{d6ae7f6e-a634-407b-a944-6e28f8923385}</UniqueIdentifier>
     </Filter>
-    <Filter Include="oBase\scc">
-      <UniqueIdentifier>{dedc6645-18e5-4b85-b45b-e6d9aafc9ace}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\containers">
       <UniqueIdentifier>{1898cd4f-ca80-45c7-910a-31a29fdf3867}</UniqueIdentifier>
     </Filter>
     <Filter Include="oBase\serialization">
       <UniqueIdentifier>{654e46c0-d2ce-4af7-bd25-f00655dba264}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="oBase\vcs">
+      <UniqueIdentifier>{dedc6645-18e5-4b85-b45b-e6d9aafc9ace}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source\vcs">
+      <UniqueIdentifier>{faf8a815-382c-4877-ac89-9124ec38fd94}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

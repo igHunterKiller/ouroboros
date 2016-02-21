@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oCore/finally.h>
+#include <oString/string.h>
 #include <oSystem/serial_port.h>
 
 #include <oSystem/windows/win_error.h>
@@ -116,10 +117,10 @@ void serial_port_impl::send(const void* _pBuffer, size_t _SizeofBuffer)
 	oVB(WriteFile(hFile, _pBuffer, static_cast<DWORD>(_SizeofBuffer), &written, nullptr));
 	if (written != static_cast<DWORD>(_SizeofBuffer))
 	{
-		sstring b1, b2;
+		char b1[64], b2[64];
 		format_bytes(b1, _SizeofBuffer, 2);
 		format_bytes(b2, written, 2);
-		oThrow(std::errc::io_error, "requested send of %s, but sent %d", b1.c_str(), b2.c_str());
+		oThrow(std::errc::io_error, "requested send of %s, but sent %d", b1, b2);
 	}
 }
 

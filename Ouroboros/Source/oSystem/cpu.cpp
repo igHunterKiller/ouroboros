@@ -2,6 +2,7 @@
 
 #include <oCore/bit.h>
 #include <oCore/countof.h>
+#include <oString/string.h>
 #include <oSystem/cpu.h>
 #include <oSystem/windows/win_error.h>
 #include <oSystem/windows/win_version.h>

@@ -54,19 +54,30 @@ namespace ouro {
 		size_type length() const { return size(); }
 		/* constexpr */ size_type capacity() const { return Capacity; }
 
-		fixed_string& assign(const char_type* start, const char_type* end)
+		size_type assign(const char_type* start, const char_type* end)
 		{
 			ptrdiff_t size = std::distance(start, end);
 			if (size >= Capacity)
 				throw std::length_error("destination is not large enough");
 			traits::copy(s, start, size + 1);
 			s[size] = 0;
-			return *this;
+			return size;
 		}
 
-		fixed_string& append(const char_type* str) { if (traits::cat(s, str, Capacity) > Capacity) throw std::length_error("destination is not large enough"); return *this; }
+		size_type assign(const char_type* str)
+		{
+			return traits::copy(s, str, Capacity);
+		}
 
-		fixed_string& append(const char_type* start, const char_type* end)
+		size_type append(const char_type* str)
+		{
+			size_type size = traits::cat(s, str, Capacity);
+			if (size > Capacity)
+				throw std::length_error("destination is not large enough");
+			return size;
+		}
+
+		size_type append(const char_type* start, const char_type* end)
 		{
 			size_type size = length();
 			char_type* st = s + size;
@@ -75,16 +86,16 @@ namespace ouro {
 				throw std::length_error("destination is not large enough");
 			traits::copy(st, start, Capacity);
 			s[size] = 0;
-			return *this;
+			return size;
 		}
 
-		fixed_string& append(const string_piece_type& str) { return append(str.first, str.second); }
+		size_type append(const string_piece_type& str) { return append(str.first, str.second); }
 
-		fixed_string& append(char_type c) { char_type str[2] = { c, '\0'}; return append(str); }
+		size_type append(char_type c) { char_type str[2] = { c, '\0'}; return append(str); }
 
-		fixed_string& operator+=(const char_type* str) { return append(str); }
-		fixed_string& operator+=(const string_piece_type& str) { return append(str); }
-		fixed_string& operator+=(char_type c) { return append(c); }
+		fixed_string& operator+=(const char_type* str) { append(str); return *this;  }
+		fixed_string& operator+=(const string_piece_type& str) { append(str); return *this;  }
+		fixed_string& operator+=(char_type c) { append(c); return *this;  }
 
 		void copy_to(charT* dst, size_t dst_size) const
 		{
