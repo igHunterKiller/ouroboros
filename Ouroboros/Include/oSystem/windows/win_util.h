@@ -56,7 +56,7 @@ private:
 
 // primarily intended for id classes
 template<typename T> DWORD asdword(const T& _ID) { return *((DWORD*)&_ID); }
-template<> inline DWORD asdword(const std::thread::id& _ID) { return ((_Thrd_t*)&_ID)->_Id; }
+template<> inline DWORD asdword(const std::thread::id& _ID) { return *(DWORD*)&_ID; }
 inline std::thread::id astid(DWORD _ID)
 {
 #if _MSC_VER >= oVS2015_VER
