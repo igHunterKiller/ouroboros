@@ -13,8 +13,7 @@
 
 using namespace std;
 
-namespace ouro {
-	namespace windows {
+namespace ouro { namespace windows {
 
 #if _DEBUG
 class local_timeout
@@ -47,7 +46,7 @@ namespace op
 struct iocp_overlapped : public OVERLAPPED
 {
 	HANDLE handle;
-	iocp::completion_t completion;
+	iocp::completion_fn completion;
 	void* context;
 };
 
@@ -61,16 +60,16 @@ public:
 
 	// Waits for all work to be completed
 	void wait() { wait_for(~0u); }
-	bool wait_for(unsigned int _TimeoutMS);
+	bool wait_for(unsigned int timeout_ms);
 	bool joinable() const;
 	void join();
 
-	OVERLAPPED* associate(HANDLE _Handle, iocp::completion_t _Completion, void* _pContext);
-	void disassociate(OVERLAPPED* _pOverlapped);
-	void post_completion(OVERLAPPED* _pOverlapped);
-	void post(iocp::completion_t _Completion, void* _pContext);
+	OVERLAPPED* associate(HANDLE handle, iocp::completion_fn completion, void* context);
+	void disassociate(OVERLAPPED* overlapped);
+	void post_completion(OVERLAPPED* overlapped);
+	void post(iocp::completion_fn completion, void* context);
 private:
-	iocp_threadpool() : hIoPort(INVALID_HANDLE_VALUE), NumRunningThreads(0), NumAssociations(0) {}
+	iocp_threadpool() : hioport_(INVALID_HANDLE_VALUE), num_running_threads_(0), num_associations_(0) {}
 	iocp_threadpool(size_t _OverlappedCapacity, size_t _NumWorkers = 0);
 	~iocp_threadpool();
 	iocp_threadpool(iocp_threadpool&& _That) { operator=(move(_That)); }
@@ -78,10 +77,10 @@ private:
 
 	void work();
 
-	HANDLE hIoPort;
-	vector<thread> Workers;
-	atomic<size_t> NumRunningThreads;
-	size_t NumAssociations;
+	HANDLE         hioport_;
+	vector<thread> workers_;
+	atomic<size_t> num_running_threads_;
+	size_t         num_associations_;
 
 	concurrent_object_pool<iocp_overlapped> pool;
 
@@ -97,20 +96,20 @@ unsigned int iocp_threadpool::concurrency()
 void iocp_threadpool::work()
 {
 	debugger::thread_name("iocp worker");
-	NumRunningThreads++;
+	num_running_threads_++;
 	while (true)
 	{
-		bool CallCompletion = false;
-		DWORD nBytes = 0;
+		bool call_completion = false;
+		DWORD nbytes = 0;
 		ULONG_PTR key = 0;
 		iocp_overlapped* ol = nullptr;
-		if (GetQueuedCompletionStatus(hIoPort, &nBytes, &key, (OVERLAPPED**)&ol, INFINITE))
+		if (GetQueuedCompletionStatus(hioport_, &nbytes, &key, (OVERLAPPED**)&ol, INFINITE))
 		{
-			if (op::post == nBytes)
+			if (op::post == nbytes)
 			{
 				try
 				{
-					iocp::completion_t complete = (iocp::completion_t)key;
+					iocp::completion_fn complete = (iocp::completion_fn)key;
 					if (complete)
 						complete(ol, 0);
 				}
@@ -126,19 +125,19 @@ void iocp_threadpool::work()
 				break;
 			
 			else if (op::completion == key)
-				CallCompletion = true;
+				call_completion = true;
 			else
 				oThrow(std::errc::operation_not_supported, "CompletionKey %p not supported", key);
 		}
 		else if (ol)
-				CallCompletion = true;
+				call_completion = true;
 
-		if (CallCompletion)
+		if (call_completion)
 		{
 			try
 			{
 				if (ol->completion)
-					ol->completion(ol->context, nBytes);
+					ol->completion(ol->context, nbytes);
 			}
 
 			catch (std::exception& e)
@@ -148,13 +147,13 @@ void iocp_threadpool::work()
 			}
 		}
 	}
-	NumRunningThreads--;
+	num_running_threads_--;
 }
 
 iocp_threadpool& iocp_threadpool::singleton()
 {
-	static iocp_threadpool* sInstance = nullptr;
-	if (!sInstance)
+	static iocp_threadpool* s_instance = nullptr;
+	if (!s_instance)
 	{
 		process_heap::find_or_allocate(
 			"iocp"
@@ -162,7 +161,7 @@ iocp_threadpool& iocp_threadpool::singleton()
 			, process_heap::garbage_collected
 			, [=](void* _pMemory) { new (_pMemory) iocp_threadpool(128); }
 			, [=](void* _pMemory) { ((iocp_threadpool*)_pMemory)->~iocp_threadpool(); }
-			, &sInstance);
+			, &s_instance);
 
 			// This is a workaround for some stuff going on in libc. Basically when
 			// these threads end, they lock a libc mutex which can be created for the
@@ -170,10 +169,10 @@ iocp_threadpool& iocp_threadpool::singleton()
 			// atexit. This dtor executes during atexit, so basically there's a 
 			// deadlock. Tickle that mutex by destroying threads here, but then bring
 			// it all back up.
-			sInstance->~iocp_threadpool();
-			new (sInstance) iocp_threadpool(128);
+			s_instance->~iocp_threadpool();
+			new (s_instance) iocp_threadpool(128);
 	}
-	return *sInstance;
+	return *s_instance;
 }
 
 void* iocp_threadpool::find_instance()
@@ -184,9 +183,9 @@ void* iocp_threadpool::find_instance()
 }
 
 iocp_threadpool::iocp_threadpool(size_t _OverlappedCapacity, size_t _NumWorkers)
-	: hIoPort(nullptr)
-	, NumRunningThreads(0)
-	, NumAssociations(0)
+	: hioport_(nullptr)
+	, num_running_threads_(0)
+	, num_associations_(0)
 {
 	auto req = pool.calc_size((uint32_t)_OverlappedCapacity);
 	void* mem = default_allocate(req, "iocp_threadpool", memory_alignment::cacheline);
@@ -196,17 +195,17 @@ iocp_threadpool::iocp_threadpool(size_t _OverlappedCapacity, size_t _NumWorkers)
 	reporting::ensure_initialized();
 
 	const size_t NumWorkers = _NumWorkers ? _NumWorkers : thread::hardware_concurrency();
-	hIoPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, static_cast<DWORD>(NumWorkers));
-	oVB(hIoPort);
+	hioport_ = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, static_cast<DWORD>(NumWorkers));
+	oVB(hioport_);
 
-	Workers.resize(NumWorkers);
+	workers_.resize(NumWorkers);
 	auto worker = bind(&iocp_threadpool::work, this);
-	NumRunningThreads = 0;
-	for (auto& w : Workers)
+	num_running_threads_ = 0;
+	for (auto& w : workers_)
 		w = move(thread(worker));
 
 	backoff bo;
-	while (NumRunningThreads != Workers.size())
+	while (num_running_threads_ != workers_.size())
 		bo.pause();
 }
 
@@ -231,16 +230,16 @@ iocp_threadpool& iocp_threadpool::operator=(iocp_threadpool&& _That)
 {
 	if (this != &_That)
 	{
-		hIoPort = _That.hIoPort; _That.hIoPort = INVALID_HANDLE_VALUE;
-		Workers = move(_That.Workers);
-		NumRunningThreads.store(_That.NumRunningThreads); _That.NumRunningThreads = 0;
-		NumAssociations = _That.NumAssociations; _That.NumAssociations = 0;
+		hioport_ = _That.hioport_; _That.hioport_ = INVALID_HANDLE_VALUE;
+		workers_ = move(_That.workers_);
+		num_running_threads_.store(_That.num_running_threads_); _That.num_running_threads_ = 0;
+		num_associations_ = _That.num_associations_; _That.num_associations_ = 0;
 		pool = move(_That.pool);
 	}
 	return *this;
 }
 
-bool iocp_threadpool::wait_for(unsigned int _TimeoutMS)
+bool iocp_threadpool::wait_for(unsigned int timeout_ms)
 {
 	backoff bo;
 
@@ -250,9 +249,9 @@ bool iocp_threadpool::wait_for(unsigned int _TimeoutMS)
 		local_timeout to(5.0);
 	#endif
 
-	while (NumAssociations > 0)
+	while (num_associations_ > 0)
 	{ 
-		if (_TimeoutMS != ~0u && timer::now_msi() >= (start + _TimeoutMS))
+		if (timeout_ms != ~0u && timer::now_msi() >= (start + timeout_ms))
 			return false;
 
 		bo.pause();
@@ -260,7 +259,7 @@ bool iocp_threadpool::wait_for(unsigned int _TimeoutMS)
 		#ifdef _DEBUG
 			if (to.timed_out())
 			{
-				oTrace("Waiting for %u outstanding iocp associations to finish...", NumAssociations);
+				oTrace("Waiting for %u outstanding iocp associations to finish...", num_associations_);
 				to.reset(5.0);
 			}
 		#endif
@@ -271,7 +270,7 @@ bool iocp_threadpool::wait_for(unsigned int _TimeoutMS)
 
 bool iocp_threadpool::joinable() const
 {
-	return INVALID_HANDLE_VALUE != hIoPort;
+	return INVALID_HANDLE_VALUE != hioport_;
 }
 
 void iocp_threadpool::join()
@@ -279,58 +278,58 @@ void iocp_threadpool::join()
 	oCheck(joinable(), std::errc::invalid_argument, "");
 	oCheck(wait_for(20000), std::errc::timed_out, "timed out waiting for iocp completion");
 
-	for (auto& w : Workers)
-		PostQueuedCompletionStatus(hIoPort, 0, op::shutdown, nullptr);
+	for (auto& w : workers_)
+		PostQueuedCompletionStatus(hioport_, 0, op::shutdown, nullptr);
 
-	for (auto& w : Workers)
+	for (auto& w : workers_)
 		if (w.joinable())
 			w.join();
 
-	if (INVALID_HANDLE_VALUE != hIoPort)
+	if (INVALID_HANDLE_VALUE != hioport_)
 	{
-		CloseHandle(hIoPort);
-		hIoPort = INVALID_HANDLE_VALUE;
+		CloseHandle(hioport_);
+		hioport_ = INVALID_HANDLE_VALUE;
 	}
 }
 
-OVERLAPPED* iocp_threadpool::associate(HANDLE _Handle, iocp::completion_t _Completion, void* _pContext)
+OVERLAPPED* iocp_threadpool::associate(HANDLE handle, iocp::completion_fn completion, void* context)
 {
-	NumAssociations++;
+	num_associations_++;
 	iocp_overlapped* ol = pool.create();
 	if (ol)
 	{
-		if (hIoPort != CreateIoCompletionPort(_Handle, hIoPort, op::completion, static_cast<DWORD>(Workers.size())))
+		if (hioport_ != CreateIoCompletionPort(handle, hioport_, op::completion, static_cast<DWORD>(workers_.size())))
 		{
 			disassociate(ol);
 			oVB(false);
 		}
 
 		memset(ol, 0, sizeof(OVERLAPPED));
-		ol->handle = _Handle;
-		ol->completion = _Completion;
-		ol->context = _pContext;
+		ol->handle = handle;
+		ol->completion = completion;
+		ol->context = context;
 	}
 
 	else
-		NumAssociations--;
+		num_associations_--;
 
 	return ol;
 }
 
-void iocp_threadpool::disassociate(OVERLAPPED* _pOverlapped)
+void iocp_threadpool::disassociate(OVERLAPPED* overlapped)
 {
-	pool.destroy(static_cast<iocp_overlapped*>(_pOverlapped));
-	NumAssociations--;
+	pool.destroy(static_cast<iocp_overlapped*>(overlapped));
+	num_associations_--;
 }
 
-void iocp_threadpool::post_completion(OVERLAPPED* _pOverlapped)
+void iocp_threadpool::post_completion(OVERLAPPED* overlapped)
 {
-	PostQueuedCompletionStatus(hIoPort, 0, op::completion, _pOverlapped);
+	PostQueuedCompletionStatus(hioport_, 0, op::completion, overlapped);
 }
 
-void iocp_threadpool::post(iocp::completion_t _Completion, void* _pContext)
+void iocp_threadpool::post(iocp::completion_fn completion, void* context)
 {
-	PostQueuedCompletionStatus(hIoPort, (DWORD)op::post, (ULONG_PTR)_Completion, (OVERLAPPED*)_pContext);
+	PostQueuedCompletionStatus(hioport_, (DWORD)op::post, (ULONG_PTR)completion, (OVERLAPPED*)context);
 }
 
 namespace iocp {
@@ -345,24 +344,24 @@ void ensure_initialized()
 	iocp_threadpool::singleton();
 }
 
-OVERLAPPED* associate(HANDLE _Handle, completion_t _Completion, void* _pContext)
+OVERLAPPED* associate(HANDLE handle, completion_fn completion, void* context)
 {
-	return iocp_threadpool::singleton().associate(_Handle, _Completion, _pContext);
+	return iocp_threadpool::singleton().associate(handle, completion, context);
 }
 
-void disassociate(OVERLAPPED* _pOverlapped)
+void disassociate(OVERLAPPED* overlapped)
 {
-	iocp_threadpool::singleton().disassociate(_pOverlapped);
+	iocp_threadpool::singleton().disassociate(overlapped);
 }
 
-void post_completion(OVERLAPPED* _pOverlapped)
+void post_completion(OVERLAPPED* overlapped)
 {
-	iocp_threadpool::singleton().disassociate(_pOverlapped);
+	iocp_threadpool::singleton().disassociate(overlapped);
 }
 
-void post(completion_t _Completion, void* _pContext)
+void post(completion_fn completion, void* context)
 {
-	iocp_threadpool::singleton().post(_Completion, _pContext);
+	iocp_threadpool::singleton().post(completion, context);
 }
 
 void wait()
@@ -370,9 +369,9 @@ void wait()
 	iocp_threadpool::singleton().wait();
 }
 
-bool wait_for(unsigned int _TimeoutMS)
+bool wait_for(unsigned int timeout_ms)
 {
-	return iocp_threadpool::singleton().wait_for(_TimeoutMS);
+	return iocp_threadpool::singleton().wait_for(timeout_ms);
 }
 
 bool joinable()
@@ -385,6 +384,4 @@ void join()
 	return iocp_threadpool::singleton().join();
 }
 
-		} // namespace iocp
-	}
-}
+}}}

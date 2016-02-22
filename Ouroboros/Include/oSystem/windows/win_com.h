@@ -2,6 +2,8 @@
 
 #pragma once
 
+// COM (Window's component object model)
+
 namespace ouro { namespace windows { namespace com {
 
 // Needs to be call per-thread that uses COM

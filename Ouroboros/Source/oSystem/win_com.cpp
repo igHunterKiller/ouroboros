@@ -8,42 +8,38 @@
 #define WIN32_LEAN_AND_MEAN
 #include <ObjBase.h>
 
-namespace ouro {
-	namespace windows {
-		namespace com {
+namespace ouro { namespace windows { namespace com {
 
 class context
 {
 public:
 	context()
-		: CallUninit(false)
+		: call_uninit_(false)
 	{
-		CallUninit = SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED|COINIT_SPEED_OVER_MEMORY));
-		if (!CallUninit)
+		call_uninit_ = SUCCEEDED(CoInitializeEx(nullptr, COINIT_MULTITHREADED|COINIT_SPEED_OVER_MEMORY));
+		if (!call_uninit_)
 			throw error();
 	}
 
-	~context() { if (CallUninit) CoUninitialize(); }
+	~context() { if (call_uninit_) CoUninitialize(); }
 
 private:
-	bool CallUninit;
+	bool call_uninit_;
 };
 			
 void ensure_initialized()
 {
-	static oTHREAD_LOCAL context* sInstance = nullptr;
-	if (!sInstance)
+	static oTHREAD_LOCAL context* s_instance = nullptr;
+	if (!s_instance)
 	{
 		process_heap::find_or_allocate(
 			"com::context"
 			, process_heap::per_thread
 			, process_heap::garbage_collected
-			, [=](void* _pMemory) { new (_pMemory) context(); }
+			, [=](void* memory) { new (memory) context(); }
 			, nullptr
-			, &sInstance);
+			, &s_instance);
 	}
 }
 		
-		} // namespace com
-	}
-}
+}}}

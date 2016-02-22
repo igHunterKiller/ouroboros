@@ -81,7 +81,7 @@ namespace ouro {
 // assertion itself rather than inside some debug function.
 
 #if oHAS_oASSERT == 1 || oHAS_oASSERTA == 1 || oHAS_oTRACE == 1 || oHAS_oTRACEA == 1
-	#define oASSERT_TRACE(_type, _default_response, _str_expr, format, ...) do \
+	#define oAssertTrace(_type, _default_response, _str_expr, format, ...) do \
 	{	static bool oAssert_IgnoreFuture = false; \
 		if (!oAssert_IgnoreFuture) \
 		{	::ouro::assert_context assertion__; assertion__.expression = _str_expr; assertion__.function = __FUNCTION__; assertion__.filename = __FILE__; assertion__.line = __LINE__; assertion__.type = ::ouro::assert_type::_type; assertion__.default_response = ::ouro::assert_action::_default_response; \
@@ -95,14 +95,14 @@ namespace ouro {
 // Always-macros (debug or release)
 
 #if oHAS_oASSERTA == 1 || oHAS_oASSERT == 1
-	#define oAssertA(expr, format, ...) do { if (!(expr)) { oASSERT_TRACE(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
+	#define oAssertA(expr, format, ...) do { if (!(expr)) { oAssertTrace(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
 #else
 	#define oAssertA(format, ...) do {} while(false)
 #endif
 
 #if oHAS_oTRACEA == 1 || oHAS_oTRACE == 1
-	#define oTraceA(format, ...)     oASSERT_TRACE(trace, ignore,        "", format, ## __VA_ARGS__)
-	#define oTraceOnceA(format, ...) oASSERT_TRACE(trace, ignore_always, "", format, ## __VA_ARGS__)
+	#define oTraceA(format, ...)     oAssertTrace(trace, ignore,        "", format, ## __VA_ARGS__)
+	#define oTraceOnceA(format, ...) oAssertTrace(trace, ignore_always, "", format, ## __VA_ARGS__)
 #else
 	#define oTraceA(format, ...)     do {} while(false)
 	#define oTraceOnceA(format, ...) do {} while(false)
@@ -112,14 +112,14 @@ namespace ouro {
 // Debug-only macros
 
 #if oHAS_oASSERT == 1
-	#define oAssert(expr, format, ...) do { if (!(expr)) { oASSERT_TRACE(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
+	#define oAssert(expr, format, ...) do { if (!(expr)) { oAssertTrace(assertion, abort, #expr, format, ## __VA_ARGS__); } } while(false)
 #else
 	#define oAssert(format, ...) do {} while(false)
 #endif
 
 #if oHAS_oTRACE == 1
-	#define oTrace(format, ...)     oASSERT_TRACE(trace, ignore,        "", format, ## __VA_ARGS__)
-	#define oTraceOnce(format, ...) oASSERT_TRACE(trace, ignore_always, "", format, ## __VA_ARGS__)
+	#define oTrace(format, ...)     oAssertTrace(trace, ignore,        "", format, ## __VA_ARGS__)
+	#define oTraceOnce(format, ...) oAssertTrace(trace, ignore_always, "", format, ## __VA_ARGS__)
 #else
 	#define oTrace(format, ...)     do {} while(false)
 	#define oTraceOnce(format, ...) do {} while(false)

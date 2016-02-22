@@ -5,7 +5,6 @@
 
 #pragma once
 #include <oString/path.h>
-#include <functional>
 #include <string>
 
 namespace ATL { struct CAtlException; }
@@ -17,47 +16,39 @@ enum class type { unknown, std, com, atl, count };
 
 struct cpp_exception
 {
-	cpp_exception()
-		: type(type::unknown)
-		, type_name("")
-		, what("")
-	{ void_exception = nullptr; }
+	cpp_exception() : type(type::unknown), type_name(""), what("") { void_exception = nullptr; }
 
-	type type;
-	const char* type_name;
-	std::string what;
+	type                  type;
+	const char*           type_name;
+	std::string           what;
 	union
 	{
-		std::exception* std_exception;
-		_com_error* com_error;
+		std::exception*     std_exception;
+		_com_error*         com_error;
 		ATL::CAtlException* atl_exception;
-		void* void_exception;
+		void*               void_exception;
 	};
 };
 
-// NOTE: _pStdException may be nullptr if the exception is not derived from 
-// std::exception.
-typedef std::function<void(const char* _Message
-	, const cpp_exception& _CppException
-	, uintptr_t _ExceptionContext)> handler;
+typedef void(*handler_fn)(const char* message, const cpp_exception& cpp_exception, uintptr_t exception_context, void* user);
 
-void set_handler(const handler& _Handler);
+void set_handler(handler_fn handler, void* user);
 
 // Specify a directory where mini/full dumps will be written. Dump filenames 
 // will be generated with a timestamp at the time of exception.
-void mini_dump_path(const path_t& _MiniDumpPath);
+void mini_dump_path(const path_t& mini_dump_path);
 const path_t& mini_dump_path();
 
-void full_dump_path(const path_t& _FullDumpPath);
+void full_dump_path(const path_t& full_dump_path);
 const path_t& full_dump_path();
 
-void post_dump_command(const char* _Command);
+void post_dump_command(const char* command);
 const char* post_dump_command();
 
-void prompt_after_dump(bool _Prompt);
+void prompt_after_dump(bool prompt);
 bool prompt_after_dump();
 
 // Set the enable state of debug CRT asserts and errors
-void enable_dialogs(bool _Enable);
+void enable_dialogs(bool enable);
 
 }}}
