@@ -41,6 +41,8 @@ public:
 		inactive_hover, // over the control but not activated
 		newly_active,   // inactive or inactive_hover last frame, active this frame
 		active,         // active for at least last frame and this frame
+
+		count,
 	};
 
 	typedef enum class state state_t;
@@ -90,7 +92,7 @@ public:
 	// === per-frame logic control ===
 
 	// returns rendering info
-	tessellation_info_t update(const float4x4& inverse_view, const float3& ws_pick0, const float3& ws_pick1, bool activate);
+	tessellation_info_t update(const float2& viewport_dimensions, const float4x4& inverse_view, const float3& ws_pick0, const float3& ws_pick1, bool activate);
 
 	// returns the result of the last update call, or inactive if abort had been called
 	state_t state() const { return state_; }
@@ -106,6 +108,8 @@ public:
 	// output vertices should be sized to contain update_result's counts for lines & faces
 	static void tessellate(const tessellation_info_t& info, vertex_t* out_lines, vertex_t* out_faces);
 
+	void trace_tessellation_info(const tessellation_info_t& info);
+
 private:
 	update_fn cb_;                // callback when the transform is updated
 	void*     cb_user_;           // user data for more context to the callback
@@ -117,6 +121,9 @@ private:
 	type_t    type_;              // current gizmo experience
 	space_t   space_;             // use cardinal basis or local basis defined by transform
 	state_t   state_;             // state based on pick ray and activation state
+
+	// debug spew of state
+	void trace();
 };
 
 }

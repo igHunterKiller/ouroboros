@@ -519,27 +519,34 @@ void gfx_view::run()
 			mouse_.update();
 			kb_.update();
 
-			// Update transform manipulator
-			if (!update_pov())
-			{
-				auto pos = pov_.position();
-				auto rot = pov_.euler_rotation();
-			
-				gizmo_tess_ = gizmo_.update(pov_.view_inverse(), pov_.unproject_near(mouse_.x(), mouse_.y()), pov_.unproject_far(mouse_.x(), mouse_.y()), mouse_.down(mouse_button::left));
+			// Update camera position & orientation
+			bool pov_updated = update_pov();
 
+			// If the user didn't change the camera, then gizmo is available
+			bool gizmo_active = !pov_updated && mouse_.down(mouse_button::left);
+
+			// Init an invalid pick so gizmo doesn't activate while rotating view
+			float3 ws_pick0(FLT_MAX, FLT_MAX, FLT_MAX);
+			float3 ws_pick1(FLT_MAX, FLT_MAX, FLT_MAX);
+
+			// If not rotating view, use mouse coords as pick
+			if (!pov_updated)
+			{
+				ws_pick0 = pov_.unproject_near(mouse_.x(), mouse_.y());
+				ws_pick1 = pov_.unproject_far(mouse_.x(), mouse_.y());
+			}
+
+			// Update transform gizmo
+			{
+				gizmo_tess_ = gizmo_.update(pov_.viewport().dimensions, pov_.view_inverse(), ws_pick0, ws_pick1, gizmo_active);
+
+				// Based on what happened, update mouse state or process selection of objects
 				switch (gizmo_.state())
 				{
-					case gizmo::state::newly_active:
-						gpu_win_->capture(mouse_capture::absolute);
-						break;
-					case gizmo::state::newly_inactive:
-						gpu_win_->capture(mouse_capture::none);
-						break;
-					case gizmo::state::inactive:
-						update_scene_selection();
-						break;
-					default:
-						break;
+					case gizmo::state::newly_active:   gpu_win_->capture(mouse_capture::absolute); break;
+					case gizmo::state::newly_inactive: gpu_win_->capture(mouse_capture::none);     break;
+					case gizmo::state::inactive:       update_scene_selection();                   break;
+					default: break;
 				}
 			}
 
@@ -584,7 +591,8 @@ void transform_pivot(const float4x4& tx, void* pivot)
 
 void gfx_view::update_scene_selection()
 {
-	if (mouse_.pressed(mouse_button::left))
+	const bool alt_down = kb_.down(key::lalt) || kb_.down(key::ralt);
+	if (!alt_down && mouse_.pressed(mouse_button::left))
 	{
 		int x = mouse_.x();
 		int y = mouse_.y();
