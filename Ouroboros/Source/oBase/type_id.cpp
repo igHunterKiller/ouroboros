@@ -41,4 +41,42 @@ template<> const char* as_string(const data_type& type)
 
 oDEFINE_TO_FROM_STRING(data_type);
 
+char as_code(const data_type& type)
+{
+	// todo: assign a symbol for each
+
+	static const char s_codes[] =
+	{
+		'?',
+		'v', // void (not used)
+		'B', // bool
+		'c', // character
+		'b', // byte (unsigned character)
+		'w', // wide character,
+		's', // short 16-bit
+		'S', // unsigned short 16-bit
+		'i', // integer 32-bit
+		'u', // unsigned integer 32-bit
+		'i', // integer 32-bit
+		'u', // unsigned integer 32-bit
+		'I', // integer 64-bit
+		'U', // unsigned integer 64-bit
+		'f', // float 32-bit
+		'd', // double 64-bit
+		'h', // half 16-bit
+		'?', // int2_type, $2i
+		'?', // int3_type, $3i
+		'?', // int4_type, $4i
+		'?', // uint2_type, $2u
+		'?', // uint3_type, $3u
+		'?', // uint4_type, $4u
+		'?', // float2_type, $2f
+		'v',
+		'?', // float4_type, $4f
+		'm',
+	};
+	match_array_e(s_codes, data_type);
+	return s_codes[(int)type];
+}
+
 }

@@ -9,7 +9,7 @@
 
 namespace ouro {
 
-	enum class data_type
+	enum class data_type : unsigned char
 	{
 		unknown,
 
