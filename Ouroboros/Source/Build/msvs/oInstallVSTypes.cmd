@@ -17,7 +17,14 @@ if exist "%VS110COMNTOOLS%..\IDE" (
 	copy /Y .\usertype.dat "%VS110COMNTOOLS%..\IDE\usertype.dat"
 )
 
-echo Say Yes to merge oNoStepInto.reg into your registry. This will step over several small trivial C++ objects even when stepping into using Visual Studio.
+if exist "%VS120COMNTOOLS%..\IDE" (
+	echo Found VS120COMNTOOLS, installing usertype.dat...
+	copy /Y .\usertype.dat "%VS120COMNTOOLS%..\IDE\usertype.dat"
+)
 
-%windir%\regedit.exe .\oNoStepInto.reg
+if exist "%VS140COMNTOOLS%..\IDE" (
+	echo Found VS140COMNTOOLS, installing usertype.dat...
+	copy /Y .\usertype.dat "%VS140COMNTOOLS%..\IDE\usertype.dat"
+)
+
 pause
