@@ -69,8 +69,9 @@ static const uint16_t s_num_lines[(int)gizmo::type::count + 1] = { 0, 3, 5 * s_f
 static const uint16_t s_num_tris[(int)gizmo::type::count + 1] = { 0, 4 * 12, 0, 3 * 2 * (s_facet - 1) };
 
 vector_component::value initial_pick(
-	const gizmo::type_t& type // scale, rotation, translation
-	, const float4x4& transform           // manipulator transform
+	const gizmo::type_t& type             // scale, rotation, translation
+	, float viewport_scale                // invert scale by viewport size to keep gizmo the same size
+	, const float4x4& transform           // gizmo transform
 	, const float3& eye                   // camera position
 	, float selection_epsilon             // allow for more forgiving selection
 	, const float& axis_radius            // ring radius or axis length
@@ -154,7 +155,7 @@ vector_component::value initial_pick(
 				axis[i] = 1.0f;
 				axis = mul((float3x3)transform, axis);
 
-				// intersect only the part of the ring on the front side of the manipulator
+				// intersect only the part of the ring on the front side of the gizmo
 				if (seg_v_torus(ws_pick0, ws_pick1, center, axis, fixed_radius, fixed_selection_epsilon, &pt) && in_front_of(screen_plane, pt))
 				{
 					picked = (vector_component::value)i;
@@ -362,7 +363,7 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 	const bool was_active = state_ >= state::newly_active;
 
 	if (!was_active)
-		axis_ = initial_pick(type_, pick_tx, eye, s_select_eps, s_axis_length, ws_pick0, ws_pick1, &activation_offset_);
+		axis_ = initial_pick(type_, vp_scale, pick_tx, eye, s_select_eps, s_axis_length, ws_pick0, ws_pick1, &activation_offset_);
 
 	const bool first_active = !was_active &&  activate && axis_ != vector_component::none;
 	const bool first_inactive = was_active && !activate;
@@ -400,12 +401,12 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 			axis_vector[axis_] = 1.0f;
 		}
 
-		// take action specific to each manipulator type
+		// take action specific to each gizmo type
 		switch (type_)
 		{
 			case gizmo::type::scale:
 			{
-				// in SS create a manipulator vector from the activation (down) point 
+				// in SS create a gizmo vector from the activation (down) point 
 				// and horizontally to the left; else start from the true center to 
 				// the activation point
 				const float3 down_pt = center + activation_offset_;
@@ -521,13 +522,14 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 	}
 
 	tessellation_info_t info;
-	info.visual_transform = visual_tx;
-	info.eye = eye;
-	info.axis_scale = active_axis_scale_;
-	info.num_line_vertices = 2 * s_num_lines[(int)type_ + 1];
+	info.visual_transform      = visual_tx;
+	info.eye                   = eye;
+	info.axis_scale            = active_axis_scale_;
+	info.viewport_scale        = viewport_scale;
+	info.num_line_vertices     = 2 * s_num_lines[(int)type_ + 1];
 	info.num_triangle_vertices = 3 * s_num_tris[(int)type_ + 1];
-	info.type = type_;
-	info.selected_axis = axis_;
+	info.type                  = type_;
+	info.selected_axis         = axis_;
 	return info;
 }
 

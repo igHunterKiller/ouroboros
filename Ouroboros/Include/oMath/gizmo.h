@@ -60,6 +60,7 @@ public:
 		float4x4 visual_transform;
 		float3   eye;
 		float    axis_scale;
+		float    viewport_scale;
 		uint16_t num_line_vertices;
 		uint16_t num_triangle_vertices;
 		type_t   type;
