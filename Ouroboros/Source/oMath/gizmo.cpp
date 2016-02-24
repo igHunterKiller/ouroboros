@@ -525,7 +525,7 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 	info.visual_transform      = visual_tx;
 	info.eye                   = eye;
 	info.axis_scale            = active_axis_scale_;
-	info.viewport_scale        = viewport_scale;
+	info.viewport_scale        = vp_scale;
 	info.num_line_vertices     = 2 * s_num_lines[(int)type_ + 1];
 	info.num_triangle_vertices = 3 * s_num_tris[(int)type_ + 1];
 	info.type                  = type_;
