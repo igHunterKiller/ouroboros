@@ -19,31 +19,29 @@ template<typename T> struct fnv1a_traits
 template<> struct fnv1a_traits<uint32_t>
 {
 	typedef uint32_t value_type;
-	static const uint32_t seed = 2166136261u;
+	static const uint32_t seed  = 2166136261u;
 	static const uint32_t value = 16777619u;
 };
 
 template<> struct fnv1a_traits<unsigned long>
 {
 	typedef unsigned long value_type;
-	static const unsigned long seed = 2166136261u;
+	static const unsigned long seed  = 2166136261u;
 	static const unsigned long value = 16777619u;
 };
 
 template<> struct fnv1a_traits<uint64_t>
 {
 	typedef uint64_t value_type;
-	static const uint64_t seed = 14695981039346656037ull;
+	static const uint64_t seed  = 14695981039346656037ull;
 	static const uint64_t value = 1099511628211ull;
 };
 
-#ifdef oHAS_CONSTEXPR
-	template<> struct fnv1a_traits<uint128_t>
-	{
-		static constexpr uint128_t seed = { 0x6c62272e07bb0142ull, 0x62b821756295c592ull }; // 144066263297769815596495629667062367629
-		static constexpr uint128_t value = { 0x0000000001000000ull, 0x000000000000013bull }; // 309485009821345068724781371
-	};
-#endif
+//template<> struct fnv1a_traits<uint128_t>
+//{
+//	constexpr static const uint128_t seed(0x6c62272e07bb0142ull, 0x62b821756295c592ull); // 144066263297769815596495629667062367629
+//	constexpr static const uint128_t value(0x0000000001000000ull, 0x000000000000013bull); // 309485009821345068724781371
+//};
 
 template<typename T>		
 inline T fnv1a(const void* buf, size_t buf_size, const T& seed = fnv1a_traits<T>::seed)
