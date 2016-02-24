@@ -23,6 +23,7 @@
     <ClCompile Include="compression.cpp" />
     <ClCompile Include="concurrent_growable_pool.cpp" />
     <ClCompile Include="date.cpp" />
+    <ClCompile Include="fundamental.cpp" />
     <ClCompile Include="gpu_api.cpp" />
     <ClCompile Include="gzip.cpp" />
     <ClCompile Include="input.cpp" />
@@ -45,7 +46,6 @@
     <ClCompile Include="stringize_hlsl.cpp" />
     <ClCompile Include="stringize_peripherals.cpp" />
     <ClCompile Include="stringize_version.cpp" />
-    <ClCompile Include="type_id.cpp" />
     <ClCompile Include="unit_test.cpp" />
     <ClCompile Include="vcs.cpp" />
     <ClCompile Include="vcs_git.cpp" />
@@ -64,6 +64,7 @@
     <ClInclude Include="..\..\Include\oBase\date.h" />
     <ClInclude Include="..\..\Include\oBase\file_format.h" />
     <ClInclude Include="..\..\Include\oBase\fixed_vector.h" />
+    <ClInclude Include="..\..\Include\oBase\fundamental.h" />
     <ClInclude Include="..\..\Include\oBase\gpu_api.h" />
     <ClInclude Include="..\..\Include\oBase\growable_hash_map.h" />
     <ClInclude Include="..\..\Include\oBase\input.h" />
@@ -75,7 +76,6 @@
     <ClInclude Include="..\..\Include\oBase\resource_registry.h" />
     <ClInclude Include="..\..\Include\oBase\scoped_timer.h" />
     <ClInclude Include="..\..\Include\oBase\sss.h" />
-    <ClInclude Include="..\..\Include\oBase\type_id.h" />
     <ClInclude Include="..\..\Include\oBase\type_info.h" />
     <ClInclude Include="..\..\Include\oBase\unit_test.h" />
     <ClInclude Include="..\..\Include\oBase\unordered_map.h" />

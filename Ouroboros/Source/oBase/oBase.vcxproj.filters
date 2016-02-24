@@ -13,9 +13,6 @@
     <ClCompile Include="..\..\External\calfaq\calfaq.cpp">
       <Filter>Source\types</Filter>
     </ClCompile>
-    <ClCompile Include="type_id.cpp">
-      <Filter>Source\traits</Filter>
-    </ClCompile>
     <ClCompile Include="input.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -82,6 +79,9 @@
     <ClCompile Include="vcs_git.cpp">
       <Filter>Source\vcs</Filter>
     </ClCompile>
+    <ClCompile Include="fundamental.cpp">
+      <Filter>Source\traits</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\oBase\fixed_vector.h">
@@ -106,9 +106,6 @@
       <Filter>oBase\containers</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\type_info.h">
-      <Filter>oBase\traits</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Include\oBase\type_id.h">
       <Filter>oBase\traits</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\callable.h">
@@ -176,6 +173,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\vcs_svn.h">
       <Filter>oBase\vcs</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\fundamental.h">
+      <Filter>oBase\traits</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
