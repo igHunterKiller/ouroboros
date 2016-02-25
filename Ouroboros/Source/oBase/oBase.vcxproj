@@ -46,6 +46,7 @@
     <ClCompile Include="stringize_hlsl.cpp" />
     <ClCompile Include="stringize_peripherals.cpp" />
     <ClCompile Include="stringize_version.cpp" />
+    <ClCompile Include="type_info.cpp" />
     <ClCompile Include="unit_test.cpp" />
     <ClCompile Include="vcs.cpp" />
     <ClCompile Include="vcs_git.cpp" />

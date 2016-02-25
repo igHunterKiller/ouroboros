@@ -5,6 +5,7 @@
 // note: vtable() calls the type's default constructor, so beware related costs.
 
 #pragma once
+#include <oCore/stringize.h>
 #include <oBase/fundamental.h>
 #include <oMemory/fnv1a.h>
 #include <type_traits>
@@ -31,6 +32,7 @@ namespace detail
 typedef void (*type_info_default_constructor)(void* instance);
 typedef void (*type_info_copy_constructor)(void* instance, const void* src);
 typedef void (*type_info_destructor)(void* instance);
+typedef const char* (*type_info_as_string)(const void* src);
 
 template<typename T> struct type_info
 {
@@ -136,6 +138,8 @@ template<typename T> struct type_info
 	// calls this type's destructor
 	static void destroy(void* instance) { static_cast<T*>(instance)->~T(); }
 
+	static const char* as_string(const void* src) { return ouro::as_string(*(const T*)src); }
+
 	// store traits for runtime access
 	static const unsigned int traits = 
 		((std::is_void                            <T>::value&0x1)<<0 )|
@@ -170,5 +174,11 @@ template<typename T> struct type_info
 		((std::is_signed                          <T>::value&0x1)<<29)|
 		((std::is_unsigned                        <T>::value&0x1)<<30);
 };
+
+// tag_string: a string that starts with a ',' and has fundamental codes describing the layout of the struct
+// No automatic padding is considered, so struct field alignment needs to be explicit. It is expected that 
+// there are matching arrays for string names of the struct fields as well as an array of as_string pointers
+// for any type that would requires such (like enums). Pass nullptr for fundamentals (bool).
+char* struct_to_string(char* dst, size_t dst_size, const char* label, const char* tag_string, const char** field_names, const type_info_as_string* as_strings, const void* src);
 
 }

@@ -31,6 +31,10 @@ enum class fundamental : unsigned char
 
 char to_code(const fundamental& f);
 fundamental from_code(char c);
+size_t fundamental_size(const fundamental& f); 
+
+// same as snprintf(), but takes a type instead of a format string, and a count of how many of those should be read from src
+int snprintf(char* dst, size_t dst_size, const fundamental& type, uint32_t num_elements, const void* src);
 
 template<typename T> struct fundamental_type
 {

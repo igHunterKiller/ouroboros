@@ -82,6 +82,9 @@
     <ClCompile Include="fundamental.cpp">
       <Filter>Source\traits</Filter>
     </ClCompile>
+    <ClCompile Include="type_info.cpp">
+      <Filter>Source\traits</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\oBase\fixed_vector.h">
