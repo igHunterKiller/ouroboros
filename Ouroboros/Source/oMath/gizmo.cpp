@@ -41,17 +41,9 @@ template<> const char* as_string(const gizmo::state_t& s)
 	return as_string(s, s_names);
 }
 
-template<> const char* as_string(const vector_component& c)
-{
-	static const char* s_names[] = { "x", "y", "z", "w" };
-	match_array_e(s_names, vector_component);
-	return (int)c < 0 ? "none" : s_names[(int)c];
-}
-
 oDEFINE_TO_FROM_STRING(gizmo::type_t);
 oDEFINE_TO_FROM_STRING(gizmo::space_t);
 oDEFINE_TO_FROM_STRING(gizmo::state_t);
-oDEFINE_TO_FROM_STRING(vector_component);
 
 size_t to_string(char* dst, size_t dst_size, const gizmo& g)
 {

@@ -57,6 +57,7 @@
     <ClInclude Include="..\..\Include\oMath\subdivide.h" />
     <ClInclude Include="..\..\Include\oMath\texgen.h" />
     <ClInclude Include="..\..\Include\oMath\trilaterate.h" />
+    <ClInclude Include="..\..\Include\oMath\vector_component.h" />
     <ClInclude Include="slab.h" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +84,7 @@
     <ClCompile Include="slab.cpp" />
     <ClCompile Include="subdivide.cpp" />
     <ClCompile Include="trilaterate.cpp" />
+    <ClCompile Include="vector_component.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F860C4D6-ED6F-40B3-BC78-B3D7BF48CB71}</ProjectGuid>

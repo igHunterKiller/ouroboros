@@ -150,6 +150,9 @@
     <ClInclude Include="..\..\Include\oMath\gizmo.h">
       <Filter>oMath\matrix</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\oMath\vector_component.h">
+      <Filter>oMath</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seg_v_seg.cpp">
@@ -220,6 +223,9 @@
     </ClCompile>
     <ClCompile Include="arcball.cpp">
       <Filter>Source\matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_component.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -4,20 +4,10 @@
 
 #pragma once
 #include <oMath/hlsl.h>
+#include <oMath/vector_component.h>
 #include <cstdint>
 
 namespace ouro {
-
-enum class vector_component : int8_t
-{
-	none = -1,
-	x,
-	y,
-	z,
-	w,
-
-	count,
-};
 
 class gizmo
 {
