@@ -91,7 +91,8 @@ ref<ID3D11Device> make_device(const device_init& init)
 	if (D3DVersion < init.api_version)
 	{
 		sstring strver;
-		oThrow(std::errc::not_supported, "Failed to create an ID3D11Device with a minimum feature set of D3D %s", to_string(strver, init.api_version));
+		to_string(strver, init.api_version);
+		oThrow(std::errc::not_supported, "Failed to create an ID3D11Device with a minimum feature set of D3D %s", strver.c_str());
 	}
 
 	debug_name(d3d, oSAFESTRN(init.name));

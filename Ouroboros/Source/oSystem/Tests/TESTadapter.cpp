@@ -23,10 +23,11 @@ oTEST(oSystem_adapter)
 		auto& ctx = *(ctx_t*)user;
 
 		sstring str_ver;
+		to_string(str_ver, info.version);
 		version_t min_ver = adapter::minimum_version(info.vendor);
 		if (!ctx.n)
-			ctx.services.trace("%s v%s%s", info.description.c_str(), to_string(str_ver, info.version), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
-		oTrace("%s v%s%s", info.description.c_str(), to_string(str_ver, info.version), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
+			ctx.services.trace("%s v%s%s", info.description.c_str(), str_ver.c_str(), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
+		oTrace("%s v%s%s", info.description.c_str(), str_ver.c_str(), info.version >= min_ver ? " (meets version requirements)" : "below min requirments");
 		ctx.n++;
 		return true;
 	}, &ctx);

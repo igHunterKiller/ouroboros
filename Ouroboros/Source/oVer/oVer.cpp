@@ -83,8 +83,8 @@ void Main(int argc, const char* argv[])
 	module::info mi = module::get_info(path_t(opts.InputPath));
 	sstring FBuf, PBuf;
 
-	oCheck(to_string(FBuf, mi.version), std::errc::invalid_argument, "");
-	oCheck(to_string(PBuf, mi.version), std::errc::invalid_argument, "");
+	oCheck(to_string(FBuf, mi.version) < FBuf.capacity(), std::errc::invalid_argument, "");
+	oCheck(to_string(PBuf, mi.version) < PBuf.capacity(), std::errc::invalid_argument, "");
 
 	if (opts.PrintFileDescription)
 		printf("%s\n", mi.description.c_str());

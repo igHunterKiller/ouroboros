@@ -664,7 +664,8 @@ char* parse_wm_message(char* dst, size_t dst_size, HWND hwnd, UINT msg, WPARAM w
 			}
 
 			sstring StrType;
-			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_input_type_CHANGE %s type=%s devname=%s", hwnd, type, to_string(StrType, InpType), Name.c_str());
+			to_string(StrType, InpType);
+			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_input_type_CHANGE %s type=%s devname=%s", hwnd, type, StrType.c_str(), Name.c_str());
 			break;
 		}
 
@@ -722,7 +723,8 @@ char* parse_wm_message(char* dst, size_t dst_size, HWND hwnd, UINT msg, WPARAM w
 			}
 
 			sstring StrGUID;
-			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DEVICECHANGE %s devtype=%s GUID=%s name=%s", hwnd, as_string::DBT((int)wparam), devtype, to_string(StrGUID, *pGUID), name);
+			to_string(StrGUID, *pGUID);
+			ouro::snprintf(dst, dst_size, "HWND 0x%x WM_DEVICECHANGE %s devtype=%s GUID=%s name=%s", hwnd, as_string::DBT((int)wparam), devtype, StrGUID.c_str(), name);
 			break;
 		}
 		default:

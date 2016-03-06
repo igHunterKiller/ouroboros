@@ -6,16 +6,16 @@
 
 namespace ouro {
 
-template<> char* to_string(char* dst, size_t dst_size, const version_t& ver)
+template<> size_t to_string(char* dst, size_t dst_size, const version_t& ver)
 {
 	static const char* fmt[] = { "%u", "%u.%u", "%u.%u.%u", "%u.%u.%u.%u" };
 	
 	int i = 0;
-	if (ver.major    == version_t::invalid) return nullptr;
+	if (ver.major    == version_t::invalid) return 0;
 	if (ver.minor    != version_t::invalid) i++;
 	if (ver.build    != version_t::invalid) i++;
 	if (ver.revision != version_t::invalid) i++;
-	return -1 != snprintf(dst, dst_size, "%u.%u.%u", ver.major, ver.minor, ver.build, ver.revision) ? dst : nullptr;
+	return snprintf(dst, dst_size, "%u.%u.%u", ver.major, ver.minor, ver.build, ver.revision);
 }
 
 template<> bool from_string(version_t* out_ver, const char* src)

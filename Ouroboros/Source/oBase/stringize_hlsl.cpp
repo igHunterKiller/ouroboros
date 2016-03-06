@@ -61,29 +61,29 @@ template<> bool from_string(uint2* out_value, const char* src) { CHK_MV_U(); ret
 template<> bool from_string(uint3* out_value, const char* src) { CHK_MV_U(); return 3 == sscanf_s(src, "%u %u %u", &out_value->x, &out_value->y, &out_value->z); }
 template<> bool from_string(uint4* out_value, const char* src) { CHK_MV(); return 4 == sscanf_s(src, "%u %u %u %u", &out_value->x, &out_value->y, &out_value->z, &out_value->w); }
 
-template<> char* to_string(char* dst, size_t dst_size, const float2& value) { return -1 != snprintf(dst, dst_size, "%f %f", value.x, value.y) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const float3& value) { return -1 != snprintf(dst, dst_size, "%f %f %f", value.x, value.y, value.z) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const float4& value) { return -1 != snprintf(dst, dst_size, "%f %f %f %f", value.x, value.y, value.z, value.w) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const double2& value) { return -1 != snprintf(dst, dst_size, "%f %f", value.x, value.y) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const double3& value) { return -1 != snprintf(dst, dst_size, "%f %f %f", value.x, value.y, value.z) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const double4& value) { return -1 != snprintf(dst, dst_size, "%f %f %f %f", value.x, value.y, value.z, value.w) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const int2& value) { return -1 != snprintf(dst, dst_size, "%d %d", value.x, value.y) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const int3& value) { return -1 != snprintf(dst, dst_size, "%d %d %d", value.x, value.y, value.z) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const int4& value) { return -1 != snprintf(dst, dst_size, "%d %d %d %d", value.x, value.y, value.z, value.w) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const uint2& value) { return -1 != snprintf(dst, dst_size, "%u %u", value.x, value.y) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const uint3& value) { return -1 != snprintf(dst, dst_size, "%u %u %u", value.x, value.y, value.z) ? dst : nullptr; }
-template<> char* to_string(char* dst, size_t dst_size, const uint4& value) { return -1 != snprintf(dst, dst_size, "%u %u %u %u", value.x, value.y, value.z, value.w) ? dst : nullptr; }
+template<> size_t to_string(char* dst, size_t dst_size, const float2& value)  { return snprintf(dst, dst_size, "%f %f",       value.x, value.y);                   }
+template<> size_t to_string(char* dst, size_t dst_size, const float3& value)  { return snprintf(dst, dst_size, "%f %f %f",    value.x, value.y, value.z);          }
+template<> size_t to_string(char* dst, size_t dst_size, const float4& value)  { return snprintf(dst, dst_size, "%f %f %f %f", value.x, value.y, value.z, value.w); }
+template<> size_t to_string(char* dst, size_t dst_size, const double2& value) { return snprintf(dst, dst_size, "%f %f",       value.x, value.y);                   }
+template<> size_t to_string(char* dst, size_t dst_size, const double3& value) { return snprintf(dst, dst_size, "%f %f %f",    value.x, value.y, value.z);          }
+template<> size_t to_string(char* dst, size_t dst_size, const double4& value) { return snprintf(dst, dst_size, "%f %f %f %f", value.x, value.y, value.z, value.w); }
+template<> size_t to_string(char* dst, size_t dst_size, const int2& value)    { return snprintf(dst, dst_size, "%d %d",       value.x, value.y);                   }
+template<> size_t to_string(char* dst, size_t dst_size, const int3& value)    { return snprintf(dst, dst_size, "%d %d %d",    value.x, value.y, value.z);          }
+template<> size_t to_string(char* dst, size_t dst_size, const int4& value)    { return snprintf(dst, dst_size, "%d %d %d %d", value.x, value.y, value.z, value.w); }
+template<> size_t to_string(char* dst, size_t dst_size, const uint2& value)   { return snprintf(dst, dst_size, "%u %u",       value.x, value.y);                   }
+template<> size_t to_string(char* dst, size_t dst_size, const uint3& value)   { return snprintf(dst, dst_size, "%u %u %u",    value.x, value.y, value.z);          }
+template<> size_t to_string(char* dst, size_t dst_size, const uint4& value)   { return snprintf(dst, dst_size, "%u %u %u %u", value.x, value.y, value.z, value.w); }
 
-template<typename T> char* to_stringT(char* dst, size_t dst_size, const oHLSL4x4<T>& value)
+template<typename T> size_t to_stringT(char* dst, size_t dst_size, const oHLSL4x4<T>& value)
 {
-	return -1 != snprintf(dst, dst_size, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f"
+	return snprintf(dst, dst_size, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f"
 		, value[0].x, value[1].x, value[2].x, value[3].x
 		, value[0].y, value[1].y, value[2].y, value[3].y
 		, value[0].z, value[1].z, value[2].z, value[3].z
-		, value[0].w, value[1].w, value[2].w, value[3].w) ? dst : nullptr;
+		, value[0].w, value[1].w, value[2].w, value[3].w);
 }
 
-template<> char* to_string(char* dst, size_t dst_size, const float4x4& value) { return to_stringT(dst, dst_size, value); }
-template<> char* to_string(char* dst, size_t dst_size, const double4x4& value) { return to_stringT(dst, dst_size, value); }
+template<> size_t to_string(char* dst, size_t dst_size, const float4x4& value) { return to_stringT(dst, dst_size, value); }
+template<> size_t to_string(char* dst, size_t dst_size, const double4x4& value) { return to_stringT(dst, dst_size, value); }
 
 }

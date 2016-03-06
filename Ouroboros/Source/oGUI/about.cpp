@@ -196,12 +196,13 @@ void about_impl::make_controls(const window::create_event& _CreateEvent)
 	// Module Info
 	char StrModuleInfo[2048];
 	{
-		sstring StrVersion;
+		sstring ver;
+		to_string(ver, mi.version);
 		snprintf(StrModuleInfo, "%s%s%s\n%s%s%s%s%s\n%s"
 			, mi.product_name.c_str()
 			, mi.is_64bit_binary ? "" : " 32-bit"
 			, mi.is_debug ? " debug" : ""
-			, to_string(StrVersion, mi.version)
+			, ver.c_str()
 			, mi.is_prerelease ? " pre-release" : ""
 			, mi.is_patched ? " patched" : ""
 			, mi.is_private ? " private" : ""

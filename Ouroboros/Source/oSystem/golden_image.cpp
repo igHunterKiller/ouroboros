@@ -40,7 +40,8 @@ void golden_image::initialize(const init_t& init)
 	replace(tmp, ctx.adapter_info.description, " ", "_");
 	golden_[hw]     = golden_[vendor] / tmp;
 	failed_[hw]     = failed_[vendor] / tmp;
-	golden_[driver] = golden_[hw] / to_string(tmp, ctx.adapter_info.version);
+	to_string(tmp, ctx.adapter_info.version);
+	golden_[driver] = golden_[hw] / tmp;
 	failed_[driver] = failed_[hw] / tmp;
 }
 
@@ -51,8 +52,9 @@ void golden_image::deinitialize()
 void golden_image::test(const char* test_name, const surface::image& img, uint32_t nth_img, float max_rms_error, uint32_t diff_img_multiplier)
 {
 	char tmp[64];
+	to_string(tmp, nth_img);
 	char filename[oMAX_PATH];
-	snprintf(filename, "%s%s.png", test_name, nth_img == 0 ? "" : to_string(tmp, nth_img));
+	snprintf(filename, "%s%s.png", test_name, nth_img == 0 ? "" : tmp);
 	const auto save_fmt = surface::get_file_format(filename);
 
 	auto img_info = img.info();

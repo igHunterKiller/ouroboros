@@ -28,8 +28,9 @@ static void init_console()
 {
 	module::info mi = this_module::get_info();
 	char ver[16];
+	to_string(ver, mi.version);
 	char title[128];
-	snprintf(title, "%s v%s%s", sTITLE, to_string(ver, mi.version), mi.is_special ? "*" : "");
+	snprintf(title, "%s v%s%s", sTITLE, ver, mi.is_special ? "*" : "");
 	console::set_title(title);
 
 	// resize console

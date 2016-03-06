@@ -21,13 +21,15 @@ void TESTdevice(unit_test::services& services)
 	sstring VRAMSize, SharedSize, IVer, FVer, DVer;
 	format_bytes(VRAMSize, desc.native_memory, 1);
 	format_bytes(SharedSize, desc.shared_system_memory, 1);
+	to_string(FVer, desc.feature_version);
+	to_string(DVer, desc.driver_version);
 	services.status("%s %s %s %s (%s shared) running on %s v%s drivers (%s)"
 		, desc.device_description.c_str()
 		, as_string(desc.api)
-		, to_string(FVer, desc.feature_version)
+		, FVer.c_str()
 		, VRAMSize.c_str()
 		, SharedSize.c_str()
 		, as_string(desc.vendor)
-		, to_string(DVer, desc.driver_version)
+		, DVer.c_str()
 		, desc.driver_description.c_str());
 }

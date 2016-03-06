@@ -169,7 +169,7 @@ namespace ouro {
 		return true;
 	}
 
-	template<TSTR_PARAMS, typename T> char* to_string(STRT& dst, const T& value) { return to_string(dst.c_str(), dst.capacity(), value); }
+	template<TSTR_PARAMS, typename T> size_t to_string(STRT& dst, const T& value) { return to_string(dst.c_str(), dst.capacity(), value); }
 
 	TSTR void to_lower(STRT& _String) { to_lower<STRT::char_type>(_String.c_str()); }
 	TSTR void to_upper(STRT& _String) { to_upper<STRT::char_type>(_String.c_str()); }

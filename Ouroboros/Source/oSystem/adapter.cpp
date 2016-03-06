@@ -282,10 +282,13 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 					&& virtual_desktop_position.y <= od.DesktopCoordinates.bottom)
 				{
 					sstring StrAdd, StrReq;
+					to_string(StrReq, required_version);
+					to_string(StrAdd, adapter_info.version);
+
 					if (exact_version)
-						oCheck(adapter_info.version == required_version, std::errc::no_such_device, "Exact video driver version %s required, but current driver is %s", to_string(StrReq, required_version), to_string(StrAdd, adapter_info.version));
+						oCheck(adapter_info.version == required_version, std::errc::no_such_device, "Exact video driver version %s required, but current driver is %s", StrReq.c_str(), StrAdd.c_str());
 					else 
-						oCheck(adapter_info.version >= required_version, std::errc::no_such_device, "Video driver version %s or newer required, but current driver is %s", to_string(StrReq, required_version), to_string(StrAdd, adapter_info.version));
+						oCheck(adapter_info.version >= required_version, std::errc::no_such_device, "Video driver version %s or newer required, but current driver is %s", StrReq.c_str(), StrAdd.c_str());
 
 					return adapter_info;
 				}
@@ -301,11 +304,12 @@ info_t find(const int2& virtual_desktop_position, const version_t& min_version, 
 		adapter = nullptr;
 	}
 
-		sstring StrReq;
+	sstring StrReq;
+	to_string(StrReq, min_version);
 	if (LookForOutput)
-		oThrow(std::errc::no_such_device, "no adapter found for the specified virtual desktop coordinates that also matches the %s driver version %s", exact_version ? "exact" : "minimum", to_string(StrReq, min_version));
+		oThrow(std::errc::no_such_device, "no adapter found for the specified virtual desktop coordinates that also matches the %s driver version %s", exact_version ? "exact" : "minimum", StrReq.c_str());
 	else
-		oThrow(std::errc::no_such_device, "no adapter found matching the %s driver version %s", exact_version ? "exact" : "minimum", to_string(StrReq, min_version));
+		oThrow(std::errc::no_such_device, "no adapter found matching the %s driver version %s", exact_version ? "exact" : "minimum", StrReq.c_str());
 }
 
 info_t find(const display::id& display_id)

@@ -123,17 +123,23 @@ int main(int argc, const char* argv[])
 
 			path_t DevPath = filesystem::dev_path();
 			printf("scc");
-			lstring RevStr;
+			lstring RevStr("?");
+
+			if (Revision)
+				to_string(RevStr, Revision);
+
 			try { Revision = scc->revision(DevPath); }
 			catch (std::exception& e) { RevStr = e.what(); }
 			if (RevStr.empty())
-				printf(" %s %s\n", Revision ? to_string(RevStr, Revision) : "?", DevPath.c_str());
+				printf(" %s %s\n", Revision.c_str(), DevPath.c_str());
 			else
 				printf(" ? %s %s\n", DevPath.c_str(), RevStr.c_str());
 		}
 
 		version_t v(opt.Major, opt.Minor);
 		sstring VerStrMS, VerStrLX;
+		to_string(VerStrMS, v);
+		to_string(VerStrLX, v);
 		xlstring s;
 		int w = snprintf(s, 
 			"// generated file - do not modify\n" \
@@ -143,8 +149,8 @@ int main(int argc, const char* argv[])
 			"#define oRC_VERSION_STR_LINUX \"%u.%u.%u\"\n" \
 			, Revision
 			, v.major, v.minor, v.build, v.revision
-			, to_string(VerStrMS, v)
-			, to_string(VerStrLX, v));
+			, VerStrMS.c_str()
+			, VerStrLX.c_str());
 
 		if (opt.ProductName) sncatf(s, "#define oRC_PRODUCTNAME \"%s\"\n", opt.ProductName);
 		if (opt.FileName) sncatf(s, "#define oRC_FILENAME \"%s\"\n", opt.FileName);

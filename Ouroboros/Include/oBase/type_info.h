@@ -29,10 +29,11 @@ namespace detail
 	};
 }
 
-typedef void (*type_info_default_constructor)(void* instance);
-typedef void (*type_info_copy_constructor)(void* instance, const void* src);
-typedef void (*type_info_destructor)(void* instance);
-typedef const char* (*type_info_as_string)(const void* src);
+typedef void        (*type_info_default_constructor_fn)(void* instance);
+typedef void        (*type_info_copy_constructor_fn)   (void* instance, const void* src);
+typedef void        (*type_info_destructor_fn)         (void* instance);
+typedef size_t      (*type_info_to_string_fn)          (char* dst, size_t dst_size, const void* src);
+typedef const char* (*type_info_as_string_fn)          (const void* src);
 
 template<typename T> struct type_info
 {
@@ -140,6 +141,8 @@ template<typename T> struct type_info
 
 	static const char* as_string(const void* src) { return ouro::as_string(*(const T*)src); }
 
+	static size_t to_string(char* dst, size_t dst_size, const void* src) { return ouro::to_string(dst, dst_size, *(const T*)src); }
+
 	// store traits for runtime access
 	static const unsigned int traits = 
 		((std::is_void                            <T>::value&0x1)<<0 )|
@@ -175,10 +178,20 @@ template<typename T> struct type_info
 		((std::is_unsigned                        <T>::value&0x1)<<30);
 };
 
-// tag_string: a string that starts with a ',' and has fundamental codes describing the layout of the struct
-// No automatic padding is considered, so struct field alignment needs to be explicit. It is expected that 
-// there are matching arrays for string names of the struct fields as well as an array of as_string pointers
-// for any type that would requires such (like enums). Pass nullptr for fundamentals (bool).
-char* struct_to_string(char* dst, size_t dst_size, const char* label, const char* tag_string, const char** field_names, const type_info_as_string* as_strings, const void* src);
+// Indents a field=value type format, using to_string to convert the specified data.
+                                  size_t field_snprintf(char* dst, size_t dst_size, const char* label, size_t indent, type_info_to_string_fn to_string, const void* data);
+template<typename T>              size_t field_snprintf(char* dst, size_t dst_size, const char* label, size_t indent, const T& data) { return field_snprintf(dst, dst_size, label, indent, type_info<T>::to_string, &data); }
+template<typename T, size_t size> size_t field_snprintf(char (&dst)[size],          const char* label, size_t indent, const T& data) { return field_snprintf(dst, size,     label, indent, type_info<T>::to_string, &data); }
+
+template<typename T, typename U> struct type_info_cast_pointer_to_void                     { typedef U     type; };
+template<typename U>             struct type_info_cast_pointer_to_void<std::true_type,  U> { typedef void* type; };
+
+// _ACC form assumes 'offset' and this will increment that value as it appends member strings
+#define STRUCTF_BEGIN(dst__, dst_size__, indent__, label__, ptr__) snprintf(dst__, dst_size__, "%.*s%s 0x%p\n{\n", 2*__min(8, indent__), "                ", (label__) ? (label__) : "?", ptr__);
+#define STRUCTF_BEGIN_ACC(dst__, dst_size__, indent__, label__, ptr__) offset += STRUCTF_BEGIN((dst__) + offset, (dst_size__) - offset, indent__, label__, ptr__)
+#define STRUCTF_END(dst__, dst_size__, indent__, label__, ptr__) snprintf(dst__, dst_size__, "%.*s}\n", 2*__min(8, indent__), "                ")
+#define STRUCTF_END_ACC(dst__, dst_size__, indent__, label__, ptr__) offset += STRUCTF_END((dst__) + offset, (dst_size__) - offset, indent__, label__, ptr__)
+#define FIELDF(dst__, dst_size__, indent__, member__) field_snprintf(dst__, dst_size__, #member__, indent, ouro::type_info<type_info_cast_pointer_to_void<std::is_pointer<decltype(member__)>::type, decltype(member__)>::type>::to_string, &(member__))
+#define FIELDF_ACC(dst__, dst_size__, indent__, member__) offset += FIELDF((dst__) + offset, (dst_size__) - offset, indent__, member__)
 
 }

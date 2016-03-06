@@ -5,78 +5,42 @@
 
 namespace ouro {
 
-char* struct_to_string(char* dst, size_t dst_size, const char* label, const char* tag_string, const char** field_names, const type_info_as_string* as_strings, const void* src)
+size_t field_snprintf(char* dst, size_t dst_size, const char* label, size_t indent, type_info_to_string_fn to_string, const void* data)
 {
-	// @tony: is there a way to specify decimal v. hex?
-	// @tony: is there a way to specify float sigfigs?
+	size_t final_length = 0;
+	size_t spacing      = 2 * indent;
 
-	// Maybe change the as_strings to to_strings and fold the strlcpys into there...
-	// then pass as_string or as_string_hex.
+	// append indent
+	final_length += spacing;
+	if (final_length < dst_size)
+		memset(dst, ' ', spacing);
+	dst += final_length;
 
-	// Still support default fallback, just need overrides occasionally.
-
-	auto base = (const char*)src;
-
-	size_t offset = 0;
-
-	offset += snprintf(dst + offset, dst_size - offset, "%s 0x%p\n{\n", label ? label : tag_string, base);
-
-	int i = 0;
-	int count = 0;
-	for (const char* tag = tag_string + 1; *tag; tag++)
+	// append label
+	size_t len = strlen(label);
+	final_length += len;
+	if (final_length < dst_size)
 	{
-		if (isdigit(*tag))
-		{
-			count *= 10;
-			count += *tag - '0';
-			continue;
-		}
-		
-		count      = __max(1, count);
-		auto type  = from_code(*tag);
-		auto sz    = fundamental_size(type);
-		auto asstr = as_strings[i];
-
-		offset += snprintf(dst + offset, dst_size - offset, "\t%-20s = ", field_names[i]);
-
-		if (asstr)
-		{
-			const char* str = asstr(base);
-
-			for (int j = 0; j < count; )
-			{
-				offset += strlcpy(dst + offset, str, dst_size - offset);
-				
-				j++;
-				if (j != count)
-				{
-					dst[offset++] = ' ';
-					if (offset == dst_size)
-						return nullptr;
-					dst[offset] = '\0';
-				}
-			}
-		}
-
-		else
-		{
-			offset += snprintf(dst + offset, dst_size - offset, type, count, base);
-		}
-
-		base += sz * count;
-		count = 0;
-
-		dst[offset++] = '\n';
-		if (offset == dst_size)
-			return nullptr;
-		dst[offset] = '\0';
-
-		i++;
+		strlcpy(dst, label, dst_size); // dst size pre-checked, so dst_size doesn't control anything
+		dst += len;
 	}
 
-	offset += snprintf(dst + offset, dst_size - offset, "}\n");
-	
-	return offset < dst_size ? dst : nullptr;
+	// append equal sign
+	final_length += 1;
+	if (final_length < dst_size)
+		*dst++ = '=';
+
+	// append value
+	len = to_string(dst, dst_size - final_length, data);
+	dst += len;
+	final_length += len;
+
+	// append newline
+	final_length += 1;
+	if (final_length < dst_size)
+		*dst++ = '\n';
+
+	return final_length;
 }
 
 }

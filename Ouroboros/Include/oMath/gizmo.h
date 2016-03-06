@@ -8,6 +8,17 @@
 
 namespace ouro {
 
+enum class vector_component : int8_t
+{
+	none = -1,
+	x,
+	y,
+	z,
+	w,
+
+	count,
+};
+
 class gizmo
 {
 public:
@@ -57,14 +68,14 @@ public:
 
 	struct tessellation_info_t
 	{
-		float4x4 visual_transform;
-		float3   eye;
-		float    axis_scale;
-		float    viewport_scale;
-		uint16_t num_line_vertices;
-		uint16_t num_triangle_vertices;
-		type_t   type;
-		int8_t   selected_axis;
+		float4x4         visual_transform;
+		float3           eye;
+		float            axis_scale;
+		float            viewport_scale;
+		uint16_t         num_line_vertices;
+		uint16_t         num_triangle_vertices;
+		type_t           type;
+		vector_component selected_axis;
 	};
 
 
@@ -103,7 +114,9 @@ public:
 	// the transform.
 	void reset();
 
-	
+	size_t to_string(char* dst, size_t dst_size) const;
+
+
 	// === per-frame tessellation ===
 	
 	// output vertices should be sized to contain update_result's counts for lines & faces
@@ -112,18 +125,18 @@ public:
 	void trace_tessellation_info(const tessellation_info_t& info);
 
 private:
-	update_fn cb_;                // callback when the transform is updated
-	void*     cb_user_;           // user data for more context to the callback
-	float4x4  tx_;                // transform being manipulated
-	float4x4  activation_tx_;     // transform as it was when manipulation starts
-	float3    activation_offset_; // on active: scale/translation: pick offset from center along axis | rotation: pick on planar axis ring
-	float     active_axis_scale_; // used to size a scale manip's axis
-	int8_t    axis_;              // currently hover-active or selected axis
-	type_t    type_;              // current gizmo experience
-	space_t   space_;             // use cardinal basis or local basis defined by transform
-	state_t   state_;             // state based on pick ray and activation state
+	update_fn        cb_;                // callback when the transform is updated
+	void*            cb_user_;           // user data for more context to the callback
+	float4x4         tx_;                // transform being manipulated
+	float4x4         activation_tx_;     // transform as it was when manipulation starts
+	float3           activation_offset_; // on active: scale/translation: pick offset from center along axis | rotation: pick on planar axis ring
+	float            active_axis_scale_; // used to size a scale manip's axis
+	type_t           type_;              // current gizmo experience
+	vector_component axis_;              // currently hover-active or selected axis
+	space_t          space_;             // use cardinal basis or local basis defined by transform
+	state_t          state_;             // state based on pick ray and activation state
 
-	// debug spew of state
+	// debug spew of state only when it changes
 	void trace();
 };
 

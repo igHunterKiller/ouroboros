@@ -64,7 +64,8 @@ static void print_header(const unit_test::info_t& info, unit_test::services& srv
 	else
 	{
 		char buf[32];
-		srv.printf(unit_test::print_type::info, "Video Driver: %s v%s\n", adapter_info.description.c_str(), to_string(buf, adapter_info.version));
+		to_string(buf, adapter_info.version);
+		srv.printf(unit_test::print_type::info, "Video Driver: %s v%s\n", adapter_info.description.c_str(), buf);
 	}
 
 	vcs_init_t init;
@@ -91,7 +92,7 @@ static void print_header(const unit_test::info_t& info, unit_test::services& srv
 		}
 	}
 
-	srv.printf(unit_test::print_type::info, "SCC Revision: %s\n", rev_str);
+	srv.printf(unit_test::print_type::info, "%s Revision: %s\n", as_string(vcs.protocol()), rev_str);
 }
 
 void ouro_unit_test_framework::check_system_requirements(const unit_test::info_t& info)

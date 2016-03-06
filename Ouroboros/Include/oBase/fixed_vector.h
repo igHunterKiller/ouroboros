@@ -199,8 +199,8 @@ protected:
 	}
 };
 
-template <typename T, size_t N> char* to_string(char* _StrDestination, size_t _SizeofStrDestination, const ouro::fixed_vector<T, N>& _Array) { return detail::to_string_container(_StrDestination, _SizeofStrDestination, _Array); }
-template <typename T, size_t sourceN, size_t destinationN> char* to_string(char (&_StrDestination)[destinationN], const ouro::fixed_vector<T, sourceN>& _Array) { return detail::to_string_container(_StrDestination, Ndst, _Array); }
+template <typename T, size_t N> size_t to_string(char* dst, size_t dst_size, const ouro::fixed_vector<T, N>& arr) { return detail::to_string_container(dst, dst_size, arr); }
+template <typename T, size_t sourceN, size_t destinationN> size_t to_string(char (&dst)[destinationN], const ouro::fixed_vector<T, sourceN>& arr) { return detail::to_string_container(dst, Ndst, arr); }
 template <typename T, size_t N> bool from_string(ouro::fixed_vector<T, N>* _pValue, const char* _StrSource) { return detail::from_string_container(_pValue, _StrSource); }
 
 }

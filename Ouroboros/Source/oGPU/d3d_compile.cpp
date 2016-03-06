@@ -312,7 +312,8 @@ const char* shader_profile(D3D_FEATURE_LEVEL level, const stage_binding::flag& s
 	{
 		version_t ver = version_t((level>>12) & 0xffff, (level>>8) & 0xffff);
 		char str_ver[64];
-		oThrow(std::errc::not_supported, "Shader profile does not exist for D3D%s's stage %s", to_string(str_ver, ver), as_string(stage_binding));
+		to_string(str_ver, ver);
+		oThrow(std::errc::not_supported, "Shader profile does not exist for D3D%s's stage %s", str_ver, as_string(stage_binding));
 	}
 
 	return profile;

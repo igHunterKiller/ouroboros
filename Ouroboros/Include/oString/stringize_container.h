@@ -14,21 +14,20 @@ template<> char* to_string(char* dst, size_t dst_size, const std::string& value)
 
 namespace detail {
 
-template<typename containerT> char* to_string_container(char* dst, size_t dst_size, const containerT& cont)
+template<typename containerT> size_t to_string_container(char* dst, size_t dst_size, const containerT& cont)
 {
 	*dst = 0;
+	size_t offset = 0;
 	auto it_last = std::end(cont) - 1;
 	for (auto it = std::begin(cont); it != std::end(cont); ++it)
 	{
-		if (!to_string(dst, dst_size, *it))
-			return nullptr;
-		size_t len = strlcat(dst, ",", dst_size);
-		if (it != it_last && len >= dst_size)
-			return nullptr;
-		dst += len;
-		dst_size -= len;
+		offset += to_string(dst + offset, dst_size - offset, *it);
+		
+		if (offset < dst_size)
+			dst[offset] = ',';
+		offset++;
 	}
-	return dst;
+	return offset;
 }
 
 template<typename containerT> bool from_string_container(containerT* out_container, const char* src)

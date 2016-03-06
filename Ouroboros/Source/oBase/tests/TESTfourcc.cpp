@@ -13,7 +13,7 @@ oTEST(oBase_fourcc)
 
 	char str[16];
 
-	oCHECK(to_string(str, fcc), "to_string on fourcc failed 1");
+	oCHECK(to_string(str, fcc) < countof(str), "to_string on fourcc failed 1");
 	oCHECK(!strcmp("TEST", str), "to_string on fourcc failed 2");
 
 	const char* fccStr = "RGBA";

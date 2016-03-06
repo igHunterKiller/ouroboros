@@ -8,19 +8,20 @@
 
 namespace ouro {
 
-template<> char* to_string(char* dst, size_t dst_size, const fourcc_t& value)
+template<> size_t to_string(char* dst, size_t dst_size, const fourcc_t& value)
 {
-	if (dst_size < 5) return nullptr;
-	unsigned int fcc = from_big_endian((unsigned int)value);
-	memcpy(dst, &fcc, sizeof(unsigned int));
-	dst[4] = 0;
-	return dst;
+	if (dst_size > 4)
+	{
+		unsigned int fcc = from_big_endian((unsigned int)value);
+		memcpy(dst, &fcc, sizeof(unsigned int));
+		dst[4] = 0;
+	}
+	return 4;
 }
 
-template<> char* to_string(char* dst, size_t dst_size, const guid_t& value)
+template<> size_t to_string(char* dst, size_t dst_size, const guid_t& value)
 {
-	if (dst_size <= 38) return nullptr;
-	return -1 != snprintf(dst, dst_size, oGUID_FMT, oGUID_DATA_IN(value)) ? dst : nullptr;
+	return snprintf(dst, dst_size, oGUID_FMT, oGUID_DATA_IN(value));
 }
 
 template<> bool from_string(fourcc_t* out_value, const char* src) { *out_value = fourcc_t(src); return true; }

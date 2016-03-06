@@ -4,6 +4,8 @@
 
 #include <oCore/assert.h>
 #include <oMemory/xxhash.h>
+#include <oBase/type_info.h>
+#include <oString/string.h>
 
 #include <oCore/color.h>
 #include <oCore/stringize.h>
@@ -39,18 +41,42 @@ template<> const char* as_string(const gizmo::state_t& s)
 	return as_string(s, s_names);
 }
 
-namespace vector_component
+template<> const char* as_string(const vector_component& c)
 {
-enum value : int8_t {
+	static const char* s_names[] = { "x", "y", "z", "w" };
+	match_array_e(s_names, vector_component);
+	return (int)c < 0 ? "none" : s_names[(int)c];
+}
 
-	none = -1,
-	x = 0,
-	y = 1,
-	z = 2,
-	w = 3,
-	count = 4,
+oDEFINE_TO_FROM_STRING(gizmo::type_t);
+oDEFINE_TO_FROM_STRING(gizmo::space_t);
+oDEFINE_TO_FROM_STRING(gizmo::state_t);
+oDEFINE_TO_FROM_STRING(vector_component);
 
-};
+size_t to_string(char* dst, size_t dst_size, const gizmo& g)
+{
+	return g.to_string(dst, dst_size);
+}
+
+template<> size_t to_string(char* dst, size_t dst_size, const gizmo::tessellation_info_t& info)
+{
+	size_t offset = 0;
+	size_t indent = 0;
+
+	STRUCTF_BEGIN_ACC(dst, dst_size, indent, "gizmo::tessellation_info_t", &info);
+		indent++;
+		FIELDF_ACC(dst, dst_size, indent, info.visual_transform);
+		FIELDF_ACC(dst, dst_size, indent, info.eye);
+		FIELDF_ACC(dst, dst_size, indent, info.axis_scale);
+		FIELDF_ACC(dst, dst_size, indent, info.viewport_scale);
+		FIELDF_ACC(dst, dst_size, indent, info.num_line_vertices);
+		FIELDF_ACC(dst, dst_size, indent, info.num_triangle_vertices);
+		FIELDF_ACC(dst, dst_size, indent, info.type);
+		FIELDF_ACC(dst, dst_size, indent, info.selected_axis);
+		indent--;
+	STRUCTF_END_ACC(dst, dst_size, indent, "gizmo::tessellation_info_t", &info);
+
+	return offset;
 }
 
 // define constants for scaling, color, etc.
@@ -68,7 +94,7 @@ static const float    s_cube_radius = 0.017321f;
 static const uint16_t s_num_lines[(int)gizmo::type::count + 1] = { 0, 3, 5 * s_facet, 3 + s_facet };
 static const uint16_t s_num_tris[(int)gizmo::type::count + 1] = { 0, 4 * 12, 0, 3 * 2 * (s_facet - 1) };
 
-vector_component::value initial_pick(
+vector_component initial_pick(
 	const gizmo::type_t& type             // scale, rotation, translation
 	, float viewport_scale                // invert scale by viewport size to keep gizmo the same size
 	, const float4x4& transform           // gizmo transform
@@ -103,9 +129,9 @@ vector_component::value initial_pick(
 			// interaction elements: endpoints of axes for scale in each cardinal direction
 			// and one at the center for uniform scaling.
 
-			for (int i = 0; i < vector_component::count; i++)
+			for (int i = 0; i < (int)vector_component::count; i++)
 			{
-				auto component = (vector_component::value)i;
+				auto component = (vector_component)i;
 
 				// 'fixed' gets applied as part of fixed_tx, so use original radii here
 				float3 end = kZero3;
@@ -149,7 +175,7 @@ vector_component::value initial_pick(
 			float4 ring_plane;
 
 			// check each rotation axis
-			for (int i = 0; i < vector_component::w; i++)
+			for (int i = 0; i < (int)vector_component::w; i++)
 			{
 				float3 axis = kZero3;
 				axis[i] = 1.0f;
@@ -158,7 +184,7 @@ vector_component::value initial_pick(
 				// intersect only the part of the ring on the front side of the gizmo
 				if (seg_v_torus(ws_pick0, ws_pick1, center, axis, fixed_radius, fixed_selection_epsilon, &pt) && in_front_of(screen_plane, pt))
 				{
-					picked = (vector_component::value)i;
+					picked = (vector_component)i;
 					ring_plane = plane(axis, center);
 					break;
 				}
@@ -195,7 +221,7 @@ vector_component::value initial_pick(
 			else
 			{
 				// check each axis
-				for (int i = 0; i < vector_component::w; i++)
+				for (int i = 0; i < (int)vector_component::w; i++)
 				{
 					float3 end = kZero3;
 					end[i] = fixed_radius;
@@ -206,7 +232,7 @@ vector_component::value initial_pick(
 						seg_closest_points(center, end, ws_pick0, ws_pick1, &t0, &t1);
 						pt = lerp(center, end, t0);
 						*out_offset = center - pt;
-						picked = (vector_component::value)i;
+						picked = (vector_component)i;
 						break;
 					}
 				}
@@ -222,12 +248,12 @@ vector_component::value initial_pick(
 	return picked;
 }
 
-static void tess_axes(const float4x4& transform, float extent, float selected_extent, const vector_component::value& selected_axis, const uint32_t axis_color[vector_component::count], gizmo::vertex_t*& out_vertices)
+static void tess_axes(const float4x4& transform, float extent, float selected_extent, const vector_component& selected_axis, const uint32_t axis_color[vector_component::count], gizmo::vertex_t*& out_vertices)
 {
 	const float3 center = transform[3].xyz();
-	for (int i = 0; i < vector_component::w; i++)
+	for (int i = 0; i < (int)vector_component::w; i++)
 	{
-		auto component = (vector_component::value)i;
+		auto component = (vector_component)i;
 
 		float3 pt = kZero3;
 		pt[i] = component == selected_axis ? selected_extent : extent;
@@ -345,6 +371,7 @@ float4x4 gizmo::transform() const
 
 gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, const float4x4& inverse_view, const float3& ws_pick0, const float3& ws_pick1, bool activate)
 {
+	trace();
 	// override activation if the type is none
 	if (type_ == gizmo::type::none)
 		activate = false;
@@ -365,7 +392,7 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 	if (!was_active)
 		axis_ = initial_pick(type_, vp_scale, pick_tx, eye, s_select_eps, s_axis_length, ws_pick0, ws_pick1, &activation_offset_);
 
-	const bool first_active = !was_active &&  activate && axis_ != vector_component::none;
+	const bool first_active = !was_active &&  activate && (vector_component)axis_ != vector_component::none;
 	const bool first_inactive = was_active && !activate;
 	const bool has_focus = axis_ != vector_component::none;
 	const bool active = activate && axis_ != vector_component::none;
@@ -398,7 +425,7 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 		else
 		{
 			axis_vector = kZero3;
-			axis_vector[axis_] = 1.0f;
+			axis_vector[(int)axis_] = 1.0f;
 		}
 
 		// take action specific to each gizmo type
@@ -536,7 +563,7 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, vertex_t* out_faces)
 {
 	// cache information about the focal point
-	const auto current_axis = (vector_component::value)info.selected_axis;
+	const auto current_axis = (vector_component)info.selected_axis;
 	const float scaled_axis_length = s_axis_length * info.axis_scale;
 	const float3 eye = info.eye;
 	const float4x4 visual_tx = info.visual_transform;
@@ -550,7 +577,7 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 	memcpy(colors, s_component_colors, sizeof(colors));
 
 	if (current_axis != vector_component::none)
-		colors[current_axis] = s_selected_color;
+		colors[(int)current_axis] = s_selected_color;
 
 	// Prepare ring template
 	float3* ring_verts = nullptr;
@@ -574,9 +601,9 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 
 			tess_axes(visual_tx, axis_length, scaled_axis_length, current_axis, s_component_colors, (vertex_t*)outl);
 
-			for (int i = 0; i < vector_component::count; i++)
+			for (int i = 0; i < (int)vector_component::count; i++)
 			{
-				auto component = (vector_component::value)i;
+				auto component = (vector_component)i;
 
 				float3 trans = kZero3;
 				if (component != vector_component::w)
@@ -620,9 +647,9 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 			space_rotation[3] = kWAxis4;
 
 			// use 'none' to indicate the gray ring that completes axis rings that are close to screen-space aligned
-			for (int i = vector_component::none; i < vector_component::count; i++)
+			for (int i = (int)vector_component::none; i < (int)vector_component::count; i++)
 			{
-				auto component = (vector_component::value)i;
+				auto component = (vector_component)i;
 
 				float4 clip_plane = (component == current_axis) ? kZero4 : screen_plane;
 				float3 trans = center;
@@ -662,7 +689,7 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 				* rotate_xy_planar(float4(eye_direction, 0.0f))
 				* remove_rotation(visual_tx);
 
-			tess_ring(visual_ss_transform, colors[vector_component::w], kZero4, s_facet, ring_verts, outl);
+			tess_ring(visual_ss_transform, colors[(int)vector_component::w], kZero4, s_facet, ring_verts, outl);
 
 			// dist's contribution to scale is handled in the use of visual_tx
 			const float scaled_extent = scaled_axis_length;
@@ -685,9 +712,9 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 				cone_verts = (float3*)unindexed.positions;
 			}
 
-			for (int i = 0; i < vector_component::w; i++)
+			for (int i = 0; i < (int)vector_component::w; i++)
 			{
-				auto component = (vector_component::value)i;
+				auto component = (vector_component)i;
 
 				float3 trans = kZero3;
 				trans[i] = scaled_extent;
@@ -709,65 +736,42 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 	}
 }
 
+size_t gizmo::to_string(char* dst, size_t dst_size) const
+{
+	size_t offset = 0;
+	size_t indent = 0;
+	STRUCTF_BEGIN_ACC(dst, dst_size, indent, "gizmo", this);
+		indent++;
+		FIELDF_ACC(dst, dst_size, indent, cb_);
+		FIELDF_ACC(dst, dst_size, indent, cb_user_);
+		FIELDF_ACC(dst, dst_size, indent, tx_);
+		FIELDF_ACC(dst, dst_size, indent, activation_tx_);
+		FIELDF_ACC(dst, dst_size, indent, activation_offset_);
+		FIELDF_ACC(dst, dst_size, indent, active_axis_scale_);
+		FIELDF_ACC(dst, dst_size, indent, type_);
+		FIELDF_ACC(dst, dst_size, indent, axis_);
+		FIELDF_ACC(dst, dst_size, indent, space_);
+		FIELDF_ACC(dst, dst_size, indent, state_);
+		indent--;
+	STRUCTF_END_ACC(dst, dst_size, indent, "gizmo", this);
 
-// @tony: given a list of strings and a list of types, auto-print a struct/class/memory footprint.
-// it would have to respect class/struct packing, or assume type list must be explicit. sss.h has 
-// a spec, but needs to differentiate int-like tuples from float tupples.
-#define oFLOAT2F "%.03f %.03f"
-#define oFLOAT3F oFLOAT2F " %.03f"
-#define oFLOAT4F oFLOAT3F " %.03f"
-#define oFLOAT4x4F_ML(prefix) oFLOAT4F prefix oFLOAT4F prefix oFLOAT4F prefix oFLOAT4F
-#define oFLOAT2_PARAMS(f2) (f2).x, (f2).y
-#define oFLOAT3_PARAMS(f3) oFLOAT2_PARAMS(f3), (f3).z
-#define oFLOAT4_PARAMS(f4) oFLOAT3_PARAMS(f4), (f4).w
-#define oFLOAT4x4_AS_PARAMS(f4x4) oFLOAT4_PARAMS((f4x4).col0), oFLOAT4_PARAMS((f4x4).col1), oFLOAT4_PARAMS((f4x4).col2), oFLOAT4_PARAMS((f4x4).col3)
+	return offset;
+}
 
 void gizmo::trace()
 {
 	static uint32_t s_ctr = 0;
 	static uint64_t s_hash = 0;
+	
 	auto hash = xxhash64(this, sizeof(*this));
 
 	if (s_hash != hash)
 	{
 		s_hash = hash;
-
-		// could be XXmmvfiiii... pass an array of labels (field names), type codes, to-string functions?
-		// maybe make the field codes a part of typeid_
-
-		oTrace("gizmo %p %08u", this, s_ctr++);
-		oTrace("{");
-		oTrace("\tcb=%p", cb_);
-		oTrace("\tcb_user=%p", cb_user_);
-		oTrace("\ttx=           " oFLOAT4x4F_ML("\n\t              "), oFLOAT4x4_AS_PARAMS(tx_));
-		oTrace("\tactivation_tx=" oFLOAT4x4F_ML("\n\t              "), oFLOAT4x4_AS_PARAMS(activation_tx_));
-		oTrace("\tactivation_offset=%.03f %.03f %.03f", oFLOAT3_PARAMS(activation_offset_));
-		oTrace("\tactive_axis_scale=%f", active_axis_scale_);
-		oTrace("\taxis=%d", axis_);
-		oTrace("\ttype=%s", as_string(type_));
-		oTrace("\tspace=%s", as_string(space_));
-		oTrace("\tstate=%s", as_string(state_));
-		oTrace("}");
+		char buf[1024];
+		to_string(buf, countof(buf));
+		oTrace("%s", buf);
 	}
-}
-
-char* to_string(char* dst, size_t dst_size, const gizmo::tessellation_info_t& info)
-{
-	int len = snprintf(dst, dst_size,
-		"gizmo::trace_tessellation_info_t %p\n"                         \
-		"{\n"                                                           \
-		"\tvisual_transform=" oFLOAT4x4F_ML("\t                 ") "\n" \
-		"\teye=" oFLOAT3F "\n"                                          \
-		"\taxis_scale=%.03f\n"                                          \
-		"\tnum_line_vertices=%u\n"                                      \
-		"\tnum_triangle_vertices=%u\n"                                  \
-		"\ttype=%s\n"                                                   \
-		"\tselected_axis=%d\n"                                          \
-		"}\n"
-			, &info, oFLOAT4x4_AS_PARAMS(info.visual_transform), oFLOAT3_PARAMS(info.eye), info.axis_scale
-			, info.num_line_vertices, info.num_triangle_vertices, as_string(info.type), info.selected_axis);
-
-	return len < dst_size ? dst : nullptr;
 }
 
 void gizmo::trace_tessellation_info(const tessellation_info_t& info)
@@ -781,7 +785,8 @@ void gizmo::trace_tessellation_info(const tessellation_info_t& info)
 		s_hash = hash;
 
 		char buf[1024];
-		oTrace("%s", to_string(buf, countof(buf), info));
+		ouro::to_string(buf, info);
+		oTrace("%s", buf);
 	}
 }
 

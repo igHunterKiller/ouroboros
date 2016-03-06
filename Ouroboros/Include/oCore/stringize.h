@@ -22,7 +22,7 @@
 // Default implementation macros. Use these to meet the requirements of the 
 // policy API.
 
-#define oDEFINE_TO_STRING(_T)                         template<> char* to_string(char* dst, size_t dst_size, const _T& value) { return ::ouro::default_to_string(dst, dst_size, value); }
+#define oDEFINE_TO_STRING(_T)                         template<> size_t to_string(char* dst, size_t dst_size, const _T& value) { return ::ouro::default_to_string(dst, dst_size, value); }
 #define oDEFINE_FROM_STRING2(_T, invalid_value)       template<> bool from_string(_T* out_value, const char* src) { return ::ouro::default_from_string<_T>(out_value, src, invalid_value); }
 #define oDEFINE_FROM_STRING(_T)                       oDEFINE_FROM_STRING2(_T, _T(0))
 #define oDEFINE_FLAGS_FROM_STRING2(_T, invalid_value) template<> bool from_string(_T* out_value, const char* src) { return ::ouro::default_from_string_bitflags<_T>(out_value, src, invalid_value); }
@@ -37,13 +37,13 @@ namespace ouro {
 // returns a const string representation of the specified value, mostly for invariants like enums
 template<typename T> const char* as_string(const T& value);
 
-// returns dst on success, or nullptr
-template<typename T>              char* to_string(char* dst, size_t dst_size, const T& value);
-template<typename T, size_t size> char* to_string(char (&dst)[size], const T& value) { return to_string<T>(dst, size, value); }
+// returns the length required for the conversion (thus success is ret_val < dst_size, like strlcpy, snprintf ignoring format error, etc.)
+template<typename T>              size_t to_string(char* dst, size_t dst_size, const T& value);
+template<typename T, size_t size> size_t to_string(char (&dst)[size], const T& value) { return to_string<T>(dst, size, value); }
 
 // permutation of from_string for fixed-size string destination
-                      inline char* to_string(char* dst, size_t dst_size, const char* src) { return -1 != snprintf(dst, dst_size, "%s", src ? src : "(null)") ? dst : nullptr; }
-template<size_t size>        char* to_string(char (&dst)[size], const char* src) { return from_string(dst, size, src); }
+                      inline size_t to_string(char* dst, size_t dst_size, const char* src) { return snprintf(dst, dst_size, "%s", src ? src : "(null)"); }
+template<size_t size>        size_t to_string(char (&dst)[size], const char* src) { return from_string(dst, size, src); }
 
 // returns true if out_value receives a successful conversion of the string to type T
 template<typename T> bool from_string(T* out_value, const char* src);
@@ -66,7 +66,7 @@ template<typename enumT, typename T, size_t size> T as_string(const enumT& e, T 
 }
 
 // copies as_string to destination
-template<typename T> char* default_to_string(char* dst, size_t dst_size, const T& value) { return to_string(dst, dst_size, as_string(value)); }
+template<typename T> size_t default_to_string(char* dst, size_t dst_size, const T& value) { return to_string(dst, dst_size, as_string(value)); }
 
 // from_string for enums that are defined to act as bitflags
 template<typename T> bool default_from_string_bitflags(T* out_value, const char* src, const typename std::underlying_type<T>::type& invalid_value)
@@ -122,17 +122,20 @@ template<typename T> bool default_from_string(T* out_value, const char* src, con
 // _____________________________________________________________________________
 // Builtin specializations
 
-template<> inline const char* as_string(const bool& value)                                    { return value ? "true" : "false"; }
-template<> inline       char* to_string(char* dst, size_t dst_size, const char* const& value) { return -1 != snprintf(dst, dst_size, "%s", value ? value : "(null)") ? dst : nullptr; }
-template<> inline       char* to_string(char* dst, size_t dst_size, const bool& value)        { return -1 != snprintf(dst, dst_size, "%s", value ? "true" : "false") ? dst : nullptr; }
-template<> inline       char* to_string(char* dst, size_t dst_size, const char& value)        { if (!dst || dst_size < 2) return nullptr; dst[0] = value; dst[1] = '\0'; return dst; }
-template<> inline       char* to_string(char* dst, size_t dst_size, const uint8_t& value)     { if (!dst || dst_size < 2) return nullptr; dst[0] = (char)value; dst[1] = '\0'; return dst; }
-#define oDEFINE_TO_STRING_BUILTIN(_T, _Tfmt) template<> inline char* to_string(char* dst, size_t dst_size, const _T& value) { return -1 != snprintf(dst, dst_size, _Tfmt, value) ? dst : nullptr; }
+template<> inline const char* as_string(const bool& value)                                     { return value ? "true" : "false"; }
+template<> inline       size_t to_string(char* dst, size_t dst_size, const char* const& value) { return snprintf(dst, dst_size, "%s", value ? value : "(null)"); }
+template<> inline       size_t to_string(char* dst, size_t dst_size, const bool& value)        { return snprintf(dst, dst_size, "%s", value ? "true" : "false"); }
+template<> inline       size_t to_string(char* dst, size_t dst_size, const char& value)        { if (dst && dst_size >= 2) { dst[0] = value;       dst[1] = '\0'; } return 1; }
+template<> inline       size_t to_string(char* dst, size_t dst_size, const uint8_t& value)     { if (dst && dst_size >= 2) { dst[0] = (char)value; dst[1] = '\0'; } return 1; }
+#define oDEFINE_TO_STRING_BUILTIN(_T, _Tfmt) template<> inline size_t to_string(char* dst, size_t dst_size, const _T& value) { return snprintf(dst, dst_size, _Tfmt, value); }
 oDEFINE_TO_STRING_BUILTIN(int16_t, "%hd" ) oDEFINE_TO_STRING_BUILTIN(uint16_t,      "%hu" )
 oDEFINE_TO_STRING_BUILTIN(int32_t, "%d"  ) oDEFINE_TO_STRING_BUILTIN(uint32_t,      "%u"  )
 oDEFINE_TO_STRING_BUILTIN(long,    "%d"  ) oDEFINE_TO_STRING_BUILTIN(unsigned long, "%u"  )
 oDEFINE_TO_STRING_BUILTIN(int64_t, "%lld") oDEFINE_TO_STRING_BUILTIN(uint64_t,      "%llu")
 oDEFINE_TO_STRING_BUILTIN(float,   "%f"  ) oDEFINE_TO_STRING_BUILTIN(double,        "%lf" )
+
+template<> inline size_t to_string<void*>(char* dst, size_t dst_size, void* const& src) { return snprintf(dst, dst_size, "%p", src); }
+template<> inline size_t to_string<const void*>(char* dst, size_t dst_size, const void* const& src) { return snprintf(dst, dst_size, "%p", src); }
 
 #ifndef _MSC_VER
 	#error sscanf_s is VS-specific
