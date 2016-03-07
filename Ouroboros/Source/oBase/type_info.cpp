@@ -36,9 +36,12 @@ size_t field_snprintf(char* dst, size_t dst_size, const char* label, size_t inde
 	final_length += len;
 
 	// append newline
-	final_length += 1;
+	final_length++;
 	if (final_length < dst_size)
+	{
 		*dst++ = '\n';
+		*dst++ = '\0';
+	}
 
 	return final_length;
 }

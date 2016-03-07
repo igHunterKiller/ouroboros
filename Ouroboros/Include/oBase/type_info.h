@@ -191,7 +191,7 @@ template<typename U>             struct type_info_cast_pointer_to_void<std::true
 #define STRUCTF_BEGIN_ACC(dst__, dst_size__, indent__, label__, ptr__) offset += STRUCTF_BEGIN((dst__) + offset, (dst_size__) - offset, indent__, label__, ptr__)
 #define STRUCTF_END(dst__, dst_size__, indent__, label__, ptr__) snprintf(dst__, dst_size__, "%.*s}\n", 2*__min(8, indent__), "                ")
 #define STRUCTF_END_ACC(dst__, dst_size__, indent__, label__, ptr__) offset += STRUCTF_END((dst__) + offset, (dst_size__) - offset, indent__, label__, ptr__)
-#define FIELDF(dst__, dst_size__, indent__, member__) field_snprintf(dst__, dst_size__, #member__, indent, ouro::type_info<type_info_cast_pointer_to_void<std::is_pointer<decltype(member__)>::type, decltype(member__)>::type>::to_string, &(member__))
+#define FIELDF(dst__, dst_size__, indent__, member__) field_snprintf(dst__, dst_size__, #member__, indent__, ouro::type_info<type_info_cast_pointer_to_void<std::is_pointer<std::remove_reference<decltype(member__)>::type>::type, std::remove_reference<decltype(member__)>::type>::type>::to_string, &(member__))
 #define FIELDF_ACC(dst__, dst_size__, indent__, member__) offset += FIELDF((dst__) + offset, (dst_size__) - offset, indent__, member__)
 
 }

@@ -75,13 +75,13 @@ template<> size_t to_string(char* dst, size_t dst_size, const gizmo::tessellatio
 static const uint32_t s_selected_color = color::white;
 static const uint32_t s_ghost_color = color::dark_slate_gray;
 static const uint32_t s_component_colors[vector_component::count] = { color::red, color::green, color::blue, color::yellow };
-static const uint16_t s_facet = 32;
-static const float    s_select_eps = 0.01f;
-static const float    s_axis_length = 0.2f;
+static const uint16_t s_facet                      = 32;
+static const float    s_select_eps                 = 0.01f;
+static const float    s_axis_length                = 0.2f;
 static const float    s_ss_translation_ring_radius = 0.02f;
-static const float    s_ss_rotation_ring_radius = 0.25f;
-static const float    s_cap_scale = 0.0115f;
-static const float    s_cube_radius = 0.017321f;
+static const float    s_ss_rotation_ring_radius    = 0.25f;
+static const float    s_cap_scale                  = 0.0115f;
+static const float    s_cube_radius                = 0.017321f;
 
 static const uint16_t s_num_lines[(int)gizmo::type::count + 1] = { 0, 3, 5 * s_facet, 3 + s_facet };
 static const uint16_t s_num_tris[(int)gizmo::type::count + 1] = { 0, 4 * 12, 0, 3 * 2 * (s_facet - 1) };
@@ -97,18 +97,18 @@ vector_component initial_pick(
 	, const float3& ws_pick1              // the other point of a pick line segment
 	, float3* out_offset)                 // receives the offset from the center of the click
 {
-	// dist is used to scale values so they seem fixed in screen-space
+	const float    fixed_ss_rotate_scale            = 1.25f;
+	const float3   center                           = transform[3].xyz();
+	const float    dist                             = length(eye - center);
+	const float3   eye_dir                          = (eye - center) / dist;
+	const float4   screen_plane                     = plane(eye_dir, center);
+	const float4x4 fixed_tx                         = rescale(transform, dist);
+	const float    fixed_selection_epsilon          = dist * selection_epsilon;
+	const float    fixed_radius                     = dist * axis_radius;
+	const float    fixed_ss_translation_ring_radius = viewport_scale * dist * s_ss_translation_ring_radius;
+	const float    fixed_cap_radius                 = dist * (s_cube_radius + selection_epsilon);
+
 	float t0, t1;
-	const float    fixed_ss_rotate_scale = 1.25f;
-	const float3   center = transform[3].xyz();
-	const float    dist = length(eye - center);
-	const float3   eye_dir = (eye - center) / dist;
-	const float4   screen_plane = plane(eye_dir, center);
-	const float4x4 fixed_tx = rescale(transform, dist);
-	const float    fixed_selection_epsilon = dist * selection_epsilon;
-	const float    fixed_radius = dist * axis_radius;
-	const float    fixed_ss_translation_ring_radius = dist * s_ss_translation_ring_radius;
-	const float    fixed_cap_radius = dist * (s_cube_radius + selection_epsilon);
 
 	// assume no intersection
 	auto picked = vector_component::none;
@@ -202,6 +202,8 @@ vector_component initial_pick(
 
 			const float4 sphere = float4(center, fixed_ss_translation_ring_radius);
 
+			const float fixed_axis_length = axis_radius * viewport_scale; // dist is encorporated in fixed_tx
+
 			// check screen-space translation circle first
 			if (seg_v_sphere(ws_pick0, ws_pick1, sphere, &t0, &t1))
 			{
@@ -216,7 +218,7 @@ vector_component initial_pick(
 				for (int i = 0; i < (int)vector_component::w; i++)
 				{
 					float3 end = kZero3;
-					end[i] = axis_radius; // dist is encorporated in fixed_tx
+					end[i] = fixed_axis_length;
 					end = mul(fixed_tx, end);
 
 					if (seg_vs_seg(center, end, ws_pick0, ws_pick1, fixed_selection_epsilon, &t0, &t1, &pt))
@@ -363,13 +365,24 @@ float4x4 gizmo::transform() const
 
 gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, const float4x4& inverse_view, const float3& ws_pick0, const float3& ws_pick1, bool activate)
 {
-	trace();
+	{
+		char buf[1024];
+		buf[0] = '\n';
+
+		size_t offset = 1;
+		FIELDF_ACC(buf, countof(buf), 0, viewport_dimensions);
+		FIELDF_ACC(buf, countof(buf), 0, activate);
+
+		oTrace("%s", buf);
+	}
+	
+	//trace();
 	// override activation if the type is none
 	if (type_ == gizmo::type::none)
 		activate = false;
 
 	// extract initial parameters
-	const float    vp_scale = 1.0f / max(viewport_dimensions);
+	const float    vp_scale = 256.0f / max(viewport_dimensions);
 	const float3   eye      = inverse_view[3].xyz();
 	const float3   right    = inverse_view[0].xyz();
 	const float4x4 pick_tx  = remove_shear(space_ == space::world ? translate(tx_[3].xyz()) : tx_);
@@ -377,10 +390,7 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 	float dist;
 	const float3 eye_dir    = normalize(eye - center, dist);
 
-	// run initial pick whenever not active to handle hover and initial selection
-	// detect state change
 	const bool was_active = state_ >= state::newly_active;
-
 	if (!was_active)
 		axis_ = initial_pick(type_, vp_scale, pick_tx, eye, s_select_eps, s_axis_length, ws_pick0, ws_pick1, &activation_offset_);
 
@@ -555,13 +565,13 @@ gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, cons
 void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, vertex_t* out_faces)
 {
 	// cache information about the focal point
-	const auto current_axis = (vector_component)info.selected_axis;
+	const auto current_axis        = (vector_component)info.selected_axis;
 	const float scaled_axis_length = s_axis_length * info.axis_scale;
-	const float3 eye = info.eye;
-	const float4x4 visual_tx = info.visual_transform;
-	const float3 center = visual_tx[3].xyz();
-	float3 eye_direction = eye - center;
-	const float dist = length(eye_direction);
+	const float3 eye               = info.eye;
+	const float4x4 visual_tx       = info.visual_transform;
+	const float3 center            = visual_tx[3].xyz();
+	float3 eye_direction           = eye - center;
+	const float dist               = length(eye_direction);
 	eye_direction /= dist; // normalize
 
 	// initialize colors based on the axis selected
@@ -673,18 +683,19 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 				float3(0.0f,                0.0f, 0.0f),
 			};
 
-			// 3 axes + center ring
-			tess_axes(visual_tx, s_axis_length, s_axis_length, current_axis, colors, outl);
+			const float fixed_axis_length    = info.viewport_scale * s_axis_length;
+			const float fixed_ss_ring_radius = info.viewport_scale * s_ss_translation_ring_radius;
+			const float fixed_cap_scale      = info.viewport_scale * s_cap_scale;
+			const float fixed_extent         = info.viewport_scale * scaled_axis_length; // dist's contribution to scale is handled in the use of visual_tx
+
+			tess_axes(visual_tx, fixed_axis_length, fixed_axis_length, current_axis, colors, outl);
 
 			// dist's contribution to scale is handled in the use of visual_tx
-			const float4x4 visual_ss_transform = scale(s_ss_translation_ring_radius)
+			const float4x4 visual_ss_transform = scale(fixed_ss_ring_radius)
 				* rotate_xy_planar(float4(eye_direction, 0.0f))
 				* remove_rotation(visual_tx);
 
 			tess_ring(visual_ss_transform, colors[(int)vector_component::w], kZero4, s_facet, ring_verts, outl);
-
-			// dist's contribution to scale is handled in the use of visual_tx
-			const float scaled_extent = scaled_axis_length;
 
 			uint16_t cone_nverts = 0;
 			float3* cone_verts = nullptr;
@@ -709,9 +720,9 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 				auto component = (vector_component)i;
 
 				float3 trans = kZero3;
-				trans[i] = scaled_extent;
+				trans[i] = fixed_extent;
 
-				float4x4 tx = scale(s_cap_scale) * rotate(s_cap_rotation[i]) * translate(trans) * visual_tx;
+				float4x4 tx = scale(fixed_cap_scale) * rotate(s_cap_rotation[i]) * translate(trans) * visual_tx;
 
 				for (uint16_t v = 0; v < cone_nverts; v++, outt++)
 				{
