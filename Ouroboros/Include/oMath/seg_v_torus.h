@@ -5,12 +5,12 @@
 
 namespace ouro {
 
-// returns the number of valid at values
+// returns the number of valid 'at' values
 // a0, a1: the line segment
 // center: torus center
 // normalized_axis: the normal of the plane that splits the torus like a bagel
 // major_radius: from center to the center of the torus tube
-// minir_radius: from the center of the torus tube to its exterior
+// minor_radius: from the center of the torus tube to its exterior
 // at0, at1, at2, at3: defines the intersection points on the segment: lerp(a0, a1, *at0), etc.
 int seg_v_torus(const float3& a0, const float3& a1, const float3& center, const float3& normalized_axis, float major_radius, float minor_radius, float* at0, float* at1, float* at2, float* at3);
 
