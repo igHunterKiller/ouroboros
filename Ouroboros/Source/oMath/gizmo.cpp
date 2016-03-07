@@ -104,7 +104,7 @@ vector_component initial_pick(
 	const float4   screen_plane                     = plane(eye_dir, center);
 	const float4x4 fixed_tx                         = rescale(transform, dist);
 	const float    fixed_selection_epsilon          = dist * selection_epsilon;
-	const float    fixed_radius                     = dist * axis_radius;
+	const float    fixed_radius                     = viewport_scale * dist * axis_radius;
 	const float    fixed_ss_translation_ring_radius = viewport_scale * dist * s_ss_translation_ring_radius;
 	const float    fixed_cap_radius                 = viewport_scale * dist * (s_cube_radius + selection_epsilon);
 	const float    fixed_axis_length                = viewport_scale * axis_radius; // this axis is often transformed by fixed_tx, which has the dist adjustment in it already. See if viewport_scale can be rolled into fixed_tx too
@@ -121,7 +121,6 @@ vector_component initial_pick(
 		{
 			// interaction elements: endpoints of axes for scale in each cardinal direction
 			// and one at the center for uniform scaling.
-
 
 			for (int i = 0; i < (int)vector_component::count; i++)
 			{
@@ -365,24 +364,12 @@ float4x4 gizmo::transform() const
 
 gizmo::tessellation_info_t gizmo::update(const float2& viewport_dimensions, const float4x4& inverse_view, const float3& ws_pick0, const float3& ws_pick1, bool activate)
 {
-	{
-		char buf[1024];
-		buf[0] = '\n';
-
-		size_t offset = 1;
-		FIELDF_ACC(buf, countof(buf), 0, viewport_dimensions);
-		FIELDF_ACC(buf, countof(buf), 0, activate);
-
-		oTrace("%s", buf);
-	}
-	
-	//trace();
 	// override activation if the type is none
 	if (type_ == gizmo::type::none)
 		activate = false;
 
 	// extract initial parameters
-	const float    vp_scale = 256.0f / max(viewport_dimensions);
+	const float    vp_scale = 256.0f / viewport_dimensions.x;
 	const float3   eye      = inverse_view[3].xyz();
 	const float3   right    = inverse_view[0].xyz();
 	const float4x4 pick_tx  = remove_shear(space_ == space::world ? translate(tx_[3].xyz()) : tx_);
@@ -643,11 +630,11 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 
 		case gizmo::type::rotate:
 		{
-			float4         screen_plane = plane(eye_direction, center);
-			const float    fixed_axis_length = dist * s_axis_length;
-			const float    fixed_ss_rotation_ring_radius = dist * s_ss_rotation_ring_radius;
-			const float4x4 fixed_scale = scale(fixed_axis_length);
-			const float4x4 screen_plane_tx = rotate_xy_planar(screen_plane);
+			float4         screen_plane                  = plane(eye_direction, center);
+			const float    fixed_axis_length             = info.viewport_scale * dist * s_axis_length;
+			const float    fixed_ss_rotation_ring_radius = info.viewport_scale * dist * s_ss_rotation_ring_radius;
+			const float4x4 fixed_scale                   = scale(fixed_axis_length);
+			const float4x4 screen_plane_tx               = rotate_xy_planar(screen_plane);
 
 			float4x4 space_rotation = remove_scale(visual_tx);
 			space_rotation[3] = kWAxis4;
