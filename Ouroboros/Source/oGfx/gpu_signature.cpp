@@ -9,8 +9,10 @@
 #include <VSpos_uv0.h>
 #include <VSpos_nrm_tan_uv0.h>
 #include <PSmouse_depth.h>
+#include <PSlinearize_depth.h>
 #include <PSconstant_color.h>
 #include <PSvertex_color.h>
+#include <PSvertex_color_stipple.h>
 #include <PStexcoordu.h>
 #include <PStexcoordv.h>
 #include <PStexcoord.h>
@@ -40,10 +42,13 @@ template<> const char* as_string(const gfx::pipeline_state& state)
 		"pos_color",
 		"pos_color_wire",
 		"pos_vertex_color",
+		"pos_vertex_color_stipple",
 		"pos_vertex_color_wire",
 		"lines_color",
 		"lines_vertex_color",
+		"lines_vertex_color_stipple",
 		"mouse_depth",
+		"linearize_depth",
 		"mesh_u0_as_color",
 		"mesh_v0_as_color",
 		"mesh_uv0_as_color",
@@ -74,10 +79,13 @@ const pipeline_state_desc pipeline_states[] =
 	pipeline_state_desc(VSpos,                   PSconstant_color,        mesh::basic::pos,     basic::translucent, basic::front_face, basic::depth_test,           primitive_type::triangle),
 	pipeline_state_desc(VSpos,                   PSconstant_color,        mesh::basic::pos,     basic::translucent, basic::front_wire, basic::depth_test,           primitive_type::triangle),
 	pipeline_state_desc(VSpos_col,               PSvertex_color,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	pipeline_state_desc(VSpos_col,               PSvertex_color_stipple,  mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
 	pipeline_state_desc(VSpos_col,               PSvertex_color,          mesh::basic::pos_col, basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
 	pipeline_state_desc(VSpos_col,               PSconstant_color,        mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::line    ),
 	pipeline_state_desc(VSpos_col,               PSvertex_color,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::line    ),
+	pipeline_state_desc(VSpos_col,               PSvertex_color_stipple,  mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::line    ),
 	pipeline_state_desc(basic::VSfullscreen_tri, PSmouse_depth,           mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
+	pipeline_state_desc(basic::VSfullscreen_tri, PSlinearize_depth,       mesh::basic::pos,     basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
 	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoordu,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
 	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoordv,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
 	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoord,              mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),

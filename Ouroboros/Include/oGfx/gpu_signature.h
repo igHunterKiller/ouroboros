@@ -32,10 +32,13 @@ enum class pipeline_state
 	pos_color,
 	pos_color_wire,
 	pos_vertex_color,
+	pos_vertex_color_stipple,
 	pos_vertex_color_wire,
 	lines_color,
 	lines_vertex_color,
+	lines_vertex_color_stipple,
 	mouse_depth,
+	linearize_depth,
 	
 	// pos_nrm_tan_uv0_col
 	mesh_u0_as_color,

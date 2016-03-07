@@ -42,7 +42,6 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	 80               oGfx        renderer    Move btt_test elements into main renderer - start terrain rendering.
 	 81               oGfx        renderer    Why break up film separately? Why not have pov be a member of the renderer? These things aren't really separable or reusable.
 	 82               oGfx        renderer    Replace placeholder lines-based grid with something that mips into the distance better - resurrect grid shader.
-	 83               oGfx        renderer    Add stippling to gizmo rendering.
 	 84               oGfx        renderer    Use the btt stuff to create a 0.1v of a terrain thing
 	 85               oGfx        renderer    Implement trivially basic model rendering
 	 86               oCore       hash_map    Replace std::function deps with templated function pattern

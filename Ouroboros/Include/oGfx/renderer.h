@@ -33,6 +33,7 @@ enum class render_pass : uint8_t
 {
 	initialize,
 	geometry,
+	depth_resolve,
 	shadow,
 	tonemap,
 	debug,
@@ -46,6 +47,8 @@ enum class render_technique : uint8_t
 	view_begin, // param nullptr, submit only one
 
 	// 'begin' techniques must be before others to sort correctly
+
+	linearize_depth, // param nullptr, submit only one
 
 	draw_lines, // param is lines_submission_t
 	draw_prim,  // param is primitive_submission_t

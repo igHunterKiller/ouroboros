@@ -36,12 +36,13 @@ template<> const char* as_string(const gfx::render_pass& pass)
 {
 	const char* s_names[] = 
 	{
-		"pass_initialize",
-		"pass_geometry",
-		"pass_shadow",
-		"pass_tonemap",
-		"pass_debug",
-		"pass_resolve",
+		"initialize",
+		"geometry",
+		"shadow",
+		"depth_resolve",
+		"tonemap",
+		"debug",
+		"resolve",
 	};
 	return as_string(pass, s_names);
 }
@@ -52,6 +53,7 @@ template<> const char* as_string(const gfx::render_technique& technique)
 	{
 		"pass_begin",
 		"view_begin",
+		"linearize_depth",
 		"draw_lines",
 		"draw_prim",
 		"draw_axis",
@@ -64,7 +66,6 @@ template<> const char* as_string(const gfx::render_technique& technique)
 }
 
 	namespace gfx {
-
 
 oTHREAD_LOCAL uint32_t renderer_t::local_tasklist_frame_id_;
 oTHREAD_LOCAL void*    renderer_t::local_tasklist_;
@@ -94,8 +95,12 @@ struct technique_context_t
 	const pov_t* pov;
 	const task_t* tasks;
 	uint32_t num_tasks;
+	render_pass pass;
+	render_technique technique;
 
 	render_settings_t render_settings;
+
+	bool is_beyond(const render_pass& p) const { return ((tasks[0].key >> pass_shift) & 0xff) > (uint64_t)p; }
 };
 
 #define ForEachTask for (const task_t* task = ctx.tasks, *end = ctx.tasks + ctx.num_tasks; task < end; task++)
@@ -117,10 +122,10 @@ void view_begin(technique_context_t& ctx)
 	{
 		cl->clear_rtv(ctx.presentation_target, color::almost_black);
 
-		auto depth_target = film->get(gfx::film_t::hyper_depth);
-		cl->clear_dsv(depth_target);
+		auto hyper_depth = film->dsv(gfx::film_t::hyper_depth);
+		cl->clear_dsv(hyper_depth);
 
-		cl->set_rtv(ctx.presentation_target, depth_target);
+		cl->set_rtv(ctx.presentation_target, hyper_depth);
 	}
 
 	// configure per-view settings
@@ -146,6 +151,28 @@ void pass_end(technique_context_t& ctx)
 	oAssert(ctx.num_tasks == 1, "");
 }
 
+void linearize_depth(technique_context_t& ctx)
+{
+	oAssert(ctx.num_tasks == 1, "Call this only once");
+	oAssert(ctx.is_beyond(render_pass::geometry), "Requires valid hyper depth buffer");
+
+	auto& cl          = *ctx.gcl;
+	auto& film        = *ctx.film;
+	auto linear_depth = film.rtv(film_t::linear_depth);
+	auto hyper_depth  = film.srv(film_t::hyper_depth);
+
+	cl.set_pso(pipeline_state::linearize_depth);
+	cl.set_vertices(0, 1, nullptr);
+	cl.set_rtv(linear_depth);
+	cl.set_srvs(oGFX_SRV_DEPTH, 1, &hyper_depth);
+	cl.draw(3);
+	cl.set_srvs(oGFX_SRV_DEPTH, 1, nullptr);
+	//cl.set_rtv(nullptr);
+
+	// This is crappy... restore prior target that I happen to know is this... and that other handlers assume too much (though they ARE draw's, targets should be set elsewhere)
+	cl.set_rtv(ctx.presentation_target, film.dsv(film_t::hyper_depth));
+}
+
 void draw_prim(technique_context_t& ctx)
 {
 	auto& cl     = *ctx.gcl;
@@ -156,21 +183,11 @@ void draw_prim(technique_context_t& ctx)
 	switch (ctx.render_settings.mode)
 	{
 		default:
-		case fullscreen_mode::normal:
-			pso = pipeline_state::mesh_simple_texture;
-			break;
-		case fullscreen_mode::wireframe:
-			pso = pipeline_state::pos_color_wire;
-			break;
-		case fullscreen_mode::texcoord:
-			pso = pipeline_state::mesh_uv0_as_color;
-			break;
-		case fullscreen_mode::texcoordu:
-			pso = pipeline_state::mesh_u0_as_color;
-			break;
-		case fullscreen_mode::texcoordv:
-			pso = pipeline_state::mesh_v0_as_color;
-			break;
+		case fullscreen_mode::normal:    pso = pipeline_state::mesh_simple_texture; break;
+		case fullscreen_mode::wireframe: pso = pipeline_state::pos_color_wire;      break;
+		case fullscreen_mode::texcoord:  pso = pipeline_state::mesh_uv0_as_color;   break;
+		case fullscreen_mode::texcoordu: pso = pipeline_state::mesh_u0_as_color;    break;
+		case fullscreen_mode::texcoordv: pso = pipeline_state::mesh_v0_as_color;    break;
 	}
 
 	cl.set_pso(pso);
@@ -216,9 +233,10 @@ void draw_axis(technique_context_t& ctx)
 {
 	oAssert(ctx.num_tasks == 1, "");
 
-	auto& cl  = *ctx.gcl;
-	auto& pov = *ctx.pov;
-
+	auto& cl    = *ctx.gcl;
+	auto& pov   = *ctx.pov;
+	auto& film  = *ctx.film;
+	
 	static const uint32_t kColors[]   = { color::red, color::lime, color::blue };
 	static const uint16_t kConeFacet  = 10;
 	static const float    kPixelInset = 28.0f;
@@ -341,10 +359,11 @@ void draw_gizmo(technique_context_t& ctx)
 {
 	oAssert(ctx.num_tasks == 1, "");
 
-	auto& cl  = *ctx.gcl;
-	auto& pov = *ctx.pov;
-
-	auto& tess = *(const gizmo::tessellation_info_t*)ctx.tasks->data;
+	auto& cl          = *ctx.gcl;
+	auto& pov         = *ctx.pov;
+	auto& film        = *ctx.film;
+	auto& tess        = *(const gizmo::tessellation_info_t*)ctx.tasks->data;
+	auto linear_depth = film.srv(film_t::linear_depth);
 
 	auto nlverts = tess.num_line_vertices;
 	auto nfverts = tess.num_triangle_vertices;
@@ -363,11 +382,15 @@ void draw_gizmo(technique_context_t& ctx)
 		gfx::draw_constants draw(kIdentity4x4, pov.view(), pov.projection());
 		cl.set_cbv(oGFX_CBV_DRAW, &draw, sizeof(draw));
 
+		bool linear_depth_set = false;
+
 		// draw lines
 		if (nlverts)
 		{
 			// Draw lines with vertex colors
-			cl.set_pso(gfx::pipeline_state::lines_vertex_color);
+			cl.set_pso(gfx::pipeline_state::lines_vertex_color_stipple);
+			cl.set_srvs(oGFX_SRV_DEPTH, 1, &linear_depth);
+			linear_depth_set = true;
 			cl.set_vertices(0, 1, &view);
 			cl.draw(nlverts);
 		}
@@ -380,10 +403,17 @@ void draw_gizmo(technique_context_t& ctx)
 			tri_view.offset += nlverts * view.vertex_stride_bytes();
 			tri_view.num_vertices = nfverts;
 
-			cl.set_pso(gfx::pipeline_state::pos_vertex_color);
+			cl.set_pso(gfx::pipeline_state::pos_vertex_color_stipple);
+			
+			if (!linear_depth_set)
+				cl.set_srvs(oGFX_SRV_DEPTH, 1, &linear_depth);
+
 			cl.set_vertices(0, 1, &tri_view);
 			cl.draw(nfverts);
 		}
+
+		if (linear_depth_set)
+			cl.set_srvs(oGFX_SRV_DEPTH, 1, nullptr);
 	}
 }
 
@@ -449,6 +479,7 @@ technique_t s_techniques[] =
 {
 	pass_begin,
 	view_begin,
+	linearize_depth,
 	draw_lines,
 	draw_prim,
 	draw_axis,
@@ -772,7 +803,9 @@ void renderer_t::kick(void* t, uint32_t num_tasks)
     auto technique_end = cur + 1;
     for (; (technique_end->key & test_mask) == match; technique_end++);
     auto nmatches = (uint32_t)(technique_end - cur);
-    uint32_t technique = (cur->key >> technique_shift) & 0xff;
+		auto key = cur->key;
+    uint32_t technique = (key >> technique_shift) & 0xff;
+		uint32_t pass = (key >> pass_shift) & 0xff;
     auto fn = s_techniques[technique];
     
     // Maybe if a pass is flagged for split, do the alternative logic below,
@@ -783,8 +816,10 @@ void renderer_t::kick(void* t, uint32_t num_tasks)
     // Can this be kicked to another thread/fiber? The challenge is that per-technique is
     // a bit fine-grained. Per-pass maybe makes more sense?
 
-		ctx.tasks = cur;
+		ctx.tasks     = cur;
 		ctx.num_tasks = nmatches;
+		ctx.pass      = (render_pass)pass;
+		ctx.technique = (render_technique)technique;
 
     fn(ctx);
     

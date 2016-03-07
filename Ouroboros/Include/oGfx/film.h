@@ -39,18 +39,22 @@ public:
 	void initialize(gpu::device* dev, uint32_t width, uint32_t height);
 	void deinitialize();
 
-	inline uint2 dimensions() const { auto desc = depths_[hyper_depth]->get_resource()->get_desc(); return uint2(desc.width, desc.height); }
+	inline uint2 dimensions() const { auto desc = depth_dsvs_[hyper_depth]->get_resource()->get_desc(); return uint2(desc.width, desc.height); }
 
 	// only call this when the buffer is not in used
 	void resize(uint32_t width, uint32_t height);
 
-	gpu::rtv* get(const color& c) const { return (gpu::rtv*)colors_[c].c_ptr(); }
-	gpu::dsv* get(const depth& d) const { return (gpu::dsv*)depths_[d].c_ptr(); }
+	gpu::rtv* rtv(const color& c) const { return (gpu::rtv*)color_rtvs_[c].c_ptr(); }
+	gpu::dsv* dsv(const depth& d) const { return (gpu::dsv*)depth_dsvs_[d].c_ptr(); }
+	gpu::srv* srv(const color& c) const { return (gpu::srv*)color_srvs_[c].c_ptr(); }
+	gpu::srv* srv(const depth& d) const { return (gpu::srv*)depth_srvs_[d].c_ptr(); }
 
 private:
 	ref<gpu::device> dev_;
-	std::array<ref<gpu::rtv>, color_count> colors_;
-	std::array<ref<gpu::dsv>, depth_count> depths_;
+	std::array<ref<gpu::rtv>, color_count> color_rtvs_;
+	std::array<ref<gpu::dsv>, depth_count> depth_dsvs_;
+	std::array<ref<gpu::srv>, color_count> color_srvs_;
+	std::array<ref<gpu::srv>, depth_count> depth_srvs_;
 
 	film_t(const film_t&);
 	const film_t& operator=(const film_t&);

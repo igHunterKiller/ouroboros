@@ -27,6 +27,7 @@ PSmagenta
 PScyan
 PSconstant_color
 PSmouse_depth
+PSlinearize_depth
 PStexture1d
 PStexture1d_array
 PStexture2d
@@ -35,6 +36,7 @@ PStexture3d
 PStexture_cube
 PStexture_cube_array
 PSvertex_color
+PSvertex_color_stipple
 PSvertex_color_prim
 PStexcoordu
 PStexcoordv

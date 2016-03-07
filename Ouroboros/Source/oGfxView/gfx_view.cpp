@@ -561,6 +561,8 @@ void gfx_view::run()
 			// each test app has to explicitly submit it's own scene.
 			submit_scene(renderer_);
 
+			renderer_.submit(0, gfx::render_pass::depth_resolve, gfx::render_technique::linearize_depth, nullptr);
+
 			submit_pick_ray();
 			submit_world_axis();
 			submit_gizmo();

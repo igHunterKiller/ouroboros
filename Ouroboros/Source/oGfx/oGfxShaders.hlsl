@@ -200,9 +200,34 @@ float4 PStexcoord3(INTcommon In) : SV_Target { return float4(frac(In.texcoord0),
 float PSmouse_depth(float4 SSposition : SV_Position, float2 texcoord0 : TEXCOORD0) : SV_Target
 {
 	const float2 mouse_texcoords = oGfx_misc_constants.a.xy;
-	float depth = t_depth.Sample(PointClamp, mouse_texcoords).x;
+	const float hyper_depth      = t_depth.Sample(PointClamp, mouse_texcoords).x;
 
-	return gfx_linearize_depth(depth);
+	return gfx_linearize_depth(hyper_depth);
+}
+
+float PSlinearize_depth(float4 SSposition : SV_Position) : SV_Target
+{
+	const int3  screen_position = (int3)SSposition.xyz;
+	const float hyper_depth     = t_depth.Load(int3(screen_position.x, screen_position.y, 0)).x;
+
+	return gfx_linearize_depth(hyper_depth);
+}
+
+float4 PSvertex_color_stipple(INTcommon In) : SV_Target
+{
+	// if the geometry would be occluded, draw a stipple pattern
+	// (thus turn depth test off for this since it will be done
+	// here and special rendering is done if it fails
+
+	const int3  screen_position       = (int3)In.SSposition.xyz;
+  const float fragment_linear_depth = In.SSposition.w;
+ 	const float scene_linear_depth    = t_depth.Load(int3(screen_position.x, screen_position.y, 0)).x;
+	const bool  occluded              = fragment_linear_depth > scene_linear_depth;
+
+  if (occluded && ((screen_position.x ^ screen_position.y) & 2))
+    discard;
+
+	return In.color;
 }
 
 // _____________________________________________________________________________
