@@ -35,3 +35,6 @@ ipch/
 Temp/
 bin/
 Ouroboros/Lib/
+
+# Ignore WinMerge backup files
+*.bak
