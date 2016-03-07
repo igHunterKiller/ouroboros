@@ -216,7 +216,7 @@ vector_component initial_pick(
 				for (int i = 0; i < (int)vector_component::w; i++)
 				{
 					float3 end = kZero3;
-					end[i] = fixed_radius;
+					end[i] = axis_radius; // dist is encorporated in fixed_tx
 					end = mul(fixed_tx, end);
 
 					if (seg_vs_seg(center, end, ws_pick0, ws_pick1, fixed_selection_epsilon, &t0, &t1, &pt))
