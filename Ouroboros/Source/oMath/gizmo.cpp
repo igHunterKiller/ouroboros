@@ -106,7 +106,8 @@ vector_component initial_pick(
 	const float    fixed_selection_epsilon          = dist * selection_epsilon;
 	const float    fixed_radius                     = dist * axis_radius;
 	const float    fixed_ss_translation_ring_radius = viewport_scale * dist * s_ss_translation_ring_radius;
-	const float    fixed_cap_radius                 = dist * (s_cube_radius + selection_epsilon);
+	const float    fixed_cap_radius                 = viewport_scale * dist * (s_cube_radius + selection_epsilon);
+	const float    fixed_axis_length                = viewport_scale * axis_radius; // this axis is often transformed by fixed_tx, which has the dist adjustment in it already. See if viewport_scale can be rolled into fixed_tx too
 
 	float t0, t1;
 
@@ -121,6 +122,7 @@ vector_component initial_pick(
 			// interaction elements: endpoints of axes for scale in each cardinal direction
 			// and one at the center for uniform scaling.
 
+
 			for (int i = 0; i < (int)vector_component::count; i++)
 			{
 				auto component = (vector_component)i;
@@ -128,7 +130,7 @@ vector_component initial_pick(
 				// 'fixed' gets applied as part of fixed_tx, so use original radii here
 				float3 end = kZero3;
 				if (component != vector_component::w)
-					end[i] = axis_radius;
+					end[i] = fixed_axis_length;
 
 				// create a bounds for the end point
 				const float4 sphere(mul(fixed_tx, end), fixed_cap_radius);
@@ -201,8 +203,6 @@ vector_component initial_pick(
 			// interaction elements: 3 axes + a screen-space translation handle at the center
 
 			const float4 sphere = float4(center, fixed_ss_translation_ring_radius);
-
-			const float fixed_axis_length = axis_radius * viewport_scale; // dist is encorporated in fixed_tx
 
 			// check screen-space translation circle first
 			if (seg_v_sphere(ws_pick0, ws_pick1, sphere, &t0, &t1))
@@ -598,10 +598,14 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 	{
 		case gizmo::type::scale:
 		{
-			const float    axis_length = current_axis == vector_component::w ? scaled_axis_length : s_axis_length;
-			const float4x4 cap_scale = scale(s_cap_scale);
+			const float axis_length              = current_axis == vector_component::w ? scaled_axis_length : s_axis_length;
+			const float fixed_axis_length        = info.viewport_scale * axis_length;
+			const float fixed_scaled_axis_length = info.viewport_scale * scaled_axis_length;
+			const float fixed_cap_scale          = info.viewport_scale * s_cap_scale;
 
-			tess_axes(visual_tx, axis_length, scaled_axis_length, current_axis, s_component_colors, (vertex_t*)outl);
+			const float4x4 cap_scale = scale(fixed_cap_scale);
+
+			tess_axes(visual_tx, fixed_axis_length, fixed_scaled_axis_length, current_axis, s_component_colors, (vertex_t*)outl);
 
 			for (int i = 0; i < (int)vector_component::count; i++)
 			{
@@ -609,7 +613,7 @@ void gizmo::tessellate(const tessellation_info_t& info, vertex_t* out_lines, ver
 
 				float3 trans = kZero3;
 				if (component != vector_component::w)
-					trans[i] = component == current_axis ? scaled_axis_length : axis_length;
+					trans[i] = component == current_axis ? fixed_scaled_axis_length : fixed_axis_length;
 
 				float4x4 tx = cap_scale * translate(trans) * visual_tx;
 
