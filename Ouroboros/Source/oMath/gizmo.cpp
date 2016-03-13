@@ -103,7 +103,7 @@ vector_component initial_pick(
 	const float3   eye_dir                          = (eye - center) / dist;
 	const float4   screen_plane                     = plane(eye_dir, center);
 	const float4x4 fixed_tx                         = rescale(transform, dist);
-	const float    fixed_selection_epsilon          = dist * selection_epsilon;
+	const float    fixed_selection_epsilon          = viewport_scale * dist * selection_epsilon;
 	const float    fixed_radius                     = viewport_scale * dist * axis_radius;
 	const float    fixed_ss_translation_ring_radius = viewport_scale * dist * s_ss_translation_ring_radius;
 	const float    fixed_cap_radius                 = viewport_scale * dist * (s_cube_radius + selection_epsilon);

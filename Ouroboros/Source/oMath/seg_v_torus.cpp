@@ -11,13 +11,14 @@
 static int inttor(const float3& raybase, const float3& raycos, const float3& center, float radius, float rplane, float rnorm, const float4x4& tran, int* nhits, float rhits[4])
 {
 	int	hit;			/* True if ray intersects torus	*/
-	float	rsphere;		/* Bounding sphere radius	*/
-	float3	Base, Dcos;		/* Transformed intersection ray	*/
-	float	rmin, rmax;		/* Root bounds			*/
-	float	yin, yout;
-	float	rho, a0, b0;		/* Related constants		*/
-	float	f, l, t, g, q, m, u;	/* Ray dependent terms		*/
-	float	C[5];			/* Quartic coefficients		*/
+	float rsphere;		/* Bounding sphere radius	*/
+	float3 Base, Dcos;		/* Transformed intersection ray	*/
+	float rmin, rmax;		/* Root bounds			*/
+	double yin, yout;
+	double rho, a0, b0;		/* Related constants		*/
+	double f, l, t, g, q, m, u;	/* Ray dependent terms		*/
+	double C[5];			/* Quartic coefficients		*/
+	double dhits[4];
 
 	*nhits  = 0;
 
@@ -73,7 +74,9 @@ static int inttor(const float3& raybase, const float3& raycos, const float3& cen
 /*	Use quartic root solver found in "Graphics Gems" by Jochen	*/
 /*	Schwarze.							*/
 
-	*nhits = ouro::quartic(C[0], C[1], C[2], C[3], C[4],rhits);
+	*nhits = ouro::quartic(C[0], C[1], C[2], C[3], C[4], dhits);
+	for (int i = 0; i < *nhits; i++)
+		rhits[i] = (float)dhits[i];
 
 /*	SolveQuartic returns root pairs in reversed order.		*/
 	//m = rhits[0]; u = rhits[1]; rhits[0] = u; rhits[1] = m;
