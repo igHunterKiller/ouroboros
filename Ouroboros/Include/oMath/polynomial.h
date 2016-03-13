@@ -44,9 +44,9 @@ inline int cubic(float a, float b, float c, float d, float out_roots[3])
 	cb_p, D;
 
 	// normalize the equation:x ^ 3 + Ax ^ 2 + Bx  + C = 0
-	A = c / d;
-	B = b / d;
-	C = a / d;
+	A = b / a;
+	B = d / a;
+	C = c / a;
 
 	// substitute x = y - A / 3 to eliminate the quadric term: x^3 + px + q = 0
 
@@ -245,10 +245,10 @@ inline int quartic(float a, float b, float c, float d, float e, float out_roots[
 
 	// normalize the equation:x ^ 4 + Ax ^ 3 + Bx ^ 2 + Cx + D = 0
 
-	A = d / e;
-	B = c / e;
-	C = b / e;
-	D = a / e;
+	A = b / a;
+	B = c / a;
+	C = d / a;
+	D = e / a;
 
 	// subsitute x = y - A / 4 to eliminate the cubic term: x^4 + px^2 + qx + r = 0
 
@@ -260,13 +260,13 @@ inline int quartic(float a, float b, float c, float d, float e, float out_roots[
 	if (polynomial_float_is_zero(r))
 	{
 		// no absolute term:y(y ^ 3 + py + q) = 0
-		num = cubic(q, p, 0.0f, 1.0f, out_roots);
+		num = cubic(1.0f, 0.0f, p, q, out_roots);
 		out_roots[num++] = 0;
 	}
 	else
 	{
 		// solve the resolvent cubic...
-		cubic(1.0f / 2.0f * r * p - 1.0f / 8.0f * q * q, -r, -1.0f / 2.0f * p, 1.0f, out_roots);
+		cubic(1.0f, -1.0f / 2.0f * p, -r, 1.0f / 2.0f * r * p - 1.0f / 8.0f * q * q, out_roots);
 
 		// ...and take the one real solution...
 		z = out_roots[0];
