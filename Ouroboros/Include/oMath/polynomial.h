@@ -67,9 +67,9 @@ template<typename T> int cubic(T a, T b, T c, T d, T out_roots[3])
 	cb_p, D;
 
 	// normalize the equation:x ^ 3 + Ax ^ 2 + Bx  + C = 0
-	A = b / a;
-	B = d / a;
-	C = c / a;
+	A = c / d;
+	B = b / d;
+	C = a / d;
 
 	// substitute x = y - A / 3 to eliminate the quadric term: x^3 + px + q = 0
 
@@ -132,94 +132,6 @@ template<typename T> int cubic(T a, T b, T c, T d, T out_roots[3])
 	return num;
 }
 
-template<typename T> int cubic2(T a, T b, T c, T d, T out_roots[3])
-{
-	// Another method.
-
-	// http://www.1728.org/cubic2.htm
-
-	const T sqrt3  = T(1.7320508075688772935274463415059);
-	const T inv_27 = T(1) / T(27);
-	const T inv_a  = T(1) / a;
-	const T inv_a2 = inv_a * inv_a;
-	const T inv_a3 = inv_a * inv_a2;
-	const T b2     = b * b;
-	const T b3     = b * b2;
-	const T b3a    = b * (T(1)/T(3)) * inv_a;
-
-	const T f      = ((T(3) * c * inv_a) - (b2 * inv_a2)) / T(3);
-	const T g      = ((T(2) * b3 * inv_a3) - (9.0f * b * c * inv_a2) + (T(27) * d * inv_a)) * inv_27;
-	const T g2     = g * g;
-	const T h      = (g2 * 0.25f) + (f * f * f * inv_27);
-	const T i2     = (g2 * 0.25f) - h;
-
-	const T i      = detail::sqrt_(i2);
-
-	if (h > 0)
-	{
-		// 1 real root
-
-		const T neg_half_g = g * -0.5f;
-		const T sqrt_h = detail::sqrt_(h);
-
-		const T r = neg_half_g + sqrt_h;
-		const T s = detail::cbrt_(r);
-		const T t = neg_half_g - sqrt_h;
-		const T u = detail::cbrt_(t);
-
-		const T su = s + u;
-		
-		if (i2 < T(0))
-		{
-			out_roots[0] = su - b3a;
-			return 1;
-		}
-		
-		const T neg_half_su = su * -0.5f;
-		const T neg_half_su_minus_b3a = neg_half_su - b3a;
-		const T v = i * (s - u) * sqrt3 * 0.5f;
-
-		out_roots[1] = neg_half_su_minus_b3a + v;
-		out_roots[2] = neg_half_su_minus_b3a - v;
-
-		return 3;
-	}
-
-	else if (equal(h, T(0)) && equal(g, T(0)) && equal(h, T(0)))
-	{
-		// all roots real and equal
-		const T w = -detail::cbrt_(d * inv_a);
-		out_roots[0] = w;
-		out_roots[1] = w;
-		out_roots[2] = w;
-
-		return 1;
-	}
-	
-	else if (h <= 0)
-	{
-		// all real
-
-		const T j = detail::cbrt_(i);
-		const T k = detail::acos_(-(g / (T(2) * i)));
-		const T l = -j;
-		const T k_div3 = k / T(3);
-		T sin_k_div3, cos_k_div3;
-		detail::sincos_(k_div3, sin_k_div3, cos_k_div3);
-		const T m = cos_k_div3;
-		const T n = sqrt3 * sin_k_div3;
-		const T p = -b3a;
-		
-		out_roots[0] = (T(2) * j * cos_k_div3) - b3a;
-		out_roots[1] = l * (m + n) + p;
-		out_roots[2] = l * (m - n) + p;
-
-		return 3;
-	}
-
-	return 0;
-}
-
 template<typename T> int quadric(T a, T b, T c, T out_roots[2])
 {
 	T p, q, D;
@@ -268,10 +180,10 @@ template<typename T> int quartic(T a, T b, T c, T d, T e, T out_roots[4])
 
 	// normalize the equation:x ^ 4 + Ax ^ 3 + Bx ^ 2 + Cx + D = 0
 
-	A = b / a;
-	B = c / a;
-	C = d / a;
-	D = e / a;
+	A = d / e;
+	B = c / e;
+	C = b / e;
+	D = a / e;
 
 	// subsitute x = y - A / 4 to eliminate the cubic term: x^4 + px^2 + qx + r = 0
 
@@ -283,13 +195,13 @@ template<typename T> int quartic(T a, T b, T c, T d, T e, T out_roots[4])
 	if (detail::is_zero(r))
 	{
 		// no absolute term:y(y ^ 3 + py + q) = 0
-		num = cubic(T(1), T(0), p, q, out_roots);
+		num = cubic(q, p, T(0), T(1), out_roots);
 		out_roots[num++] = 0;
 	}
 	else
 	{
 		// solve the resolvent cubic...
-		cubic(T(1), T(-1) / T(2) * p, -r, T(1) / T(2) * r * p - T(1) / T(8) * q * q, out_roots);
+		cubic(T(0.5) * r * p - T(0.125) * q * q, -r, T(-0.5) * p, T(1), out_roots);
 
 		// ...and take the one real solution...
 		z = out_roots[0];

@@ -65,11 +65,11 @@ static int inttor(const float3& raybase, const float3& raycos, const float3& cen
 
 /*	Compute the coefficients of the quartic.			*/
 
-	C[0] = 1.0f;
-	C[1] = 2.0f * m;
+	C[4] = 1.0f;
+	C[3] = 2.0f * m;
 	C[2] = m*m + 2.0f*u - q*f;
-	C[3] = 2.0f*m*u - q*l;
-	C[4] = u*u - q*t;
+	C[1] = 2.0f*m*u - q*l;
+	C[0] = u*u - q*t;
 	
 /*	Use quartic root solver found in "Graphics Gems" by Jochen	*/
 /*	Schwarze.							*/
