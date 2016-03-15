@@ -16,6 +16,7 @@
 #include <oMath/quat.h>
 #include <oMath/seg_closest_points.h>
 #include <oMath/seg_v_plane.h>
+#include <oMath/seg_v_ring.h>
 #include <oMath/seg_v_seg.h>
 #include <oMath/seg_v_sphere.h>
 #include <oMath/seg_v_torus.h>
@@ -76,7 +77,7 @@ static const uint32_t s_selected_color = color::white;
 static const uint32_t s_ghost_color = color::dark_slate_gray;
 static const uint32_t s_component_colors[vector_component::count] = { color::red, color::green, color::blue, color::yellow };
 static const uint16_t s_facet                      = 32;
-static const float    s_select_eps                 = 0.01f;
+static const float    s_select_eps                 = 0.05f;
 static const float    s_axis_length                = 0.2f;
 static const float    s_ss_translation_ring_radius = 0.02f;
 static const float    s_ss_rotation_ring_radius    = 0.25f;
@@ -175,7 +176,11 @@ vector_component initial_pick(
 				axis = mul((float3x3)transform, axis);
 
 				// intersect only the part of the ring on the front side of the gizmo
-				if (seg_v_torus(ws_pick0, ws_pick1, center, axis, fixed_radius, fixed_selection_epsilon, &pt) && in_front_of(screen_plane, pt))
+
+				// torus collision is complex, and quartic calculation is unstable and/or requires double precision, so KISS with something simpler
+				// This /does/ work, though it might need an adjustment to fixed_selection_epsilon.
+				//if (seg_v_torus(ws_pick0, ws_pick1, center, axis, fixed_radius, fixed_selection_epsilon, &pt) && in_front_of(screen_plane, pt))
+				if (seg_v_ring(ws_pick0, ws_pick1, center, axis, fixed_radius, fixed_selection_epsilon, &pt) && in_front_of(screen_plane, pt))
 				{
 					picked = (vector_component)i;
 					ring_plane = plane(axis, center);

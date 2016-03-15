@@ -50,6 +50,7 @@
     <ClInclude Include="..\..\Include\oMath\seg_v_cylinder.h" />
     <ClInclude Include="..\..\Include\oMath\seg_v_obb.h" />
     <ClInclude Include="..\..\Include\oMath\seg_v_plane.h" />
+    <ClInclude Include="..\..\Include\oMath\seg_v_ring.h" />
     <ClInclude Include="..\..\Include\oMath\seg_v_seg.h" />
     <ClInclude Include="..\..\Include\oMath\seg_v_sphere.h" />
     <ClInclude Include="..\..\Include\oMath\seg_v_torus.h" />
@@ -78,6 +79,7 @@
     <ClCompile Include="seg_v_cylinder.cpp" />
     <ClCompile Include="seg_v_obb.cpp" />
     <ClCompile Include="seg_v_plane.cpp" />
+    <ClCompile Include="seg_v_ring.cpp" />
     <ClCompile Include="seg_v_seg.cpp" />
     <ClCompile Include="seg_v_sphere.cpp" />
     <ClCompile Include="seg_v_torus.cpp" />
