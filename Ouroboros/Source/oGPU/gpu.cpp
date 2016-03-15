@@ -1276,8 +1276,8 @@ device::device(const device_init& init, window* win)
 
 		ref<IDXGISwapChain> sc = dxgi::make_swap_chain(d3d
 			, false
-			, max(1, s.client_size.x)
-			, max(1, s.client_size.y)
+			, max(8, s.client_size.x)
+			, max(8, s.client_size.y)
 			, false
 			, surface::format::b8g8r8a8_unorm
 			, 0
@@ -1457,7 +1457,7 @@ void device::on_window_resized()
 	HWND hwnd = (HWND)win_->native_handle();
 	RECT r;
 	GetClientRect(hwnd, &r);
-	resize(max(1, int(r.right - r.left)), max(1, int(r.bottom - r.top)));
+	resize(max(8, int(r.right - r.left)), max(8, int(r.bottom - r.top)));
 }
 
 void device::resize(uint32_t width, uint32_t height)
