@@ -1274,10 +1274,13 @@ device::device(const device_init& init, window* win)
 		window_shape s = win->shape();
 		oGPU_CHECK(!has_statusbar(s.style), "A window used for rendering must not have a status bar");
 
+		auto& win_init = win->init();
+		oGPU_CHECK(all(win_init.min_client_size > int2(0, 0)), "A window's minimum dimensions must be non-zero to protect against minimizing the window causing degenerate targets. It's recommended the size work well with other render targets so special handling isn't required for minimized windows.");
+
 		ref<IDXGISwapChain> sc = dxgi::make_swap_chain(d3d
 			, false
-			, max(8, s.client_size.x)
-			, max(8, s.client_size.y)
+			, s.client_size.x
+			, s.client_size.y
 			, false
 			, surface::format::b8g8r8a8_unorm
 			, 0
@@ -1457,7 +1460,7 @@ void device::on_window_resized()
 	HWND hwnd = (HWND)win_->native_handle();
 	RECT r;
 	GetClientRect(hwnd, &r);
-	resize(max(8, int(r.right - r.left)), max(8, int(r.bottom - r.top)));
+	resize(int(r.right - r.left), int(r.bottom - r.top));
 }
 
 void device::resize(uint32_t width, uint32_t height)

@@ -52,6 +52,7 @@ gfx_view::gfx_view()
 		i.shape.style = window_style::borderless;
 		i.shape.client_size = int2(256, 256);
 		i.shape.client_position = int2(0, 0);
+		i.min_client_size = int2(16, 16);
 		gpu_win_ = window::make(i);
 		int hotkeys_id = gpu_win_->new_hotkeys(ui::s_hotkeys);
 		gpu_win_->set_hotkeys(hotkeys_id);
@@ -441,6 +442,7 @@ void gfx_view::ui_run()
 			i.shape.state = window_state::hidden;
 			i.shape.style = window_style::sizable_with_menu_and_statusbar;
 			i.shape.client_size = int2(256, 256);
+			i.min_client_size = int2(160, 160);
 			app_win_ = window::make(i);
 
 			// initialize some extra UI features

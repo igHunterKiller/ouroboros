@@ -1070,7 +1070,7 @@ bool window_impl::handle_lifetime(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpa
 			EventHooks.visit(e);
 			break;
 		}
-	
+
 		case WM_CLOSE:
 		{
 			// Don't allow DefWindowProc to destroy the window, put it all on client 
@@ -1178,6 +1178,22 @@ bool window_impl::handle_sizing(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lpara
 
 	switch (msg)
 	{
+		case WM_GETMINMAXINFO:
+		{
+			if (any(Init.min_client_size >= int2(0, 0)))
+			{
+				auto inf = (MINMAXINFO*)lparam;
+
+				int2 decorated_size = oWinGetDecoratedWindowSize(hwnd, Init.min_client_size);
+				inf->ptMinTrackSize.x = decorated_size.x;
+				inf->ptMinTrackSize.y = decorated_size.y;
+				*out_lresult = 0;
+				return true;
+			}
+
+			break;
+		}
+	
 		case WM_WINDOWPOSCHANGING:
 			trigger_generic_event(event_type::moving);
 			return true;

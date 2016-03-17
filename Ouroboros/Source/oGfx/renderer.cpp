@@ -926,7 +926,7 @@ void renderer_t::on_window_resized(uint32_t new_width, uint32_t new_height)
 	if (!dev_)
 		return;
 
-	film_.resize(max(8u, new_width), max(8u, new_height));
+	film_.resize(new_width, new_height);
 	dev_->on_window_resized();
 }
 

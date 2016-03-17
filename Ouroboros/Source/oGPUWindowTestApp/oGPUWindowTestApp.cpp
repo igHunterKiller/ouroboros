@@ -160,6 +160,7 @@ gpu_test_app::gpu_test_app()
 		i.shape.style = window_style::borderless;
 		i.shape.client_size = int2(256, 256);
 		i.shape.client_position = int2(0, 0);
+		i.min_client_size = int2(8, 8);
 		gpu_win_ = window::make(i);
 		gpu_win_->new_hotkeys(ui::s_hotkeys);
 	}
@@ -472,6 +473,7 @@ void gpu_test_app::ui_run()
 			i.shape.state = window_state::hidden;
 			i.shape.style = window_style::sizable_with_menu_and_statusbar;
 			i.shape.client_size = int2(256, 256);
+			i.min_client_size = int2(160, 160);
 			app_win_ = window::make(i);
 
 			// initialize some extra UI features

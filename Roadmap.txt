@@ -75,7 +75,6 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	121               oSystem     filesystem_monitor Figure out where buffer alloc comes from... maybe user-specified buffer rather than just size? unwatch could return pointer
 	122               Ouroboros   all.h       Consider renaming all.h to precomp.h or pch.h and only include headers useful for pch. all implies all when it's meant just for precompiled headers
 	123               oSystem     gsreport    Review win_gsreport, why'd that change when moving to VS2015?
-	126               oGPU        device      Review min size of presentation target and also for film... can they be made to be natural sizes such that all rendering just works? what about 1/2 and 1/4 buffers? Clamp after?
 
 === Notes ===
 

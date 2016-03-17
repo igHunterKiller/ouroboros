@@ -1584,7 +1584,13 @@ void oWinSetShape(HWND _hWnd, const window_shape& _Shape)
 		UINT uFlags = SWP_NOZORDER|SWP_FRAMECHANGED;
 		if (New.state == window_state::minimized || New.state == window_state::maximized)
 			uFlags |= SWP_NOMOVE|SWP_NOSIZE;
-		oVB(SetWindowPos(_hWnd, 0, r.left, r.top, oWinRectW(r), oWinRectH(r), uFlags));
+
+		MINMAXINFO mmi = {0};
+		SendMessage(_hWnd, WM_GETMINMAXINFO, 0, (LPARAM)&mmi);
+		int width = __max(oWinRectW(r), mmi.ptMinTrackSize.x);
+		int height = __max(oWinRectH(r), mmi.ptMinTrackSize.y);
+
+		oVB(SetWindowPos(_hWnd, 0, r.left, r.top, width, height, uFlags));
 	}
 
 	// Now handle visibility, min/max/restore
@@ -1613,6 +1619,14 @@ void oWinSetShape(HWND _hWnd, const window_shape& _Shape)
 		}
 		oVB(SetWindowPlacement(_hWnd, &WP));
 	}
+}
+
+int2 oWinGetDecoratedWindowSize(HWND _hWnd, const int2& _ClientSize)
+{
+	RECT r = { 0, 0, _ClientSize.x, _ClientSize.y };
+	r.bottom += oWinGetStatusBarHeight(_hWnd);
+	AdjustWindowRect(&r, GetWindowLong(_hWnd, GWL_STYLE), !!GetMenu(_hWnd));
+	return int2(oWinRectW(r), oWinRectH(r));
 }
 
 bool oWinRestore(HWND _hWnd)

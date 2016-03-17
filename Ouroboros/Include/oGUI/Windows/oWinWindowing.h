@@ -469,6 +469,10 @@ ouro::window_shape oWinGetShape(HWND _hWnd);
 // Sets the shape of the specified window.
 void oWinSetShape(HWND _hWnd, const ouro::window_shape& _Shape);
 
+// Returns the width and height of the window according to its current style
+// This is similar to AdjustWindowRect, but accounts for status bar.
+int2 oWinGetDecoratedWindowSize(HWND _hWnd, const int2& _ClientSize);
+
 // There's a known issue that a simple ShowWindow doesn't always work on some 
 // minimized apps. The WAR seems to be to set focus to anything else, then try 
 // to restore the app. This is exposed to be used on any HWND because it is a 

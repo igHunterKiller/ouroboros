@@ -165,6 +165,7 @@ tex_view::tex_view()
 		i.shape.style = window_style::borderless;
 		i.shape.client_position = int2(0, 0);
 		i.shape.client_size = int2(256, 256);
+		i.min_client_size = int2(8, 8);
 		gpu_win_ = window::make(i);
 		int hk_id = gpu_win_->new_hotkeys(ui::s_hotkeys);
 		gpu_win_->set_hotkeys(hk_id);

@@ -239,6 +239,7 @@ public:
 		, allow_touch(false)
 		, client_drag_to_move(false)
 		, alt_f4_closes(false)
+		, min_client_size(-1, -1)
 	{}
   
 		const char* title;
@@ -261,6 +262,9 @@ public:
 		event_hook on_event;
 		input_hook on_input;
 		window_shape shape;
+
+		// if non-negative, ensure resize never dips below this size
+		int2 min_client_size;
 	};
 
 	static std::shared_ptr<window> make(const init_t& i);
