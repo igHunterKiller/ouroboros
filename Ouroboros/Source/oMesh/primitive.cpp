@@ -15,6 +15,12 @@ namespace ouro { namespace mesh {
 
 struct derive_flags
 {
+	derive_flags()
+		: normals(0)
+		, tangents(0)
+		, colors(0)
+	{}
+
 	uint8_t normals  : 1;
 	uint8_t tangents : 1;
 	uint8_t colors   : 1;
