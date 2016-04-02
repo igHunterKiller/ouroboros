@@ -14,6 +14,8 @@ oTEST(oSystem_win_crt_leak_tracker)
 {
 	#ifdef _DEBUG
 		oTrace("THIS TESTS THE LEAK REPORTING CODE, SO THIS WILL INTENTIONALLY REPORT LEAKS IN THE OUTPUT AS PART OF THAT TEST.");
+
+		enable_report(true);
 	
 		bool old_value = enabled();
 		oFinally { enable(old_value); };

@@ -36,8 +36,8 @@ public:
 	void enable(bool enable);
 	inline bool enabled() const { return enabled_; }
 
-	inline void enable_report(bool enable) { report_enabled = enable; }
-	inline bool enable_report() { return report_enabled; }
+	inline void enable_report(bool enable) { report_enabled_ = enable; }
+	inline bool enable_report() { return report_enabled_; }
 
 	bool report(bool current_context_only);
 
@@ -58,16 +58,17 @@ protected:
 
 	static int malloc_hook(int alloc_type, void* user_data, size_t size, int block_type, long request_number, const unsigned char* path, int line);
 	
-	size_t NonLinearBytes; // todo: make this track memory that was allocated and not recorded.
-	_CRT_ALLOC_HOOK OriginalAllocHook;
+	size_t nonlinear_bytes_; // todo: make this track memory that was allocated and not recorded.
+	_CRT_ALLOC_HOOK orig_alloc_hook_;
 	bool enabled_;
-	bool report_enabled;
+	bool report_enabled_;
 };
 
 context::context()
-	: NonLinearBytes(0)
+	: nonlinear_bytes_(0)
+	, orig_alloc_hook_(nullptr)
 	, enabled_(false)
-	, OriginalAllocHook(nullptr)
+	, report_enabled_(false)
 {
 	ouro::reporting::ensure_initialized();
 
@@ -86,12 +87,12 @@ context::context()
 context::~context()
 {
 	report(false);
-	_CrtSetAllocHook(OriginalAllocHook);
+	_CrtSetAllocHook(orig_alloc_hook_);
 
-	if (NonLinearBytes)
+	if (nonlinear_bytes_)
 	{
 		mstring buf;
-		format_bytes(buf, NonLinearBytes, 2);
+		format_bytes(buf, nonlinear_bytes_, 2);
 		oTrace("CRT leak tracker: Allocated %s beyond the internal reserve. Increase kTrackingInternalReserve to improve performance, especially on shutdown.", buf.c_str());
 	}
 
@@ -117,11 +118,11 @@ context& context::singleton()
 void context::enable(bool enable)
 {
 	if (enable && !enabled_)
-		OriginalAllocHook = _CrtSetAllocHook(malloc_hook);
+		orig_alloc_hook_ = _CrtSetAllocHook(malloc_hook);
 	else if (!enable && enabled_)
 	{
-		_CrtSetAllocHook(OriginalAllocHook);
-		OriginalAllocHook = nullptr;
+		_CrtSetAllocHook(orig_alloc_hook_);
+		orig_alloc_hook_ = nullptr;
 	}
 
 	enabled_ = enable;
@@ -129,16 +130,16 @@ void context::enable(bool enable)
 
 bool context::report(bool current_context_only)
 {
-	size_t nLeaks = 0;
-	if (report_enabled)
+	size_t nleaks = 0;
+	if (report_enabled_)
 	{
 		bool prior = enabled();
 		enable(false);
-		nLeaks = leak_tracker::report(current_context_only);
+		nleaks = leak_tracker::report(current_context_only);
 		enable(prior);
 	}
 
-	return nLeaks > 0;
+	return nleaks > 0;
 }
 
 int context::on_malloc_event(int alloc_type, void* user_data, size_t size
@@ -147,8 +148,8 @@ int context::on_malloc_event(int alloc_type, void* user_data, size_t size
 	int allowAllocationToProceed = 1;
 
 	// Call any prior hook first
-	if (OriginalAllocHook)
-		allowAllocationToProceed = OriginalAllocHook(alloc_type, user_data, size, block_type, request_number, path, line);
+	if (orig_alloc_hook_)
+		allowAllocationToProceed = orig_alloc_hook_(alloc_type, user_data, size, block_type, request_number, path, line);
 
 	if (allowAllocationToProceed && block_type != _IGNORE_BLOCK && block_type != _CRT_BLOCK)
 	{
