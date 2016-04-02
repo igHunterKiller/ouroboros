@@ -55,6 +55,13 @@ void memset2(void* dst, int16_t value, size_t bytes);
 void memset4(void* dst, int32_t value, size_t bytes);
 void memset8(void* dst, int64_t value, size_t bytes);
 
+template<size_t sz>  void memset(void* dst, void* pvalue, size_t bytes);
+template<>    inline void memset<1>(void* dst, void* pvalue, size_t bytes) { ::memset(dst,*(const int*    )pvalue, bytes); }
+template<>    inline void memset<2>(void* dst, void* pvalue, size_t bytes) { memset2(dst, *(const int16_t*)pvalue, bytes); }
+template<>    inline void memset<4>(void* dst, void* pvalue, size_t bytes) { memset4(dst, *(const int32_t*)pvalue, bytes); }
+template<>    inline void memset<8>(void* dst, void* pvalue, size_t bytes) { memset8(dst, *(const int64_t*)pvalue, bytes); }
+template<typename T> void memset   (void* dst, T      value, size_t bytes) { memset<sizeof(T)>(dst, (void*)&value, bytes); }
+
 // Sets n bytes from source to destination for the specified copy size number 
 // of bytes. This uses memset and above flavors if src_size is appropriate.
 void memnset(void* oRESTRICT dst, const void* oRESTRICT src, size_t src_size, size_t copy_size);

@@ -37,7 +37,6 @@
     <ClInclude Include="..\..\Include\oConcurrency\threadpool.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="concurrent_hash_map.cpp" />
     <ClCompile Include="future.cpp" />
     <ClCompile Include="mutex.cpp" />
     <ClCompile Include="plan_thread.cpp" />

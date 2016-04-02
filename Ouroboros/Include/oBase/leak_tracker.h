@@ -112,8 +112,8 @@ public:
 	void reset() { allocs.clear(); }
 
 	// Reports all allocations currently tracked to the debugger print function.
-	// If _CurrentContextOnly is true, then only the allocations since the last 
-	// call to new_context() will be reported. If _CurrentContextOnly is false, 
+	// If current_context_only is true, then only the allocations since the last 
+	// call to new_context() will be reported. If current_context_only is false, 
 	// all allocations since the start of tracking will be reported. This returns 
 	// the number of leaks reported.
 	size_t report(bool current_context_only = true);
@@ -147,8 +147,13 @@ private:
 		bool operator<(const entry& that) { return id < that.id; }
 	};
 
-	concurrent_hash_map allocs;
-	concurrent_object_pool<entry> pool;
+	static const uint32_t nullidx = uint32_t(-1);
+
+	typedef concurrent_hash_map<uint64_t, uint32_t> hash_map_t;
+	typedef concurrent_object_pool<entry> pool_t;
+
+	hash_map_t allocs;
+	pool_t pool;
 	countdown_latch delay_latch;
 	std::atomic<uint16_t> current_context;
 	init_t init;

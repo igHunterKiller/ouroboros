@@ -20,7 +20,7 @@ static inline uint64_t leak_tracker_hash(uintptr_t key)
 leak_tracker::size_type leak_tracker::calc_size(size_type capacity)
 {
 	return align(concurrent_object_pool<entry>::calc_size(capacity)
-		+ concurrent_hash_map::calc_size(capacity)
+		+ hash_map_t::calc_size(capacity)
 		, oCACHE_LINE_SIZE);
 }
 
@@ -80,7 +80,7 @@ void leak_tracker::initialize(const init_t& i, size_type capacity, const char* a
 	auto allocs_mem = (uint8_t*)a.allocate(total_size, "leak_tracker", opts);
 	auto pool_mem = allocs_mem + allocs_bytes;
 	
-	allocs.initialize(allocs_mem, capacity);
+	allocs.initialize(nullidx, allocs_mem, capacity);
 	pool.initialize(pool_mem, pool_bytes);
 }
 
@@ -96,7 +96,7 @@ void leak_tracker::initialize(const init_t& i, void* memory, size_type capacity)
 	auto allocs_mem = (uint8_t*)memory;
 	auto pool_mem = allocs_mem + allocs_bytes;
 
-	allocs.initialize(memory, capacity);
+	allocs.initialize(nullidx, memory, capacity);
 	auto req = pool.calc_size(capacity);
 	void* mem = align((uint8_t*)memory + allocs_bytes, oCACHE_LINE_SIZE);
 	pool.initialize(mem, req);
@@ -121,22 +121,22 @@ void leak_tracker::on_stat_ordinal(const allocation_stats& stats, uint32_t old_o
 
 void leak_tracker::internal_on_stat(uintptr_t new_ptr, const allocation_stats& stats, uintptr_t old_ptr)
 {
-	concurrent_hash_map::value_type idx = concurrent_hash_map::nullidx;
+	auto idx = nullidx;
 
 	switch (stats.operation)
 	{
 		case memory_operation::reallocate:
-			idx = allocs.remove(leak_tracker_hash(old_ptr));
-			if (idx == concurrent_hash_map::nullidx)
+			idx = allocs.nix(leak_tracker_hash(old_ptr));
+			if (idx == nullidx)
 				init.print("[leak_tracker] failed to find old_ptr for realloc\n");
 			// pass thru to allocate
 
 		case memory_operation::allocate:
 		{
-			if (idx == concurrent_hash_map::nullidx)
+			if (idx == nullidx)
 				idx = pool.allocate_index();
 
-			if (idx != concurrent_hash_map::nullidx)
+			if (idx != nullidx)
 			{
 				entry* e = pool.typed_pointer(idx);
 				if (e)
@@ -149,7 +149,7 @@ void leak_tracker::internal_on_stat(uintptr_t new_ptr, const allocation_stats& s
 					e->id = stats.ordinal;
 
 					idx = allocs.set(leak_tracker_hash(new_ptr), idx);
-					if (idx != concurrent_hash_map::nullidx)
+					if (idx != nullidx)
 					{
 						e = pool.typed_pointer(idx);
 
@@ -174,8 +174,8 @@ void leak_tracker::internal_on_stat(uintptr_t new_ptr, const allocation_stats& s
 
 		case memory_operation::deallocate:
 		{
-			idx = allocs.remove(leak_tracker_hash(new_ptr));
-			if (idx != concurrent_hash_map::nullidx)
+			idx = allocs.nix(leak_tracker_hash(new_ptr));
+			if (idx != nullidx)
 				pool.deallocate(idx);
 			break;
 		}
@@ -188,8 +188,9 @@ void leak_tracker::internal_on_stat(uintptr_t new_ptr, const allocation_stats& s
 size_t leak_tracker::num_outstanding_allocations(bool current_context_only)
 {
 	size_t n = 0;
-	allocs.visit([&](concurrent_hash_map::value_type idx)
+	allocs.visit([&](const hash_map_t::key_type& key, const hash_map_t::val_type& idx)
 	{
+		key;
 		const entry& e = *pool.typed_pointer(idx);
 		if (e.tracked && (!current_context_only || e.context == current_context))
 			n++;
@@ -224,10 +225,11 @@ size_t leak_tracker::report(bool current_context_only)
 	size_t nLeaks = 0;
 	bool headerPrinted = false;
 	size_t totalLeakBytes = 0;
-	allocs.visit([&](concurrent_hash_map::value_type idx)
+	allocs.visit([&](hash_map_t::key_type key, hash_map_t::val_type idx)
 	{
+		key;
 		const entry& e = *pool.typed_pointer(idx);
-		if (e.tracked && (!current_context_only || e.context == current_context))
+ 		if (e.tracked && (!current_context_only || e.context == current_context))
 		{
 			if (!headerPrinted)
 			{

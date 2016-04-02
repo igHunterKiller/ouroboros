@@ -211,8 +211,10 @@ private:
 		blob compiled;
 	};
 	
+	typedef concurrent_hash_map<uint64_t, uint32_t> hash_map_t;
+
 	concurrent_object_pool<file_info> pool_;
-	concurrent_hash_map lookup_;
+	hash_map_t lookup_;
 	concurrent_stack<file_info> inserts_;
 	concurrent_stack<file_info> removes_;
 	void** entries_;

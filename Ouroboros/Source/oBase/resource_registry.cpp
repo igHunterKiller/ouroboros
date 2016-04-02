@@ -9,7 +9,7 @@ resource_registry_t::size_type resource_registry_t::calc_size(size_type capacity
 {
 	allocate_options opts(required_alignment);
 	const size_type pool_req = opts.align(concurrent_object_pool<file_info>::calc_size(capacity));
-	const size_type lookup_req = opts.align(concurrent_hash_map::calc_size(capacity));
+	const size_type lookup_req = opts.align(hash_map_t::calc_size(capacity));
 	const size_type entries_req = opts.align(capacity * (uint32_t)sizeof(void*));
   return pool_req + lookup_req + entries_req;
 }
@@ -84,12 +84,12 @@ void resource_registry_t::initialize(void* memory, size_type bytes, resource_pla
 	auto capacity = calc_capacity(bytes);
 
 	auto pool_bytes = opts.align(concurrent_object_pool<file_info>::calc_size(capacity));
-	auto lookup_bytes = opts.align(concurrent_hash_map::calc_size(capacity));
+	auto lookup_bytes = opts.align(hash_map_t::calc_size(capacity));
 
 	pool_.initialize(memory, pool_bytes);
 
 	auto p = (uint8_t*)memory + pool_bytes;
-	lookup_.initialize(p, capacity);
+	lookup_.initialize(nullidx, p, capacity);
 	p += lookup_bytes;
 	entries_ = (void**)p;
 
@@ -137,7 +137,7 @@ void resource_registry_t::remove_all()
 		{
 			destroy(*e);
 			auto f = pool_.typed_pointer(i);
-			lookup_.set(f->key, lookup_.nullidx);
+			lookup_.set(f->key, nullidx);
 			*e = f->status == resource_status::deinitializing ? missing_ : failed_;
 			pool_.destroy(f);
 		}
@@ -160,7 +160,7 @@ resource_registry_t::size_type resource_registry_t::flush(size_type max_operatio
 		*e = (&missing_)[placeholder_index];
 		if (placeholder_index) // only free the entry if removing, leave entry if discarding
 		{
-			lookup_.set(f->path.hash(), lookup_.nullidx);
+			lookup_.set(f->path.hash(), nullidx);
 			pool_.destroy(f);
 		}
 		else
@@ -207,7 +207,7 @@ resource_registry_t::size_type resource_registry_t::flush(size_type max_operatio
 	}
 
 	if (EstHashesToReclaim && EstHashesToReclaim <= n)
-		lookup_.reclaim();
+		lookup_.reclaim_keys();
 
 	return inserts_.size() + removes_.size();
 }
@@ -215,13 +215,13 @@ resource_registry_t::size_type resource_registry_t::flush(size_type max_operatio
 resource_base_t resource_registry_t::get(key_type key) const
 {
 	auto index = lookup_.get(key);
-	return index == lookup_.nullidx ? &missing_ : entries_ + index;
+	return index == nullidx ? &missing_ : entries_ + index;
 }
 
 path_t resource_registry_t::path(key_type key) const
 {
 	auto index = lookup_.get(key);
-	if (index == lookup_.nullidx)
+	if (index == nullidx)
 		return path_t();
 	auto f = pool_.typed_pointer(index);
 	return f->path;
@@ -240,7 +240,7 @@ path_t resource_registry_t::path(const resource_base_t& resource) const
 resource_status resource_registry_t::status(key_type key) const
 {
 	auto index = lookup_.get(key);
-	if (index == lookup_.nullidx)
+	if (index == nullidx)
 		return resource_status::invalid;
 	auto f = pool_.typed_pointer(index);
 	return f->status;
@@ -272,7 +272,7 @@ resource_base_t resource_registry_t::insert(key_type key, const path_t& path, bl
 	index_type index = lookup_.get(key);
 	file_info* f = nullptr;
 
-	if (index != lookup_.nullidx)
+	if (index != nullidx)
 	{
 		e = entries_ + index;
 		f = pool_.typed_pointer(index);
@@ -325,7 +325,7 @@ resource_base_t resource_registry_t::insert(key_type key, const path_t& path, bl
 		
 		// another thread is trying to do this same thing, so let it
 		// hmm... why would two threads get back the same index from a call to pool_create()? Maybe this isn't needed.
-		if (lookup_.nullidx != lookup_.set(key, index))
+		if (nullidx != lookup_.set(key, index))
 		{
 			oTrace("resource_registry_t race on setting index %u", index);
 			pool_.destroy(f);
@@ -355,7 +355,7 @@ bool resource_registry_t::remove(key_type key)
 	// deinitializing_to_failed  deinitializing (must be already queued)
 
 	auto index = lookup_.get(key);
-	if (index == lookup_.nullidx)
+	if (index == nullidx)
 		return false;
 	auto f = pool_.typed_pointer(index);
 	resource_status old = f->status.exchange(resource_status::deinitializing);
