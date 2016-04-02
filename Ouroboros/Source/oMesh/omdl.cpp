@@ -73,7 +73,8 @@ blob encode_omdl(const model& mdl
 	return mem;
 }
 
-model decode_omdl(const void* buffer, size_t size
+model decode_omdl(const path_t& path
+	, const void* buffer, size_t size
 	, const layout_t& desired_layout
 	, const allocator& subsets_alloc
 	, const allocator& mesh_alloc

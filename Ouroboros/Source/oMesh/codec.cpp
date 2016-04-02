@@ -14,7 +14,7 @@ namespace ouro { namespace mesh {
 #define DECLARE_CODEC(ext) \
 	bool is_##ext(const void* buffer, size_t size); \
 	blob encode_##ext(const model& mdl, const allocator& file_alloc, const allocator& temp_alloc); \
-	model decode_##ext(const void* buffer, size_t size, const layout_t& desired_layout, const allocator& subsets_alloc, const allocator& mesh_alloc, const allocator& temp_alloc);
+	model decode_##ext(const path_t& path, const void* buffer, size_t size, const layout_t& desired_layout, const allocator& subsets_alloc, const allocator& mesh_alloc, const allocator& temp_alloc);
 
 	/// The challenge with get_info() is that often it's not known before a full parse
 	//info_t get_info_##ext(const void* buffer, size_t size);
@@ -25,7 +25,7 @@ namespace ouro { namespace mesh {
 #define GET_FILE_FORMAT_EXT(ext) if (!_stricmp(extension, "." #ext)) return file_format::##ext;
 #define GET_FILE_FORMAT_HEADER(ext) if (is_##ext(buffer, size)) return file_format::##ext;
 #define ENCODE(ext) case file_format::##ext: return encode_##ext(mdl, file_alloc, temp_alloc);
-#define DECODE(ext) case file_format::##ext: decoded = decode_##ext(buffer, size, desired_layout, subsets_alloc, mesh_alloc, temp_alloc); break;
+#define DECODE(ext) case file_format::##ext: decoded = decode_##ext(path, buffer, size, desired_layout, subsets_alloc, mesh_alloc, temp_alloc); break;
 #define AS_STRING(ext) case mesh::file_format::##ext: return #ext;
 //#define GET_INFO(ext) case file_format::##ext: return get_info_##ext(buffer, size);
 //#define GET_REQ_INPUT(ext) case file_format::##ext: return required_input_##ext(stored_format);
@@ -57,7 +57,8 @@ blob encode(const model& mdl
 	throw std::exception("unknown mesh encoding");
 }
 
-model decode(const void* buffer, size_t size
+model decode(const path_t& path
+	, const void* buffer, size_t size
 	, const layout_t& desired_layout
 	, const allocator& subsets_alloc
 	, const allocator& mesh_alloc

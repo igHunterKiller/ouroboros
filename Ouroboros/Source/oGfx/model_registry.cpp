@@ -81,7 +81,7 @@ void* model_registry::create(const char* name, blob& compiled)
 	auto vlayout = gfx::layout(vertex_layout_);
 
 	// todo: figure out a way that this can allocate right out of the cpu-accessible buffer... or hope for D3D12
-	*mdl = mesh::decode(compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
+	*mdl = mesh::decode(name, compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
 	auto info = mdl->info();
 
 	gpu::ibv indices = dev_->new_ibv(name, info.num_indices, mdl->indices());

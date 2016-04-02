@@ -451,11 +451,11 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 	} // End of life for from-disk vertex elements and index hash
 
 	#ifdef _DEBUG
-		if (IndexMapMallocBytes)
+		if (IndexMapMallocBytes > kInitialReserve)
 		{
 			mstring reserved, additional;
-			const char* n = oSAFESTRN(obj_path); // passing the macro directly causes win32 to throw an exception
-			oTrace("obj: %s index map allocated %s additional indices beyond the initial est_num_vertices=%s", n, format_commas(additional, (uint32_t)(IndexMapMallocBytes / sizeof(uint32_t))), format_commas(reserved, init.est_num_vertices));
+			const char* n = obj_path.c_str(); // passing the macro directly causes win32 to throw an exception
+			oTrace("obj: %s index map allocated %s additional indices beyond the initial est_num_indices=%s", n, format_commas(additional, (uint32_t)((IndexMapMallocBytes - kInitialReserve) / sizeof(uint32_t))), format_commas(reserved, init.est_num_indices));
 		}
 	#endif
 
@@ -464,26 +464,26 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 		bool CalcNormals = false;
 		if (data_.normals.empty())
 		{
-			oTrace("obj: No normals found in %s...", obj_path);
+			oTrace("obj: No normals found in %s...", obj_path.c_str());
 			CalcNormals = true;
 		}
 
 		else if (!DegenerateNormals.empty())
 		{
 			// @tony: Is there a way to calculate only the degenerates?
-			oTrace("oOBJ: %u degenerate normals in %s...", DegenerateNormals.size(), obj_path);
+			oTrace("obj: %u degenerate normals in %s...", DegenerateNormals.size(), obj_path.c_str());
 			CalcNormals = true;
 		}
 
 		if (CalcNormals)
 		{
-			oTrace("Calculating vertex normals... (%s)", oSAFESTRN(obj_path));
+			oTrace("obj: Calculating vertex normals... (%s)", obj_path.c_str());
 			sstring StrTime;
 			timer t;
 			data_.normals.resize(data_.positions.size());
 			calc_vertex_normals(data_.normals.data(), indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), (uint32_t)data_.positions.size(), init.counter_clockwise_faces, true);
 			format_duration(StrTime, t.seconds(), true, true);
-			oTrace("Calculating vertex normals done in %s. (%s)", StrTime.c_str(), oSAFESTRN(obj_path));
+			oTrace("obj: Calculating vertex normals done in %s. (%s)", StrTime.c_str(), obj_path.c_str());
 		}
 	}
 
@@ -492,13 +492,13 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 		bool CalcTexcoords = false;
 		if (data_.texcoords.empty())
 		{
-			oTrace("oOBJ: No texcoords found in %s...", oSAFESTRN(obj_path));
+			oTrace("obj: No texcoords found in %s...", obj_path.c_str());
 			CalcTexcoords = true;
 		}
 
 		else if (!DegenerateTexcoords.empty())
 		{
-			oTrace("oOBJ: %u degenerate texcoords in %s...", DegenerateTexcoords.size(), oSAFESTRN(obj_path));
+			oTrace("obj: %u degenerate texcoords in %s...", DegenerateTexcoords.size(), obj_path.c_str());
 			CalcTexcoords = true;
 		}
 
@@ -507,17 +507,17 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 			data_.texcoords.resize(data_.positions.size());
 			sstring StrTime;
 			double SolverTime = 0.0;
-			oTrace("Calculating texture coordinates... (%s)", oSAFESTRN(obj_path));
+			oTrace("obj: Calculating texture coordinates... (%s)", obj_path.c_str());
 			try { calc_texcoords(data_.aabb_min, data_.aabb_max, indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), data_.texcoords.data(), (uint32_t)data_.texcoords.size(), &SolverTime); }
 			catch (std::exception& e)
 			{
 				e;
 				data_.texcoords.clear();
-				oTraceA("Calculating texture coordinates failed. %s (%s)", obj_path, e.what());
+				oTraceA("obj: Calculating texture coordinates failed. %s (%s)", obj_path, e.what());
 			}
 
 			format_duration(StrTime, SolverTime, true, true);
-			oTrace("Calculating texture coordinates done in %s. (%s)", StrTime.c_str(), oSAFESTRN(obj_path));
+			oTrace("obj: Calculating texture coordinates done in %s. (%s)", StrTime.c_str(), obj_path.c_str());
 		}
 	}
 }

@@ -18,7 +18,8 @@ blob encode_obj(const model& mdl
 	throw std::exception("encode obj not implemented");
 }
 
-model decode_obj(const void* buffer, size_t size
+model decode_obj(const path_t& path
+	, const void* buffer, size_t size
 	, const layout_t& desired_layout
 	, const allocator& subsets_alloc
 	, const allocator& mesh_alloc
@@ -29,10 +30,11 @@ model decode_obj(const void* buffer, size_t size
 
 	obj::init_t init;
 	init.counter_clockwise_faces = false;
-	auto mesh = obj::mesh::make(init, "", (const char*)buffer); // buffer must be nul-terminated
+	auto mesh = obj::mesh::make(init, path, (const char*)buffer); // buffer must be nul-terminated
 	auto obj_info = mesh->info();
 	auto model_info = obj_info.mesh_info;
 	model_info.layout = desired_layout;
+	model_info.num_slots = (uint8_t)layout_slots(desired_layout);
 
 	model mdl(model_info, subsets_alloc, mesh_alloc);
 	memcpy(mdl.subsets(), obj_info.subsets, model_info.num_subsets * sizeof(subset_t));

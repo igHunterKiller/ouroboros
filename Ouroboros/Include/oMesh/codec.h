@@ -3,6 +3,7 @@
 // Facade for encoding and decoding several mesh formats
 
 #pragma once
+#include <oString/path.h>
 #include <oMesh/mesh.h>
 #include <oMesh/model.h>
 
@@ -29,20 +30,22 @@ blob encode(const model& mdl
 	, const allocator& file_alloc = default_allocator
 	, const allocator& temp_alloc = default_allocator);
 
-// Parses the in-memory formatted buffer into a surface. temp_alloc may be used
-// for conversions.
-model decode(const void* buffer, size_t size
+// Parses the in-memory formatted buffer into a model. temp_alloc may be used
+// for conversions. The path is available as pass-through, nothing is loaded.
+model decode(const path_t& path
+	, const void* buffer, size_t size
 	, const layout_t& desired_layout
 	, const allocator& subsets_alloc = default_allocator
 	, const allocator& mesh_alloc = default_allocator
 	, const allocator& temp_alloc = default_allocator);
 
-inline model decode(const blob& buffer
+inline model decode(const path_t& path
+	, const blob& buffer
 	, const layout_t& desired_layout
 	, const allocator& subsets_alloc = default_allocator
 	, const allocator& mesh_alloc = default_allocator
 	, const allocator& temp_alloc = default_allocator)
-	{ return decode(buffer, buffer.size(), desired_layout, subsets_alloc, mesh_alloc, temp_alloc); }
+	{ return decode(path, buffer, buffer.size(), desired_layout, subsets_alloc, mesh_alloc, temp_alloc); }
 
 #if 0
 // converts the first few bytes of a supported format into a surface::info
