@@ -38,6 +38,7 @@ public:
 			i.shape.client_position = int2(20,20);
 			i.shape.client_size = int2(600,480-65);
 			i.on_event = std::bind(&WindowInWindow::GPUWindowEventHook, this, std::placeholders::_1);
+			i.min_client_size = int2(16,16);
 			GPUWindow = window::make(i);
 		}
 

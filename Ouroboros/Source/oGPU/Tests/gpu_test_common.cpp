@@ -139,6 +139,7 @@ void gpu_test::create(const char* title, bool interactive, const int* snapshot_f
 		i.shape.state = devmode_ ? window_state::restored : window_state::hidden;
 		i.shape.style = window_style::sizable;
 		i.shape.client_size = resolution;
+		i.min_client_size = int2(16,16);
 		win_ = window::make(i);
 	}
 
