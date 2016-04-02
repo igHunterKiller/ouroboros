@@ -241,7 +241,7 @@ int vcs_t::invoke_nothrow(const char* fmt, ...) const
 	int n = vsnprintf(cmdline_, cmdline_.capacity(), fmt, args);
 	va_end(args);
 
-	if (n < 0 || n >= cmdline_.capacity())
+	if (n < 0 || n >= (int)cmdline_.capacity())
 		return (int)std::errc::no_buffer_space;
 
 	return init_.spawn(cmdline_, vcs_get_line, &stdout_, init_.timeout_ms);
@@ -259,7 +259,7 @@ void vcs_t::invoke(const char* fmt, ...) const
 	va_start(args, fmt);
 	int n = vsnprintf(cmdline_, cmdline_.capacity(), fmt, args);
 	va_end(args);
-	if (n < 0 || n >= cmdline_.capacity())
+	if (n < 0 || n >= (int)cmdline_.capacity())
 		throw vcs_exception(vcs_error::command_string_too_long);
 	int err = init_.spawn(cmdline_, vcs_get_line, &stdout_, init_.timeout_ms);
 	if (err)
