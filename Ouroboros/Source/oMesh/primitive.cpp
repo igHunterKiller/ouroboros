@@ -243,9 +243,9 @@ static model primitive_model(const allocator& alloc, const allocator& tmp, const
 model box(const allocator& alloc, const allocator& tmp, const face_type& type, const element_t* elements, size_t num_elements
 	, const float3& aabb_min, const float3& aabb_max, uint32_t color)
 {
-	auto  tess       = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
-	auto  info       = primitive::cube_info(tess);
-	void* mem        = alloca(info.total_bytes());
+	auto tess = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
+	auto info = primitive::cube_info(tess);
+	auto mem  = tmp.allocate(info.total_bytes(), "primitive::box temp mesh");
 	
 	primitive::mesh_t mesh(info, mem);
 	primitive::cube_tessellate(&mesh, tess);
@@ -257,9 +257,9 @@ model box(const allocator& alloc, const allocator& tmp, const face_type& type, c
 model circle(const allocator& alloc, const allocator& tmp, const face_type& type, const element_t* elements, size_t num_elements
 	, const uint16_t facet, float radius, uint32_t color)
 {
-	auto tess        = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
-	auto info        = primitive::circle_info(tess, facet);
-	auto mem         = alloca(info.total_bytes());
+	auto tess = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
+	auto info = primitive::circle_info(tess, facet);
+	auto mem  = tmp.allocate(info.total_bytes(), "primitive::circle temp mesh");
 
 	primitive::mesh_t mesh(info, mem);
 	primitive::circle_tessellate(&mesh, tess, facet, radius);
@@ -272,11 +272,10 @@ model cylinder(const allocator& alloc, const allocator& tmp, const face_type& ty
 	, const uint16_t facet, const uint16_t divide
 	, float base_radius, float apex_radius, float height, uint32_t color)
 {
-	const float r    = apex_radius / std::max(base_radius, oVERY_SMALLf);
-	
-	auto tess        = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
-	auto info        = primitive::cylinder_info(tess, facet);
-	auto mem         = alloca(info.total_bytes());
+	const float r = apex_radius / std::max(base_radius, oVERY_SMALLf);
+	auto tess     = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
+	auto info     = primitive::cylinder_info(tess, facet);
+	auto mem      = tmp.allocate(info.total_bytes(), "primitive::cylinder temp mesh");
 
 	primitive::mesh_t mesh(info, mem);
 	primitive::cylinder_tessellate(&mesh, tess, facet, r);
@@ -297,9 +296,9 @@ model cylinder(const allocator& alloc, const allocator& tmp, const face_type& ty
 model frustum(const allocator& alloc, const allocator& tmp, const face_type& type, const element_t* elements, size_t num_elements
 	, const float4x4& projection, uint32_t color)
 {
-	auto  tess       = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
-	auto  info       = primitive::cube_info(tess);
-	void* mem        = alloca(info.total_bytes());
+	auto  tess = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
+	auto  info = primitive::cube_info(tess);
+	auto  mem  = tmp.allocate(info.total_bytes(), "primitive::frustum temp mesh");
 
 	primitive::mesh_t mesh(info, mem);
 	primitive::cube_tessellate(&mesh, tess);
@@ -424,7 +423,7 @@ model torus(const allocator& alloc, const allocator& tmp, const face_type& type,
 	float r    = inner_radius / std::max(outer_radius, oVERY_SMALLf);
 	auto  tess = type == face_type::outline ? primitive::tessellation_type::lines : primitive::tessellation_type::textured;
 	auto  info = primitive::torus_info(tess, facet, divide);
-	auto  mem  = alloca(info.total_bytes());
+	auto  mem  = tmp.allocate(info.total_bytes(), "primitive::torus temp mesh");
 
 	primitive::mesh_t mesh(info, mem);
 	primitive::torus_tessellate(&mesh, tess, facet, divide, r);
