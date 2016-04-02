@@ -18,6 +18,8 @@ enum class tessellation_type : uint8_t
 	solid,      // positions only, indices are triangle triplets
 	textured,   // positions & texcoords, indices are triangle triplets
 	cubemapped, // positions & texcoords assigned as viewed from inside rather than outside, indices are triangle triplets
+
+	count,
 };
 
 struct info_t

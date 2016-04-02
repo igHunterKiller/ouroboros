@@ -3,12 +3,48 @@
 #include <oMath/primitive.h>
 #include <oCore/byte.h>
 #include <oCore/countof.h>
+#include <oBase/type_info.h>
 #include <algorithm>
 #include <stdexcept>
 
 #include <oCore/assert.h>
 
-namespace ouro { namespace primitive {
+namespace ouro {
+
+template<> const char* as_string(const primitive::tessellation_type& type)
+{
+	const char* s_names[] = 
+	{
+		"lines",
+		"solid",
+		"textured",
+		"cubemapped",
+	};
+	return as_string(type, s_names);
+}
+
+oDEFINE_TO_FROM_STRING(primitive::tessellation_type)
+
+template<> size_t to_string(char* dst, size_t dst_size, const primitive::info_t& info)
+{
+	size_t offset = 0;
+	size_t indent = 0;
+
+	STRUCTF_BEGIN_ACC(dst, dst_size, indent, "primitive::info_t", &info);
+		indent++;
+		FIELDF_ACC(dst, dst_size, indent, info.nindices);
+		FIELDF_ACC(dst, dst_size, indent, info.nvertices);
+		FIELDF_ACC(dst, dst_size, indent, info.maxdiv);
+		FIELDF_ACC(dst, dst_size, indent, info.apex);
+		FIELDF_ACC(dst, dst_size, indent, info.nadir);
+		FIELDF_ACC(dst, dst_size, indent, info.type);
+		indent--;
+	STRUCTF_END_ACC(dst, dst_size, indent, "primitive::info_t", &info);
+
+	return offset;
+};
+
+namespace primitive {
 
 static const float PI = 3.14159265358979323846f;
 static inline void sincosf(float radians, float& out_sin, float& out_cos) { out_sin = sinf(radians); out_cos = cosf(radians); }
