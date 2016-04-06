@@ -18,6 +18,7 @@ enum class allocate_errc : uint32_t
 {
 	invalid,
 	invalid_ptr,
+	invalid_block_size,
   invalid_bookkeeping,
   invalid_capacity,
 	out_of_memory,

@@ -1,6 +1,5 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oCore/assert.h>
 #include <oMemory/pool.h>
 #include <oMemory/allocate.h>
 #include <algorithm>
@@ -57,11 +56,11 @@ pool& pool::operator=(pool&& that)
 	{
 		deinitialize();
 
-		blocks_ = that.blocks_; that.blocks_ = nullptr;
-		stride_ = that.stride_; that.stride_ = 0;
+		blocks_  = that.blocks_;  that.blocks_  = nullptr;
+		stride_  = that.stride_;  that.stride_  = 0;
 		nblocks_ = that.nblocks_; that.nblocks_ = 0;
-		nfree_ = that.nfree_; that.nfree_ = 0;
-		head_ = that.head_; that.head_ = nullidx;
+		nfree_   = that.nfree_;   that.nfree_   = 0;
+		head_    = that.head_;    that.head_    = nullidx;
 	}
 
 	return *this;
@@ -71,31 +70,34 @@ void pool::initialize(void* memory, size_type bytes, size_type block_size)
 {
 	if (!memory)
 		throw allocate_error(allocate_errc::invalid_bookkeeping);
-
-	oCheck(block_size >= sizeof(index_type), std::errc::invalid_argument, "block_size must be a minimum of 4 bytes");
-
+	
+	if (block_size < sizeof(index_type))
+		throw allocate_error(allocate_errc::invalid_block_size);
+	
 	const size_type capacity = calc_capacity(bytes, block_size);
 	if (!capacity || capacity > max_capacity())
 		throw allocate_error(allocate_errc::invalid_bookkeeping);
 
-	head_ = 0;
-	blocks_ = (uint8_t*)memory;
-	stride_ = block_size;
+	blocks_  = (uint8_t*)memory;
+	stride_  = block_size;
 	nblocks_ = capacity;
-	nfree_ = capacity;
+	nfree_   = capacity;
+	head_    = 0;
+
 	const index_type n = nblocks_ - 1;
 	for (index_type i = 0; i < n; i++)
-		*(index_type*)(stride_*i + blocks_) = i + 1;
-	*(index_type*)(stride_*n + blocks_) = nullidx;
+		*(index_type*)(stride_ * i + blocks_) = i + 1;
+	*(index_type*)(stride_ * n + blocks_) = nullidx;
 }
 
 void* pool::deinitialize()
 {
-	void* p = blocks_;
-	blocks_ = nullptr;
-	stride_ = 0;
+	void* p  = blocks_;
+	blocks_  = nullptr;
+	stride_  = 0;
 	nblocks_ = 0;
-	head_ = nullidx;
+	nfree_   = 0;
+	head_    = nullidx;
 	return p;
 }
 
@@ -112,13 +114,12 @@ pool::index_type pool::allocate_index()
 void pool::deallocate(index_type index)
 {
 	if (!owns(index))
-		oThrow(std::errc::invalid_argument, "pool does not own the specified index or pointer");
+		throw allocate_error(allocate_errc::invalid_ptr);
 	*(index_type*)pointer(index) = index_type(head_);
 	head_ = index;
 	nfree_++;
 }
 
-// convert between allocated index and pointer values
 void* pool::pointer(index_type index) const
 {
 	return index != nullidx ? (stride_*index + blocks_) : nullptr;
