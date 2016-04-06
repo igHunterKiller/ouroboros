@@ -44,6 +44,7 @@
     <ClInclude Include="..\..\Include\oGfx\bytecode.h" />
     <ClInclude Include="..\..\Include\oGfx\camera.h" />
     <ClInclude Include="..\..\Include\oGfx\device_resource_registry.h" />
+    <ClInclude Include="..\..\Include\oGfx\device_resource_registry2.h" />
     <ClInclude Include="..\..\Include\oGfx\draw_constants.h" />
     <ClInclude Include="..\..\Include\oGfx\film.h" />
     <ClInclude Include="..\..\Include\oGfx\gpu_signature.h" />

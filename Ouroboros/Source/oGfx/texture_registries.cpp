@@ -2,6 +2,7 @@
 
 #include <oGfx/texture_registries.h>
 #include <oSurface/codec.h>
+#include <oCore/assert.h>
 #include <oCore/color.h>
 
 namespace ouro { namespace gfx {
@@ -22,50 +23,44 @@ static blob make_solid_image_file(uint32_t argb, const allocator& alloc)
 // Open question: should the baking of unbaked assets be done in the IO/threads or queued
 // and done concurrently in the create step?
 
-blob encode_oimg(blob& compiled, const allocator& alloc)
+void texture2d_registry2::initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc)
 {
-	const allocator& temp_alloc = default_allocator;
+	alloc_ = alloc ? alloc : default_allocator;
 
-	auto fformat = surface::get_file_format(compiled);
-	if (fformat == surface::file_format::unknown)
-		oThrow(std::errc::invalid_argument, "unknown file format");
+	allocate_options opts(required_alignment);
+	void* memory = alloc_.allocate(budget_bytes, "texture2d_registry2", opts);
 
-	if (fformat == surface::file_format::oimg)
-		return std::move(compiled);
+	auto error_placeholder = make_solid_image_file(color::white, io_alloc);
 
-	auto info = surface::get_info(compiled);
-	auto desired_format = surface::as_texture(info.format); // ensure the format is render-compatible
-	desired_format = surface::as_unorm(desired_format); // srgb not hooked up yet in renderer
-	auto img = surface::decode(compiled, temp_alloc, temp_alloc, desired_format, surface::mip_layout::tight);
-	return encode(img, surface::file_format::oimg, alloc, temp_alloc, surface::format::unknown, surface::compression::none);
+	device_resource_registry2_t<texture2d_internal>::initialize(memory, budget_bytes, dev, error_placeholder, io_alloc);
 }
 
-void texture2d_registry::initialize(gpu::device* dev, uint32_t bookkeeping_bytes, const allocator& alloc, const allocator& io_alloc)
+void texture2d_registry2::deinitialize()
 {
-	resource_placeholders_t placeholders;
-	placeholders.compiled_missing = make_solid_image_file(color::default_gray, io_alloc);
-	placeholders.compiled_loading = placeholders.compiled_missing.alias();
-	placeholders.compiled_failed = make_solid_image_file(color::red, io_alloc);
+	if (pool_.valid())
+	{
+		void* p = device_resource_registry2_t<texture2d_internal>::deinitialize();
 
-	auto mem = alloc.allocate(bookkeeping_bytes, "texture2d_registry", memory_alignment::cacheline);
-  initialize_base(dev, "texture2d_registry", bookkeeping_bytes, alloc, io_alloc, placeholders);
+		if (alloc_)
+			alloc_.deallocate(p);
+
+		alloc_ = allocator();
+	}
 }
 
-void texture2d_registry::deinitialize()
+texture2d2_t texture2d_registry2::load(const path_t& path)
 {
-	if (!valid())
-		return;
-
-	deinitialize_base();
+	void* loading_placeholder = device_resource_registry2_t<texture2d_internal>::get_error_placeholder();
+	return device_resource_registry2_t<texture2d_internal>::load(path, (texture2d_internal*)loading_placeholder, false);
 }
 
-void* texture2d_registry::create(const char* name, blob& compiled)
+void* texture2d_registry2::create(const path_t& path, blob& compiled)
 {
 	auto fformat = surface::get_file_format(compiled);
-	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument,"Unknown file format: %s", name ? name : "(null)");
+	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument, "[texture2d_registry2] Unknown file format: %s", path.c_str());
 
 	auto info = surface::get_info(compiled);
-	oCheck(info.is_2d(), std::errc::invalid_argument, "%s is not a 2d texture", name ? name : "(null)");
+	oCheck(info.is_2d(), std::errc::invalid_argument, "[texture2d_registry2] Not a texture2d: %s", path.c_str());
 
 	// ensure the format is render-compatible
 	auto desired_format = surface::as_texture(info.format);
@@ -79,26 +74,16 @@ void* texture2d_registry::create(const char* name, blob& compiled)
 	auto img = surface::decode(compiled, desired_format, surface::mip_layout::tight);
 
 	auto tex = pool_.create();
-	tex->view = dev_->new_texture(name, img);
-	oTrace("[texture2d_registry] create %s", name);
+	tex->view = dev_->new_texture(path, img);
+	oTrace("[texture2d_registry2] create %p %s", tex, path.c_str());
 	return tex;
 }
 
-void texture2d_registry::destroy(void* entry)
+void texture2d_registry2::destroy(void* resource)
 {
-	auto tex = (basic_resource_type*)entry;
+	auto tex = (basic_resource_type*)resource;
 	tex->view = nullptr;
 	pool_.destroy(tex);
-}
-
-texture2d_t texture2d_registry::load(const path_t& path)
-{
-	return default_load(path);
-}
-
-void texture2d_registry::unload(const texture2d_t& tex)
-{
-	remove(tex);
 }
 
 }}

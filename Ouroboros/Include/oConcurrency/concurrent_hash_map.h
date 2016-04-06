@@ -27,7 +27,8 @@ public:
 	typedef keyT key_type;
 	typedef valT val_type;
 
-	typedef void (*visitor_fn)(key_type key, val_type value, void* user);
+	// return true to keep traversing, false to exit early
+	typedef bool (*visitor_fn)(key_type key, val_type value, void* user);
 
 	static const memory_alignment required_alignment = memory_alignment::cacheline;
 	
@@ -55,26 +56,32 @@ public:
 	void      visit(visitor_fn visitor, void* user);                                   // visit valid values
 
 	template<typename visitorT>
-	void visit(visitorT visitor) // std::function form (must be void visit(key_type k, val_type v))
+	void visit(visitorT visitor) // std::function form (must be bool visit(key_type k, val_type v)) (return true to keep traversing, false to exit early)
 	{
 		for (uint32_t i = 0; i <= mod_; i++)
 			if (!val_nul(i))
 			{
 				auto k = keys_[i].load(atm_order);
 				auto v = vals_[i].load(atm_order);
-				visitor(k, v);
+				if (!visitor(k, v))
+					return;
 			}
 	}
 
 
 	// === concurrent api ===
 
-	size_type   capacity() const { return mod_ + 1; }                                 // returns the max storable key-value pairs
-	bool     add(const key_type& key, const val_type& value);                         // sets key to value if the prior key or value is nul (un-reclaimed keys do not fail)
-	val_type set(const key_type& key, const val_type& value);                         // sets key to value and returns prior 
-	val_type nix(const key_type& key) { return set(key, nul_val_); }                  // flags key as valid, but derelict so reclaim_keys() can later reset the key
-	val_type get(const key_type& key) const;                                          // returns nul if no key/value exists
+	size_type capacity() const { return mod_ + 1; }                                                             // returns the max storable key-value pairs
+	val_type  nul() const { return nul_val_; }                                                                  // returns the nul val set at init time
+	bool      add(const key_type& key, const val_type& value);                                                  // sets key to value if the prior key or value is nul (un-reclaimed keys do not fail)
+	bool      cas(const key_type& key, val_type& old_value, const key_type& new_value, val_type*& val_pointer); // compare-and-swap rules: if key not found behave as add (old_value <- nul); if key then only assign val if it's still old_value
+	val_type  set(const key_type& key, const val_type& value, val_type*& val_pointer);                          // sets key to value and returns prior; out_index receives the index into vals_ to which key evaluated
+	val_type  nix(const key_type& key) { return set(key, nul_val_); }                                           // flags key as valid, but derelict so reclaim_keys() can later reset the key
+	val_type  get(const key_type& key) const;                                                                   // returns nul if no key/value exists
 
+	bool      cas(const key_type& key, val_type& old_value, const key_type& new_value) { val_type* dummy; return cae(key, old_value, new_value, dummy); }
+	val_type  set(const key_type& key, const val_type& value) { val_type* dummy; return set(key, value, dummy); }
+	
 private:
 	concurrent_hash_map(const concurrent_hash_map&);
 	const concurrent_hash_map& operator=(const concurrent_hash_map&);
@@ -271,7 +278,8 @@ void concurrent_hash_map<keyT, valT>::visit(visitor_fn visitor, void* user)
 		{
 			auto k = keys_[i].load(atm_order);
 			auto v = keys_[i].load(atm_order);
-			visitor(k, v);
+			if (!visitor(k, v))
+				return;
 		}
 }
 
@@ -304,7 +312,7 @@ bool concurrent_hash_map<keyT, valT>::add(const key_type& key, const val_type& v
 }
 
 template<typename keyT, typename valT>
-typename concurrent_hash_map<keyT, valT>::val_type concurrent_hash_map<keyT, valT>::set(const key_type& key, const val_type& value)
+bool concurrent_hash_map<keyT, valT>::cas(const key_type& key, val_type& old_value, const key_type& new_value, val_type*& val_pointer)
 {
 	if (key == nul_key_)
 		throw std::invalid_argument("key must be non-zero");
@@ -330,6 +338,47 @@ typename concurrent_hash_map<keyT, valT>::val_type concurrent_hash_map<keyT, val
 			if (prev != nul_key_ && prev != key)
 				continue;
 		}
+
+		// @tony: this feels a bit heavyweight since the key needs to be reevalated by calling code - perhaps
+		// pass a callback that cas-loops here? see what usage looks like and swing back to optimize this if necessary
+
+		// either the key is found or a new one was successfully written: ready to update the value, but only if it still matches the old value
+
+		val_pointer = (val_type*)vals_ + k;
+
+		return vals_[k].compare_exchange_strong(old_value, new_value, atm_order);
+	}
+}
+
+template<typename keyT, typename valT>
+typename concurrent_hash_map<keyT, valT>::val_type concurrent_hash_map<keyT, valT>::set(const key_type& key, const val_type& value, val_type*& val_pointer)
+{
+	if (key == nul_key_)
+		throw std::invalid_argument("key must be non-zero");
+
+	for (key_type k = key, j = 0;; k++, j++) // j ensures one loop, k can wrap over the memory
+	{
+		// key was not found and a new one could not be added
+		if (j > mod_)
+			throw std::length_error("concurrent_hash_map full");
+
+		k &= mod_;
+		atm_key_t& atm_key = keys_[k];
+		key_type probed = atm_key.load(atm_order);
+		if (probed != key)
+		{
+			// invoke the 'linear' in linear probe hashmap: skip a seemingly valid key and look for the next available slot
+			if (probed != nul_key_)
+				continue;
+
+			// try inserting a new key and double-test to protect against another thread inserting the same key (so ignore cas's return value)
+			key_type prev = nul_key_;
+			atm_key.compare_exchange_strong(prev, key, atm_order);
+			if (prev != nul_key_ && prev != key)
+				continue;
+		}
+
+		val_pointer = (val_type*)vals_ + k;
 
 		// either the key is found or a new one was successfully written: ready to update the value
 		return vals_[k].exchange(value, atm_order);

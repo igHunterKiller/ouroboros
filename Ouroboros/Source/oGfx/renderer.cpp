@@ -88,7 +88,7 @@ struct task_t
 struct technique_context_t
 {
 	gfx::model_registry* models;
-	gfx::texture2d_registry* texture2ds;
+	gfx::texture2d_registry2* texture2ds;
 	gpu::graphics_command_list* gcl;
 	gpu::rtv* presentation_target;
 	const gfx::film_t* film;
@@ -197,7 +197,7 @@ void draw_prim(technique_context_t& ctx)
 		auto& prim = *(const primitive_submission_t*)task->data;
 
 		// set up material parameters
-		cl.set_srvs(0, 1, &prim.texture->view);
+		cl.set_srvs(0, 1, &prim.texture);
 
 		// bind a model
 		auto model = models.primitive(prim.type);

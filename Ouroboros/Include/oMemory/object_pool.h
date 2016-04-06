@@ -23,8 +23,10 @@ public:
 	object_pool(void* memory, size_type bytes) : pool(memory, bytes, sizeof(T)) {}
 	~object_pool() { ((pool*)this)->~pool(); }
 	object_pool& operator=(object_pool&& that) { return (object_pool&)pool::operator=(std::move((pool&&)that)); }
+	object_pool(const object_pool&) = delete;
+	const object_pool& operator=(const object_pool&) = delete;
 	
-  void initialize(void* arena, size_type bytes) { pool::initialize(arena, bytes, sizeof(T)); }
+  void initialize(void* memory, size_type bytes) { pool::initialize(memory, bytes, sizeof(T)); }
 
 	T* create() { void* p = allocate(); return p ? new (p) T() : nullptr; }
 	
@@ -43,10 +45,6 @@ public:
 	void destroy(T* ptr) { ptr->T::~T(); deallocate(ptr); }
 
 	T* typed_pointer(index_type index) const { return (T*)pool::pointer(index); }
-
-private:
-	object_pool(const object_pool&); /* = delete; */
-	const object_pool& operator=(const object_pool&); /* = delete; */
 };
 
 }

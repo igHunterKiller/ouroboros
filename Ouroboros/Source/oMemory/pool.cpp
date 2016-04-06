@@ -36,14 +36,14 @@ pool::pool(pool&& that)
 	that.deinitialize();
 }
 
-pool::pool(void* arena, size_type bytes, size_type block_size)
+pool::pool(void* memory, size_type bytes, size_type block_size)
 	: blocks_(nullptr)
 	, stride_(0)
 	, nblocks_(0)
 	, nfree_(0)
 	, head_(nullidx)
 {
-	initialize(arena, bytes, block_size);
+	initialize(memory, bytes, block_size);
 }
 
 pool::~pool()
@@ -67,9 +67,9 @@ pool& pool::operator=(pool&& that)
 	return *this;
 }
 
-void pool::initialize(void* arena, size_type bytes, size_type block_size)
+void pool::initialize(void* memory, size_type bytes, size_type block_size)
 {
-	if (!arena)
+	if (!memory)
 		throw allocate_error(allocate_errc::invalid_bookkeeping);
 
 	oCheck(block_size >= sizeof(index_type), std::errc::invalid_argument, "block_size must be a minimum of 4 bytes");
@@ -79,7 +79,7 @@ void pool::initialize(void* arena, size_type bytes, size_type block_size)
 		throw allocate_error(allocate_errc::invalid_bookkeeping);
 
 	head_ = 0;
-	blocks_ = (uint8_t*)arena;
+	blocks_ = (uint8_t*)memory;
 	stride_ = block_size;
 	nblocks_ = capacity;
 	nfree_ = capacity;

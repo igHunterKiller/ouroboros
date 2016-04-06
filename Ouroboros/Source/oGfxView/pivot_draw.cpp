@@ -49,6 +49,7 @@ void pivot_draw::initialize()
 
 void pivot_draw::deinitialize()
 {
+	texture_.release();
 }
 
 void pivot_draw::on_view_default()
@@ -125,7 +126,7 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		prim->world = tx;
 		prim->color = colors[i % countof(colors)];
 		prim->type  = shapes[i];
-		prim->texture = texture_;
+		prim->texture = texture_.get()->view;
 
 		renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_prim, prim);
 

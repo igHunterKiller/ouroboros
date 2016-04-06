@@ -25,7 +25,7 @@ public:
 	// returns the bookkeeping overhead
 	static size_type overhead();
 
-	// returns the minimum size in bytes required of the arena passed to initialize()
+	// returns the minimum size in bytes required of the memory passed to initialize()
 	static size_type calc_size(size_type capacity, size_type block_size);
 
 	// returns the max block count that fits into the specified bytes
@@ -38,7 +38,7 @@ public:
 	pool(pool&& that);
 
 	// ctor creates as a valid pool using external memory
-	pool(void* arena, size_type bytes, size_type block_size);
+	pool(void* memory, size_type bytes, size_type block_size);
 
 	// dtor
 	~pool();
@@ -46,11 +46,18 @@ public:
 	// calls deinitialize on this, moves that's memory under the same config
 	pool& operator=(pool&& that);
 
+	// no copy semantics
+	pool(const pool&) = delete;
+	const pool& operator=(const pool&) = delete;
+
 	// use calc_size() to determine memory size
-	void initialize(void* arena, size_type bytes, size_type block_size);
+	void initialize(void* memory, size_type bytes, size_type block_size);
 
 	// deinitializes the pool and returns the memory passed to initialize()
 	void* deinitialize();
+
+	// returns if the pool has been initialized
+	inline bool valid() const { return !!blocks_; }
 
 	// returns the size each allocated block will be
 	inline size_type block_size() const { return stride_; }
@@ -94,9 +101,6 @@ private:
 	size_type nblocks_;
 	size_type nfree_;
 	uint32_t head_;
-
-	pool(const pool&); /* = delete; */
-	const pool& operator=(const pool&); /* = delete; */
 };
 
 }

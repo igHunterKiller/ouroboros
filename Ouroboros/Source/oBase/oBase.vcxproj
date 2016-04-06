@@ -41,6 +41,7 @@
     </ClCompile>
     <ClCompile Include="plan.cpp" />
     <ClCompile Include="resource_registry.cpp" />
+    <ClCompile Include="resource_registry2.cpp" />
     <ClCompile Include="snappy.cpp" />
     <ClCompile Include="stringize_base.cpp" />
     <ClCompile Include="stringize_hlsl.cpp" />
@@ -75,6 +76,7 @@
     <ClInclude Include="..\..\Include\oBase\osc.h" />
     <ClInclude Include="..\..\Include\oBase\plan.h" />
     <ClInclude Include="..\..\Include\oBase\resource_registry.h" />
+    <ClInclude Include="..\..\Include\oBase\resource_registry2.h" />
     <ClInclude Include="..\..\Include\oBase\scoped_timer.h" />
     <ClInclude Include="..\..\Include\oBase\sss.h" />
     <ClInclude Include="..\..\Include\oBase\type_info.h" />

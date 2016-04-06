@@ -85,6 +85,9 @@
     <ClCompile Include="type_info.cpp">
       <Filter>Source\traits</Filter>
     </ClCompile>
+    <ClCompile Include="resource_registry2.cpp">
+      <Filter>Source\containers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\oBase\fixed_vector.h">
@@ -179,6 +182,9 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\oBase\fundamental.h">
       <Filter>oBase\traits</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oBase\resource_registry2.h">
+      <Filter>oBase\containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -188,12 +188,13 @@ void leak_tracker::internal_on_stat(uintptr_t new_ptr, const allocation_stats& s
 size_t leak_tracker::num_outstanding_allocations(bool current_context_only)
 {
 	size_t n = 0;
-	allocs.visit([&](const hash_map_t::key_type& key, const hash_map_t::val_type& idx)
+	allocs.visit([&](const hash_map_t::key_type& key, const hash_map_t::val_type& idx)->bool
 	{
 		key;
 		const entry& e = *pool.typed_pointer(idx);
 		if (e.tracked && (!current_context_only || e.context == current_context))
 			n++;
+		return true;
 	});
 
 	return n;
@@ -225,7 +226,7 @@ size_t leak_tracker::report(bool current_context_only)
 	size_t nLeaks = 0;
 	bool headerPrinted = false;
 	size_t totalLeakBytes = 0;
-	allocs.visit([&](hash_map_t::key_type key, hash_map_t::val_type idx)
+	allocs.visit([&](hash_map_t::key_type key, hash_map_t::val_type idx)->bool
 	{
 		key;
 		const entry& e = *pool.typed_pointer(idx);
@@ -262,6 +263,7 @@ size_t leak_tracker::report(bool current_context_only)
 				init.print(buf);
 			}
 		}
+		return true;
 	});
 
 	if (nLeaks)
