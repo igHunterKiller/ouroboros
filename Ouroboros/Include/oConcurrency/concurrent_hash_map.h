@@ -79,7 +79,7 @@ public:
 	val_type  nix(const key_type& key) { return set(key, nul_val_); }                                           // flags key as valid, but derelict so reclaim_keys() can later reset the key
 	val_type  get(const key_type& key) const;                                                                   // returns nul if no key/value exists
 
-	bool      cas(const key_type& key, val_type& old_value, const key_type& new_value) { val_type* dummy; return cae(key, old_value, new_value, dummy); }
+	bool      cas(const key_type& key, val_type& old_value, const key_type& new_value) { val_type* dummy; return cas(key, old_value, new_value, dummy); }
 	val_type  set(const key_type& key, const val_type& value) { val_type* dummy; return set(key, value, dummy); }
 	
 private:
