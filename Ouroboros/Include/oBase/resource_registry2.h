@@ -21,6 +21,9 @@ namespace ouro {
 class base_resource
 {
 public:
+	typedef uint64_t handle_type;
+	typedef std::atomic<handle_type> atm_handle_type;
+
 	enum class status : uint8_t // (4-bit)
 	{
 		missing,
@@ -34,10 +37,10 @@ public:
 	// can be determined by the pointer itself, comparing against a small set of states - which is as large as there
 	// are different assets.
 
-	static uint64_t pack(void* resource, status status, uint16_t type, uint16_t refcnt);
-	static uint64_t repack(uint64_t previous_packed, void* resource, status status);
-	static uint64_t reference(uint64_t packed); // add 1 to ref count
-	static uint64_t release(uint64_t packed);   // subtract 1 from ref count
+	static handle_type pack     (void* resource, status status, uint16_t type, uint16_t refcnt); // combines all elements of a resource handle
+	static handle_type repack   (handle_type previous_packed, void* resource, status status);    // updates all but refcount
+	static handle_type reference(handle_type packed);                                            // add 1 to ref count
+	static handle_type release  (handle_type packed);                                            // subtract 1 from ref count
 
 	// ctors
 	base_resource() : handle_(nullptr)                                       {}
@@ -54,29 +57,29 @@ public:
 	void release()   const; // symmetry with reference()
 	
 protected:
-	static const uint64_t refcnt_mask  = 0xfff0000000000000;
-	static const uint64_t status_mask  = 0x000f000000000000;
-	static const uint64_t ptr_mask     = 0x0000ffffffffffff;
-  static const uint64_t type_mask    = 0x000000000000000f;
-  static const uint64_t refcnt_max   = 0x0000000000000fff;
-  static const uint64_t status_max   = 0x000000000000000f;
-  static const uint64_t refcnt_one   = 0x0010000000000000;
-  static const uint32_t refcnt_shift = 52;
-  static const uint32_t status_shift = 48;
+	static const handle_type refcnt_mask  = 0xfff0000000000000;
+	static const handle_type status_mask  = 0x000f000000000000;
+	static const handle_type ptr_mask     = 0x0000ffffffffffff;
+	static const handle_type type_mask    = 0x000000000000000f;
+	static const handle_type refcnt_max   = 0x0000000000000fff;
+	static const handle_type status_max   = 0x000000000000000f;
+	static const handle_type refcnt_one   = 0x0010000000000000;
+	static const uint32_t refcnt_shift    = 52;
+	static const uint32_t status_shift    = 48;
 	
-	static bool     is_placeholder(status   status) { return status != status::ready;                         }
-	static void*    ptr           (uint64_t packed) { return (void*)  (packed                  & ptr_mask  ); }
-	static status   stat          (uint64_t packed) { return status  ((packed >> status_shift) & status_max); }
-	static uint16_t refcnt        (uint64_t packed) { return uint16_t((packed >> refcnt_shift) & refcnt_max); }
-	static bool     hasref        (uint64_t packed) { return (packed & refcnt_mask) != 0;                     }
-	static bool     is_placeholder(uint64_t packed) { return is_placeholder(stat(packed));                    }
+	static bool     is_placeholder(status      status) { return status != status::ready;                         }
+	static void*    ptr           (handle_type packed) { return (void*)  (packed                  & ptr_mask  ); }
+	static status   stat          (handle_type packed) { return status  ((packed >> status_shift) & status_max); }
+	static uint16_t refcnt        (handle_type packed) { return uint16_t((packed >> refcnt_shift) & refcnt_max); }
+	static bool     hasref        (handle_type packed) { return (packed & refcnt_mask) != 0;                     }
+	static bool     is_placeholder(handle_type packed) { return is_placeholder(stat(packed));                    }
 
 	friend class resource_registry2_t;
-	base_resource(uint64_t* handle) : handle_((std::atomic_uint64_t*)handle) {}
+	base_resource(handle_type* handle) : handle_((atm_handle_type*)handle) {}
 
 	void reference() const; // const makes copy ctor easier
 
-	mutable std::atomic_uint64_t* handle_;
+	mutable atm_handle_type* handle_;
 };
 
 template<typename T>
@@ -114,7 +117,6 @@ class resource_registry2_t
 public:
 	typedef uint32_t size_type;
 	typedef uint64_t key_type;
-	typedef uint64_t val_type;
 
 	static const memory_alignment required_alignment = memory_alignment::cacheline;
 
@@ -162,7 +164,7 @@ protected:
 public:
 
 	// returns true if this class has been initialized
-	bool valid() const { return pool_.valid(); }
+	bool valid() const { return lookup_.valid(); }
 
 	// ...
 	void* get_error_placeholder() { return error_placeholder_; }
@@ -221,13 +223,20 @@ private:
 			};
 		};
 	};
-	
-	concurrent_hash_map<key_type, val_type> store_;             // stores resources, accessible by key
-	concurrent_object_pool<queued_t>        pool_;              // stores available queue nodes
-	concurrent_stack<queued_t>              creates_;           // queue for all compiled buffers that can be passed to create and then inserted
-	concurrent_stack<queued_t>              destroys_;          // queue for all valid resources to destroy in the next flush
-	allocator                               io_alloc_;          // used for temporary file io and decode operations
-	void*                                   error_placeholder_; // inserted if a file load fails
+
+	typedef concurrent_hash_map<key_type, uint32_t>            lookup_t;
+	typedef concurrent_object_pool<queued_t>                   queued_pool_t;
+	typedef concurrent_object_pool<base_resource::handle_type> res_pool_t;
+	typedef concurrent_stack<queued_t>                         queue_t;
+	typedef std::atomic<base_resource::handle_type>            atm_resource_t;
+
+	lookup_t      lookup_;            // stores resources, accessible by key
+	res_pool_t    res_pool_;          // stores available resources
+	queued_pool_t queued_pool_;       // stores available queue nodes
+	queue_t       creates_;           // queue for all compiled buffers that can be passed to create and then inserted
+	queue_t       destroys_;          // queue for all valid resources to destroy in the next flush
+	void*         error_placeholder_; // inserted if a file load fails
+	allocator     io_alloc_;          // used for temporary file io and decode operations
 
 	static void load_completion(const path_t& path, blob& buffer, const std::system_error* syserr, void* user);
 	void load_completion(const path_t& path, blob& buffer, const std::system_error* syserr);
@@ -238,7 +247,7 @@ private:
 	void replace(const key_type& key, void* resource, const base_resource::status& status);
 
 	// returns true if insertion occured or false if an existing handle was updated
-	bool insert_or_resolve(const key_type& key, void* placeholder, const base_resource::status& status, val_type*& out_handle);
+	bool insert_or_resolve(const key_type& key, void* placeholder, const base_resource::status& status, base_resource::handle_type*& out_handle);
 
 	void queue_create(const path_t& path, blob& compiled);
 	void queue_destroy(void* resource);

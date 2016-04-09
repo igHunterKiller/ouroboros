@@ -107,9 +107,10 @@ void base_resource::release() const
 resource_registry2_t::size_type resource_registry2_t::calc_size(size_type capacity)
 {
 	allocate_options opts(required_alignment);
-	const size_type store_bytes = opts.align(concurrent_hash_map<key_type, val_type>::calc_size(capacity));
-	const size_type pool_bytes  = opts.align(concurrent_object_pool<queued_t>::calc_size(capacity));
-  return store_bytes + pool_bytes;
+	const size_type lookup_bytes = opts.align(lookup_t::calc_size(capacity));
+	const size_type res_bytes    = opts.align(res_pool_t::calc_size(capacity));
+	const size_type queued_bytes = opts.align(queued_pool_t::calc_size(capacity));
+  return lookup_bytes + res_bytes + queued_bytes;
 }
 
 resource_registry2_t::size_type resource_registry2_t::calc_capacity(size_type bytes)
@@ -128,8 +129,9 @@ resource_registry2_t::resource_registry2_t()
 resource_registry2_t::resource_registry2_t(resource_registry2_t&& that)
 	: error_placeholder_(nullptr)
 {
-	store_             = std::move(that.store_);
-	pool_              = std::move(that.pool_);
+	lookup_            = std::move(that.lookup_);
+	res_pool_          = std::move(that.res_pool_);
+	queued_pool_        = std::move(that.queued_pool_);
 	creates_           = std::move(that.creates_);
 	destroys_          = std::move(that.destroys_);
 	error_placeholder_ = that.error_placeholder_; that.error_placeholder_ = nullptr;
@@ -150,8 +152,11 @@ resource_registry2_t& resource_registry2_t::operator=(resource_registry2_t&& tha
 {
 	if (this != &that)
 	{
-		store_             = std::move(that.store_);
-		pool_              = std::move(that.pool_);
+		deinitialize();
+
+		lookup_            = std::move(that.lookup_);
+		res_pool_          = std::move(that.res_pool_);
+		queued_pool_       = std::move(that.queued_pool_);
 		creates_           = std::move(that.creates_);
 		destroys_          = std::move(that.destroys_);
 		error_placeholder_ = that.error_placeholder_; that.error_placeholder_ = nullptr;
@@ -174,42 +179,80 @@ void resource_registry2_t::initialize(void* memory, size_type bytes, void* error
 
 	auto capacity = calc_capacity(bytes);
 
-	const size_type store_bytes = opts.align(concurrent_hash_map<key_type, val_type>::calc_size(capacity));
-	const size_type pool_bytes  = opts.align(concurrent_object_pool<queued_t>::calc_size(capacity));
+	const size_type lookup_bytes = opts.align(lookup_t::calc_size(capacity));
+	const size_type res_bytes    = opts.align(res_pool_t::calc_size(capacity));
+	const size_type queued_bytes = opts.align(queued_pool_t::calc_size(capacity));
 
-	store_.initialize(0, memory, capacity);
-
-	auto pool_mem = (uint8_t*)memory + store_bytes;
+	auto lookup_mem              = (uint8_t*)memory;
+	auto res_mem                 = lookup_mem + lookup_bytes;
+	auto queued_mem              = res_mem    + res_bytes;
 	
-	pool_.initialize(pool_mem, pool_bytes);
-
-	io_alloc_ = io_alloc;
+	lookup_     .initialize(res_pool_.nullidx, memory, capacity);
+	res_pool_   .initialize(res_mem, res_bytes);
+	queued_pool_.initialize(queued_mem, queued_bytes);
 
 	error_placeholder_ = error_placeholder;
+	io_alloc_          = io_alloc;
 }
 
 void* resource_registry2_t::deinitialize()
 {
 	void* p = nullptr;
-	if (store_.valid())
+	if (lookup_.valid())
 	{
 		if (!creates_.empty() || !destroys_.empty())
 			throw std::exception("resource_registry2_t should have been flushed before destruction");
 
+		io_alloc_ = allocator();
 		error_placeholder_ = nullptr;
 
-		pool_.deinitialize();
-		p = store_.deinitialize();
-
-		io_alloc_ = allocator();
+		queued_pool_.deinitialize();
+		res_pool_.deinitialize();
+		p = lookup_.deinitialize();
 	}
 
 	return p;
 }
 
+bool resource_registry2_t::insert_or_resolve(const key_type& key, void* placeholder, const base_resource::status& status, base_resource::handle_type*& out_handle)
+{
+	auto packed = base_resource::pack(placeholder, status, 0, 1);
+
+	// do a quick check to see if there's already a value
+	auto index = lookup_.get(key);
+	if (index == lookup_.nul())
+	{
+		// create a new entry
+		index = res_pool_.allocate_index();
+		if (index == res_pool_.nullidx)
+			throw std::invalid_argument("out of slots");
+
+		// initialize the entry
+		out_handle  = res_pool_.typed_pointer(index);
+		*out_handle = packed;
+
+		// activate new entry
+		auto prev = lookup_.nul();
+
+		bool inserted = lookup_.cas(key, prev, index);
+		if (!inserted)
+		{
+			out_handle = res_pool_.typed_pointer(prev); // another thread did an insert before this one, so resolve to its value
+			res_pool_.deallocate(index);							  // and roll back this thread's effort
+		}
+
+		return inserted;
+	}
+
+	// valid index, resolve it
+	out_handle = res_pool_.typed_pointer(index);
+
+	return false;
+}
+
 base_resource resource_registry2_t::resolve(const key_type& key, void* placeholder)
 {
-	uint64_t* handle;
+	base_resource::handle_type* handle;
 	insert_or_resolve(key, placeholder, base_resource::status::missing, handle);
 	return base_resource(handle);
 }
@@ -222,40 +265,24 @@ void resource_registry2_t::load_completion(const path_t& path, blob& buffer, con
 
 void resource_registry2_t::load_completion(const path_t& path, blob& buffer, const std::system_error* syserr)
 {
-	auto     relative_path = path.relative_path(filesystem::data_path());
-	uint64_t key           = relative_path.hash();
+	auto relative_path = path.relative_path(filesystem::data_path());
+	auto key           = relative_path.hash();
 
 	if (!syserr)
 		queue_create(relative_path, buffer);
 	else
 	{
 		oTrace("Load failed: %s\n  %s", path.c_str(), syserr->what());
-		uint64_t* handle;
+		base_resource::handle_type* handle;
 		insert_or_resolve(key, error_placeholder_, base_resource::status::error, handle);
 	}
-}
-
-bool resource_registry2_t::insert_or_resolve(const key_type& key, void* placeholder, const base_resource::status& status, val_type*& out_handle)
-{
-	bool     inserted = false;
-	uint64_t packed   = base_resource::pack(placeholder, status, 0, 1);
-	uint64_t prev     = store_.get(key);
-	uint64_t next;
-	do
-	{
-		 // if nul, insert a new placeholder else reference whatever's there already
-		inserted = prev == store_.nul();
-		next     = inserted ? packed : base_resource::reference(prev);
-
-	} while (!store_.cas(key, prev, next, out_handle));
-
-	return inserted;
 }
 
 base_resource resource_registry2_t::insert(const path_t& path, blob& compiled, void* placeholder, bool force)
 {
 	oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
-	uint64_t* handle, key = path.hash();
+	base_resource::handle_type* handle;
+	auto key = path.hash();
 	if (insert_or_resolve(key, placeholder, base_resource::status::loading, handle) || force)
 		queue_create(path, compiled);
 	return base_resource(handle);
@@ -264,7 +291,8 @@ base_resource resource_registry2_t::insert(const path_t& path, blob& compiled, v
 base_resource resource_registry2_t::load(const path_t& path, void* placeholder, bool force)
 {
 	oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
-	uint64_t* handle, key = path.hash();
+	base_resource::handle_type* handle;
+	auto key = path.hash();
 	if (insert_or_resolve(key, placeholder, base_resource::status::loading, handle) || force)
 		filesystem::load_async(filesystem::data_path() / path, load_completion, this, filesystem::load_option::binary_read, io_alloc_);
 	return base_resource(handle);
@@ -274,11 +302,17 @@ void resource_registry2_t::replace(const key_type& key, void* resource, const ba
 {
 	// note: status could be bool at this point if there was a way to uniquely map placeholders to a status
 
-	uint64_t* handle, next, prev = store_.get(key);
+	auto index = lookup_.get(key);
+	if (index == lookup_.nul())
+		throw std::invalid_argument("invalid key");
+
+	atm_resource_t* handle = (atm_resource_t*)res_pool_.typed_pointer(index);
+	base_resource::handle_type next, prev = handle->load();
+
 	do
 	{
-		// if an entry's key was deleted in a sweep (o-refs) while loading, then this result isn't needed anymore
-		if (prev == store_.nul() && !base_resource::is_placeholder(status))
+		// if an entry's key was deleted in a sweep (0-refs) while loading, then this result isn't needed anymore
+		if (prev == 0 && !base_resource::is_placeholder(status))
 		{
 			queue_destroy(resource);
 			return;
@@ -286,7 +320,7 @@ void resource_registry2_t::replace(const key_type& key, void* resource, const ba
 
 		next = base_resource::repack(prev, resource, status); // retain refcount (type, for now?)
 		
-	} while (!store_.cas(key, prev, next, handle));
+	} while (!handle->compare_exchange_strong(prev, next));
 
 	oTrace("[resource_registry2] replaced %p with %p", base_resource::ptr(prev), base_resource::ptr(next));
 
@@ -297,7 +331,7 @@ void resource_registry2_t::replace(const key_type& key, void* resource, const ba
 
 void resource_registry2_t::queue_create(const path_t& path, blob& compiled)
 {
-	auto q = (queued_t*)pool_.allocate();
+	auto q = (queued_t*)queued_pool_.allocate();
 	if (q)
 	{
 		new (q) queued_t(path, compiled);
@@ -309,11 +343,11 @@ void resource_registry2_t::queue_create(const path_t& path, blob& compiled)
 
 void resource_registry2_t::queue_destroy(void* resource)
 {
-	auto q = (queued_t*)pool_.allocate();
+	auto q = (queued_t*)queued_pool_.allocate();
 	if (q)
 	{
 		new (q) queued_t(resource);
-		creates_.push(q);
+		destroys_.push(q);
 	}
 	else
 		oTrace("queue overflow: leaking resource %p", resource);
@@ -323,35 +357,25 @@ resource_registry2_t::size_type resource_registry2_t::flush(size_type max_operat
 {
 	size_type n = max_operations;
 
-	// sweep 0-referenced entries in the hash map
-
-	// This visit is actually concurrent for values only in the sense that
-	// it doesn't really matter if a new entry comes along or what-not, so 
-	// for normal contention on the value this is fine because
-	// A. it's looking for 0-referenced values which means only a load might
-	//    insert the value during the process, but that will cause the cas
-	//    to fail, and then it's on that function to queue-destroy the prior 
-	//    entry.
-	// B. When a 0-reference is found, a cas locks out anyone else, so 
-	//    thereafter the entry is orphaned
-	// C. if a resurrection happens - that's valid: i.e. a 0-reference gets
-	//    ref'ed again at the 11th hour, and thus this cas will fail and 
-	//    no destroy will happen.
-	store_.visit([&](uint64_t key, uint64_t value)
+	// sweep 0-refed entries in the hash map
+	lookup_.visit([&](const lookup_t::key_type& key, const lookup_t::val_type& index)
 	{
-		const uint64_t nul_val = store_.nul();
-		uint64_t* handle;
+		// todo: make a missing placeholder separate from error
+		uint64_t null_handle = base_resource::pack(error_placeholder_, base_resource::status::missing, 0, 0);
 
-		// if 0-ref'ed, cas in a nullptr to fully claim the entry
-		uint64_t prev = value;
+		// if 0-ref'ed replace entry with something that won't crash, but is invalid
+		// this is an attempt to make this part of the flush still remain concurrent
+		auto* handle = (atm_resource_t*)res_pool_.typed_pointer(index);
+		base_resource::handle_type prev = handle->load();
 		do
 		{
 			if (base_resource::hasref(prev) || base_resource::is_placeholder(prev))
 				return true;
 
-		} while (!store_.cas(key, prev, nul_val, handle));
+		} while (!handle->compare_exchange_strong(prev, null_handle));
 
-		// case succeeded in nullifying entry, safe to destroy resource
+		lookup_.nix(key);
+		res_pool_.deallocate(index);
 		destroy(base_resource::ptr(prev));
 		n--;
 		return n != 0; // false (i.e. stop traversing) if the quota is used up)
@@ -366,7 +390,7 @@ resource_registry2_t::size_type resource_registry2_t::flush(size_type max_operat
 		void* resource = create(q->path, q->compiled);
 		auto stat = resource ? base_resource::status::ready : base_resource::status::error;
 		replace(q->path.hash(), resource, stat);
-		pool_.deallocate(q);
+		queued_pool_.deallocate(q);
 		n--;
 	}
 
@@ -375,7 +399,7 @@ resource_registry2_t::size_type resource_registry2_t::flush(size_type max_operat
 	while (n && destroys_.pop(&q))
 	{
 		destroy(q->resource);
-		pool_.deallocate(q);
+		queued_pool_.deallocate(q);
 		n--;
 	}
 
@@ -383,7 +407,7 @@ resource_registry2_t::size_type resource_registry2_t::flush(size_type max_operat
 	// if there are any modifications during this period, this all breaks down
 	// so although there is optimism in the above operations, overall flush is
 	// non-concurrent because of this.
-	store_.reclaim_keys();
+	lookup_.reclaim_keys();
 
 	return n;
 }
