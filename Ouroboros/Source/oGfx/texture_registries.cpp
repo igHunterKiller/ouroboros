@@ -50,8 +50,7 @@ void texture2d_registry2::deinitialize()
 
 texture2d2_t texture2d_registry2::load(const path_t& path)
 {
-	void* loading_placeholder = device_resource_registry2_t<texture2d_internal>::get_error_placeholder();
-	return device_resource_registry2_t<texture2d_internal>::load(path, (texture2d_internal*)loading_placeholder, false);
+	return device_resource_registry2_t<texture2d_internal>::load(path, nullptr, false);
 }
 
 void* texture2d_registry2::create(const path_t& path, blob& compiled)

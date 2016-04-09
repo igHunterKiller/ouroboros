@@ -35,7 +35,7 @@ template<> const char* as_string(const gfx::primitive_model& m)
 	
 namespace gfx {
 
-void model_registry::initialize(gpu::device* dev, uint32_t bookkeeping_bytes, const allocator& alloc, const allocator& io_alloc)
+void model_registry::initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc)
 {
 	vertex_layout_ = vertex_layout::pos_nrm_tan_uv0_col;
 	vertex_shader_ = vertex_shader::pos_nrm_tan_uv0_col;
@@ -44,17 +44,16 @@ void model_registry::initialize(gpu::device* dev, uint32_t bookkeeping_bytes, co
 
 	// if there's a static primitives registry, this might be able to turn into an initialize_with_builtin
 	mesh::model placeholder = mesh::box(io_alloc, io_alloc, face_type, vlayout.data(), vlayout.size(), float3(-1.0f), float3(1.0f), (uint32_t)color::default_gray);
+	auto error_placeholder  = mesh::encode(placeholder, mesh::file_format::omdl, io_alloc, io_alloc);
 
-	auto placeholder_file = mesh::encode(placeholder, mesh::file_format::omdl, io_alloc, io_alloc);
+	alloc_ = alloc ? alloc : default_allocator;
 
-  resource_placeholders_t placeholders;
-	placeholders.compiled_missing = placeholder_file.alias();
-  placeholders.compiled_loading = placeholder_file.alias();
-  placeholders.compiled_failed = placeholder_file.alias();
+	allocate_options opts(required_alignment);
+	void* memory = alloc_.allocate(budget_bytes, "texture2d_registry2", opts);
 
-  initialize_base(dev, "model_registry", bookkeeping_bytes, alloc, io_alloc, placeholders);
+	device_resource_registry2_t<model_t::type>::initialize(memory, budget_bytes, dev, error_placeholder, io_alloc);
+
 	insert_primitives(alloc, io_alloc);
-
 	flush();
 }
 
@@ -63,28 +62,27 @@ void model_registry::deinitialize()
 	if (!valid())
 		return;
 
-	remove_primitives();
-	deinitialize_base();
+	device_resource_registry2_t<model_t::type>::deinitialize();
 }
 
-void* model_registry::create(const char* name, blob& compiled)
+void* model_registry::create(const path_t& path, blob& compiled)
 {
 	// todo: find more meaningful allocators here
 	const allocator& subsets_allocator = default_allocator;
 	const allocator& temp_allocator = default_allocator;
 
 	auto fformat = mesh::get_file_format(compiled);
-	oCheck(fformat != mesh::file_format::unknown, std::errc::invalid_argument, "Unknown file format: %s", name ? name : "(null)");
+	oCheck(fformat != mesh::file_format::unknown, std::errc::invalid_argument, "Unknown file format: %s", path.c_str());
 
 	auto mdl = pool_.create();
 
 	auto vlayout = gfx::layout(vertex_layout_);
 
 	// todo: figure out a way that this can allocate right out of the cpu-accessible buffer... or hope for D3D12
-	*mdl = mesh::decode(name, compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
+	*mdl = mesh::decode(path, compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
 	auto info = mdl->info();
 
-	gpu::ibv indices = dev_->new_ibv(name, info.num_indices, mdl->indices());
+	gpu::ibv indices = dev_->new_ibv(path, info.num_indices, mdl->indices());
 
 	std::array<uint32_t, mesh::max_num_slots> vertices_offsets;
 	vertices_offsets.fill(0);
@@ -93,7 +91,7 @@ void* model_registry::create(const char* name, blob& compiled)
 	for (uint32_t slot = 0; slot < nslots; slot++)
 	{
 		const auto stride = mdl->vertex_stride(slot);
-		gpu::vbv verts = dev_->new_vbv(name, stride, info.num_vertices, mdl->vertices(slot));
+		gpu::vbv verts = dev_->new_vbv(path, stride, info.num_vertices, mdl->vertices(slot));
 		vertices_offsets[slot] = verts.offset;
 	}
 
@@ -128,7 +126,7 @@ void model_registry::destroy(void* entry)
   pool_.destroy(mdl);
 }
 
-void model_registry::set_model(gpu::graphics_command_list* cl, const model_t& mdl)
+void model_registry::set_model(gpu::graphics_command_list* cl, const mesh::model* mdl)
 {
 	auto& info = mdl->info();
 	
@@ -162,9 +160,8 @@ void model_registry::set_model(gpu::graphics_command_list* cl, const model_t& md
 
 void model_registry::insert_primitive(const primitive_model& prim, const mesh::model& model, const allocator& alloc, const allocator& io_alloc)
 {
-	// reminder: +1's on key is because 0/null is a reserved symbol
 	auto omdl = mesh::encode(model, mesh::file_format::omdl, alloc, io_alloc);
-	insert((key_type)prim + 1, as_string(prim), omdl);
+	insert_indexed((key_type)prim + 1, as_string(prim), omdl);
 }
 
 void model_registry::insert_primitives(const allocator& alloc, const allocator& io_alloc)
@@ -234,26 +231,17 @@ void model_registry::insert_primitives(const allocator& alloc, const allocator& 
 	insert_primitive(primitive_model::torus_outline, mesh, alloc, io_alloc);
 }
 
-void model_registry::remove_primitives()
-{
-	for (key_type prim_key = 1; prim_key <= (key_type)primitive_model::count; prim_key++)
-		remove(prim_key);
-}
-
 model_t model_registry::load(const path_t& path)
 {
-	return default_load(path);
+	return device_resource_registry2_t<model_t::type>::load(path, nullptr, false);
 }
 
 model_t model_registry::load(const path_t& path, const mesh::model& model)
 {
-	auto blob = mesh::encode(model, mesh::file_format::omdl, io_alloc_, io_alloc_);
-	return insert(path, blob, true);
-}
-
-void model_registry::unload(const model_t& mdl)
-{
-  remove(mdl);
+	auto io_alloc = get_io_allocator();
+	auto blob = mesh::encode(model, mesh::file_format::omdl, io_alloc, io_alloc);
+	return insert(path, nullptr, blob, true);
 }
 
 }}
+

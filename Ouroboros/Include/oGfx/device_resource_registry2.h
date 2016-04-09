@@ -71,11 +71,11 @@ protected:
 		void* p = nullptr;
 		if (dev_)
 		{
+			destroy_indexed();
 			destroy(error_resource_);
 
 			flush();
-			if (!pool_.full())
-				throw std::invalid_argument("resource registry should be empty, all handles destroyed");
+			oCheck(pool_.full(), std::errc::invalid_argument, "resource registry should be empty, all handles destroyed, but there are still %u entries", pool_.size());
 
 			resource_registry2_t::deinitialize();
 			void* arena = pool_.deinitialize();
@@ -87,10 +87,12 @@ protected:
 
 	// == concurrent api ==
 
-	resource_type resolve(const key_type& key, basic_resource_type* placeholder) { return (resource_type)resource_registry_t::resolve(key, placeholder); }
-	resource_type resolve(const path_t& path, basic_resource_type* placeholder) { return resolve(path.hash(), placeholder); }
-	resource_type insert(const path_t& path, blob& compiled, basic_resource_type* placeholder, bool force);
-	resource_type load(const path_t& path, basic_resource_type* placeholder, bool force) { return resource_registry2_t::load(path, placeholder, force); }
+	resource_type        resolve        (const key_type& key,   basic_resource_type* placeholder)                             { return (resource_type)       resource_registry2_t::resolve(key, placeholder);                  }
+	resource_type        resolve        (const path_t&   path,  basic_resource_type* placeholder)                             { return (resource_type)       resource_registry2_t::resolve(path.hash(), placeholder);          }
+	resource_type        insert         (const path_t&   path,  basic_resource_type* placeholder, blob& compiled, bool force) { return (resource_type)       resource_registry2_t::insert(path, placeholder, compiled, force); }
+	resource_type        load           (const path_t&   path,  basic_resource_type* placeholder,                 bool force) { return (resource_type)       resource_registry2_t::load(path, placeholder, force);             }
+	void                 insert_indexed (const key_type& index, const char* label,                blob& compiled)             {                              resource_registry2_t::insert_indexed(index, label, compiled);     }
+	basic_resource_type* resolve_indexed(const key_type& index) const                                                         { return (basic_resource_type*)resource_registry2_t::resolve_indexed(index);                     }
 
 protected:
 	gpu::device* dev_;

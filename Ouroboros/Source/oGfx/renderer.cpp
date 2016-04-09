@@ -10,6 +10,7 @@
 
 #include <oGUI/window.h>
 #include <oCore/countof.h>
+#include <oSystem/filesystem.h>
 
 // About submission:
 // I need threads to communicate back what their allocs were so all can be processed.

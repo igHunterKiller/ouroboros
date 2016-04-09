@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <oConcurrency/concurrent_hash_map.h>
 #include <oConcurrency/concurrent_stack.h>
+#include <oMemory/concurrent_object_pool.h>
 #include <oString/path.h>
 
 namespace ouro {
@@ -28,8 +29,11 @@ public:
 	{
 		missing,
 		loading,
+		indexed,
 		ready,
 		error,
+
+		count,
 	};
 
 	// @tony: The way things are shaping up, I really only need 1 bit for whether the asset is a placeholder
@@ -161,6 +165,12 @@ protected:
 	// destroys the internals of the instance and returns the arena passed to initialize()
 	void* deinitialize();
 
+	// returns the io allocator associated with this registry
+	allocator get_io_allocator() { return io_alloc_; }
+
+	// destroys all indexed resources, this should be called before any final flush during deinitialize()
+	void destroy_indexed();
+
 public:
 
 	// returns true if this class has been initialized
@@ -186,7 +196,14 @@ public:
 	// ref-counted handle to it. If force is false, the handle may resolve to a pre-existing
 	// entry and no ownership of compiled is taken. If a new entry, the specified placeholder
 	// is inserted immediately to hold resolution over until the queue is flushed.
-	base_resource insert(const path_t& path, blob& compiled, void* placeholder, bool force);
+	base_resource insert(const path_t& path, void* placeholder, blob& compiled, bool force);
+
+	// inserts a resource that is locked in memory (like a placeholder) and is referenced directly (no handle, no ref-counting)
+	// these will be cleaned up during deinitialize(). Calling insert_indexed on a valid resource will overwrite it and clean up 
+	// the prior one. resolve_index will return the error placeholder until after the next flush. The intended pattern is that
+	// an enumerated array of assets will be inserted and a final flush will create them at derived-registry initialization time.
+	void  insert_indexed (const key_type& index, const char* label, blob& compiled);
+	void* resolve_indexed(const key_type& index) const;
 
 	// queues path for async loading and immediately returns a handle that will resolve to a 
 	// placeholder until loading completes, at which time the result will be queued for creation.
@@ -207,7 +224,7 @@ private:
 	struct queued_t
 	{
 		queued_t(void* resource) : resource(resource) {}
-		queued_t(const path_t& path, blob& compiled) : path(path), compiled(std::move(compiled)) {}
+		queued_t(const path_t& path, blob& compiled, const key_type& index) : path(path), compiled(std::move(compiled)), index(index) {}
 
 		~queued_t() = delete;
 
@@ -218,8 +235,9 @@ private:
 			void* resource; // for destroy
 			struct          // for create
 			{
-				blob compiled;
-				path_t path;
+				blob     compiled;
+				path_t   path;
+				key_type index;
 			};
 		};
 	};
@@ -246,10 +264,10 @@ private:
 	// destroy. Any previous valid resource will also be queued for destroy.
 	void replace(const key_type& key, void* resource, const base_resource::status& status);
 
-	// returns true if insertion occured or false if an existing handle was updated
+	// returns true if insertion occured or false if an existing handle was retreived
 	bool insert_or_resolve(const key_type& key, void* placeholder, const base_resource::status& status, base_resource::handle_type*& out_handle);
 
-	void queue_create(const path_t& path, blob& compiled);
+	void queue_create(const path_t& path, blob& compiled, const key_type& index = 0);
 	void queue_destroy(void* resource);
 };
 
