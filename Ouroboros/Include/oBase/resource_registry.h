@@ -1,13 +1,9 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-// A wrapper for a handle returned from resource_registry. This gets a 
-// direct handle into the storage of the registry, and that is a pointer
-// to a resource with metadata. The only metadata this modifies is the 
-// reference count, but it can see modifications made by resource registry.
-// When the refcount goes to 0, this does not itself take action to free
-// the resource. Instead all 0-reference resources are swept up at a known
-// time since resoures of this type tend to be created from a single-threaded
-// device (d3d).
+// wrapper around a conceptual concurrent hash map mapping a hash of a file's path
+// to its contents prepared for runtime. This is intended to be the heavy-lifting
+// innards of a derived class that fills out resource-specific create/destroy and
+// also more thoroughly defines file I/O.
 
 #pragma once
 #include <atomic>
@@ -24,6 +20,10 @@ class base_resource_registry
 public:
 	typedef uint32_t size_type;
 	typedef uint64_t key_type;
+
+	// called by load, this function should asynchronously load the specified file's binary
+	// and call complete_load() on the resulting blob.
+	typedef void (*load_fn)(const path_t& path, allocator& io_alloc, void* user);
 
 	class handle
 	{
@@ -116,9 +116,6 @@ protected:
 	// ctor that moves an existing base_resource_registry into this one
 	base_resource_registry(base_resource_registry&& that);
 
-	// initializing ctor: see initialize_base()
-	base_resource_registry(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc);
-
 	// dtor
 	virtual ~base_resource_registry();
 
@@ -126,7 +123,7 @@ protected:
 	base_resource_registry& operator=(base_resource_registry&& that);
 
 	// derived classes should set up all apparatus for create/destroy to work, then call this - placeholder is immediately created
-	void initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc);
+	void initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, load_fn load, void* load_user, const allocator& io_alloc);
 	
 	// destroys the internals of the instance and returns the memory passed to initialize_base()
 	void* deinitialize_base();
@@ -134,9 +131,9 @@ protected:
 	// returns the io allocator associated with this registry
 	allocator get_io_allocator() { return io_alloc_; }
 
-	// destroys all indexed resources, this should be called before any final flush during deinitialize_base()
-	void destroy_indexed();
-
+	// queues for create, or if invalid inserts error placeholder
+	void complete_load(const path_t& path, blob& compiled, const char* error_message);
+	
 public:
 
 	// returns true if this class has been initialized
@@ -220,12 +217,11 @@ private:
 	queued_pool_t queued_pool_;       // stores available queue nodes
 	queue_t       creates_;           // queue for all compiled buffers that can be passed to create and then inserted
 	queue_t       destroys_;          // queue for all valid resources to destroy in the next flush
+	load_fn       load_;              // a function to asynchronously load the binary of a path
+	void*         load_user_;         // user data for calling load_
 	void*         error_placeholder_; // inserted if a file load fails
 	allocator     io_alloc_;          // used for temporary file io and decode operations
 	sstring       label_;             // name used in traces
-
-	static void load_completion(const path_t& path, blob& buffer, const std::system_error* syserr, void* user);
-	void load_completion(const path_t& path, blob& buffer, const std::system_error* syserr);
 
 	// replaces an existing key with the specified resource or placeholder and updates the status
 	// if the key is in a bad state, such as having been discarded, the resource will be queued for
@@ -234,6 +230,9 @@ private:
 
 	// returns true if insertion occured or false if an existing handle was retreived
 	bool insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle);
+
+	// destroys all indexed resources, this should be called before any final flush during deinitialize_base()
+	void destroy_indexed();
 
 	void queue_create(const path_t& path, blob& compiled, const key_type& index = 0);
 	void queue_destroy(void* resource);

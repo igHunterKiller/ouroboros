@@ -2,7 +2,6 @@
 
 #include <oBase/resource_registry.h>
 #include <oCore/assert.h>
-#include <oSystem/filesystem.h>
 
 namespace ouro {
 
@@ -135,25 +134,26 @@ base_resource_registry::size_type base_resource_registry::calc_capacity(size_typ
 }
 
 base_resource_registry::base_resource_registry()
-	: error_placeholder_(nullptr)
+	: load_(nullptr)
+	, load_user_(nullptr)
+	, error_placeholder_(nullptr)
 {
 }
 
 base_resource_registry::base_resource_registry(base_resource_registry&& that)
-	: error_placeholder_(nullptr)
+	: load_(nullptr)
+	, load_user_(nullptr)
+	, error_placeholder_(nullptr)
 {
 	lookup_            = std::move(that.lookup_);
 	res_pool_          = std::move(that.res_pool_);
-	queued_pool_        = std::move(that.queued_pool_);
+	queued_pool_       = std::move(that.queued_pool_);
 	creates_           = std::move(that.creates_);
 	destroys_          = std::move(that.destroys_);
+	load_              = that.load_;              that.load_              = nullptr;
+	load_user_         = that.load_user_;         that.load_user_         = nullptr;
 	error_placeholder_ = that.error_placeholder_; that.error_placeholder_ = nullptr;
-}
-
-base_resource_registry::base_resource_registry(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc)
-	: error_placeholder_(nullptr)
-{
-	initialize_base(registry_label, memory, bytes, error_placeholder, io_alloc);
+	label_             = std::move(that.label_);
 }
 
 base_resource_registry::~base_resource_registry()
@@ -172,13 +172,15 @@ base_resource_registry& base_resource_registry::operator=(base_resource_registry
 		queued_pool_       = std::move(that.queued_pool_);
 		creates_           = std::move(that.creates_);
 		destroys_          = std::move(that.destroys_);
+		load_              = that.load_;              that.load_              = nullptr;
+		load_user_         = that.load_user_;         that.load_user_         = nullptr;
 		error_placeholder_ = that.error_placeholder_; that.error_placeholder_ = nullptr;
-		label_             =std::move(that.label_);
+		label_             = std::move(that.label_);
 	}
 	return *this;
 }
 
-void base_resource_registry::initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc)
+void base_resource_registry::initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, load_fn load, void* load_user, const allocator& io_alloc)
 {
 	allocate_options opts(required_alignment);
 
@@ -205,6 +207,8 @@ void base_resource_registry::initialize_base(const char* registry_label, void* m
 	res_pool_   .initialize(res_mem, res_bytes);
 	queued_pool_.initialize(queued_mem, queued_bytes);
 
+	load_              = load;
+	load_user_         = load_user;
 	error_placeholder_ = create("error_placeholder", error_placeholder);
 	io_alloc_          = io_alloc;
 
@@ -228,10 +232,25 @@ void* base_resource_registry::deinitialize_base()
 		res_pool_.deinitialize();
 		p = lookup_.deinitialize();
 
+		load_ = nullptr;
+		load_user_ = nullptr;
+
 		label_.clear();
 	}
 
 	return p;
+}
+
+void base_resource_registry::complete_load(const path_t& path, blob& compiled, const char* error_message)
+{
+	if (compiled)
+		queue_create(path, compiled);
+	else
+	{
+		handle::type* h;
+		insert_or_resolve(path.hash(), error_placeholder_, handle::status::error, h);
+		oTrace("[%s] Load failed: %s\n  %s", label_.c_str(), path.c_str(), error_message ? error_message : "unknown error");
+	}
 }
 
 bool base_resource_registry::insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle)
@@ -279,27 +298,6 @@ base_resource_registry::handle base_resource_registry::resolve(const key_type& k
 	return handle(h);
 }
 
-void base_resource_registry::load_completion(const path_t& path, blob& buffer, const std::system_error* syserr, void* user)
-{
-	auto reg = (base_resource_registry*)user;
-	reg->load_completion(path, buffer, syserr);
-}
-
-void base_resource_registry::load_completion(const path_t& path, blob& buffer, const std::system_error* syserr)
-{
-	auto relative_path = path.relative_path(filesystem::data_path());
-	auto key           = relative_path.hash();
-
-	if (!syserr)
-		queue_create(relative_path, buffer);
-	else
-	{
-		oTrace("Load failed: %s\n  %s", path.c_str(), syserr->what());
-		handle::type* h;
-		insert_or_resolve(key, error_placeholder_, handle::status::error, h);
-	}
-}
-
 base_resource_registry::handle base_resource_registry::insert(const path_t& path, void* placeholder, blob& compiled, bool force)
 {
 	oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
@@ -337,7 +335,7 @@ base_resource_registry::handle base_resource_registry::load(const path_t& path, 
 	handle::type* h;
 	auto key = path.hash();
 	if (insert_or_resolve(key, placeholder, handle::status::loading, h) || force)
-		filesystem::load_async(filesystem::data_path() / path, load_completion, this, filesystem::load_option::binary_read, io_alloc_);
+		load_(path, io_alloc_, load_user_);
 	return handle(h);
 }
 

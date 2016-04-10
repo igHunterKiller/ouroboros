@@ -1,9 +1,13 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
+// Implements file I/O for a resource registry and adds some memory management 
+// for oGPU resources.
+
 #pragma once
 #include <oBase/resource_registry.h>
 #include <oMemory/object_pool.h>
 #include <oGPU/gpu.h>
+#include <oSystem/filesystem.h>
 
 namespace ouro { namespace gfx {
 
@@ -13,10 +17,11 @@ class device_resource_registry : protected resource_registry<resourceT>
 protected:
 	// all these api are meant to implement a further type-wrapper
 
-	typedef resource_registry<resourceT> base_t;
-	typedef typename base_t::resource_type basic_resource_type;
-	typedef typename base_t::size_type size_type;
-	typedef typename base_t::handle handle;
+	typedef device_resource_registry<resourceT> self_t;
+	typedef resource_registry<resourceT>        base_t;
+	typedef typename base_t::resource_type      basic_resource_type;
+	typedef typename base_t::size_type          size_type;
+	typedef typename base_t::handle             handle;
 
 	static const memory_alignment required_alignment = base_t::required_alignment;
 
@@ -40,6 +45,8 @@ protected:
 
 	device_resource_registry() : dev_(nullptr) {}
 	~device_resource_registry() {}
+  device_resource_registry(const device_resource_registry&) = delete;
+  const device_resource_registry& operator=(const device_resource_registry&) = delete;
 
 	void initialize(const char* registry_label, void* memory, size_type bytes, gpu::device* dev, blob& error_placeholder, const allocator& io_alloc)
 	{
@@ -62,7 +69,7 @@ protected:
 
 		dev_ = dev;
 
-		initialize_base(registry_label, reg_memory, reg_bytes, error_placeholder, io_alloc);
+		initialize_base(registry_label, reg_memory, reg_bytes, error_placeholder, load_async, this, io_alloc);
 	}
 
 	void* deinitialize()
@@ -81,9 +88,17 @@ protected:
 	gpu::device* dev_;
 	object_pool<basic_resource_type> pool_;
 
-private:
-  device_resource_registry(const device_resource_registry&);
-  const device_resource_registry& operator=(const device_resource_registry&);
+	static void on_completion(const path_t& path, blob& buffer, const std::system_error* syserr, void* user)
+	{
+		auto reg = (device_resource_registry*)user;
+		path_t relative_path = path.relative_path(filesystem::data_path());
+		reg->complete_load(relative_path, buffer, syserr ? syserr->what() : "no error");
+	}
+
+	static void load_async(const path_t& path, allocator& io_alloc, void* user)
+	{
+		filesystem::load_async(filesystem::data_path() / path, on_completion, user, filesystem::load_option::binary_read, io_alloc);
+	}
 };
 
 }}
