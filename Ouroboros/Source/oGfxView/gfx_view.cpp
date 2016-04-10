@@ -14,8 +14,11 @@
 
 #include <oGUI/msgbox.h>
 #include <oGUI/Windows/win_gdi_bitmap.h>
+#include <oGUI/Windows/win_common_dialog.h>
 
 #include <oConcurrency/backoff.h>
+
+#include <oMesh/codec.h>
 
 using namespace ouro;
 using namespace ouro::gui;
@@ -109,6 +112,8 @@ void gfx_view::create_menus(const window::create_event& evt)
 		menu::append_submenu(h.parent == ui::menu::top_level ? evt.menu : menus_[h.parent], menus_[h.child], h.name);
 
 	// File menu
+	menu::append_item(menus_[ui::menu::file], ui::menu_item::file_load_mesh, "&Load Mesh...\tCtrl+O");
+	menu::append_separator(menus_[ui::menu::file]);
 	menu::append_item(menus_[ui::menu::file], ui::menu_item::file_exit, "E&xit\tAlt+F4");
 
 	// Edit menu
@@ -168,6 +173,27 @@ void gfx_view::check_state(window_state state)
 void gfx_view::check_style(window_style style)
 {
 	menu::check_radio(menus_[ui::menu::view_style], ui::menu_item::view_style_first, ui::menu_item::view_style_last, ui::menu_item::view_style_first + (int)style);
+}
+
+void gfx_view::load_mesh_dialog()
+{
+	const char* s_supported_formats = 
+		"Supported Image Types|*.obj"                               \
+		"|All Files Types|*.*"                                      \
+		"|Alias Wavefront|*.obj";
+
+	path_t path(filesystem::data_path());
+	if (windows::common_dialog::open_path(path, "Open Mesh", s_supported_formats, (HWND)app_win_->native_handle()))
+	{
+		if (path.is_relative_to(filesystem::data_path()))
+		{
+			path_t rel_path = path.relative_path(filesystem::data_path());
+			uri_t uri_ref(rel_path.c_str());
+			request_model_load(*renderer_.get_model_registry(), uri_ref);
+		}
+		else
+			oTrace("Not a data path: %s", path.c_str());
+	}
 }
 
 void gfx_view::set_standalone_mode_internal(bool enabled, const window_shape& gpu_shape)
@@ -322,10 +348,11 @@ void gfx_view::on_menu(const input_t& inp)
 {
 	switch (inp.menu.id)
 	{
-		case ui::menu_item::file_exit:    running_ = false;             break;
-		case ui::menu_item::help_about:   about_->show_modal(app_win_); break;
-		case ui::menu_item::view_default: on_view_default();            break;
-		default:                          erh_.on_input(inp);           break;
+		case ui::menu_item::file_load_mesh: load_mesh_dialog();           break;
+		case ui::menu_item::file_exit:      running_ = false;             break;
+		case ui::menu_item::help_about:     about_->show_modal(app_win_); break;
+		case ui::menu_item::view_default:   on_view_default();            break;
+		default:                            erh_.on_input(inp);           break;
 		case ui::menu_item::view_exclusive:
 		{
 			const bool checked = menu::checked(menus_[ui::menu::view], inp.menu.id);
@@ -414,6 +441,12 @@ void gfx_view::on_hotkey(const input_t& inp)
 		{
 			g_render_settings.mode = gfx::fullscreen_mode(inp.hotkey.id - ui::hotkey::render_solid);
 			menu::check_radio(menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, ui::menu_item::view_render_state_first + (int)g_render_settings.mode);
+			break;
+		}
+
+		case ui::hotkey::load_mesh:
+		{
+			load_mesh_dialog();
 			break;
 		}
 

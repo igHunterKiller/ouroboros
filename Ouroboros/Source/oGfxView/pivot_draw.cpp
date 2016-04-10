@@ -50,6 +50,7 @@ void pivot_draw::initialize()
 void pivot_draw::deinitialize()
 {
 	texture_ = gfx::texture2d_t();
+	model_   = gfx::model_t();
 }
 
 void pivot_draw::on_view_default()
@@ -154,4 +155,11 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 
 		renderer.submit(0, gfx::render_pass::debug, gfx::render_technique::draw_grid, grid);
 	}
+}
+
+void pivot_draw::request_model_load(gfx::model_registry& registry, const uri_t& uri_ref)
+{
+	oTrace("request_model_load: %s", uri_ref.c_str());
+
+	model_ = registry.load(uri_ref);
 }
