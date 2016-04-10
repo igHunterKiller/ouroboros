@@ -1,95 +1,100 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-// A concurrent name<->index mapping for objects whose creation and destruction must be 
-// done at a controlled time.
-
-// Comments will refer to a 'device' below. It is assumed that resources managed
-// by this registry are generated from a factory-style singleton, be it a facade for
-// a large api or middleware. Often such devices have resource lifetime constraints
-// such as creating/destroying from the same thread, or otherwise being single-threaded.
-// The advise in the comments is not binding, the main message being this registry bridges
-// higher-level code and an underlying middleware, so all the rules of that middleware apply.
-
-// The intent of this class is to serve as a base implementation for another layer of wrapper 
-// that introduces more specific types, implements file or other I/O and encapsulates any 
-// factory dependencies.
+// A wrapper for a handle returned from resource_registry. This gets a 
+// direct handle into the storage of the registry, and that is a pointer
+// to a resource with metadata. The only metadata this modifies is the 
+// reference count, but it can see modifications made by resource registry.
+// When the refcount goes to 0, this does not itself take action to free
+// the resource. Instead all 0-reference resources are swept up at a known
+// time since resoures of this type tend to be created from a single-threaded
+// device (d3d).
 
 #pragma once
+#include <atomic>
+#include <cstdint>
 #include <oConcurrency/concurrent_hash_map.h>
 #include <oConcurrency/concurrent_stack.h>
-#include <oMemory/allocate.h>
 #include <oMemory/concurrent_object_pool.h>
-#include <oMemory/pool.h>
 #include <oString/path.h>
-#include <cstdint>
 
 namespace ouro {
 
-enum class resource_status
-{
-	invalid = 0,
-	failed,
-	initializing,
-	initialized,
-	deinitializing,
-	deinitializing_to_loading,
-	deinitializing_to_failed,
-};
-
-class resource_base_t
-{
-public:
-	resource_base_t() : entry_(nullptr) {}
-	resource_base_t(void** that) : entry_(that) {}
-	resource_base_t(void* const* that) : entry_((void**)that) {}
-	inline operator bool() const { return !!entry_ && !!*entry_; }
-	inline operator void*() const { return *entry_; }
-protected:
-	void** entry_;
-};
-
-template<typename T>
-class resource_t : public resource_base_t
-{
-public:
-	resource_t() {}
-	resource_t(const resource_base_t& that) : resource_base_t(that) {}
-	resource_t(resource_base_t&& that) : resource_base_t(std::move(that)) {}
-	resource_t& operator=(resource_base_t&& that) { if (this != &that) { entry_ = that.entry_; that.entry_ = nullptr; } return *this; }
-	resource_t(T& that) : resource_base_t(&that) {}
-	resource_t(T* that) : resource_base_t(that) {}
-	inline operator bool() const { return !!entry_; }
-	inline operator bool() { return !!entry_; }
-	inline operator T*() { return *(T**)entry_; }
-	inline operator const T*() { return *(T**)entry_; }
-	inline T* operator->() { return *(T**)entry_; }
-	inline const T* operator->() const { return *(T**)entry_; }
-};
-
-// define this struct for initialize(). These buffers are not retained but are 
-// used to initialize fallback resources used when user resources are not available.
-struct resource_placeholders_t
-{
-	blob compiled_missing;
-	blob compiled_loading;
-	blob compiled_failed;
-};
-
-class resource_registry_t
+class base_resource_registry
 {
 public:
 	typedef uint32_t size_type;
-	typedef uint32_t index_type;
-	typedef path_t::hash_type key_type;
+	typedef uint64_t key_type;
+
+	class handle
+	{
+	public:
+		typedef uint64_t type;
+		typedef std::atomic<type> atm_type;
+
+		enum class status : uint8_t // (4-bit)
+		{
+			missing,
+			loading,
+			indexed,
+			ready,
+			error,
+
+			count,
+		};
+
+		// ctors
+		handle() : handle_(nullptr)                   {}
+		~handle()                                     { release(); }
+		handle(const handle& that)                    { handle_ = that.handle_; reference(); }
+		handle(handle&& that) : handle_(that.handle_) { that.handle_ = nullptr; }
+		const handle& operator=(const handle& that);
+		handle&       operator=(handle&& that);
+
+		// accessors
+		void* get()                   const           { auto h = handle_->load();                          return ptr(h); }
+		void* get(status* out_status) const           { auto h = handle_->load(); *out_status = status(h); return ptr(h); }
+  
+	protected:
+		static const type refcnt_mask      = 0xfff0000000000000;
+		static const type status_mask      = 0x000f000000000000;
+		static const type ptr_mask         = 0x0000ffffffffffff;
+		static const type type_mask        = 0x000000000000000f;
+		static const type refcnt_max       = 0x0000000000000fff;
+		static const type status_max       = 0x000000000000000f;
+		static const type refcnt_one       = 0x0010000000000000;
+		static const uint32_t refcnt_shift = 52;
+		static const uint32_t status_shift = 48;
+
+		friend class base_resource_registry;
+	
+		static type                   pack          (void* resource, const enum class status& status, uint16_t type, uint16_t refcnt); // combines all elements of a resource handle
+		static type                   repack        (type previous_packed, void* resource, const enum class status& status);           // updates all but refcount
+		static type                   reference     (type packed);                                                                     // add 1 to ref count
+		static type                   release       (type packed);                                                                     // subtract 1 from ref count
+
+		static bool                   is_placeholder(const status& status) { return status != status::ready;                                  }
+		static bool                   is_indexed    (const status& status) { return status == status::indexed;                                }
+		static void*                  ptr           (type          packed) { return (void*)  (packed                  & ptr_mask  );          }
+		static enum class status      status        (type          packed) { return enum class status((packed >> status_shift) & status_max); }
+		static uint16_t               refcnt        (type          packed) { return uint16_t((packed >> refcnt_shift) & refcnt_max);          }
+		static bool                   hasref        (type          packed) { return (packed & refcnt_mask) != 0;                              }
+		static bool                   is_placeholder(type          packed) { return is_placeholder(status(packed));                           }
+
+		handle(type* h) : handle_((atm_type*)h) {}
+
+		void reference();
+		void release();
+
+		atm_type* handle_;
+	};
 
 	static const memory_alignment required_alignment = memory_alignment::cacheline;
-	
-	// returns the minimum size in bytes required of the arena passed to initialize()
+
+	// returns the minimum size in bytes required of memory passed to initialize_base()
 	static size_type calc_size(size_type capacity);
 
 	// returns the max block count that fits into the specified bytes
 	static size_type calc_capacity(size_type bytes);
-
 
 	// === non-concurrent api ===
 
@@ -100,127 +105,183 @@ protected:
 
 	// converts a compiled (baked/finalized) buffer into the resource type 
 	// maintained in this registry. This is called during flushes()
-	virtual void* create(const char* name, blob& compiled) = 0;
+	virtual void* create(const path_t& path, blob& compiled) = 0;
 
 	// free a resource created in create()
 	virtual void destroy(void* resource) = 0;
 
-public:
 	// ctor creates as empty
-	resource_registry_t();
+	base_resource_registry();
 
-	// ctor that moves an existing resource_registry_t into this one
-	resource_registry_t(resource_registry_t&& that);
+	// ctor that moves an existing base_resource_registry into this one
+	base_resource_registry(base_resource_registry&& that);
 
-	// initializing ctor: see initialize()
-	resource_registry_t(void* arena, size_type bytes, resource_placeholders_t& placeholders);
+	// initializing ctor: see initialize_base()
+	base_resource_registry(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc);
 
 	// dtor
-	virtual ~resource_registry_t();
+	virtual ~base_resource_registry();
 
 	// calls deinitialize on this before move
-	resource_registry_t& operator=(resource_registry_t&& that);
+	base_resource_registry& operator=(base_resource_registry&& that);
 
-	// placeholders are created (see create()) immediately. use calc_size() to determine bytes below.
-	void initialize(void* arena, size_type bytes, resource_placeholders_t& placeholders);
+	// derived classes should set up all apparatus for create/destroy to work, then call this - placeholder is immediately created
+	void initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc);
 	
-	// destroys the internals of the instance and returns the arena passed to initialize()
-	void* deinitialize();
+	// destroys the internals of the instance and returns the memory passed to initialize_base()
+	void* deinitialize_base();
+
+	// returns the io allocator associated with this registry
+	allocator get_io_allocator() { return io_alloc_; }
+
+	// destroys all indexed resources, this should be called before any final flush during deinitialize_base()
+	void destroy_indexed();
+
+public:
 
 	// returns true if this class has been initialized
-	inline bool valid() const { return pool_.valid(); }
+	bool valid() const { return lookup_.valid(); }
+
+	// ...
+	void* get_error_placeholder() { return error_placeholder_; }
 	
-	// size/capacity accessors
-	inline size_type capacity() const { return pool_.capacity(); }
-	inline size_type size() const { return pool_.size(); }
-	inline bool empty() const { return pool_.empty(); }
-
-	// removes all entries from the registry except placeholders
-	// note: should be called on the device thread because the flush is immediate
-	void remove_all();
-
-	// flush insert and remove queues. This should be called from the thread 
-	// note: should be called on the device thread because the flush is immediate
-	// returns number of operations completed
+	// destroys all zero-ref resources, flushes other queued destroys and creates, 
+	// and reclaims derelict keys. This is not concurrent and should be called at a 
+	// time the device that supports create/destroy is not processing data. Returns 
+	// the number of operations processed.
 	size_type flush(size_type max_operations = ~0u);
 
 
 	// === concurrent api ===
 
-	// note: topology of data stored is fixed except during flush(), so concurrency
-	// is guaranteed except during flush().
+	// resolve the key to an existing key, or create a new one with the specified placeholder
+	handle resolve(const key_type& key, void* placeholder);
+	handle resolve(const path_t& path, void* placeholder) { return resolve(path.hash(), placeholder); }
 
-	// returns a persistently consistent resource by key. The underlying resource 
-	// may be discarded or loading but the resource itself will be stable and 
-	// useable until remove is called on it and the next flush() is called. This
-	// may dereference to one of the resource placeholders.
+	// takes ownership of and queues compiled for creation and immediately returns a 
+	// ref-counted handle to it. If force is false, the handle may resolve to a pre-existing
+	// entry and no ownership of compiled is taken. If a new entry, the specified placeholder
+	// is inserted immediately to hold resolution over until the queue is flushed.
+	handle insert(const path_t& path, void* placeholder, blob& compiled, bool force);
 
-	// retrieve a persistent handle; depending on the state of the true resource, 
-	// this may dereference to one of the placeholder resources.
-	resource_base_t get(key_type key) const;
-	resource_base_t get(const path_t& path) const { return get(path.hash()); }
+	// inserts a resource that is locked in memory (like a placeholder) and is referenced directly (no handle, no ref-counting)
+	// these will be cleaned up during deinitialize_base(). Calling insert_indexed on a valid resource will overwrite it and 
+	// clean up the prior one. resolve_index will return the error placeholder until after the next flush. The intended pattern 
+	// is that an enumerated array of assets will be inserted and a final flush will create them at derived-registry 
+	// initialization time.
+	void  insert_indexed (const key_type& index, const char* label, blob& compiled);
+	void* resolve_indexed(const key_type& index) const;
 
-	// retrieve a persistent handle by index; this is a fast-path for accessing 
-	// builtin resources defined by their enumeration and initialized into the 
-	// registry before any other. Use with care.
-	resource_base_t by_index(int index) const { return entries_ + index; }
-	template<typename enumT> resource_base_t by_index(const enumT e) const { return by_index((int)e); }
+	// queues path for async loading and immediately returns a handle that will resolve to a 
+	// placeholder until loading completes, at which time the result will be queued for creation.
+	// If force is false, this may resolve to an already-existing handle. If force is true on a 
+	// pre-existing valid resource, it will remain that resource until the load completes instead 
+	// of an immediately new placeholder.
+	handle load(const path_t& path, void* placeholder, bool force);
 
-	// returns the path used to identify the resource
-	path_t path(key_type key) const;
-	path_t path(const resource_base_t& resource) const;
-
-	// returns the state of the specified entry
-	resource_status status(key_type key) const;
-	resource_status status(const path_t& path) const { return status(path.hash()); }
-	resource_status status(const resource_base_t& resource) const;
-
-	// queues the compiled blob for creation and immediately returns a handle that will 
-	// dereference to a placeholder until the blob is fully processes by a flush(). If
-	// compiled is null then the resource will remain a placeholder. If another thread calls
-	// insert, then the most-correct will win, i.e. either an already-valid cached version or
-	// a thread that successfully creates the resource to replace a failed or missing attempt.
-	resource_base_t insert(key_type key, const path_t& path, blob& compiled, bool force = false);
-	resource_base_t insert(const path_t& path, blob& compiled, bool force = false) { return insert(path.hash(), path, compiled, force); }
-	
-	// removes the entry allocated from this registry. The entry is still valid 
-	// until the next call to flush() so any device async processing can finish 
-	// using it.
-	bool remove(key_type key);
-	bool remove(const path_t& path) { return remove(path.hash()); }
-	bool remove(const resource_base_t& resource);
-
-	// Sets the resource to the loading placeholder and destroys the associated real
-	// resource. This is like a remove, but without removing the bookkeeping: useful 
-	// during reload operations.
-	bool discard(const resource_base_t& resource);
-	bool discard(const key_type key) { return discard(get(key)); }
-	bool discard(const char* name) { return discard(get(name)); }
+	// note: unloading/erasing is done by eviscerating all base_resource handles so they release 
+	// their refcount. flush() garbage-collects all zero-referenced resources. It's also possible
+	// through inserts/loads to validly resolve to a zero-referenced resource and increment it to
+	// one, thereby preventing the next flush from destroying it. Imagine a level transition:
+	// unload all previous assets, load all next-level assets and any shared assets will naturally
+	// resolve and short-circuit a load request.
 
 private:
-	static const index_type nullidx = index_type(-1);
-
-	struct file_info
-	{
-		file_info() : next(nullptr) { status = resource_status::invalid; }
-		~file_info() { status = resource_status::invalid; }
-		file_info* next;
-		key_type key;
-		std::atomic<resource_status> status;
-		path_t path;
-		blob compiled;
-	};
 	
-	typedef concurrent_hash_map<uint64_t, uint32_t> hash_map_t;
+	struct queued_t
+	{
+		queued_t(void* resource) : resource(resource) {}
+		queued_t(const path_t& path, blob& compiled, const key_type& index) : path(path), compiled(std::move(compiled)), index(index) {}
 
-	concurrent_object_pool<file_info> pool_;
-	hash_map_t lookup_;
-	concurrent_stack<file_info> inserts_;
-	concurrent_stack<file_info> removes_;
-	void** entries_;
-	void* missing_;
-	void* loading_;
-	void* failed_;
+		~queued_t() = delete;
+
+		queued_t* next;
+		
+		union
+		{
+			void* resource; // for destroy
+			struct          // for create
+			{
+				blob     compiled;
+				path_t   path;
+				key_type index;
+			};
+		};
+	};
+
+	typedef concurrent_hash_map<key_type, uint32_t> lookup_t;
+	typedef concurrent_object_pool<queued_t>        queued_pool_t;
+	typedef concurrent_object_pool<handle::type>    res_pool_t;
+	typedef concurrent_stack<queued_t>              queue_t;
+	typedef std::atomic<handle::type>               atm_resource_t;
+
+	lookup_t      lookup_;            // stores resources, accessible by key
+	res_pool_t    res_pool_;          // stores available resources
+	queued_pool_t queued_pool_;       // stores available queue nodes
+	queue_t       creates_;           // queue for all compiled buffers that can be passed to create and then inserted
+	queue_t       destroys_;          // queue for all valid resources to destroy in the next flush
+	void*         error_placeholder_; // inserted if a file load fails
+	allocator     io_alloc_;          // used for temporary file io and decode operations
+	sstring       label_;             // name used in traces
+
+	static void load_completion(const path_t& path, blob& buffer, const std::system_error* syserr, void* user);
+	void load_completion(const path_t& path, blob& buffer, const std::system_error* syserr);
+
+	// replaces an existing key with the specified resource or placeholder and updates the status
+	// if the key is in a bad state, such as having been discarded, the resource will be queued for
+	// destroy. Any previous valid resource will also be queued for destroy.
+	void replace(const key_type& key, void* resource, const enum class handle::status& status);
+
+	// returns true if insertion occured or false if an existing handle was retreived
+	bool insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle);
+
+	void queue_create(const path_t& path, blob& compiled, const key_type& index = 0);
+	void queue_destroy(void* resource);
+};
+
+template<typename resourceT>
+class resource_registry : protected base_resource_registry
+{
+public:
+	typedef resourceT                         resource_type;
+	typedef base_resource_registry::size_type size_type;
+
+	class handle : public base_resource_registry::handle
+	{
+	public:
+		typedef resourceT type;
+
+		handle()                                           : base_resource_registry::handle()                {}
+		handle(const handle&                         that) : base_resource_registry::handle(that)            {}
+		handle(const base_resource_registry::handle& that) : base_resource_registry::handle(that)            {}
+		~handle()                                                                                            { release(); }
+		handle(handle&& that)                              : base_resource_registry::handle(std::move(that)) {}
+		handle(base_resource_registry::handle&& that)      : base_resource_registry::handle(std::move(that)) {}
+
+		const handle& operator=(const handle& that)             { return (const handle&)base_resource_registry::handle::operator=(that); }
+		handle&       operator=(handle&& that)                  { return (handle&)base_resource_registry::handle::operator=(std::move(that)); }
+
+		type* get()                                       const { return (type*)base_resource_registry::handle::get(); }
+		type* get(enum class status* out_status)                     const { return (type*)base_resource_registry::handle::get(out_status); }
+		type* get(enum class status* out_status, uint16_t* out_type) const { return (type*)base_resource_registry::handle::get(out_status, out_type); }
+
+		operator bool         () const                          { return !!entry_; }
+		operator bool         ()                                { return !!entry_; }
+		operator type*        ()                                { return get(); }
+		operator const type*  ()                                { return get(); }
+		type*       operator->()                                { return get(); }
+		const type* operator->() const                          { return get(); }
+	};
+
+
+	// == concurrent api ==
+
+	handle         resolve        (const key_type& key,   resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(key, placeholder);                  }
+	handle         resolve        (const path_t&   path,  resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(path.hash(), placeholder);          }
+	handle         insert         (const path_t&   path,  resource_type* placeholder, blob& compiled, bool force) { return (handle)        base_resource_registry::insert(path, placeholder, compiled, force); }
+	handle         load           (const path_t&   path,  resource_type* placeholder,                 bool force) { return (handle)        base_resource_registry::load(path, placeholder, force);             }
+	void           insert_indexed (const key_type& index, const char* label,                blob& compiled)       {                        base_resource_registry::insert_indexed(index, label, compiled);     }
+	resource_type* resolve_indexed(const key_type& index) const                                                   { return (resource_type*)base_resource_registry::resolve_indexed(index);                     }
 };
 
 }

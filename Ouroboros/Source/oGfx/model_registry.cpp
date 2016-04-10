@@ -51,7 +51,7 @@ void model_registry::initialize(gpu::device* dev, uint32_t budget_bytes, const a
 	allocate_options opts(required_alignment);
 	void* memory = alloc_.allocate(budget_bytes, "model_registry", opts);
 
-	device_resource_registry2_t<handle::type>::initialize("model registry", memory, budget_bytes, dev, error_placeholder, io_alloc);
+	base_t::initialize("model registry", memory, budget_bytes, dev, error_placeholder, io_alloc);
 
 	insert_primitives(alloc, io_alloc);
 	flush();
@@ -62,7 +62,7 @@ void model_registry::deinitialize()
 	if (!valid())
 		return;
 
-	device_resource_registry2_t<handle::type>::deinitialize();
+	base_t::deinitialize();
 }
 
 void* model_registry::create(const path_t& path, blob& compiled)
@@ -233,7 +233,7 @@ void model_registry::insert_primitives(const allocator& alloc, const allocator& 
 
 model_registry::handle model_registry::load(const path_t& path)
 {
-	return device_resource_registry2_t<handle::type>::load(path, nullptr, false);
+	return base_t::load(path, nullptr, false);
 }
 
 model_registry::handle model_registry::load(const path_t& path, const mesh::model& model)

@@ -3,7 +3,7 @@
 // handles I/O and referencing of models
 
 #pragma once
-#include <oGfx/device_resource_registry2.h>
+#include <oGfx/device_resource_registry.h>
 #include <oGfx/bytecode.h>
 #include <oMesh/model.h>
 
@@ -34,10 +34,10 @@ enum class primitive_model : uint8_t
 	count,
 };
 
-class model_registry : public device_resource_registry2_t<mesh::model>
+class model_registry : public device_resource_registry<mesh::model>
 {
 public:
-	typedef device_resource_registry2_t<mesh::model> base_t;
+	typedef device_resource_registry<mesh::model> base_t;
 	typedef base_t::handle handle;
 
 	static const mesh::face_type face_type = mesh::face_type::front_cw;
@@ -48,7 +48,7 @@ public:
   handle load(const path_t& path);
 	handle load(const path_t& path, const mesh::model& model);
 
-  uint32_t flush(uint32_t max_operations = ~0u) { return device_resource_registry2_t<basic_resource_type>::flush(max_operations); }
+  uint32_t flush(uint32_t max_operations = ~0u) { return base_t::flush(max_operations); }
 
 	mesh::model* primitive(const primitive_model& prim) const { return resolve_indexed((uint64_t)prim + 1); }
 

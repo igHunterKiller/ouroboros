@@ -161,9 +161,6 @@
     <ClInclude Include="..\..\Include\oGfx\gpu_signature_slots.h">
       <Filter>oGfx\Shader Definitions</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\oGfx\device_resource_registry2.h">
-      <Filter>oGfx\Resource Registries</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="oGfxShaders.hlsl">

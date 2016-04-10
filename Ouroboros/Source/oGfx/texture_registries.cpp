@@ -32,14 +32,14 @@ void texture2d_registry::initialize(gpu::device* dev, uint32_t budget_bytes, con
 
 	auto error_placeholder = make_solid_image_file(color::white, io_alloc);
 
-	device_resource_registry2_t<texture2d_internal>::initialize("tex2d registry", memory, budget_bytes, dev, error_placeholder, io_alloc);
+	device_resource_registry<texture2d_internal>::initialize("tex2d registry", memory, budget_bytes, dev, error_placeholder, io_alloc);
 }
 
 void texture2d_registry::deinitialize()
 {
 	if (pool_.valid())
 	{
-		void* p = device_resource_registry2_t<texture2d_internal>::deinitialize();
+		void* p = device_resource_registry<texture2d_internal>::deinitialize();
 
 		if (alloc_)
 			alloc_.deallocate(p);
