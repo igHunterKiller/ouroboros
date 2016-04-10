@@ -257,30 +257,31 @@ public:
 		handle(handle&& that)                              : base_resource_registry::handle(std::move(that)) {}
 		handle(base_resource_registry::handle&& that)      : base_resource_registry::handle(std::move(that)) {}
 
-		const handle& operator=(const handle& that)             { return (const handle&)base_resource_registry::handle::operator=(that); }
-		handle&       operator=(handle&& that)                  { return (handle&)base_resource_registry::handle::operator=(std::move(that)); }
+		const handle& operator=(const handle& that)                        { return (const handle&)base_resource_registry::handle::operator=(that); }
+		handle&       operator=(handle&& that)                             { return (handle&)base_resource_registry::handle::operator=(std::move(that)); }
 
-		type* get()                                       const { return (type*)base_resource_registry::handle::get(); }
+		type* get()                                                  const { return (type*)base_resource_registry::handle::get(); }
 		type* get(enum class status* out_status)                     const { return (type*)base_resource_registry::handle::get(out_status); }
 		type* get(enum class status* out_status, uint16_t* out_type) const { return (type*)base_resource_registry::handle::get(out_status, out_type); }
+		enum class status status()                                   const { enum class status s; get(&s); return s; }
 
-		operator bool         () const                          { return !!entry_; }
-		operator bool         ()                                { return !!entry_; }
-		operator type*        ()                                { return get(); }
-		operator const type*  ()                                { return get(); }
-		type*       operator->()                                { return get(); }
-		const type* operator->() const                          { return get(); }
+		operator bool         () const                                     { return !!entry_; }
+		operator bool         ()                                           { return !!entry_; }
+		operator type*        ()                                           { return get(); }
+		operator const type*  ()                                           { return get(); }
+		type*       operator->()                                           { return get(); }
+		const type* operator->() const                                     { return get(); }
 	};
 
 
 	// == concurrent api ==
 
-	handle         resolve        (const key_type& key,   resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(key, placeholder);                  }
+	handle         resolve        (const key_type& key,   resource_type* placeholder)                                 { return (handle)        base_resource_registry::resolve(key, placeholder);                  }
 	handle         resolve        (const uri_t&    uri_ref,   resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(uri_ref.hash(), placeholder);          }
 	handle         insert         (const uri_t&    uri_ref,   resource_type* placeholder, blob& compiled, bool force) { return (handle)        base_resource_registry::insert(uri_ref, placeholder, compiled, force); }
 	handle         load           (const uri_t&    uri_ref,   resource_type* placeholder,                 bool force) { return (handle)        base_resource_registry::load(uri_ref, placeholder, force);             }
-	void           insert_indexed (const key_type& index, const char* label,                blob& compiled)       {                        base_resource_registry::insert_indexed(index, label, compiled);     }
-	resource_type* resolve_indexed(const key_type& index) const                                                   { return (resource_type*)base_resource_registry::resolve_indexed(index);                     }
+	void           insert_indexed (const key_type& index, const char* label,                blob& compiled)           {                        base_resource_registry::insert_indexed(index, label, compiled);     }
+	resource_type* resolve_indexed(const key_type& index) const                                                       { return (resource_type*)base_resource_registry::resolve_indexed(index);                     }
 };
 
 }
