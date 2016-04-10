@@ -16,91 +16,52 @@ public:
 	typedef uint32_t index_type;
 	typedef uint32_t size_type;
 
-	// if at capacity allocate() will return this value
-	// (upper bits reserved for atomic tagging)
-	static const index_type nullidx = 0x00ffffff;
-
-	// the largest index issued by this pool, also serving as a static max_capacity()
-	static const size_type max_index = nullidx - 1;
-
-	// the maximum number of items a concurrent_pool can hold
-	static size_type max_capacity() { return max_index; }
-
-	// returns the minimum size in bytes required of the arena passed to initialize()
-	static size_type calc_size(size_type capacity, size_type block_size);
-
-	// returns the max block count that fits into the specified bytes
-	static size_type calc_capacity(size_type bytes, size_type block_size);
+	static const index_type nullidx  = 0x00ffffff;                                 // if at capacity allocate() will return this value (upper bits reserved for atomic tagging)
+	static const size_type max_index = nullidx - 1;                                // largest index issued by this pool, also serving as a static max_capacity()
+	
+	static size_type max_capacity() { return max_index; }                          // maximum number of items a concurrent_pool can hold
+	static size_type calc_size(size_type capacity, size_type block_size);          // required bytes for the memory passed to initialize()
+	static size_type calc_capacity(size_type bytes, size_type block_size);         // max block count that fits in the specified bytes
 
 
 	// === non-concurrent api ===
 
-	// ctor creates as empty
-	concurrent_pool();
+	concurrent_pool();                                                             // default ctor (creates as empty)
+	concurrent_pool(concurrent_pool&& that);                                       // move ctor
+	concurrent_pool(void* arena, size_type bytes, size_type block_size);           // ctor calls initialize()
+	~concurrent_pool();                                                            // dtor
+	concurrent_pool& operator=(concurrent_pool&& that);                            // calls deinitialize on this, moves in that's memory 
+	concurrent_pool(const concurrent_pool&)                  = delete;		         // no copy ctor
+	const concurrent_pool& operator=(const concurrent_pool&) = delete;		         // no copy assigment
 
-	// ctor moves an existing pool into this one
-	concurrent_pool(concurrent_pool&& that);
+	void initialize(void* arena, size_type bytes, size_type block_size);           // use calc_size() to determine memory size
+	void* deinitialize();                                                          // returns the memory passed to initialize()
 
-	// ctor creates as a valid pool using external memory
-	concurrent_pool(void* arena, size_type bytes, size_type block_size);
-
-	// dtor
-	~concurrent_pool();
-
-	// calls deinitialize on this, moves that's memory under the same config
-	concurrent_pool& operator=(concurrent_pool&& that);
-
-	// use calc_size() to determine arena size
-	void initialize(void* arena, size_type bytes, size_type block_size);
-
-	// deinitializes the pool and returns the memory passed to initialize()
-	void* deinitialize();
-
-	// returns true if this class has been initialized
-	inline bool valid() const { return !!blocks_; }
-
-	// returns the size each allocated block will be
-	inline size_type block_size() const { return stride_; }
-
-	// SLOW! walks the free list and returns the count
-	size_type count_free() const;
-
-	// SLOW! returns the number of allocated elements
-	inline size_type size() const { return capacity() - count_free(); }
-
-	// SLOW! returns true of there are no outstanding allocations
-	inline bool full() const { return capacity() == count_free(); }
+	size_type  block_size()           const { return stride_; }                    // size of each allocated block
+	size_type  count_free()           const;                                       // SLOW! (walks freelist) number of items available
+	size_type  size()                 const { return capacity() - count_free(); }  // SLOW! number of allocated elements
+	bool       valid()                const { return !!blocks_; }                  // true if the pool has been initialized
+	bool       full()                 const { return capacity() == count_free(); } // SLOW! true if there are no outstanding allocations
 
 
 	// === concurrent api ===
 
-	// returns the max number of items that can be allocated from this pool
-	inline size_type capacity() const { return nblocks_; }
+	size_type  capacity()             const { return nblocks_; }                   // max number of items that can be available
+	bool       empty()                const;                                       // true if all items have been allocated
 
-	// returns true if all items have been allocated
-	bool empty() const;
+	bool       owns(index_type index) const { return index < nblocks_; }			     // range-check the pointer to within the pool
+	bool       owns(void* ptr)        const { return owns(index(ptr)); }			     // range-check the pointer to within the pool
 
-	// allocate/deallocate an index into the pool. If empty out of resources nullidx
-	// will be returned.
-	index_type allocate_index();
-	void deallocate(index_type index);
+	index_type allocate_index();																									 // same allocation as via pointer below, nullidx on failure
+	void       deallocate(index_type index);																			 // same allocation as via pointer below
 
-	// Wrappers for treating the block as a pointer to block_size memory.
-	inline void* allocate() { index_type i = allocate_index(); return pointer(i); }
-	inline void deallocate(void* pointer) { deallocate(index(pointer)); }
+	void*      allocate()                { return pointer(allocate_index()); }     // allocation returns a pointer to a block_size chunk
+	void       deallocate(void* pointer) { deallocate(index(pointer)); }           // free by pointer
 
-	// convert between allocated index and pointer values
-	void* pointer(index_type index) const;
-	index_type index(void* ptr) const;
-
-	// simple range check that returns true if this index/pointer could have been allocated from this pool
-	bool owns(index_type index) const { return index < nblocks_; }
-	bool owns(void* ptr) const { return owns(index(ptr)); }
+	void*      pointer(index_type index) const;                                   // pointer from index
+	index_type index(void* ptr)          const;                                   // index from pointer
 
 private:
-	concurrent_pool(const concurrent_pool&); /* = delete; */
-	const concurrent_pool& operator=(const concurrent_pool&); /* = delete; */
-
   union
 	{
 		char cache_padding_[oCACHE_LINE_SIZE];
