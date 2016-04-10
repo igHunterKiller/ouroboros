@@ -276,6 +276,26 @@ public:
 	int compare(const basic_path_t& that) const { return traits::compare(this->c_str(), that.c_str()); }
 	int compare(const char_type* that) const { return traits::compare(this->c_str(), that); }
 
+	bool is_relative_to(const char* root) const
+	{
+		if (root && *root)
+		{
+			size_t cmn_len = cmnroot(p, root);
+			if (cmn_len)
+			{
+				size_t nseps = 0;
+				size_t index = cmn_len + 1;
+				while (root[index])
+				{
+					if (traits::is_sep(root[index]))
+						return false;
+					index++;
+				}
+			}
+		}
+		return true;
+	}
+
 	basic_path_t relative_path(const char* root) const
 	{
 		basic_path_t rel;
@@ -285,15 +305,20 @@ public:
 			if (cmn_len)
 			{
 				size_t nseps = 0;
-				size_t index = cmn_len - 1;
+				size_t index = cmn_len + 1;
 				while (root[index])
 				{
-					if (traits::is_sep(root[index]) && 0 != root[index + 1])
+					if (traits::is_sep(root[index]))
 						nseps++;
 					index++;
 				}
 				for (size_t i = 0; i < nseps; i++)
-					rel /= traits::dotdot_str();
+				{
+					rel.p.append(traits::dotdot_str());
+					rel.p.append(traits::generic_sep_str());
+				}
+
+				rel.ends_with_sep_ = !!nseps;
 			}
 
 			const char* src = (*this).c_str() + cmn_len;
