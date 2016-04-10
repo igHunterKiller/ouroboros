@@ -45,8 +45,8 @@ public:
   void initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc);
 	void deinitialize();
 
-  handle load(const path_t& path);
-	handle load(const path_t& path, const mesh::model& model);
+  handle load(const uri_t& uri_ref);
+	handle load(const uri_t& uri_ref, const mesh::model& model);
 
   uint32_t flush(uint32_t max_operations = ~0u) { return base_t::flush(max_operations); }
 
@@ -61,7 +61,7 @@ public:
 private:
 	allocator alloc_;
 
-	void* create(const path_t& path, blob& compiled);
+	void* create(const uri_t& uri_ref, blob& compiled);
   void destroy(void* entry);
 
 	void insert_primitive(const primitive_model& prim, const mesh::model& model, const allocator& alloc, const allocator& io_alloc);

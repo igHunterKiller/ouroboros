@@ -1,9 +1,9 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-// wrapper around a conceptual concurrent hash map mapping a hash of a file's path
-// to its contents prepared for runtime. This is intended to be the heavy-lifting
-// innards of a derived class that fills out resource-specific create/destroy and
-// also more thoroughly defines file I/O.
+// wrapper around a conceptual concurrent hash map mapping a hash of a uri_ref to its 
+// contents prepared for runtime. This is intended to be the heavy-lifting innards 
+// of a derived class that fills out resource-specific create/destroy and also more 
+// thoroughly defines file I/O.
 
 #pragma once
 #include <atomic>
@@ -11,7 +11,7 @@
 #include <oConcurrency/concurrent_hash_map.h>
 #include <oConcurrency/concurrent_stack.h>
 #include <oMemory/concurrent_object_pool.h>
-#include <oString/path.h>
+#include <oString/uri.h>
 
 namespace ouro {
 
@@ -23,7 +23,7 @@ public:
 
 	// called by load, this function should asynchronously load the specified file's binary
 	// and call complete_load() on the resulting blob.
-	typedef void (*load_fn)(const path_t& path, allocator& io_alloc, void* user);
+	typedef void (*load_fn)(const uri_t& uri_ref, allocator& io_alloc, void* user);
 
 	class handle
 	{
@@ -105,7 +105,7 @@ protected:
 
 	// converts a compiled (baked/finalized) buffer into the resource type 
 	// maintained in this registry. This is called during flushes()
-	virtual void* create(const path_t& path, blob& compiled) = 0;
+	virtual void* create(const uri_t& uri_ref, blob& compiled) = 0;
 
 	// free a resource created in create()
 	virtual void destroy(void* resource) = 0;
@@ -132,7 +132,7 @@ protected:
 	allocator get_io_allocator() { return io_alloc_; }
 
 	// queues for create, or if invalid inserts error placeholder
-	void complete_load(const path_t& path, blob& compiled, const char* error_message);
+	void complete_load(const uri_t& uri_ref, blob& compiled, const char* error_message);
 	
 public:
 
@@ -153,13 +153,13 @@ public:
 
 	// resolve the key to an existing key, or create a new one with the specified placeholder
 	handle resolve(const key_type& key, void* placeholder);
-	handle resolve(const path_t& path, void* placeholder) { return resolve(path.hash(), placeholder); }
+	handle resolve(const uri_t& uri_ref, void* placeholder) { return resolve(uri_ref.hash(), placeholder); }
 
 	// takes ownership of and queues compiled for creation and immediately returns a 
 	// ref-counted handle to it. If force is false, the handle may resolve to a pre-existing
 	// entry and no ownership of compiled is taken. If a new entry, the specified placeholder
 	// is inserted immediately to hold resolution over until the queue is flushed.
-	handle insert(const path_t& path, void* placeholder, blob& compiled, bool force);
+	handle insert(const uri_t& uri_ref, void* placeholder, blob& compiled, bool force);
 
 	// inserts a resource that is locked in memory (like a placeholder) and is referenced directly (no handle, no ref-counting)
 	// these will be cleaned up during deinitialize_base(). Calling insert_indexed on a valid resource will overwrite it and 
@@ -169,12 +169,12 @@ public:
 	void  insert_indexed (const key_type& index, const char* label, blob& compiled);
 	void* resolve_indexed(const key_type& index) const;
 
-	// queues path for async loading and immediately returns a handle that will resolve to a 
+	// queues uri_ref for async loading and immediately returns a handle that will resolve to a 
 	// placeholder until loading completes, at which time the result will be queued for creation.
 	// If force is false, this may resolve to an already-existing handle. If force is true on a 
 	// pre-existing valid resource, it will remain that resource until the load completes instead 
 	// of an immediately new placeholder.
-	handle load(const path_t& path, void* placeholder, bool force);
+	handle load(const uri_t& uri_ref, void* placeholder, bool force);
 
 	// note: unloading/erasing is done by eviscerating all base_resource handles so they release 
 	// their refcount. flush() garbage-collects all zero-referenced resources. It's also possible
@@ -188,7 +188,7 @@ private:
 	struct queued_t
 	{
 		queued_t(void* resource) : resource(resource) {}
-		queued_t(const path_t& path, blob& compiled, const key_type& index) : path(path), compiled(std::move(compiled)), index(index) {}
+		queued_t(const uri_t& uri_ref, blob& compiled, const key_type& index) : uri_ref(uri_ref), compiled(std::move(compiled)), index(index) {}
 
 		~queued_t() = delete;
 
@@ -200,7 +200,7 @@ private:
 			struct          // for create
 			{
 				blob     compiled;
-				path_t   path;
+				uri_t    uri_ref;
 				key_type index;
 			};
 		};
@@ -217,7 +217,7 @@ private:
 	queued_pool_t queued_pool_;       // stores available queue nodes
 	queue_t       creates_;           // queue for all compiled buffers that can be passed to create and then inserted
 	queue_t       destroys_;          // queue for all valid resources to destroy in the next flush
-	load_fn       load_;              // a function to asynchronously load the binary of a path
+	load_fn       load_;              // a function to asynchronously load the binary of a uri_ref
 	void*         load_user_;         // user data for calling load_
 	void*         error_placeholder_; // inserted if a file load fails
 	allocator     io_alloc_;          // used for temporary file io and decode operations
@@ -234,7 +234,7 @@ private:
 	// destroys all indexed resources, this should be called before any final flush during deinitialize_base()
 	void destroy_indexed();
 
-	void queue_create(const path_t& path, blob& compiled, const key_type& index = 0);
+	void queue_create(const uri_t& uri_ref, blob& compiled, const key_type& index = 0);
 	void queue_destroy(void* resource);
 };
 
@@ -276,9 +276,9 @@ public:
 	// == concurrent api ==
 
 	handle         resolve        (const key_type& key,   resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(key, placeholder);                  }
-	handle         resolve        (const path_t&   path,  resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(path.hash(), placeholder);          }
-	handle         insert         (const path_t&   path,  resource_type* placeholder, blob& compiled, bool force) { return (handle)        base_resource_registry::insert(path, placeholder, compiled, force); }
-	handle         load           (const path_t&   path,  resource_type* placeholder,                 bool force) { return (handle)        base_resource_registry::load(path, placeholder, force);             }
+	handle         resolve        (const uri_t&    uri_ref,   resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(uri_ref.hash(), placeholder);          }
+	handle         insert         (const uri_t&    uri_ref,   resource_type* placeholder, blob& compiled, bool force) { return (handle)        base_resource_registry::insert(uri_ref, placeholder, compiled, force); }
+	handle         load           (const uri_t&    uri_ref,   resource_type* placeholder,                 bool force) { return (handle)        base_resource_registry::load(uri_ref, placeholder, force);             }
 	void           insert_indexed (const key_type& index, const char* label,                blob& compiled)       {                        base_resource_registry::insert_indexed(index, label, compiled);     }
 	resource_type* resolve_indexed(const key_type& index) const                                                   { return (resource_type*)base_resource_registry::resolve_indexed(index);                     }
 };

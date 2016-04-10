@@ -92,11 +92,13 @@ protected:
 	{
 		auto reg = (device_resource_registry*)user;
 		path_t relative_path = path.relative_path(filesystem::data_path());
-		reg->complete_load(relative_path, buffer, syserr ? syserr->what() : "no error");
+		reg->complete_load(uri_t(relative_path.c_str()), buffer, syserr ? syserr->what() : "no error");
 	}
 
-	static void load_async(const path_t& path, allocator& io_alloc, void* user)
+	static void load_async(const uri_t& uri_ref, allocator& io_alloc, void* user)
 	{
+		path_t path = uri_ref.path();
+		oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
 		filesystem::load_async(filesystem::data_path() / path, on_completion, user, filesystem::load_option::binary_read, io_alloc);
 	}
 };

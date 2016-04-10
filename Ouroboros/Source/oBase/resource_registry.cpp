@@ -241,15 +241,15 @@ void* base_resource_registry::deinitialize_base()
 	return p;
 }
 
-void base_resource_registry::complete_load(const path_t& path, blob& compiled, const char* error_message)
+void base_resource_registry::complete_load(const uri_t& uri_ref, blob& compiled, const char* error_message)
 {
 	if (compiled)
-		queue_create(path, compiled);
+		queue_create(uri_ref, compiled);
 	else
 	{
 		handle::type* h;
-		insert_or_resolve(path.hash(), error_placeholder_, handle::status::error, h);
-		oTrace("[%s] Load failed: %s\n  %s", label_.c_str(), path.c_str(), error_message ? error_message : "unknown error");
+		insert_or_resolve(uri_ref.hash(), error_placeholder_, handle::status::error, h);
+		oTrace("[%s] Load failed: %s\n  %s", label_.c_str(), uri_ref.c_str(), error_message ? error_message : "unknown error");
 	}
 }
 
@@ -298,13 +298,11 @@ base_resource_registry::handle base_resource_registry::resolve(const key_type& k
 	return handle(h);
 }
 
-base_resource_registry::handle base_resource_registry::insert(const path_t& path, void* placeholder, blob& compiled, bool force)
+base_resource_registry::handle base_resource_registry::insert(const uri_t& uri_ref, void* placeholder, blob& compiled, bool force)
 {
-	oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
 	handle::type* h;
-	auto key = path.hash();
-	if (insert_or_resolve(key, placeholder, handle::status::loading, h) || force)
-		queue_create(path, compiled);
+	if (insert_or_resolve(uri_ref.hash(), placeholder, handle::status::loading, h) || force)
+		queue_create(uri_ref, compiled);
 	return handle(h);
 }
 
@@ -329,13 +327,11 @@ void* base_resource_registry::resolve_indexed(const key_type& index) const
 	return handle::ptr(packed);
 }
 
-base_resource_registry::handle base_resource_registry::load(const path_t& path, void* placeholder, bool force)
+base_resource_registry::handle base_resource_registry::load(const uri_t& uri_ref, void* placeholder, bool force)
 {
-	oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
 	handle::type* h;
-	auto key = path.hash();
-	if (insert_or_resolve(key, placeholder, handle::status::loading, h) || force)
-		load_(path, io_alloc_, load_user_);
+	if (insert_or_resolve(uri_ref.hash(), placeholder, handle::status::loading, h) || force)
+		load_(uri_ref, io_alloc_, load_user_);
 	return handle(h);
 }
 
@@ -370,16 +366,16 @@ void base_resource_registry::replace(const key_type& key, void* resource, const 
 		queue_destroy(handle::ptr(prev));
 }
 
-void base_resource_registry::queue_create(const path_t& path, blob& compiled, const key_type& index)
+void base_resource_registry::queue_create(const uri_t& uri_ref, blob& compiled, const key_type& index)
 {
 	auto q = (queued_t*)queued_pool_.allocate();
 	if (q)
 	{
-		new (q) queued_t(path, compiled, index);
+		new (q) queued_t(uri_ref, compiled, index);
 		creates_.push(q);
 	}
 	else
-		oTrace("queue overflow: ignoring %s", path.c_str());
+		oTrace("queue overflow: ignoring %s", uri_ref.c_str());
 }
 
 void base_resource_registry::queue_destroy(void* resource)
@@ -444,15 +440,15 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 	while (n && creates_.pop(&q))
 	{
 		// maybe move this above the full sweep? in case stuff is inserted with a 0 refcount?
-		void* resource = create(q->path, q->compiled);
-		auto key       = q->index ? q->index : q->path.hash();
+		void* resource = create(q->uri_ref, q->compiled);
+		auto key       = q->index ? q->index : q->uri_ref.hash();
 		auto ready     = q->index ? handle::status::indexed : handle::status::ready;
 		auto stat      = resource ? ready : handle::status::error;
 		
 		if (q->index)
 			oTrace("[%s] created %p for index %u", label_.c_str(), resource, q->index);
 		else
-			oTrace("[%s] created %p for %s", label_.c_str(), resource, q->path.c_str());
+			oTrace("[%s] created %p for %s", label_.c_str(), resource, q->uri_ref.c_str());
 		
 		replace(key, resource, stat);
 		queued_pool_.deallocate(q);

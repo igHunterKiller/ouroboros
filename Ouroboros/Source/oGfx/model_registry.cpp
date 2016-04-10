@@ -65,24 +65,24 @@ void model_registry::deinitialize()
 	base_t::deinitialize();
 }
 
-void* model_registry::create(const path_t& path, blob& compiled)
+void* model_registry::create(const uri_t& uri_ref, blob& compiled)
 {
 	// todo: find more meaningful allocators here
 	const allocator& subsets_allocator = default_allocator;
 	const allocator& temp_allocator = default_allocator;
 
 	auto fformat = mesh::get_file_format(compiled);
-	oCheck(fformat != mesh::file_format::unknown, std::errc::invalid_argument, "Unknown file format: %s", path.c_str());
+	oCheck(fformat != mesh::file_format::unknown, std::errc::invalid_argument, "Unknown file format: %s", uri_ref.c_str());
 
 	auto mdl = pool_.create();
 
 	auto vlayout = gfx::layout(vertex_layout_);
 
 	// todo: figure out a way that this can allocate right out of the cpu-accessible buffer... or hope for D3D12
-	*mdl = mesh::decode(path, compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
+	*mdl = mesh::decode(uri_ref.path(), compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
 	auto info = mdl->info();
 
-	gpu::ibv indices = dev_->new_ibv(path, info.num_indices, mdl->indices());
+	gpu::ibv indices = dev_->new_ibv(uri_ref, info.num_indices, mdl->indices());
 
 	std::array<uint32_t, mesh::max_num_slots> vertices_offsets;
 	vertices_offsets.fill(0);
@@ -91,7 +91,7 @@ void* model_registry::create(const path_t& path, blob& compiled)
 	for (uint32_t slot = 0; slot < nslots; slot++)
 	{
 		const auto stride = mdl->vertex_stride(slot);
-		gpu::vbv verts = dev_->new_vbv(path, stride, info.num_vertices, mdl->vertices(slot));
+		gpu::vbv verts = dev_->new_vbv(uri_ref, stride, info.num_vertices, mdl->vertices(slot));
 		vertices_offsets[slot] = verts.offset;
 	}
 
@@ -231,16 +231,16 @@ void model_registry::insert_primitives(const allocator& alloc, const allocator& 
 	insert_primitive(primitive_model::torus_outline, mesh, alloc, io_alloc);
 }
 
-model_registry::handle model_registry::load(const path_t& path)
+model_registry::handle model_registry::load(const uri_t& uri_ref)
 {
-	return base_t::load(path, nullptr, false);
+	return base_t::load(uri_ref, nullptr, false);
 }
 
-model_registry::handle model_registry::load(const path_t& path, const mesh::model& model)
+model_registry::handle model_registry::load(const uri_t& uri_ref, const mesh::model& model)
 {
 	auto io_alloc = get_io_allocator();
 	auto blob = mesh::encode(model, mesh::file_format::omdl, io_alloc, io_alloc);
-	return insert(path, nullptr, blob, true);
+	return insert(uri_ref, nullptr, blob, true);
 }
 
 }}

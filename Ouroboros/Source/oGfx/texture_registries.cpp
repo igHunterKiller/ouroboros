@@ -48,18 +48,18 @@ void texture2d_registry::deinitialize()
 	}
 }
 
-texture2d_registry::handle texture2d_registry::load(const path_t& path)
+texture2d_registry::handle texture2d_registry::load(const uri_t& uri_ref)
 {
-	return base_t::load(path, nullptr, false);
+	return base_t::load(uri_ref, nullptr, false);
 }
 
-void* texture2d_registry::create(const path_t& path, blob& compiled)
+void* texture2d_registry::create(const uri_t& uri_ref, blob& compiled)
 {
 	auto fformat = surface::get_file_format(compiled);
-	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument, "[texture2d_registry] Unknown file format: %s", path.c_str());
+	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument, "[texture2d_registry] Unknown file format: %s", uri_ref.c_str());
 
 	auto info = surface::get_info(compiled);
-	oCheck(info.is_2d(), std::errc::invalid_argument, "[texture2d_registry] Not a texture2d: %s", path.c_str());
+	oCheck(info.is_2d(), std::errc::invalid_argument, "[texture2d_registry] Not a texture2d: %s", uri_ref.c_str());
 
 	// ensure the format is render-compatible
 	auto desired_format = surface::as_texture(info.format);
@@ -73,8 +73,8 @@ void* texture2d_registry::create(const path_t& path, blob& compiled)
 	auto img = surface::decode(compiled, desired_format, surface::mip_layout::tight);
 
 	auto tex = pool_.create();
-	tex->view = dev_->new_texture(path, img);
-	oTrace("[texture2d_registry] create %p %s", tex, path.c_str());
+	tex->view = dev_->new_texture(uri_ref, img);
+	oTrace("[texture2d_registry] create %p %s", tex, uri_ref.c_str());
 	return tex;
 }
 

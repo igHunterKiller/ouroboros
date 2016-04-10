@@ -26,14 +26,14 @@ public:
   void initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc);
 	void deinitialize();
 
-  handle load(const path_t& path);
+  handle load(const uri_t& uri_ref);
 
   uint32_t flush(uint32_t max_operations = ~0u) { return device_resource_registry<basic_resource_type>::flush(max_operations); }
 
 private:
 	allocator alloc_;
   
-	void* create(const path_t& path, blob& compiled) override;
+	void* create(const uri_t& uri_ref, blob& compiled) override;
   void destroy(void* resource) override;
 };
 
