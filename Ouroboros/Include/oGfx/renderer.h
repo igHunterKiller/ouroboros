@@ -139,7 +139,7 @@ public:
 	film_t* film() { return &film_; }
 
 	model_registry* get_model_registry() { return &models_; }
-	texture2d_registry2* get_texture2d_registry() { return &texture2ds_; }
+	texture2d_registry* get_texture2d_registry() { return &texture2ds_; }
 
 private:
 // _____________________________________________________________________________
@@ -155,7 +155,7 @@ private:
 	const render_settings_t* render_settings_;
 	film_t film_;
 	model_registry models_;
-	texture2d_registry2 texture2ds_;
+	texture2d_registry texture2ds_;
 	uint32_t frame_id_;
 
 	flexible_array_t<void*, true>* global_heaps_;

@@ -49,9 +49,9 @@ void model_registry::initialize(gpu::device* dev, uint32_t budget_bytes, const a
 	alloc_ = alloc ? alloc : default_allocator;
 
 	allocate_options opts(required_alignment);
-	void* memory = alloc_.allocate(budget_bytes, "texture2d_registry2", opts);
+	void* memory = alloc_.allocate(budget_bytes, "model_registry", opts);
 
-	device_resource_registry2_t<model_t::type>::initialize(memory, budget_bytes, dev, error_placeholder, io_alloc);
+	device_resource_registry2_t<handle::type>::initialize("model registry", memory, budget_bytes, dev, error_placeholder, io_alloc);
 
 	insert_primitives(alloc, io_alloc);
 	flush();
@@ -62,7 +62,7 @@ void model_registry::deinitialize()
 	if (!valid())
 		return;
 
-	device_resource_registry2_t<model_t::type>::deinitialize();
+	device_resource_registry2_t<handle::type>::deinitialize();
 }
 
 void* model_registry::create(const path_t& path, blob& compiled)
@@ -231,12 +231,12 @@ void model_registry::insert_primitives(const allocator& alloc, const allocator& 
 	insert_primitive(primitive_model::torus_outline, mesh, alloc, io_alloc);
 }
 
-model_t model_registry::load(const path_t& path)
+model_registry::handle model_registry::load(const path_t& path)
 {
-	return device_resource_registry2_t<model_t::type>::load(path, nullptr, false);
+	return device_resource_registry2_t<handle::type>::load(path, nullptr, false);
 }
 
-model_t model_registry::load(const path_t& path, const mesh::model& model)
+model_registry::handle model_registry::load(const path_t& path, const mesh::model& model)
 {
 	auto io_alloc = get_io_allocator();
 	auto blob = mesh::encode(model, mesh::file_format::omdl, io_alloc, io_alloc);

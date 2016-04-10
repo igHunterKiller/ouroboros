@@ -49,7 +49,7 @@ void pivot_draw::initialize()
 
 void pivot_draw::deinitialize()
 {
-	texture_.release();
+	texture_ = gfx::texture2d_t();
 }
 
 void pivot_draw::on_view_default()

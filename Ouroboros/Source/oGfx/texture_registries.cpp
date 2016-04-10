@@ -23,19 +23,19 @@ static blob make_solid_image_file(uint32_t argb, const allocator& alloc)
 // Open question: should the baking of unbaked assets be done in the IO/threads or queued
 // and done concurrently in the create step?
 
-void texture2d_registry2::initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc)
+void texture2d_registry::initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc)
 {
-	alloc_ = alloc ? alloc : default_allocator;
+	alloc_ = alloc;
 
 	allocate_options opts(required_alignment);
-	void* memory = alloc_.allocate(budget_bytes, "texture2d_registry2", opts);
+	void* memory = alloc.allocate(budget_bytes, "texture2d_registry", opts);
 
 	auto error_placeholder = make_solid_image_file(color::white, io_alloc);
 
-	device_resource_registry2_t<texture2d_internal>::initialize(memory, budget_bytes, dev, error_placeholder, io_alloc);
+	device_resource_registry2_t<texture2d_internal>::initialize("tex2d registry", memory, budget_bytes, dev, error_placeholder, io_alloc);
 }
 
-void texture2d_registry2::deinitialize()
+void texture2d_registry::deinitialize()
 {
 	if (pool_.valid())
 	{
@@ -48,18 +48,18 @@ void texture2d_registry2::deinitialize()
 	}
 }
 
-texture2d2_t texture2d_registry2::load(const path_t& path)
+texture2d_registry::handle texture2d_registry::load(const path_t& path)
 {
-	return device_resource_registry2_t<texture2d_internal>::load(path, nullptr, false);
+	return base_t::load(path, nullptr, false);
 }
 
-void* texture2d_registry2::create(const path_t& path, blob& compiled)
+void* texture2d_registry::create(const path_t& path, blob& compiled)
 {
 	auto fformat = surface::get_file_format(compiled);
-	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument, "[texture2d_registry2] Unknown file format: %s", path.c_str());
+	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument, "[texture2d_registry] Unknown file format: %s", path.c_str());
 
 	auto info = surface::get_info(compiled);
-	oCheck(info.is_2d(), std::errc::invalid_argument, "[texture2d_registry2] Not a texture2d: %s", path.c_str());
+	oCheck(info.is_2d(), std::errc::invalid_argument, "[texture2d_registry] Not a texture2d: %s", path.c_str());
 
 	// ensure the format is render-compatible
 	auto desired_format = surface::as_texture(info.format);
@@ -74,11 +74,11 @@ void* texture2d_registry2::create(const path_t& path, blob& compiled)
 
 	auto tex = pool_.create();
 	tex->view = dev_->new_texture(path, img);
-	oTrace("[texture2d_registry2] create %p %s", tex, path.c_str());
+	oTrace("[texture2d_registry] create %p %s", tex, path.c_str());
 	return tex;
 }
 
-void texture2d_registry2::destroy(void* resource)
+void texture2d_registry::destroy(void* resource)
 {
 	auto tex = (basic_resource_type*)resource;
 	tex->view = nullptr;
