@@ -429,7 +429,11 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 
 		lookup_.nix(key);
 		res_pool_.deallocate(index);
-		destroy(handle::ptr(prev));
+		void* resource = handle::ptr(prev);
+		destroy(resource);
+
+		oTrace("[%s] destroyed %p", label_.c_str(), resource);
+
 		n--;
 		return n != 0; // false (i.e. stop traversing) if the quota is used up)
 	});
