@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 #pragma once
 #include <oMesh/obj.h>
+#include <memory>
 
 namespace ouro { namespace tests {
 

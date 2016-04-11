@@ -28,10 +28,11 @@ model decode_obj(const path_t& path
 	if (!is_obj(buffer, size))
 		return model();
 
-	obj::init_t init;
+	obj::mesh::init_t init;
 	init.counter_clockwise_faces = false;
-	auto mesh = obj::mesh::make(init, path, (const char*)buffer); // buffer must be nul-terminated
-	auto obj_info = mesh->info();
+
+	obj::mesh mesh(init, path, (const char*)buffer, temp_alloc, temp_alloc); // buffer must be nul-terminated
+	auto obj_info = mesh.info();
 	auto model_info = obj_info.mesh_info;
 	model_info.layout = desired_layout;
 	model_info.num_slots = (uint8_t)layout_slots(desired_layout);

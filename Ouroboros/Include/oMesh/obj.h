@@ -4,9 +4,9 @@
 
 #pragma once
 #include <oCore/color.h>
+#include <oMemory/allocate.h>
 #include <oString/path.h>
 #include <oMesh/mesh.h>
-#include <memory>
 
 namespace ouro { namespace mesh { namespace obj {
 
@@ -71,34 +71,54 @@ struct info_t
 	mesh::info_t    mesh_info;
 };
 
-struct init_t
-{
-	init_t()
-		: est_num_vertices       (100000)
-		, est_num_indices        (100000)
-		, flip_handedness        (false)
-		, counter_clockwise_faces(true)
-		, calc_normals_on_error  (true)
-		, calc_texcoords_on_error(false)
-	{}
-
-	uint32_t est_num_vertices;          // used to pre-allocate memory (minimizes reallocs)
-	uint32_t est_num_indices;           // used to pre-allocate memory (minimizes reallocs)
-	bool     flip_handedness;
-	bool     counter_clockwise_faces;
-	bool     calc_normals_on_error;     // either for no loaded normals or degenerates
-	bool     calc_texcoords_on_error;   // uses LCSM if no texcoords in source (NOT CURRENTLY IMPLEMENTED)
-};
-
 class mesh
 {
 public:
-	// given the path and the loaded-to-memory string contents of the file, parse into 3D data
-	static std::shared_ptr<mesh> make(const init_t& init, const path_t& obj_path, const char* obj_string
+	struct init_t
+	{
+		init_t()
+			: est_num_vertices       (100000)
+			, est_num_indices        (100000)
+			, flip_handedness        (false)
+			, counter_clockwise_faces(true)
+			, calc_normals_on_error  (true)
+			, calc_texcoords_on_error(false)
+		{}
+
+		uint32_t est_num_vertices;          // used to pre-allocate memory (minimizes reallocs)
+		uint32_t est_num_indices;           // used to pre-allocate memory (minimizes reallocs)
+		bool     flip_handedness;
+		bool     counter_clockwise_faces;
+		bool     calc_normals_on_error;     // either for no loaded normals or degenerates
+		bool     calc_texcoords_on_error;   // uses LCSM if no texcoords in source (NOT CURRENTLY IMPLEMENTED)
+	};
+
+	mesh()                                  : impl_(nullptr) {}
+	~mesh()                                 { deinitialize(); }
+	mesh(const mesh& that)                  = delete;
+	const mesh& operator=(const mesh& that) = delete;
+	mesh(mesh&& that) : impl_(that.impl_)   { that.impl_ = nullptr; }
+	mesh& operator=(mesh&& that)            { if (this != &that) { impl_ = that.impl_; that.impl_ = nullptr; } return *this; }
+
+	mesh(const init_t& init
+		, const path_t& obj_path
+		, const char* obj_string
+		, const allocator& mesh_alloc = default_allocator
+		, const allocator& temp_alloc = default_allocator)
+	{ initialize(init, obj_path, obj_string, mesh_alloc, temp_alloc); }
+
+	void initialize(const init_t& init
+		, const path_t& obj_path
+		, const char* obj_string
 		, const allocator& mesh_alloc = default_allocator
 		, const allocator& temp_alloc = default_allocator);
 
-	virtual info_t info() const = 0;
+	void deinitialize();
+
+	info_t info() const;
+
+private:
+	void* impl_;
 };
 
 struct texture_info
@@ -182,9 +202,20 @@ struct material_lib_info
 class material_lib
 {
 public:
-	static std::shared_ptr<material_lib> make(const path_t& mtl_path, const char* mtl_string);
+	material_lib()                                          : impl_(nullptr) {}
+	~material_lib()                                         { deinitialize(); }
+	material_lib(const material_lib& that)                  = delete;
+	const material_lib& operator=(const material_lib& that) = delete;
+	material_lib(material_lib&& that) : impl_(that.impl_)   { that.impl_ = nullptr; }
+	material_lib& operator=(material_lib&& that)            { if (this != &that) { impl_ = that.impl_; that.impl_ = nullptr; } return *this; }
 
-	virtual material_lib_info get_info() const = 0;
+	void initialize(const path_t& mtl_path, const char* mtl_string, const allocator& alloc);
+	void deinitialize();
+
+	material_lib_info info() const;
+
+private:
+	void* impl_;
 };
 
 }}}

@@ -308,7 +308,7 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 // unique indexed data. This must be called after ALL SourceElements have been
 // populated.
 template<typename allocT>
-static void reduce_elements(const init_t& init
+static void reduce_elements(const mesh::init_t& init
 	, index_map_t* index_map
 	, const vertex_data& src_elements
 	, std::vector<uint32_t, allocT>* indices
@@ -410,20 +410,18 @@ static void reduce_elements(const init_t& init
 	s.num_indices = (uint32_t)indices->size() - s.start_index;
 }
 
-class mesh_impl : public mesh
+struct mesh_impl
 {
-public:
-	mesh_impl(const init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc);
-	info_t info() const override;
+	mesh_impl(const mesh::init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc);
+	info_t info() const;
 
-private:
 	vertex_data                                         data_;
 	std::vector<uint32_t, ouro_std_allocator<uint32_t>> indices_;
 	path_t                                              path_;
 	bool                                                counter_clockwise_faces_;
 };
 
-mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc)
+mesh_impl::mesh_impl(const mesh::init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc)
 	: path_(obj_path)
 	, counter_clockwise_faces_(init.counter_clockwise_faces)
 	, data_(mesh_alloc)
@@ -536,11 +534,6 @@ mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj
 	}
 }
 
-std::shared_ptr<mesh> mesh::make(const init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc)
-{
-	return std::make_shared<mesh_impl>(init, obj_path, obj_string, mesh_alloc, temp_alloc);
-}
-
 info_t mesh_impl::info() const
 {
 	info_t i;
@@ -577,6 +570,33 @@ info_t mesh_impl::info() const
 	i.mesh_info.lods.fill(lod);
 
 	return i;
+}
+
+void mesh::initialize(const init_t& init
+	, const path_t& obj_path
+	, const char* obj_string
+	, const allocator& mesh_alloc
+	, const allocator& temp_alloc)
+{
+	impl_ = mesh_alloc.allocate(sizeof(mesh_impl), "mesh_impl");
+	new (impl_) mesh_impl(init, obj_path, obj_string, mesh_alloc, temp_alloc);
+}
+
+void mesh::deinitialize()
+{
+	if (impl_)
+	{
+		auto impl      = (mesh_impl*)impl_;
+		auto std_alloc = impl->indices_.get_allocator();
+		std_alloc.alloc_.destroy(impl);
+		impl_          = nullptr;
+	}
+}
+
+info_t mesh::info() const
+{
+	auto impl = (mesh_impl*)impl_;
+	return impl->info();
 }
 
 bool from_string_opt(float3* dst, const char** pstart)
@@ -731,9 +751,8 @@ static texture_info parse_texture_info(const char* _TextureLine)
 	oThrow(std::errc::io_error, "error parsing obj texture info");
 }
 
-typedef std::vector<material_info, ouro_std_allocator<material_info>> material_info_vector_t;
-
-static void parse_materials(material_info_vector_t& materials, const path_t& mtl_path, const char* mtl_string)
+template<typename allocT>
+static void parse_materials(std::vector<material_info, allocT>& materials, const path_t& mtl_path, const char* mtl_string)
 {
 	// NOTE: mtl_path is not used yet, but leave this in case we need
 	// to report better errors.
@@ -812,34 +831,52 @@ static void parse_materials(material_info_vector_t& materials, const path_t& mtl
 	}
 }
 
-class material_lib_impl : public material_lib
+struct material_lib_impl
 {
-public:
-	material_lib_impl(const path_t& mtl_path, const char* mtl_string);
-	material_lib_info get_info() const override;
-private:
-	material_info_vector_t Materials;
-	path_t Path;
+	material_lib_impl(const path_t& mtl_path, const char* mtl_string, const allocator& alloc);
+	material_lib_info info() const;
+
+	std::vector<material_info, ouro_std_allocator<material_info>> materials_;
+	path_t                                                        path_;
 };
 
-material_lib_impl::material_lib_impl(const path_t& mtl_path, const char* mtl_string)
+material_lib_impl::material_lib_impl(const path_t& mtl_path, const char* mtl_string, const allocator& alloc)
+	: materials_(ouro_std_allocator<material_info>(alloc, "material_lib"))
 {
-	Materials.reserve(16);
-	parse_materials(Materials, mtl_path, mtl_string);
+	materials_.reserve(16);
+	parse_materials(materials_, mtl_path, mtl_string);
 }
 
-std::shared_ptr<material_lib> material_lib::make(const path_t& mtl_path, const char* mtl_string)
-{
-	return std::make_shared<material_lib_impl>(mtl_path, mtl_string);
-}
-
-material_lib_info material_lib_impl::get_info() const
+material_lib_info material_lib_impl::info() const
 {
 	material_lib_info i;
-	i.materials = Materials.data();
-	i.num_materials = (uint32_t)Materials.size();
-	i.mtl_path = Path;
+	i.materials = materials_.data();
+	i.num_materials = (uint32_t)materials_.size();
+	i.mtl_path = path_;
 	return i;
+}
+
+void material_lib::initialize(const path_t& mtl_path, const char* mtl_string, const allocator& alloc)
+{
+	impl_ = alloc.allocate(sizeof(material_lib_impl), "material_lib_impl");
+	new (impl_) material_lib_impl(mtl_path, mtl_string, alloc);
+}
+
+void material_lib::deinitialize()
+{
+	if (impl_)
+	{
+		auto impl      = (material_lib_impl*)impl_;
+		auto std_alloc = impl->materials_.get_allocator();
+		std_alloc.alloc_.destroy(impl);
+		impl_          = nullptr;
+	}
+}
+
+material_lib_info material_lib::info() const
+{
+	auto impl = (material_lib_impl*)impl_;
+	return impl->info();
 }
 
 }}}

@@ -10,10 +10,10 @@
 
 using namespace ouro;
 
-static void test_correctness(const std::shared_ptr<tests::obj_test>& _Expected, const std::shared_ptr<mesh::obj::mesh>& _OBJ)
+static void test_correctness(const std::shared_ptr<tests::obj_test>& _Expected, const mesh::obj::mesh& _OBJ)
 {
 	mesh::obj::info_t expectedInfo = _Expected->get_info();
-	mesh::obj::info_t objInfo = _OBJ->info();
+	mesh::obj::info_t objInfo = _OBJ.info();
 
 	oCHECK(!strcmp(expectedInfo.mtl_path, objInfo.mtl_path), "MaterialLibraryPath \"%s\" (should be %s) does not match in obj file \"%s\"", objInfo.mtl_path.c_str(), expectedInfo.mtl_path.c_str(), objInfo.obj_path.c_str());
 	
@@ -44,9 +44,9 @@ static void obj_load(unit_test::services& services, const char* _Path, double* _
 	double start = timer::now();
 	auto b = services.load_buffer(_Path);
 
-	mesh::obj::init_t init;
+	mesh::obj::mesh::init_t init;
 	init.calc_normals_on_error = false; // buddha doesn't have normals and is 300k faces... let's not sit in the test suite calculating such a large test case
-	std::shared_ptr<mesh::obj::mesh> obj = mesh::obj::mesh::make(init, _Path, b);
+	mesh::obj::mesh obj(init, _Path, b);
 
 	if (_pLoadTime)
 		*_pLoadTime = timer::now() - start;
@@ -57,7 +57,7 @@ oTEST(oMesh_obj)
 	// Correctness
 	{
 		std::shared_ptr<tests::obj_test> test = tests::obj_test::make(tests::obj_test::cube);
-		std::shared_ptr<mesh::obj::mesh> obj = mesh::obj::mesh::make(mesh::obj::init_t(), "Correctness (cube) obj", test->file_contents());
+		mesh::obj::mesh obj(mesh::obj::mesh::init_t(), "Correctness (cube) obj", test->file_contents());
 		test_correctness(test, obj);
 	}
 
