@@ -91,6 +91,11 @@ struct face
 
 struct vertex_data
 {
+	vertex_data()
+		: aabb_min( FLT_MAX,  FLT_MAX,  FLT_MAX)
+		, aabb_max(-FLT_MAX, -FLT_MAX, -FLT_MAX)
+	{}
+
 	void reserve(uint32_t new_num_vertices, uint32_t new_num_faces)
 	{
 		positions.reserve(new_num_vertices);
@@ -125,7 +130,7 @@ static const char* parse_vline(const char* vline
 	, std::vector<float3>& normals
 	, std::vector<float3>& texcoords
 	, float3& min_position
-	, float3& max_positions)
+	, float3& max_position)
 {
 	float3 temp;
 
@@ -138,7 +143,7 @@ static const char* parse_vline(const char* vline
 			atof(&vline, &temp.z); if (flip_handedness) temp.z = -temp.z;
 			positions.push_back(temp);
 			min_position = min(min_position, temp);
-			max_positions = max(max_positions, temp);
+			max_position = max(max_position, temp);
 			break;
 		case 't':
 			move_to_whitespace(&vline);
@@ -240,7 +245,7 @@ static const char* parse_fline(const char* fline
 }
 
 // Scans an OBJ string and appends vertex element data
-static void parse_elements(const char* obj_string, bool flip_handedness, vertex_data* _pElements)
+static void parse_elements(const char* obj_string, bool flip_handedness, vertex_data* elements)
 {
 	uint32_t NumGroups = 0;
 	group_t group;
@@ -252,20 +257,20 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 		switch (*line)
 		{
 			case 'v':
-				line = parse_vline(line, flip_handedness, _pElements->positions, _pElements->normals, _pElements->texcoords, _pElements->aabb_min, _pElements->aabb_max);
+				line = parse_vline(line, flip_handedness, elements->positions, elements->normals, elements->texcoords, elements->aabb_min, elements->aabb_max);
 				break;
 			case 'f':
 				line = parse_fline(line
-					, (uint32_t)_pElements->positions.size()
-					, (uint32_t)_pElements->normals.size()
-					, (uint32_t)_pElements->texcoords.size()
-					, (uint32_t)_pElements->groups.size()
-					, _pElements->faces);
+					, (uint32_t)elements->positions.size()
+					, (uint32_t)elements->normals.size()
+					, (uint32_t)elements->texcoords.size()
+					, (uint32_t)elements->groups.size()
+					, elements->faces);
 				break;
 			case 'g':
 				// close out previous group
 				if (NumGroups)
-					_pElements->groups.push_back(group); 
+					elements->groups.push_back(group); 
 				NumGroups++;
 				parse_string(group.group_name, line);
 				break;
@@ -273,7 +278,7 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 				parse_string(group.material_name, line);
 				break;
 			case 'm':
-				parse_string(_pElements->mtl_path, line);
+				parse_string(elements->mtl_path, line);
 				break;
 			default:
 				break;
@@ -285,12 +290,12 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 	// close out a remaining group one last time
 	// NOTE: start prim / num prims are handled later after vertices have been reduced
 	if (NumGroups)
-		_pElements->groups.push_back(group);
+		elements->groups.push_back(group);
 
 	else
 	{
 		group.group_name = "Default Group";
-		_pElements->groups.push_back(group);
+		elements->groups.push_back(group);
 	}
 }
 
@@ -552,9 +557,9 @@ info_t mesh_impl::info() const
 	i.mesh_info.extents = (data_.aabb_max - data_.aabb_min) * 0.5f;
 	i.mesh_info.avg_edge_length = 1.0f;
 	i.mesh_info.avg_texel_density = float2(1.0f, 1.0f);
-	i.mesh_info.layout[0] = celement_t(element_semantic::position, 0, surface::format::r32g32b32_float,    0);
-	i.mesh_info.layout[1] = celement_t(element_semantic::normal,   0, surface::format::r32g32b32_float,    1);
-	i.mesh_info.layout[2] = celement_t(element_semantic::tangent,  0, surface::format::r32g32b32a32_float, 2);
+	i.mesh_info.layout[0] = celement_t(element_semantic::position, 0, surface::format::r32g32b32_float, 0);
+	i.mesh_info.layout[1] = celement_t(element_semantic::normal,   0, surface::format::r32g32b32_float, 1);
+	i.mesh_info.layout[2] = celement_t(element_semantic::texcoord, 0, surface::format::r32g32b32_float, 2);
 	
 	lod_t lod;
 	lod.opaque_color.start_subset = 0;
