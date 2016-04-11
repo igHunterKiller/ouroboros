@@ -12,8 +12,6 @@
 
 oDEFINE_WHITESPACE_PARSING();
 
-static const float3 ZERO3(0.0f, 0.0f, 0.0f);
-
 namespace ouro {
 
 template<> const char* as_string(const mesh::obj::texture_type& type)
@@ -91,9 +89,15 @@ struct face
 
 struct vertex_data
 {
-	vertex_data()
-		: aabb_min( FLT_MAX,  FLT_MAX,  FLT_MAX)
-		, aabb_max(-FLT_MAX, -FLT_MAX, -FLT_MAX)
+	vertex_data(const allocator& alloc)
+		: aabb_min ( FLT_MAX,  FLT_MAX,  FLT_MAX)
+		, aabb_max (-FLT_MAX, -FLT_MAX, -FLT_MAX)
+		, positions(ouro_std_allocator<float3>  (alloc, "obj vertex_data"))
+		, normals  (ouro_std_allocator<float3>  (alloc, "obj vertex_data"))
+		, texcoords(ouro_std_allocator<float3>  (alloc, "obj vertex_data"))
+		, faces    (ouro_std_allocator<face>    (alloc, "obj vertex_data"))
+		, groups   (ouro_std_allocator<group_t> (alloc, "obj vertex_data"))
+		, subsets  (ouro_std_allocator<subset_t>(alloc, "obj vertex_data"))
 	{}
 
 	void reserve(uint32_t new_num_vertices, uint32_t new_num_faces)
@@ -108,27 +112,27 @@ struct vertex_data
 	float3 aabb_min;
 	float3 aabb_max;
 
-	std::vector<float3> positions;
-	std::vector<float3> normals;
-	std::vector<float3> texcoords;
+	std::vector<float3, ouro_std_allocator<float3>>     positions;
+	std::vector<float3, ouro_std_allocator<float3>>     normals;
+	std::vector<float3, ouro_std_allocator<float3>>     texcoords;
 	
 	// these are assigned after negative indices have been handled, but are 
 	// otherwise directly-from-file values.
-	std::vector<face> faces;
-
-	std::vector<group_t> groups;
-	std::vector<subset_t> subsets;
+	std::vector<face,     ouro_std_allocator<face>>     faces;
+	std::vector<group_t,  ouro_std_allocator<group_t>>  groups;
+	std::vector<subset_t, ouro_std_allocator<subset_t>> subsets;
 
 	path_string mtl_path;
 };
 
 // Given a string that starts with the letter 'v', parse as a line of vector
 // values and push_back into the appropriate vector.
+template<typename allocT>
 static const char* parse_vline(const char* vline
 	, bool flip_handedness
-	, std::vector<float3>& positions
-	, std::vector<float3>& normals
-	, std::vector<float3>& texcoords
+	, std::vector<float3, allocT>& positions
+	, std::vector<float3, allocT>& normals
+	, std::vector<float3, allocT>& texcoords
 	, float3& min_position
 	, float3& max_position)
 {
@@ -169,12 +173,13 @@ static const char* parse_vline(const char* vline
 // Fills the specified face with data from a line in an OBJ starting with the 
 // 'f' (face) character. This returns a pointer into the string fline that is 
 // either the end of the string, or the end of the line.
+template<typename allocT>
 static const char* parse_fline(const char* fline
 	, uint32_t num_positions
 	, uint32_t num_normals
 	, uint32_t num_texcoords
 	, uint32_t num_groups
-	, std::vector<face>& faces)
+	, std::vector<face, allocT>& faces)
 {
 	move_to_whitespace(&fline);
 	move_past_line_whitespace(&fline);
@@ -189,26 +194,26 @@ static const char* parse_fline(const char* fline
 		{
 			// parsing faces is relative to vertex parsing up to this point,
 			// so figure out where the data's at.
-			uint32_t ZeroBasedIndexFromFile = 0;
+			uint32_t zero_based_index_from_file = 0;
 
 			// Negative indices implies the max indexable vertex OBJ will be INT_MAX, 
 			// not UINT_MAX.
 			if (*fline == '-')
 			{
-				int NegativeIndex = atoi(fline);
-				uint32_t NumElements = 0;
+				int negative_index = atoi(fline);
+				uint32_t nelements = 0;
 				switch (semantic)
 				{
-					case face::position: NumElements = num_positions; break;
-					case face::normal: NumElements = num_normals; break;
-					case face::texcoord: NumElements = num_texcoords; break;
+					case face::position: nelements = num_positions; break;
+					case face::normal:   nelements = num_normals;   break;
+					case face::texcoord: nelements = num_texcoords; break;
 				}
-				ZeroBasedIndexFromFile = NumElements + NegativeIndex;
+				zero_based_index_from_file = nelements + negative_index;
 			}
 			else
-				ZeroBasedIndexFromFile = atoi(fline) - 1;
+				zero_based_index_from_file = atoi(fline) - 1;
 
-			f.index[f.num_indices][semantic] = ZeroBasedIndexFromFile;
+			f.index[f.num_indices][semantic] = zero_based_index_from_file;
 
 			if (semantic == (face::semantic_count-1))
 				break;
@@ -247,7 +252,7 @@ static const char* parse_fline(const char* fline
 // Scans an OBJ string and appends vertex element data
 static void parse_elements(const char* obj_string, bool flip_handedness, vertex_data* elements)
 {
-	uint32_t NumGroups = 0;
+	uint32_t ngroups = 0;
 	group_t group;
 
 	const char* line = obj_string;
@@ -269,9 +274,9 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 				break;
 			case 'g':
 				// close out previous group
-				if (NumGroups)
+				if (ngroups)
 					elements->groups.push_back(group); 
-				NumGroups++;
+				ngroups++;
 				parse_string(group.group_name, line);
 				break;
 			case 'u':
@@ -289,7 +294,7 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 
 	// close out a remaining group one last time
 	// NOTE: start prim / num prims are handled later after vertices have been reduced
-	if (NumGroups)
+	if (ngroups)
 		elements->groups.push_back(group);
 
 	else
@@ -302,13 +307,14 @@ static void parse_elements(const char* obj_string, bool flip_handedness, vertex_
 // Using config data and an index hash, reduce all duplicate/face data into 
 // unique indexed data. This must be called after ALL SourceElements have been
 // populated.
+template<typename allocT>
 static void reduce_elements(const init_t& init
 	, index_map_t* index_map
 	, const vertex_data& src_elements
-	, std::vector<uint32_t>* indices
+	, std::vector<uint32_t, allocT>* indices
 	, vertex_data* singly_indexed_elements
-	, std::vector<uint32_t>* degenerate_normals
-	, std::vector<uint32_t>* degenerate_texcoords)
+	, std::vector<uint32_t, allocT>* degenerate_normals
+	, std::vector<uint32_t, allocT>* degenerate_texcoords)
 {
 	singly_indexed_elements->subsets.resize(src_elements.groups.size());
 
@@ -351,7 +357,7 @@ static void reduce_elements(const init_t& init
 					else
 					{
 						degenerate_normals->push_back(NewIndex);
-						singly_indexed_elements->normals.push_back(ZERO3);
+						singly_indexed_elements->normals.push_back(float3(0.0f, 0.0f, 0.0f));
 					}
 				}
 
@@ -362,7 +368,7 @@ static void reduce_elements(const init_t& init
 					else
 					{
 						degenerate_texcoords->push_back(NewIndex);
-						singly_indexed_elements->texcoords.push_back(ZERO3);
+						singly_indexed_elements->texcoords.push_back(float3(0.0f, 0.0f, 0.0f));
 					}
 				}
 			
@@ -376,25 +382,25 @@ static void reduce_elements(const init_t& init
 		// Now that the index has either been added or reset to a pre-existing index, 
 		// add the face definition to the index list
 
-		static const uint32_t CCWindices[6] = { 0, 2, 1, 2, 0, 3, };
-		static const uint32_t CWindices[6] = { 0, 1, 2, 2, 3, 0, };
+		static const uint32_t kCkCWindices[6] = { 0, 2, 1, 2, 0, 3, };
+		static const uint32_t kCWindices[6] = { 0, 1, 2, 2, 3, 0, };
 	
 		bool UseCCW = init.counter_clockwise_faces;
 		if (init.flip_handedness)
 			UseCCW = !UseCCW;
 	
-		const uint32_t* pOrder = UseCCW ? CCWindices : CWindices;
+		const uint32_t* order = UseCCW ? kCkCWindices : kCWindices;
 
-		indices->push_back(resolvedIndices[pOrder[0]]);
-		indices->push_back(resolvedIndices[pOrder[1]]);
-		indices->push_back(resolvedIndices[pOrder[2]]);
+		indices->push_back(resolvedIndices[order[0]]);
+		indices->push_back(resolvedIndices[order[1]]);
+		indices->push_back(resolvedIndices[order[2]]);
 
 		// Add another triangle for the rest of the quad
 		if (f.num_indices == 4)
 		{
-			indices->push_back(resolvedIndices[pOrder[3]]);
-			indices->push_back(resolvedIndices[pOrder[4]]);
-			indices->push_back(resolvedIndices[pOrder[5]]);
+			indices->push_back(resolvedIndices[order[3]]);
+			indices->push_back(resolvedIndices[order[4]]);
+			indices->push_back(resolvedIndices[order[5]]);
 		}
 	} // for each face
 
@@ -407,167 +413,167 @@ static void reduce_elements(const init_t& init
 class mesh_impl : public mesh
 {
 public:
-	mesh_impl(const init_t& init, const path_t& obj_path, const char* obj_string);
+	mesh_impl(const init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc);
 	info_t info() const override;
 
 private:
-	vertex_data data_;
-	std::vector<uint32_t> indices_;
-	path_t path_;
-	bool counter_clockwise_faces_;
+	vertex_data                                         data_;
+	std::vector<uint32_t, ouro_std_allocator<uint32_t>> indices_;
+	path_t                                              path_;
+	bool                                                counter_clockwise_faces_;
 };
 
-mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj_string)
+mesh_impl::mesh_impl(const init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc)
 	: path_(obj_path)
 	, counter_clockwise_faces_(init.counter_clockwise_faces)
+	, data_(mesh_alloc)
 {
 	const size_t kInitialReserve = init.est_num_indices * sizeof(uint32_t);
-	size_t IndexMapMallocBytes = 0;
-	
-	std::vector<uint32_t> DegenerateNormals, DegenerateTexcoords;
-	DegenerateNormals.reserve(1000);
-	DegenerateTexcoords.reserve(1000);
+	size_t       index_map_bytes = 0;
+
+	std::vector<uint32_t, ouro_std_allocator<uint32_t>> degenerate_normals  (ouro_std_allocator<uint32_t>(temp_alloc, "degenerate_normals"));
+	std::vector<uint32_t, ouro_std_allocator<uint32_t>> degenerate_texcoords(ouro_std_allocator<uint32_t>(temp_alloc, "degenerate_texcoords"));
+	degenerate_normals.reserve(1000);
+	degenerate_texcoords.reserve(1000);
 
 	// Scope memory usage... more might be used below when calculating normals, 
 	// etc. so free this stuff up rather than leaving it all around.
 	
 	{
-		void* pArena = malloc(kInitialReserve);
-		oFinally { if (pArena) free(pArena); };
-		linear_allocator Allocator(pArena, kInitialReserve);
-		index_map_t IndexMap(0, index_map_t::hasher(), index_map_t::key_equal(), std::less<key_t>()
-			, allocator_type(&Allocator, &IndexMapMallocBytes));
+		// create a hash map backed by a linear allocator: reduce_elements will hash geometry elements to minimize vertices,
+		// then the hash is no longer needed - and no deallocation is necessary, so the linear allocator saves all the teardown free's
+		void* index_map_memory = temp_alloc.allocate(kInitialReserve, "index_map linear_allocator");
+		oFinally { if (index_map_memory) temp_alloc.deallocate(index_map_memory); };
+		linear_allocator lin_alloc(index_map_memory, kInitialReserve);
+		index_map_t index_map(0, index_map_t::hasher(), index_map_t::key_equal(), std::less<key_t>(), allocator_type(&lin_alloc, &index_map_bytes));
 
 		// OBJ files don't contain a same-sized vertex streams for each elements, 
 		// and indexing occurs uniquely between vertex elements. Eventually we will 
 		// create same-sized vertex data - even by replication of data - so that a 
-		// single index buffer can be used. That's the this->VertexElements, but 
-		// first to get the raw vertex data off disk, use this.
-		vertex_data OffDiskElements;
-		OffDiskElements.reserve(init.est_num_vertices, init.est_num_indices / 3);
-		parse_elements(obj_string, init.flip_handedness, &OffDiskElements);
+		// single index buffer can be used. That's the this->data_, but first get 
+		// the raw vertex data off disk using off_disk_data.
+		vertex_data off_disk_data(temp_alloc);
+		off_disk_data.reserve(init.est_num_vertices, init.est_num_indices / 3);
+		parse_elements(obj_string, init.flip_handedness, &off_disk_data);
 
-		const uint32_t kEstMaxVertexElements = (uint32_t)max(max(OffDiskElements.positions.size(), OffDiskElements.normals.size()), OffDiskElements.texcoords.size());
-		data_.reserve(kEstMaxVertexElements, init.est_num_indices / 3);
+		const uint32_t est_max_vertices = (uint32_t)max(max(off_disk_data.positions.size(), off_disk_data.normals.size()), off_disk_data.texcoords.size());
+		data_.reserve(est_max_vertices, init.est_num_indices / 3);
 		indices_.reserve(init.est_num_indices);
 
-		reduce_elements(init, &IndexMap, OffDiskElements, &indices_, &data_, &DegenerateNormals, &DegenerateTexcoords);
+		reduce_elements(init, &index_map, off_disk_data, &indices_, &data_, &degenerate_normals, &degenerate_texcoords);
 
-	} // End of life for from-disk vertex elements and index hash
+	} // End of life for from-disk vertex data and index hash
 
 	#ifdef _DEBUG
-		if (IndexMapMallocBytes > kInitialReserve)
+		if (index_map_bytes > kInitialReserve)
 		{
 			mstring reserved, additional;
 			const char* n = obj_path.c_str(); // passing the macro directly causes win32 to throw an exception
-			oTrace("obj: %s index map allocated %s additional indices beyond the initial est_num_indices=%s", n, format_commas(additional, (uint32_t)((IndexMapMallocBytes - kInitialReserve) / sizeof(uint32_t))), format_commas(reserved, init.est_num_indices));
+			oTrace("[obj] %s index map allocated %s additional indices beyond the initial est_num_indices=%s", n, format_commas(additional, (uint32_t)((index_map_bytes - kInitialReserve) / sizeof(uint32_t))), format_commas(reserved, init.est_num_indices));
 		}
 	#endif
 
 	if (init.calc_normals_on_error)
 	{
-		bool CalcNormals = false;
+		bool calc_normals = false;
 		if (data_.normals.empty())
 		{
-			oTrace("obj: No normals found in %s...", obj_path.c_str());
-			CalcNormals = true;
+			oTrace("[obj] No normals found in %s...", obj_path.c_str());
+			calc_normals = true;
 		}
 
-		else if (!DegenerateNormals.empty())
+		else if (!degenerate_normals.empty())
 		{
 			// @tony: Is there a way to calculate only the degenerates?
-			oTrace("obj: %u degenerate normals in %s...", DegenerateNormals.size(), obj_path.c_str());
-			CalcNormals = true;
+			oTrace("[obj] %u degenerate normals in %s...", degenerate_normals.size(), obj_path.c_str());
+			calc_normals = true;
 		}
 
-		if (CalcNormals)
+		if (calc_normals)
 		{
-			oTrace("obj: Calculating vertex normals... (%s)", obj_path.c_str());
-			sstring StrTime;
+			oTrace("[obj] Calculating vertex normals... (%s)", obj_path.c_str());
+			sstring str_time;
 			timer t;
 			data_.normals.resize(data_.positions.size());
 			calc_vertex_normals(data_.normals.data(), indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), (uint32_t)data_.positions.size(), init.counter_clockwise_faces, true);
-			format_duration(StrTime, t.seconds(), true, true);
-			oTrace("obj: Calculating vertex normals done in %s. (%s)", StrTime.c_str(), obj_path.c_str());
+			format_duration(str_time, t.seconds(), true, true);
+			oTrace("[obj] Calculating vertex normals done in %s. (%s)", str_time.c_str(), obj_path.c_str());
 		}
 	}
 
 	if (init.calc_texcoords_on_error)
 	{
-		bool CalcTexcoords = false;
+		bool calc_texcoords = false;
 		if (data_.texcoords.empty())
 		{
-			oTrace("obj: No texcoords found in %s...", obj_path.c_str());
-			CalcTexcoords = true;
+			oTrace("[obj] No texcoords found in %s...", obj_path.c_str());
+			calc_texcoords = true;
 		}
 
-		else if (!DegenerateTexcoords.empty())
+		else if (!degenerate_texcoords.empty())
 		{
-			oTrace("obj: %u degenerate texcoords in %s...", DegenerateTexcoords.size(), obj_path.c_str());
-			CalcTexcoords = true;
+			oTrace("[obj] %u degenerate texcoords in %s...", degenerate_texcoords.size(), obj_path.c_str());
+			calc_texcoords = true;
 		}
 
-		if (CalcTexcoords)
+		if (calc_texcoords)
 		{
 			data_.texcoords.resize(data_.positions.size());
-			sstring StrTime;
-			double SolverTime = 0.0;
-			oTrace("obj: Calculating texture coordinates... (%s)", obj_path.c_str());
-			try { calc_texcoords(data_.aabb_min, data_.aabb_max, indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), data_.texcoords.data(), (uint32_t)data_.texcoords.size(), &SolverTime); }
+			sstring str_time;
+			double solver_time = 0.0;
+			oTrace("[obj] Calculating texture coordinates... (%s)", obj_path.c_str());
+			try { ouro::mesh::calc_texcoords(data_.aabb_min, data_.aabb_max, indices_.data(), (uint32_t)indices_.size(), data_.positions.data(), data_.texcoords.data(), (uint32_t)data_.texcoords.size(), &solver_time); }
 			catch (std::exception& e)
 			{
 				e;
 				data_.texcoords.clear();
-				oTraceA("obj: Calculating texture coordinates failed. %s (%s)", obj_path, e.what());
+				oTraceA("[obj] Calculating texture coordinates failed. %s (%s)", obj_path, e.what());
 			}
 
-			format_duration(StrTime, SolverTime, true, true);
-			oTrace("obj: Calculating texture coordinates done in %s. (%s)", StrTime.c_str(), obj_path.c_str());
+			format_duration(str_time, solver_time, true, true);
+			oTrace("[obj] Calculating texture coordinates done in %s. (%s)", str_time.c_str(), obj_path.c_str());
 		}
 	}
 }
 
-std::shared_ptr<mesh> mesh::make(const init_t& init, const path_t& obj_path, const char* obj_string)
+std::shared_ptr<mesh> mesh::make(const init_t& init, const path_t& obj_path, const char* obj_string, const allocator& mesh_alloc, const allocator& temp_alloc)
 {
-	return std::make_shared<mesh_impl>(init, obj_path, obj_string);
+	return std::make_shared<mesh_impl>(init, obj_path, obj_string, mesh_alloc, temp_alloc);
 }
 
 info_t mesh_impl::info() const
 {
 	info_t i;
-	i.obj_path = path_;
-	i.mtl_path = data_.mtl_path;
-	i.groups = data_.groups.data();
-	i.subsets = data_.subsets.data();
-	i.indices = indices_.data();
-	i.positions = data_.positions.empty() ? nullptr : data_.positions.data();
-	i.normals = data_.normals.empty() ? nullptr : data_.normals.data();
-	i.texcoords = data_.texcoords.empty() ? nullptr : data_.texcoords.data();
+	i.obj_path                     = path_;
+	i.mtl_path                     = data_.mtl_path;
+	i.groups                       = data_.groups.data();
+	i.subsets                      = data_.subsets.data();
+	i.indices                      = indices_.data();
+	i.positions                    = data_.positions.empty() ? nullptr : data_.positions.data();
+	i.normals                      = data_.normals.empty() ? nullptr : data_.normals.data();
+	i.texcoords                    = data_.texcoords.empty() ? nullptr : data_.texcoords.data();
 
-	i.mesh_info.num_indices = (uint32_t)indices_.size();
-	i.mesh_info.num_vertices = (uint32_t)data_.positions.size();
-	i.mesh_info.num_subsets = (uint16_t)data_.groups.size();
-	i.mesh_info.num_slots = 3; // each element is put in its own slots: obj supports pos, nrm, tan
-	i.mesh_info.log2scale = 0;
-	i.mesh_info.primitive_type = primitive_type::triangles;
-	i.mesh_info.face_type = counter_clockwise_faces_ ? face_type::front_cw : face_type::front_ccw;
-	i.mesh_info.flags = 0;
-
-	i.mesh_info.bounding_sphere = i.positions ? calc_sphere(i.positions, sizeof(float3), i.mesh_info.num_vertices) : float4(0.0f, 0.0f, 0.0f, 0.0f);
-	i.mesh_info.extents = (data_.aabb_max - data_.aabb_min) * 0.5f;
-	i.mesh_info.avg_edge_length = 1.0f;
-	i.mesh_info.avg_texel_density = float2(1.0f, 1.0f);
-	i.mesh_info.layout[0] = celement_t(element_semantic::position, 0, surface::format::r32g32b32_float, 0);
-	i.mesh_info.layout[1] = celement_t(element_semantic::normal,   0, surface::format::r32g32b32_float, 1);
-	i.mesh_info.layout[2] = celement_t(element_semantic::texcoord, 0, surface::format::r32g32b32_float, 2);
+	i.mesh_info.num_indices        = (uint32_t)indices_.size();
+	i.mesh_info.num_vertices       = (uint32_t)data_.positions.size();
+	i.mesh_info.num_subsets        = (uint16_t)data_.groups.size();
+	i.mesh_info.num_slots          = 3; // each element is put in its own slots: obj supports pos, nrm, tan
+	i.mesh_info.log2scale          = 0;
+	i.mesh_info.primitive_type     = primitive_type::triangles;
+	i.mesh_info.face_type          = counter_clockwise_faces_ ? face_type::front_cw : face_type::front_ccw;
+	i.mesh_info.flags              = 0;
+	i.mesh_info.bounding_sphere    = i.positions ? calc_sphere(i.positions, sizeof(float3), i.mesh_info.num_vertices) : float4(0.0f, 0.0f, 0.0f, 0.0f);
+	i.mesh_info.extents            = (data_.aabb_max - data_.aabb_min) * 0.5f;
+	i.mesh_info.avg_edge_length    = 1.0f;
+	i.mesh_info.avg_texel_density  = float2(1.0f, 1.0f);
+	i.mesh_info.layout[0]          = celement_t(element_semantic::position, 0, surface::format::r32g32b32_float, 0);
+	i.mesh_info.layout[1]          = celement_t(element_semantic::normal,   0, surface::format::r32g32b32_float, 1);
+	i.mesh_info.layout[2]          = celement_t(element_semantic::texcoord, 0, surface::format::r32g32b32_float, 2);
 	
 	lod_t lod;
-	lod.opaque_color.start_subset = 0;
-	lod.opaque_color.num_subsets = i.mesh_info.num_subsets;
-	lod.opaque_shadow.start_subset = 0;
-	lod.opaque_shadow.num_subsets = i.mesh_info.num_subsets;
-	lod.collision.start_subset = 0;
-	lod.collision.num_subsets = i.mesh_info.num_subsets;
+	lod.opaque_color.start_subset  = 0; lod.opaque_color.num_subsets  = i.mesh_info.num_subsets;
+	lod.opaque_shadow.start_subset = 0; lod.opaque_shadow.num_subsets = i.mesh_info.num_subsets;
+	lod.collision.start_subset     = 0; lod.collision.num_subsets     = i.mesh_info.num_subsets;
+
 	i.mesh_info.lods.fill(lod);
 
 	return i;
@@ -725,7 +731,9 @@ static texture_info parse_texture_info(const char* _TextureLine)
 	oThrow(std::errc::io_error, "error parsing obj texture info");
 }
 
-static void parse_materials(std::vector<material_info>& materials, const path_t& mtl_path, const char* mtl_string)
+typedef std::vector<material_info, ouro_std_allocator<material_info>> material_info_vector_t;
+
+static void parse_materials(material_info_vector_t& materials, const path_t& mtl_path, const char* mtl_string)
 {
 	// NOTE: mtl_path is not used yet, but leave this in case we need
 	// to report better errors.
@@ -810,7 +818,7 @@ public:
 	material_lib_impl(const path_t& mtl_path, const char* mtl_string);
 	material_lib_info get_info() const override;
 private:
-	std::vector<material_info> Materials;
+	material_info_vector_t Materials;
 	path_t Path;
 };
 
