@@ -20,6 +20,8 @@ public:
 	blob(void* pointer, size_t size, deleter_fn deleter) : pointer_(pointer),       size_(size) ,      deleter_(deleter) {}
 	blob(blob&& that)                                    : pointer_(that.pointer_), size_(that.size_), deleter_(that.deleter_) { that.pointer_ = nullptr; that.size_ = 0; that.deleter_ = nullptr; }
 	~blob()                                                                                                                    { if (pointer_ && deleter_) deleter_(pointer_); }
+	blob(const blob&)                  = delete;
+	const blob& operator=(const blob&) = delete;
 
 	blob& operator=(blob&& that)
 	{
@@ -27,7 +29,7 @@ public:
 		{
 			if (pointer_ && deleter_) deleter_(pointer_);
 			pointer_ = that.pointer_; that.pointer_ = nullptr;
-			size_    = that.size_;    that.size_ = 0;
+			size_    = that.size_;    that.size_    = 0;
 			deleter_ = that.deleter_; that.deleter_ = nullptr;
 		}
 		return *this;
@@ -54,11 +56,8 @@ public:
 	deleter_fn deleter()               const { return deleter_; }
 
 private:
-	blob(const blob&);/* = delete; */
-	const blob& operator=(const blob&);/* = delete; */
-
-  void* pointer_;
-	size_t size_;
+  void*      pointer_;
+	size_t     size_;
 	deleter_fn deleter_;
 };
 
