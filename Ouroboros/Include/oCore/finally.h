@@ -23,15 +23,15 @@ template<typename functionT>
 class finally_base
 {
 public:
-	finally_base(functionT&& fn) : fn_(std::move(fn)) {}
-	finally_base(finally_base&& that) : fn_(std::move(that.fn_)) {}
-	~finally_base() { fn_(); }
+	finally_base                 ()                          = delete;
+	finally_base                 (functionT&& fn)            : fn_(std::move(fn))       {}
+	finally_base                 (      finally_base&& that) : fn_(std::move(that.fn_)) {}
+	finally_base& operator=      (      finally_base&& that)                            { if (this != &that) { fn_ = std::move(that.fn_); } return *this; }
+	finally_base                 (const finally_base&  that) = delete;
+	const finally_base& operator=(const finally_base&  that) = delete;
+	~finally_base()                                                                     { fn_(); }
 
 private:
-	finally_base();
-	finally_base(const finally_base&);
-	const finally_base& operator=(const finally_base&);
-
 	functionT fn_;
 };
 
