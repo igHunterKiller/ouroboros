@@ -12,7 +12,7 @@
 namespace ouro { namespace gfx {
 
 template<typename resourceT>
-class device_resource_registry : protected resource_registry<resourceT>
+class device_resource_registry : public resource_registry<resourceT>
 {
 protected:
 	// all these api are meant to implement a further type-wrapper
@@ -69,7 +69,7 @@ protected:
 
 		dev_ = dev;
 
-		initialize_base(registry_label, reg_memory, reg_bytes, error_placeholder, load_async, this, io_alloc);
+		initialize_base(registry_label, reg_memory, reg_bytes, error_placeholder, io_alloc, true);
 	}
 
 	void* deinitialize()
@@ -92,14 +92,14 @@ protected:
 	{
 		auto reg = (device_resource_registry*)user;
 		path_t relative_path = path.relative_path(filesystem::data_path());
-		reg->complete_load(uri_t(relative_path.c_str()), buffer, syserr ? syserr->what() : "no error");
+		reg->complete_load_resource(uri_t(relative_path.c_str()), buffer, syserr ? syserr->what() : "no error");
 	}
 
-	static void load_async(const uri_t& uri_ref, allocator& io_alloc, void* user)
+	void load_resource(const uri_t& uri_ref, allocator& io_alloc) override
 	{
 		path_t path = uri_ref.path();
 		oCheck(!path.is_windows_absolute(), std::errc::invalid_argument, "path should be relative to data path (%s)", path.c_str());
-		filesystem::load_async(filesystem::data_path() / path, on_completion, user, filesystem::load_option::binary_read, io_alloc);
+		filesystem::load_async(filesystem::data_path() / path, on_completion, this, filesystem::load_option::binary_read, io_alloc);
 	}
 };
 

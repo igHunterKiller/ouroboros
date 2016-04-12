@@ -11,6 +11,7 @@ template<> const char* as_string(const enum class base_resource_registry::handle
 	{
 		"missing",
 		"loading",
+		"loading_indexed",
 		"indexed",
 		"ready",
 		"error",
@@ -134,25 +135,22 @@ base_resource_registry::size_type base_resource_registry::calc_capacity(size_typ
 }
 
 base_resource_registry::base_resource_registry()
-	: load_(nullptr)
-	, load_user_(nullptr)
-	, error_placeholder_(nullptr)
+	: error_placeholder_(nullptr)
+	, concurrent_create_(false)
 {
 }
 
 base_resource_registry::base_resource_registry(base_resource_registry&& that)
-	: load_(nullptr)
-	, load_user_(nullptr)
-	, error_placeholder_(nullptr)
+	: error_placeholder_(nullptr)
+	, concurrent_create_(false)
 {
 	lookup_            = std::move(that.lookup_);
 	res_pool_          = std::move(that.res_pool_);
 	queued_pool_       = std::move(that.queued_pool_);
 	creates_           = std::move(that.creates_);
 	destroys_          = std::move(that.destroys_);
-	load_              = that.load_;              that.load_              = nullptr;
-	load_user_         = that.load_user_;         that.load_user_         = nullptr;
 	error_placeholder_ = that.error_placeholder_; that.error_placeholder_ = nullptr;
+	concurrent_create_ = that.concurrent_create_; that.concurrent_create_ = false;
 	label_             = std::move(that.label_);
 }
 
@@ -172,15 +170,14 @@ base_resource_registry& base_resource_registry::operator=(base_resource_registry
 		queued_pool_       = std::move(that.queued_pool_);
 		creates_           = std::move(that.creates_);
 		destroys_          = std::move(that.destroys_);
-		load_              = that.load_;              that.load_              = nullptr;
-		load_user_         = that.load_user_;         that.load_user_         = nullptr;
 		error_placeholder_ = that.error_placeholder_; that.error_placeholder_ = nullptr;
+		concurrent_create_ = that.concurrent_create_; that.concurrent_create_ = false;
 		label_             = std::move(that.label_);
 	}
 	return *this;
 }
 
-void base_resource_registry::initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, load_fn load, void* load_user, const allocator& io_alloc)
+void base_resource_registry::initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc, bool concurrent_create)
 {
 	allocate_options opts(required_alignment);
 
@@ -207,11 +204,10 @@ void base_resource_registry::initialize_base(const char* registry_label, void* m
 	res_pool_   .initialize(res_mem, res_bytes);
 	queued_pool_.initialize(queued_mem, queued_bytes);
 
-	load_              = load;
-	load_user_         = load_user;
-	error_placeholder_ = create("error_placeholder", error_placeholder);
-	io_alloc_          = io_alloc;
-
+	error_placeholder_           = create_resource("error_placeholder", error_placeholder);
+	io_alloc_                    = io_alloc;
+	concurrent_create_           = concurrent_create;
+	
 	strlcpy(label_, registry_label);
 }
 
@@ -221,19 +217,18 @@ void* base_resource_registry::deinitialize_base()
 	if (lookup_.valid())
 	{
 		destroy_indexed();
-		destroy(error_placeholder_);
-		error_placeholder_ = nullptr;
+		destroy_resource(error_placeholder_);
 		
 		flush();
 		oCheck(res_pool_.full() && creates_.empty() && destroys_.empty(), std::errc::protocol_error, "[%s] flush should have emptied all queues and released all assets", label_.c_str());
 
-		io_alloc_ = allocator();
+		error_placeholder_ = nullptr;
+		concurrent_create_ = false;
+		io_alloc_          = allocator();
+
 		queued_pool_.deinitialize();
 		res_pool_.deinitialize();
 		p = lookup_.deinitialize();
-
-		load_ = nullptr;
-		load_user_ = nullptr;
 
 		label_.clear();
 	}
@@ -241,19 +236,28 @@ void* base_resource_registry::deinitialize_base()
 	return p;
 }
 
-void base_resource_registry::complete_load(const uri_t& uri_ref, blob& compiled, const char* error_message)
+void base_resource_registry::complete_load_resource(const uri_t& uri_ref, blob& compiled, const char* error_message)
 {
+	handle::type* h;
 	if (compiled)
-		queue_create(uri_ref, compiled);
+	{
+		if (concurrent_create_)
+		{
+			void* resource = create_resource(uri_ref, compiled);
+			insert_or_resolve(uri_ref.hash(), resource,  resource ? handle::status::ready : handle::status::error, h, true);
+		}
+		else
+			queue_create(uri_ref, compiled);
+	}
+
 	else
 	{
-		handle::type* h;
 		insert_or_resolve(uri_ref.hash(), error_placeholder_, handle::status::error, h);
 		oTrace("[%s] Load failed: %s\n  %s", label_.c_str(), uri_ref.c_str(), error_message ? error_message : "unknown error");
 	}
 }
 
-bool base_resource_registry::insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle)
+bool base_resource_registry::insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle, bool force)
 {
 	auto packed = handle::pack(placeholder ? placeholder : error_placeholder_, status, 0, 1);
 
@@ -281,9 +285,11 @@ bool base_resource_registry::insert_or_resolve(const key_type& key, void* placeh
 		}
 
 		oCheck(index != res_pool_.nullidx, std::errc::invalid_argument, "something bad happened");
-
 		return inserted;
 	}
+
+	else if (force)
+		replace_by_index(index, placeholder, status);
 
 	// valid index, resolve it
 	out_handle = res_pool_.typed_pointer(index);
@@ -309,12 +315,21 @@ base_resource_registry::handle base_resource_registry::insert(const uri_t& uri_r
 void base_resource_registry::insert_indexed(const key_type& index, const char* label, blob& compiled)
 {
 	handle::type* h;
-	insert_or_resolve(index, nullptr, handle::status::indexed, h);
 
-	path_t path("indexed:");
-	path /= label;
+	uri_t uri_ref("indexed://", label);
 
-	queue_create(path, compiled, index);
+	if (concurrent_create_)
+	{
+		void* resource = create_resource(uri_ref, compiled);
+		oCheck(resource, std::errc::invalid_argument, "[%s] create_resource failed for %s", label_.c_str(), label);
+		insert_or_resolve(index, resource, resource ? handle::status::indexed : handle::status::error, h, true);
+	}
+
+	else
+	{
+		insert_or_resolve(index, nullptr, handle::status::loading_indexed, h);
+		queue_create(uri_ref, compiled, index);
+	}
 }
 
 void* base_resource_registry::resolve_indexed(const key_type& index) const 
@@ -331,18 +346,12 @@ base_resource_registry::handle base_resource_registry::load(const uri_t& uri_ref
 {
 	handle::type* h;
 	if (insert_or_resolve(uri_ref.hash(), placeholder, handle::status::loading, h) || force)
-		load_(uri_ref, io_alloc_, load_user_);
+		load_resource(uri_ref, io_alloc_);
 	return handle(h);
 }
 
-void base_resource_registry::replace(const key_type& key, void* resource, const enum class handle::status& status)
+void base_resource_registry::replace_by_index(const uint32_t& index, void* resource, const enum class handle::status& status)
 {
-	// note: status could be bool at this point if there was a way to uniquely map placeholders to a status
-
-	auto index = lookup_.get(key);
-	if (index == lookup_.nul())
-		throw std::invalid_argument("invalid key");
-
 	atm_resource_t* handle = (atm_resource_t*)res_pool_.typed_pointer(index);
 	handle::type next, prev = handle->load();
 
@@ -364,6 +373,17 @@ void base_resource_registry::replace(const key_type& key, void* resource, const 
 	// free any previously valid data
 	if (!handle::is_placeholder(prev))
 		queue_destroy(handle::ptr(prev));
+}
+
+void base_resource_registry::replace(const key_type& key, void* resource, const enum class handle::status& status)
+{
+	// note: status could be bool at this point if there was a way to uniquely map placeholders to a status
+
+	auto index = lookup_.get(key);
+	if (index == lookup_.nul())
+		throw std::invalid_argument("invalid key");
+
+	replace_by_index(index, resource, status);
 }
 
 void base_resource_registry::queue_create(const uri_t& uri_ref, blob& compiled, const key_type& index)
@@ -400,7 +420,7 @@ void base_resource_registry::destroy_indexed()
 		{
 			lookup_.nix(key);
 			res_pool_.deallocate(index);
-			destroy(handle::ptr(packed));
+			destroy_resource(handle::ptr(packed));
 		}
 		return true;
 	});
@@ -430,7 +450,7 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 		lookup_.nix(key);
 		res_pool_.deallocate(index);
 		void* resource = handle::ptr(prev);
-		destroy(resource);
+		destroy_resource(resource);
 
 		oTrace("[%s] destroyed %p", label_.c_str(), resource);
 
@@ -444,7 +464,7 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 	while (n && creates_.pop(&q))
 	{
 		// maybe move this above the full sweep? in case stuff is inserted with a 0 refcount?
-		void* resource = create(q->uri_ref, q->compiled);
+		void* resource = create_resource(q->uri_ref, q->compiled);
 		auto key       = q->index ? q->index : q->uri_ref.hash();
 		auto ready     = q->index ? handle::status::indexed : handle::status::ready;
 		auto stat      = resource ? ready : handle::status::error;
@@ -463,7 +483,7 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 	// this is done after create in case some creates are noop'ed
 	while (n && destroys_.pop(&q))
 	{
-		destroy(q->resource);
+		destroy_resource(q->resource);
 		queued_pool_.deallocate(q);
 		n--;
 	}

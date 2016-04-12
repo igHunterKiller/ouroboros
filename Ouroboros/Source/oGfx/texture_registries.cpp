@@ -48,12 +48,7 @@ void texture2d_registry::deinitialize()
 	}
 }
 
-texture2d_registry::handle texture2d_registry::load(const uri_t& uri_ref)
-{
-	return base_t::load(uri_ref, nullptr, false);
-}
-
-void* texture2d_registry::create(const uri_t& uri_ref, blob& compiled)
+void* texture2d_registry::create_resource(const uri_t& uri_ref, blob& compiled)
 {
 	auto fformat = surface::get_file_format(compiled);
 	oCheck(fformat != surface::file_format::unknown, std::errc::invalid_argument, "[texture2d_registry] Unknown file format: %s", uri_ref.c_str());
@@ -78,7 +73,7 @@ void* texture2d_registry::create(const uri_t& uri_ref, blob& compiled)
 	return tex;
 }
 
-void texture2d_registry::destroy(void* resource)
+void texture2d_registry::destroy_resource(void* resource)
 {
 	auto tex = (basic_resource_type*)resource;
 	tex->view = nullptr;

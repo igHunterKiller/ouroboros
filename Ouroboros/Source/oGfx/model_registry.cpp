@@ -65,7 +65,7 @@ void model_registry::deinitialize()
 	base_t::deinitialize();
 }
 
-void* model_registry::create(const uri_t& uri_ref, blob& compiled)
+void* model_registry::create_resource(const uri_t& uri_ref, blob& compiled)
 {
 	// todo: find more meaningful allocators here
 	const allocator& subsets_allocator = default_allocator;
@@ -100,7 +100,7 @@ void* model_registry::create(const uri_t& uri_ref, blob& compiled)
 	return mdl;
 }
 
-void model_registry::destroy(void* entry)
+void model_registry::destroy_resource(void* entry)
 {
 	auto mdl = (mesh::model*)entry;
 	auto info = mdl->info();
@@ -229,11 +229,6 @@ void model_registry::insert_primitives(const allocator& alloc, const allocator& 
 
 	mesh = mesh::torus(alloc, io_alloc, mesh::face_type::outline, vlayout.data(), vlayout.size(), kFacet, kFacet, 0.5f, kExtent);
 	insert_primitive(primitive_model::torus_outline, mesh, alloc, io_alloc);
-}
-
-model_registry::handle model_registry::load(const uri_t& uri_ref)
-{
-	return base_t::load(uri_ref, nullptr, false);
 }
 
 model_registry::handle model_registry::load(const uri_t& uri_ref, const mesh::model& model)

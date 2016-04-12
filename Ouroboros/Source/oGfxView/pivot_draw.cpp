@@ -161,5 +161,5 @@ void pivot_draw::request_model_load(gfx::model_registry& registry, const uri_t& 
 {
 	oTrace("request_model_load: %s", uri_ref.c_str());
 
-	model_ = registry.load(uri_ref);
+	model_ = registry.load(uri_ref, nullptr);
 }

@@ -21,10 +21,6 @@ public:
 	typedef uint32_t size_type;
 	typedef uint64_t key_type;
 
-	// called by load, this function should asynchronously load the specified file's binary
-	// and call complete_load() on the resulting blob.
-	typedef void (*load_fn)(const uri_t& uri_ref, allocator& io_alloc, void* user);
-
 	class handle
 	{
 	public:
@@ -35,6 +31,7 @@ public:
 		{
 			missing,
 			loading,
+			loading_indexed,
 			indexed,
 			ready,
 			error,
@@ -79,6 +76,7 @@ public:
 		static uint16_t               refcnt        (type          packed) { return uint16_t((packed >> refcnt_shift) & refcnt_max);          }
 		static bool                   hasref        (type          packed) { return (packed & refcnt_mask) != 0;                              }
 		static bool                   is_placeholder(type          packed) { return is_placeholder(status(packed));                           }
+		static bool                   is_indexed    (type          packed) { return is_indexed(status(packed));                               }
 
 		handle(type* h) : handle_((atm_type*)h) {}
 
@@ -99,16 +97,22 @@ public:
 	// === non-concurrent api ===
 
 protected:
+
+	// loads a file from disk, network, etc. Before this is called, a placeholder
+	// is inserted by the calling function. Call complete_load_resource to finish
+	// processing the loaded blob.
+	virtual void load_resource(const uri_t& uri_ref, allocator& io_alloc) = 0;
+
 	// lifetime management specific to the resource type
 	// called during flush(), so if there are any rules associated with creation,
 	// such as being on a certain thread, ensure flush is called from that thread
 
 	// converts a compiled (baked/finalized) buffer into the resource type 
-	// maintained in this registry. This is called during flushes()
-	virtual void* create(const uri_t& uri_ref, blob& compiled) = 0;
+	// maintained in this registry. This is called during flushes().
+	virtual void* create_resource(const uri_t& uri_ref, blob& compiled) = 0;
 
 	// free a resource created in create()
-	virtual void destroy(void* resource) = 0;
+	virtual void destroy_resource(void* resource) = 0;
 
 	// ctor creates as empty
 	base_resource_registry();
@@ -123,7 +127,7 @@ protected:
 	base_resource_registry& operator=(base_resource_registry&& that);
 
 	// derived classes should set up all apparatus for create/destroy to work, then call this - placeholder is immediately created
-	void initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, load_fn load, void* load_user, const allocator& io_alloc);
+	void initialize_base(const char* registry_label, void* memory, size_type bytes, blob& error_placeholder, const allocator& io_alloc, bool concurrent_create);
 	
 	// destroys the internals of the instance and returns the memory passed to initialize_base()
 	void* deinitialize_base();
@@ -132,8 +136,8 @@ protected:
 	allocator get_io_allocator() { return io_alloc_; }
 
 	// queues for create, or if invalid inserts error placeholder
-	void complete_load(const uri_t& uri_ref, blob& compiled, const char* error_message);
-	
+	void complete_load_resource(const uri_t& uri_ref, blob& compiled, const char* error_message);
+
 public:
 
 	// returns true if this class has been initialized
@@ -159,7 +163,7 @@ public:
 	// ref-counted handle to it. If force is false, the handle may resolve to a pre-existing
 	// entry and no ownership of compiled is taken. If a new entry, the specified placeholder
 	// is inserted immediately to hold resolution over until the queue is flushed.
-	handle insert(const uri_t& uri_ref, void* placeholder, blob& compiled, bool force);
+	handle insert(const uri_t& uri_ref, void* placeholder, blob& compiled, bool force = false);
 
 	// inserts a resource that is locked in memory (like a placeholder) and is referenced directly (no handle, no ref-counting)
 	// these will be cleaned up during deinitialize_base(). Calling insert_indexed on a valid resource will overwrite it and 
@@ -174,7 +178,7 @@ public:
 	// If force is false, this may resolve to an already-existing handle. If force is true on a 
 	// pre-existing valid resource, it will remain that resource until the load completes instead 
 	// of an immediately new placeholder.
-	handle load(const uri_t& uri_ref, void* placeholder, bool force);
+	handle load(const uri_t& uri_ref, void* placeholder, bool force = false);
 
 	// note: unloading/erasing is done by eviscerating all base_resource handles so they release 
 	// their refcount. flush() garbage-collects all zero-referenced resources. It's also possible
@@ -212,16 +216,17 @@ private:
 	typedef concurrent_stack<queued_t>              queue_t;
 	typedef std::atomic<handle::type>               atm_resource_t;
 
-	lookup_t      lookup_;            // stores resources, accessible by key
-	res_pool_t    res_pool_;          // stores available resources
-	queued_pool_t queued_pool_;       // stores available queue nodes
-	queue_t       creates_;           // queue for all compiled buffers that can be passed to create and then inserted
-	queue_t       destroys_;          // queue for all valid resources to destroy in the next flush
-	load_fn       load_;              // a function to asynchronously load the binary of a uri_ref
-	void*         load_user_;         // user data for calling load_
-	void*         error_placeholder_; // inserted if a file load fails
-	allocator     io_alloc_;          // used for temporary file io and decode operations
-	sstring       label_;             // name used in traces
+	lookup_t      lookup_;               // stores resources, accessible by key
+	res_pool_t    res_pool_;             // stores available resources
+	queued_pool_t queued_pool_;          // stores available queue nodes
+	queue_t       creates_;              // queue for all compiled buffers that can be passed to create and then inserted
+	queue_t       destroys_;             // queue for all valid resources to destroy in the next flush
+	void*         error_placeholder_;    // inserted if a file load fails
+	allocator     io_alloc_;             // used for temporary file io and decode operations
+	bool          concurrent_create_;    // if true, create is called during complete_load_resource. If false the blob is queued for create during flush
+	sstring       label_;                // name used in traces
+
+	void replace_by_index(const uint32_t& index, void* resource, const enum class handle::status& status);
 
 	// replaces an existing key with the specified resource or placeholder and updates the status
 	// if the key is in a bad state, such as having been discarded, the resource will be queued for
@@ -229,7 +234,7 @@ private:
 	void replace(const key_type& key, void* resource, const enum class handle::status& status);
 
 	// returns true if insertion occured or false if an existing handle was retreived
-	bool insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle);
+	bool insert_or_resolve(const key_type& key, void* placeholder, const enum class handle::status& status, handle::type*& out_handle, bool force = false);
 
 	// destroys all indexed resources, this should be called before any final flush during deinitialize_base()
 	void destroy_indexed();
@@ -276,12 +281,12 @@ public:
 
 	// == concurrent api ==
 
-	handle         resolve        (const key_type& key,   resource_type* placeholder)                                 { return (handle)        base_resource_registry::resolve(key, placeholder);                  }
-	handle         resolve        (const uri_t&    uri_ref,   resource_type* placeholder)                             { return (handle)        base_resource_registry::resolve(uri_ref.hash(), placeholder);          }
-	handle         insert         (const uri_t&    uri_ref,   resource_type* placeholder, blob& compiled, bool force) { return (handle)        base_resource_registry::insert(uri_ref, placeholder, compiled, force); }
-	handle         load           (const uri_t&    uri_ref,   resource_type* placeholder,                 bool force) { return (handle)        base_resource_registry::load(uri_ref, placeholder, force);             }
-	void           insert_indexed (const key_type& index, const char* label,                blob& compiled)           {                        base_resource_registry::insert_indexed(index, label, compiled);     }
-	resource_type* resolve_indexed(const key_type& index) const                                                       { return (resource_type*)base_resource_registry::resolve_indexed(index);                     }
+	handle         resolve        (const key_type& key,   resource_type* placeholder)                                         { return (handle)        base_resource_registry::resolve(key, placeholder);                     }
+	handle         resolve        (const uri_t&    uri_ref,   resource_type* placeholder)                                     { return (handle)        base_resource_registry::resolve(uri_ref.hash(), placeholder);          }
+	handle         insert         (const uri_t&    uri_ref,   resource_type* placeholder, blob& compiled, bool force = false) { return (handle)        base_resource_registry::insert(uri_ref, placeholder, compiled, force); }
+	handle         load           (const uri_t&    uri_ref,   resource_type* placeholder,                 bool force = false) { return (handle)        base_resource_registry::load(uri_ref, placeholder, force);             }
+	void           insert_indexed (const key_type& index, const char* label,                blob& compiled)                   {                        base_resource_registry::insert_indexed(index, label, compiled);        }
+	resource_type* resolve_indexed(const key_type& index) const                                                               { return (resource_type*)base_resource_registry::resolve_indexed(index);                        }
 };
 
 }
