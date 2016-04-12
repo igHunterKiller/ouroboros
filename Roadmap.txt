@@ -38,17 +38,14 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
      59               Testing     tests       oCore_win_crt_leak_tracker (sometimes succeeds)
      60               oString     deps        Try to remove path_t's dependency on fixed_string
      74               oCore       refactor    is macros.h worth having? Review and remove if appropriate.
-	 76               oMath       gizmo       Something happens between r637 and r638 that makes the gizmo misbehave while manipulating camera: investigate
 	 80               oGfx        renderer    Move btt_test elements into main renderer - start terrain rendering.
 	 81               oGfx        renderer    Why break up film separately? Why not have pov be a member of the renderer? These things aren't really separable or reusable.
 	 82               oGfx        renderer    Replace placeholder lines-based grid with something that mips into the distance better - resurrect grid shader.
 	 84               oGfx        renderer    Use the btt stuff to create a 0.1v of a terrain thing
 	 85               oGfx        renderer    Implement trivially basic model rendering
 	 86               oCore       hash_map    Replace std::function deps with templated function pattern
-	 88               oGfx        renderer    Get a model loading from obj (no material)
 	 89 88            oGfx        renderer    Get some geometry-based debug viz defined
 	 90               oGfx        renderer    See about getting a font/text rendering method up. Prepare for menus (i.e. background color/text hilight).
-	 91 89            oGfxView    ui          File Open, any simple mesh operations, debug viz exposed, etc.
 	 92               oGfx        debug menu  See about adding some listing of texture registry and allow triggering of loading the texture with stats
 	 93 82?           oGfx        renderer    Tinker with some default shaders: noise-based, resurrect 'draft' shader (3d grid shader?)
 	 94               oGfx        renderer    Get some kind of light geometry going, be able to transform it
@@ -75,7 +72,7 @@ ORDINAL DEPENDENCIES  LIBRARY     TITLE       DESC
 	121               oSystem     filesystem_monitor Figure out where buffer alloc comes from... maybe user-specified buffer rather than just size? unwatch could return pointer
 	122               Ouroboros   all.h       Consider renaming all.h to precomp.h or pch.h and only include headers useful for pch. all implies all when it's meant just for precompiled headers
 	123               oSystem     gsreport    Review win_gsreport, why'd that change when moving to VS2015?
-	124               oMesh       decode      venus-birth.obj crashes, investigate
+	125               oMath       gizmo       If you translate in screen-space (yellow circle) and hold the mouse down, the object will not settle/stay put. Investigate and remove the drift.
 
 === Notes ===
 
