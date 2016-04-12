@@ -29,6 +29,9 @@ public:
 
 	// return true to keep traversing, false to exit early
 	typedef bool (*visitor_fn)(key_type key, val_type value, void* user);
+	
+	// return true if the key can be retired, false if value is still valid
+	typedef bool (*retire_fn)(const val_type& value, const val_type& nul_value, void* user);
 
 	static const memory_alignment required_alignment = memory_alignment::cacheline;
 	
@@ -54,6 +57,7 @@ public:
 	size_type occupancy()    const { return (size() * 100) / capacity(); }             // [0,100] percentage of capacity that is valid
 	bool      needs_resize() const { return occupancy() > 75; }                        // returns true if performance is degraded due to high occupancy
 	size_type reclaim_keys();                                                          // derelict keys can saturate occupancy, call this periodically to eviscerate keys with invalid values
+	size_type reclaim_keys(retire_fn retire, void* user);                              // reclaim_keys, but additionally remove keys based on a value test other than for nul
 	size_type migrate(concurrent_hash_map& that, size_type max_moves = size_type(-1)); // rehash a limited number of keys from this to that
 	void      visit(visitor_fn visitor, void* user);                                   // visit valid values
 
@@ -207,21 +211,31 @@ typename concurrent_hash_map<keyT, valT>::size_type concurrent_hash_map<keyT, va
 template<typename keyT, typename valT>
 typename concurrent_hash_map<keyT, valT>::size_type concurrent_hash_map<keyT, valT>::reclaim_keys()
 {
+	return reclaim_keys([](const val_type& value, const val_type& nul_value, void* user) { return value == nul_value; }, nullptr);
+}
+	
+template<typename keyT, typename valT>
+typename concurrent_hash_map<keyT, valT>::size_type concurrent_hash_map<keyT, valT>::reclaim_keys(retire_fn retire, void* user)
+{
 	size_type n = 0;
 	uint32_t i = 0;
 	while (i <= mod_)
 	{
-		if (val_nul(i) && !key_nul(i))
+		bool val_is_nul = retire(vals_[i], nul_val_, user);
+
+		if (val_is_nul && !key_nul(i))
 		{
 			keys_[i] = nul_key_;
+			vals_[i] = nul_val_;
 			n++;
 
 			uint32_t ii = (i + 1) & mod_;
 			while (!key_nul(ii))
 			{
-				if (val_nul(ii))
+				if (retire(vals_[ii], nul_val_, user))
 				{
 					keys_[ii] = nul_key_;
+					vals_[ii] = nul_val_;
 					n++;
 				}
 

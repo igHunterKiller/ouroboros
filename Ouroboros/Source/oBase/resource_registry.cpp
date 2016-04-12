@@ -430,34 +430,6 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 {
 	size_type n = max_operations;
 
-	// sweep 0-refed entries in the hash map
-	lookup_.visit([&](const lookup_t::key_type& key, const lookup_t::val_type& index)
-	{
-		// todo: make a missing placeholder separate from error
-		uint64_t null_handle = handle::pack(error_placeholder_, handle::status::missing, 0, 0);
-
-		// if 0-ref'ed replace entry with something that won't crash, but is invalid
-		// this is an attempt to make this part of the flush still remain concurrent
-		auto* handle = (atm_resource_t*)res_pool_.typed_pointer(index);
-		handle::type prev = handle->load();
-		do
-		{
-			if (handle::hasref(prev) || handle::is_placeholder(prev))
-				return true;
-
-		} while (!handle->compare_exchange_strong(prev, null_handle));
-
-		lookup_.nix(key);
-		res_pool_.deallocate(index);
-		void* resource = handle::ptr(prev);
-		destroy_resource(resource);
-
-		oTrace("[%s] destroyed %p", label_.c_str(), resource);
-
-		n--;
-		return n != 0; // false (i.e. stop traversing) if the quota is used up)
-	});
-
 	queued_t* q = nullptr;
 
 	// sweep separate create queue and insert new resources
@@ -492,7 +464,40 @@ base_resource_registry::size_type base_resource_registry::flush(size_type max_op
 	// if there are any modifications during this period, this all breaks down
 	// so although there is optimism in the above operations, overall flush is
 	// non-concurrent because of this.
-	lookup_.reclaim_keys();
+
+	struct this_ctx
+	{
+		base_resource_registry* reg;
+		uint32_t* counter;
+	};
+
+	this_ctx ctx;
+	ctx.reg = this;
+	ctx.counter = &n;
+
+	lookup_.reclaim_keys([](const uint32_t& index, const uint32_t& nul, void* user)
+	{
+		if (index == nul)
+			return true;
+
+		this_ctx& ctx = *(this_ctx*)user;
+		handle::type packed = *ctx.reg->res_pool_.typed_pointer(index);
+
+		// do not auto-reclaim referenced or placeholders here - they will explicitly be
+		// zero-refed or nix'ed elsewhere
+		if (handle::hasref(packed) || handle::is_placeholder(packed))
+			return false;
+
+		ctx.reg->res_pool_.deallocate(index);
+		void* resource = handle::ptr(packed);
+		ctx.reg->destroy_resource(resource);
+
+		oTrace("[%s] destroyed %p", ctx.reg->label_.c_str(), resource);
+
+		(*ctx.counter)--;
+		return true;
+
+	}, &ctx);
 
 	return max_operations - n;
 }
