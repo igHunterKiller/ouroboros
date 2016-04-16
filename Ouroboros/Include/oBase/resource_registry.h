@@ -270,8 +270,8 @@ public:
 		type* get(enum class status* out_status, uint16_t* out_type) const { return (type*)base_resource_registry::handle::get(out_status, out_type); }
 		enum class status status()                                   const { enum class status s; get(&s); return s; }
 
-		operator bool         () const                                     { return !!entry_; }
-		operator bool         ()                                           { return !!entry_; }
+		operator bool         () const                                     { return !!handle_; }
+		operator bool         ()                                           { return !!handle_; }
 		operator type*        ()                                           { return get(); }
 		operator const type*  ()                                           { return get(); }
 		type*       operator->()                                           { return get(); }
