@@ -425,23 +425,25 @@ struct srv             : view         { srv_desc get_desc() const;              
 struct ibv
 {
 	ibv() : offset(0), num_indices(0), transient(false), is_32bit(false) {}
+	ibv(uint32_t offset, uint32_t num_indices, bool transient = false, bool is_32bit = false) : offset(offset), num_indices(num_indices), transient(transient), is_32bit(is_32bit) {}
 
 	uint32_t offset;           // bytes from index buffer base
 	uint32_t num_indices : 30; //
-	uint32_t transient : 1;    // else persistent
-	uint32_t is_32bit : 1;     // else is 16-bit
+	uint32_t transient   : 1;  // else persistent
+	uint32_t is_32bit    : 1;  // else is 16-bit
 };
 
 struct vbv
 {
 	vbv() : offset(0), num_vertices(0), transient(false), vertex_stride_uints_minus_1(0) {}
+	vbv(uint32_t offset, uint32_t num_vertices, uint32_t stride_bytes, bool transient = false) : offset(offset), num_vertices(num_vertices), transient(transient) { vertex_stride_bytes(stride_bytes); }
 
-	uint32_t offset;                           // bytes from vertex buffer base
-	uint32_t num_vertices : 26;                //
-	uint32_t transient : 1;                    // else persistent
-	uint32_t vertex_stride_uints_minus_1  : 5; // (sizeof(vertex) / 4) - 1 to make the most of the bit space
+	uint32_t offset;                            // bytes from vertex buffer base
+	uint32_t num_vertices                 : 26; //
+	uint32_t transient                    : 1;  // else persistent
+	uint32_t vertex_stride_uints_minus_1  : 5;  // (sizeof(vertex) / 4) - 1 to make the most of the bit space
 	inline void vertex_stride_bytes(uint32_t stride_bytes) { vertex_stride_uints_minus_1 = (stride_bytes / sizeof(uint32_t)) - 1; }
-	inline uint32_t vertex_stride_bytes() const { return (vertex_stride_uints_minus_1 + 1) * sizeof(uint32_t); }
+	inline uint32_t vertex_stride_bytes() const { return ((vertex_stride_uints_minus_1 + 1) & ((1<<5)-1)) * sizeof(uint32_t); }
 };
 
 class graphics_command_list : public device_child
