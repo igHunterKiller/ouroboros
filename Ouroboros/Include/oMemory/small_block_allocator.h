@@ -23,56 +23,30 @@ public:
 	// returns the bookkeeping overhead
 	static size_type overhead();
 
-	// ctor creates as empty
 	small_block_allocator();
-
-	// ctor moves an existing small_block_allocator into this one
-	small_block_allocator(small_block_allocator&& that);
-
-	// ctor creates as a valid small_block_allocator using external memory
-	small_block_allocator(void* arena, size_type bytes, const uint16_t* block_sizes, size_type num_block_sizes);
-
-	// dtor
+	small_block_allocator(void* memory, size_type bytes, const uint16_t* block_sizes, size_type num_block_sizes);
 	~small_block_allocator();
-
-	// calls deinitialize on this, moves that's memory under the same config
-	small_block_allocator& operator=(small_block_allocator&& that);
+	small_block_allocator                 (small_block_allocator&& that);
+	small_block_allocator& operator=      (small_block_allocator&& that);
+	small_block_allocator                 (const small_block_allocator&) = delete;
+	const small_block_allocator& operator=(const small_block_allocator&) = delete;
 
 	// manages the specified memory block to fulfill allocators of exactly one of
 	// the sizes in block_sizes. The memory must be chunk_size-aligned both in 
 	// base pointer and size.
-	void initialize(void* arena, size_type bytes, const uint16_t* block_sizes, size_type num_block_sizes);
-
-	// deinitializes and returns the memory passed to initialize()
-	void* deinitialize();
-
-	// allocates memory of the specified size if that size is equal to one of the
-	// block sizes used to initialize this allocator. If no match or memory is not
-	// available this returns nullptr
-	void* allocate(size_t size);
-
-	// frees memory returned from allocate
-	void deallocate(void* ptr);
-
-	// simple range check that returns true if this index/pointer could have been 
-	// allocated from this allocator
-	bool owns(void* ptr) const { return chunks_.owns(ptr); }
+	void  initialize(void* memory, size_type bytes, const uint16_t* block_sizes, size_type num_block_sizes); // note max_num_block_sizes
+	void* deinitialize();                                                                                    // returns memory passed to initialize()
+	void* allocate(size_t size);                                                                             // if a best-fit is not available, this will allocate 1-size larger - careful with alignment relating to block size
+	void  deallocate(void* ptr);
+	bool  owns(void* ptr) const { return chunks_.owns(ptr); }                                                // range-check the pointer to within the allocator
 
 private:
-	small_block_allocator(const small_block_allocator&); /* = delete; */
-	const small_block_allocator& operator=(const small_block_allocator&); /* = delete; */
-
 	struct chunk_t
 	{
 		static const uint16_t nullidx = uint16_t(-1);
-
 		chunk_t() : prev(nullidx), next(nullidx), bin(nullidx), pad(0) {}
-
 		pool pool;
-		uint16_t prev;
-		uint16_t next;
-		uint16_t bin;
-		uint16_t pad;
+		uint16_t prev, next, bin, pad;
 	};
 
 	void remove_chunk(chunk_t* c);

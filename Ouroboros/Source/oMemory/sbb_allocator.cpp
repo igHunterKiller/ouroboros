@@ -8,6 +8,11 @@
 #define USE_ALLOCATOR_STATS 1
 #define USE_ALLOCATION_STATS 1
 
+#include <oCore/assert.h>
+#define SBB_TRACE(sbb_op, new_ptr, old_ptr, bytes, align, label) do { oTrace("[SBB], %s, %p, %p, %u, %u, %s", sbb_op, old_ptr, new_ptr, bytes, align, label); } while(false)
+//#define SBB_TRACE(sbb_op, new_ptr, old_ptr, bytes, align, label) do {} while(false)
+
+
 namespace ouro {
 
 struct walk_stats
@@ -26,12 +31,12 @@ static void find_largest_free_block(void* ptr, size_t bytes, int used, void* use
 	}
 }
 
-size_t sbb_allocator::calc_bookkeeping_size(size_t arena_bytes, size_t min_block_size)
+size_t sbb_allocator::calc_bookkeeping_size(size_t memory_bytes, size_t min_block_size)
 {
-  return sbb_bookkeeping_size(arena_bytes, min_block_size);
+  return sbb_bookkeeping_size(memory_bytes, min_block_size);
 }
 
-void sbb_allocator::initialize(void* arena, size_t bytes, void* bookkeeping, size_t min_block_size)
+void sbb_allocator::initialize(void* memory, size_t memory_bytes, void* bookkeeping, size_t min_block_size)
 {
   if (!bookkeeping)
     throw allocate_error(allocate_errc::invalid_bookkeeping);
@@ -41,10 +46,10 @@ void sbb_allocator::initialize(void* arena, size_t bytes, void* bookkeeping, siz
 		deinitialize();
 
 		heap_ = bookkeeping;
-		heap_size_ = bytes;
+		heap_size_ = memory_bytes;
 		min_block_size_ = min_block_size;
 
-		heap_ = sbb_create(arena, heap_size_, min_block_size, heap_);
+		heap_ = sbb_create(memory, heap_size_, min_block_size, heap_);
 
 		#if USE_ALLOCATOR_STATS
 			stats_ = allocator_stats();
@@ -55,7 +60,7 @@ void sbb_allocator::initialize(void* arena, size_t bytes, void* bookkeeping, siz
 
 void* sbb_allocator::deinitialize()
 {
-	void* arena = heap_;
+	void* memory = heap_;
   if (heap_)
   {
 	  #if USE_ALLOCATOR_STATS
@@ -70,7 +75,7 @@ void* sbb_allocator::deinitialize()
 	  heap_ = nullptr;
 	  heap_size_ = 0;
   }
-	return arena;
+	return memory;
 }
 
 sbb_allocator::sbb_allocator(sbb_allocator&& that)
@@ -102,15 +107,15 @@ allocator_stats sbb_allocator::get_stats() const
 
 const void* sbb_allocator::bookkeeping() const
 {
-	return sbb_arena((sbb_t)heap_);
+	return sbb_bookkeeping((sbb_t)heap_);
 }
 
-const void* sbb_allocator::arena() const
+const void* sbb_allocator::base() const
 {
 	return sbb_arena((sbb_t)heap_);
 }
 
-size_t sbb_allocator::arena_size() const
+size_t sbb_allocator::capacity() const
 {
 	return sbb_arena_bytes((sbb_t)heap_);
 }
@@ -119,7 +124,21 @@ void* sbb_allocator::allocate(size_t bytes, const char* label, const allocate_op
 {
 	bytes = std::max(bytes, size_t(1));
 	size_t align = options.convert_alignment();
-	void* p = align == 16 ? sbb_malloc((sbb_t)heap_, bytes) : sbb_memalign((sbb_t)heap_, align, bytes);
+	
+	void* p;
+
+	if (align == 16)
+	{
+		p = sbb_malloc((sbb_t)heap_, bytes);
+		SBB_TRACE("sbb_malloc", p, nullptr, bytes, align, label);
+	}
+
+	else
+	{
+		p = sbb_memalign((sbb_t)heap_, align, bytes);
+		SBB_TRACE("sbb_memalign", p, nullptr, bytes, align, label);
+	}
+
 	if (p)
 	{
 		size_t block_size = nextpow2(bytes);//sbb_block_size(p);
@@ -151,6 +170,7 @@ void* sbb_allocator::reallocate(void* ptr, size_t bytes)
 {
 	size_t block_size = ptr ? sbb_block_size((sbb_t)heap_, ptr) : 0;
 	void* p = sbb_realloc((sbb_t)heap_, ptr, bytes);
+	SBB_TRACE("sbb_realloc", p, ptr, bytes, 0, "");
 	if (p)
 	{
 		size_t diff = nextpow2(bytes)/*sbb_block_size(p)*/ - block_size;
@@ -182,6 +202,7 @@ void sbb_allocator::deallocate(void* ptr)
 	{
 		const size_t block_size = sbb_block_size((sbb_t)heap_, ptr); // kinda slow... should sbb be modified to return block size freed?
 		sbb_free((sbb_t)heap_, ptr);
+		SBB_TRACE("sbb_free", ptr, nullptr, 0, 0, "");
 
 		#if USE_ALLOCATOR_STATS
 			stats_.num_allocations--;
@@ -207,9 +228,20 @@ size_t sbb_allocator::size(void* ptr) const
 	return sbb_block_size((sbb_t)heap_, ptr);
 }
 
+size_t sbb_allocator::offset(void* ptr) const
+{
+	return owns(ptr) ? size_t((uint8_t*)ptr - (uint8_t*)sbb_arena((sbb_t)heap_)) : size_t(-1);
+}
+
+void* sbb_allocator::ptr(size_t offset) const
+{
+	void* p = (uint8_t*)sbb_arena((sbb_t)heap_) + offset;
+	return owns(p) ? p : nullptr;
+}
+
 bool sbb_allocator::owns(void* ptr) const
 {
-	return ptr >= heap_ && ptr < ((uint8_t*)heap_ + heap_size_);
+	return ptr >= heap_ && ptr < ((uint8_t*)sbb_arena((sbb_t)heap_) + heap_size_);
 }
 
 bool sbb_allocator::valid() const

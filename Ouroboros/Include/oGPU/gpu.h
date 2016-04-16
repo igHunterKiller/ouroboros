@@ -614,7 +614,7 @@ public:
 
 	// if an ibv or vbv's contents needs to be read, use this base in conjunction with the view's offset
 	// to access the data.
-	const void* readable_mesh_base() const { return persistent_mesh_alloc_.arena(); }
+	const void* readable_mesh_base() const { return persistent_mesh_alloc_.base(); }
 
 	ref<rtv> new_rtv(resource* r, const rtv_desc& desc);
 	ref<dsv> new_dsv(resource* r, const dsv_desc& desc);

@@ -1,8 +1,8 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oCore/assert.h>
-#include <oMemory/sbb.h>
 #include <oCore/cbtree.h>
+#include <oMemory/sbb.h>
 #include <algorithm>
 #include <stdexcept>
 

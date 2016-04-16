@@ -33,23 +33,23 @@ static void find_largest_free_block(void* ptr, size_t bytes, int used, void* use
 	}
 }
 
-void tlsf_allocator::initialize(void* arena, size_t bytes)
+void tlsf_allocator::initialize(void* memory, size_t bytes)
 {
-	if (!arena)
+	if (!memory)
 		throw allocate_error(allocate_errc::invalid_bookkeeping);
 
-  if (!aligned(arena, 16))
+  if (!aligned(memory, 16))
 		throw allocate_error(allocate_errc::alignment);
 
-	heap_ = arena;
+	heap_ = memory;
 	heap_size_ = bytes;
 	reset();
 }
 
 void* tlsf_allocator::deinitialize()
 {
-	void* arena = heap_;
-  if (arena)
+	void* memory = heap_;
+  if (memory)
   {
 	  #if USE_ALLOCATOR_STATS
 		  if (stats_.num_allocations)
@@ -62,7 +62,7 @@ void* tlsf_allocator::deinitialize()
 	  tlsf_destroy(heap_);
 	  heap_ = nullptr;
   }
-	return arena;
+	return memory;
 }
 
 tlsf_allocator::tlsf_allocator(tlsf_allocator&& that)
@@ -193,6 +193,11 @@ void tlsf_allocator::deallocate(void* ptr)
 size_t tlsf_allocator::size(void* ptr) const 
 {
 	return tlsf_block_size(ptr);
+}
+
+size_t tlsf_allocator::offset(void* ptr) const
+{
+	return owns(ptr) ? size_t((uint8_t*)ptr - (uint8_t*)heap_) : size_t(-1);
 }
 
 bool tlsf_allocator::owns(void* ptr) const

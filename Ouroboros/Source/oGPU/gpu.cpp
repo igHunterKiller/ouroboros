@@ -2067,7 +2067,7 @@ ibv device::new_ibv(const char* name, uint32_t num_indices, const void* index_da
 	void* cpu_copy = persistent_mesh_alloc_.allocate(bytes, name ? name : "persistent indices", memory_alignment::align4);
 	if (cpu_copy)
 	{
-		view.offset = uint32_t((uint8_t*)cpu_copy - (uint8_t*)persistent_mesh_alloc_.arena());
+		view.offset = (uint32_t)persistent_mesh_alloc_.offset(cpu_copy);
 		view.num_indices = num_indices;
 		view.transient = 0;
 		view.is_32bit = is_32bit;
@@ -2093,7 +2093,7 @@ void device::del_ibv(const ibv& view)
 
 	if (view.offset)
 	{
-		void* ptr = (uint8_t*)persistent_mesh_alloc_.arena() + view.offset;
+		void* ptr = persistent_mesh_alloc_.ptr(view.offset);
 		persistent_mesh_alloc_.deallocate(ptr);
 	}
 }
@@ -2109,7 +2109,7 @@ vbv device::new_vbv(const char* name, uint32_t vertex_stride, uint32_t num_verti
 
 	if (cpu_copy)
 	{
-	  view.offset = uint32_t((uint8_t*)cpu_copy - (uint8_t*)persistent_mesh_alloc_.arena());
+	  view.offset = (uint32_t)persistent_mesh_alloc_.offset(cpu_copy);
 		view.vertex_stride_uints_minus_1 = (vertex_stride >> 2) - 1;
 		view.transient = 0;
 		view.num_vertices = num_vertices;
@@ -2135,7 +2135,7 @@ void device::del_vbv(const vbv& view)
 
 	if (view.offset)
 	{
-		void* ptr = (uint8_t*)persistent_mesh_alloc_.arena() + view.offset;
+		void* ptr = persistent_mesh_alloc_.ptr(view.offset);
 		persistent_mesh_alloc_.deallocate(ptr);
 	}
 }
