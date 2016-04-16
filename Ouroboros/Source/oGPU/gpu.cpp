@@ -1327,7 +1327,7 @@ device::device(const device_init& init, window* win)
 		void* cpu_mem = alloc_(cpu_bytes, "device persistent mesh bookkeeping", opts);
 
 		void* bookkeeping = cpu_mem;
-		persistent_mesh_alloc_.initialize((uint8_t*)bookkeeping + capacity_bytes, capacity_bytes, bookkeeping);
+		persistent_mesh_alloc_.initialize((uint8_t*)bookkeeping + persistent_bookkeeping_bytes, capacity_bytes, bookkeeping);
 
 		resource_desc desc;
 		desc.width = capacity_bytes;
@@ -2107,7 +2107,7 @@ vbv device::new_vbv(const char* name, uint32_t vertex_stride, uint32_t num_verti
 	auto bytes = num_vertices * vertex_stride;
 	void* cpu_copy = persistent_mesh_alloc_.allocate(bytes, name ? name : "device vertices", memory_alignment::align4);
 
-  if (cpu_copy)
+	if (cpu_copy)
 	{
 	  view.offset = uint32_t((uint8_t*)cpu_copy - (uint8_t*)persistent_mesh_alloc_.arena());
 		view.vertex_stride_uints_minus_1 = (vertex_stride >> 2) - 1;
