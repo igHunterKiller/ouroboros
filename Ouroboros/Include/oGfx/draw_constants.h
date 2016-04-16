@@ -70,6 +70,13 @@ struct draw_constants
 		world_view_projection = world * view * projection;
 		world_rotation = remove_scale((float3x4)world);
 	}
+	
+	inline void set_transform(const float4x4& _world, const float4x4& view_projection)
+	{
+		world = _world;
+		world_view_projection = world * view_projection;
+		world_rotation = remove_scale((float3x4)world);
+	}
 #endif
 };
 
