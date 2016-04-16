@@ -9,8 +9,8 @@
 #define USE_ALLOCATION_STATS 1
 
 #include <oCore/assert.h>
-#define SBB_TRACE(sbb_op, new_ptr, old_ptr, bytes, align, label) do { oTrace("[SBB], %s, %p, %p, %u, %u, %s", sbb_op, old_ptr, new_ptr, bytes, align, label); } while(false)
-//#define SBB_TRACE(sbb_op, new_ptr, old_ptr, bytes, align, label) do {} while(false)
+//#define SBB_TRACE(sbb_op, new_ptr, old_ptr, bytes, align, label) do { oTrace("[SBB], %s, %p, %p, %u, %u, %s", sbb_op, old_ptr, new_ptr, bytes, align, label); } while(false)
+#define SBB_TRACE(sbb_op, new_ptr, old_ptr, bytes, align, label) do {} while(false)
 
 
 namespace ouro {
