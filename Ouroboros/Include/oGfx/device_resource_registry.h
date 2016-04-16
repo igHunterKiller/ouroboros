@@ -69,7 +69,13 @@ protected:
 
 		dev_ = dev;
 
-		initialize_base(registry_label, reg_memory, reg_bytes, error_placeholder, io_alloc, true);
+		// The creates themselves aren't so bad, it's the UpdateSubresource calls
+		// Such resources shouldn't be in use, so I wonder if there's a way to 
+		// waive the hazards for such an operation?
+		// Note: mesh memory using sbb won't be thread-safe either.
+		bool create_d3d_devices_on_io_threads = false;
+
+		initialize_base(registry_label, reg_memory, reg_bytes, error_placeholder, io_alloc, create_d3d_devices_on_io_threads);
 	}
 
 	void* deinitialize()
