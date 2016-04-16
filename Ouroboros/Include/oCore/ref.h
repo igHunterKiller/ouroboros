@@ -30,22 +30,13 @@ namespace ouro {
 
 template<class T> struct ref
 {
-	ref() : ptr(nullptr) {}
-	~ref() { if (ptr) ref_release(ptr); ptr = nullptr; }
+	ref()              : ptr(nullptr)   {}
+	ref(ref<T>&& that) : ptr(that.ptr)  { that.ptr = nullptr; }
+	ref(const ref<T>& that)             { ptr = const_cast<T*>(that.c_ptr()); if (ptr) ref_reference(ptr); }
+	~ref()                              { if (ptr) ref_release(ptr); ptr = nullptr; }
 
-	ref(const ref<T>& that)
-	{
-		ptr = const_cast<T*>(that.c_ptr());
-		if (ptr) ref_reference(ptr);
-	}
-
-	// Specify ref = false if initializing from a factory call that
-	// returns a ref of 1.
-	ref(const T* that, bool ref = true)
-	{
-		ptr = static_cast<T*>(const_cast<T*>(that));
-		if (ptr && ref) ref_reference(ptr);
-	}
+	// Specify ref = false if initializing from a factory call that returns a ref of 1
+	ref(const T* that, bool ref = true) { ptr = static_cast<T*>(const_cast<T*>(that)); if (ptr && ref) ref_reference(ptr); }
 
 	ref<T>& operator=(T* that) volatile
 	{
@@ -57,15 +48,12 @@ template<class T> struct ref
 	
 	ref<T>& operator=(const ref<T>& that) volatile
 	{
-		// const_cast is ok because we're casting away the constness of the ref and 
-		// not the underlying type
+		// const_cast is ok because it casts away the constness of the ref, not the underlying type
 		if (that) ref_reference(const_cast<T*>(that.c_ptr()));
 		if (ptr) ref_release(ptr);
 		ptr = const_cast<T*>(that.c_ptr());
 		return const_cast<ref<T>&>(*this);
 	}
-
-	ref(ref<T>&& that) : ptr(that.ptr) { that.ptr = nullptr; }
 
 	ref<T>& operator=(ref<T>&& that) volatile
 	{
@@ -78,30 +66,20 @@ template<class T> struct ref
 		return const_cast<ref<T>&>(*this);
 	}
 
-	T* operator->() { return ptr; }
-	const T* operator->() const { return ptr; }
-	
-	operator T*() { return ptr; }
-	operator const T*() const { return ptr; }
-
-	T* operator->() volatile { return ptr; }
-	const T* operator->() const volatile { return ptr; }
-	
-	operator T*() volatile { return ptr; }
-	operator const T*() const volatile { return ptr; }
-	// This version of the operator should only be used for "create" style 
-	// functions, and functions that "retrieve" ref's i.e. QueryInterface.
-	T** operator &() { return &ptr; } 
-
-	// The const variant only makes sense for "retrieve" style calls, but 
-	// otherwise see comments above.
-	const T** operator &() const { return const_cast<const T**>(&ptr); } 
-	
-	T* c_ptr() { return ptr; }
-	const T* c_ptr() const { return ptr; }
-
-	T* c_ptr() volatile { return ptr; }
-	const T* c_ptr() const volatile { return ptr; }
+	               T*  operator->()                { return ptr; }
+	               T*  operator->() volatile       { return ptr; }
+	const          T*  operator->() const          { return ptr; }
+	const          T*  operator->() const volatile { return ptr; }
+	operator       T*()                            { return ptr; }
+	operator       T*()             volatile       { return ptr; }
+	operator const T*()             const          { return ptr; }
+	operator const T*()             const volatile { return ptr; }
+	               T*  c_ptr()                     { return ptr; }
+	               T*  c_ptr()      volatile       { return ptr; }
+	const          T*  c_ptr()      const          { return ptr; }
+	const          T*  c_ptr()      const volatile { return ptr; }
+	               T** operator &()                { return &ptr; }  // use only in "create" style functions (return-by-address) that manually ref-count before assigning the parameter
+	const          T** operator &() const          { return const_cast<const T**>(&ptr); } 
 
 private:
 	T* ptr;
