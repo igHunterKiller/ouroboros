@@ -3,8 +3,8 @@
 #include <oGfx/model_registry.h>
 #include <oMath/matrix.h>
 #include <oMesh/codec.h>
-#include <oMesh/obj.h>
 #include <oMesh/primitive.h>
+#include <oCore/color.h>
 #include <oCore/stringize.h>
 
 namespace ouro { 
