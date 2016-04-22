@@ -20,7 +20,8 @@ struct subset_t
 		skinned  = 1<<0,
 		atested  = 1<<1,
 		blended  = 1<<2,
-		face_ccw = 1<<3,
+		dblsided = 1<<3,
+		face_ccw = 1<<4,
 	};
 
 	uint32_t start_index;     // offset into an index buffer where the indices for this subset starts
@@ -83,8 +84,8 @@ struct info_t
 	primitive_type       primitive_type;
 	face_type            face_type;
 	uint16_t             flags;
-	float4               bounding_sphere;   // inscribed in the obb
-	float3               extents;           // forms an obb from the sphere's center
+	float4               bounding_sphere;   // inscribed in the aabb
+	float3               extents;           // forms an aabb from the sphere's center
 	float                avg_edge_length;
 	float4               lod_distances;
 	float2               avg_texel_density;
@@ -117,6 +118,8 @@ inline uint32_t num_primitives(const info_t& info) { return num_primitives(info.
 
 void calc_aabb(const float3* vertices, uint32_t vertex_stride, uint32_t num_vertices, float3* out_min, float3* out_max);
 float4 calc_sphere(const float3* vertices, uint32_t vertex_stride, uint32_t num_vertices);
+
+uint8_t calc_log2scale(const float3& aabb_extents);
 
 // Calculate the face normals from the following inputs:
 // face_normals: output, array to fill with normals. This should be at least as
@@ -221,11 +224,11 @@ void prune_unindexed_vertices(PUV_PARAMS(uint16_t, float3, float3));
 // _____________________________________________________________________________
 // Interpolation
 
-inline float3  lerp_positions(const float3& a, const float3& b, float s) { return lerp(a, b, s); }
-inline float3  lerp_normals(const float3& a, const float3& b, float s) { return normalize(lerp(a, b, s)); }
-inline float4  lerp_tangents(const float4& a, const float4& b, float s) { return float4(normalize(lerp(a.xyz(), b.xyz(), s)), a.w); }
-inline float2  lerp_texcoords(const float2& a, const float2& b, float s) { return lerp(a, b, s); }
-inline float3  lerp_texcoords(const float3& a, const float3& b, float s) { return lerp(a, b, s); }
+inline float3   lerp_positions(const float3& a, const float3& b, float s) { return lerp(a, b, s); }
+inline float3   lerp_normals(const float3& a, const float3& b, float s) { return normalize(lerp(a, b, s)); }
+inline float4   lerp_tangents(const float4& a, const float4& b, float s) { return float4(normalize(lerp(a.xyz(), b.xyz(), s)), a.w); }
+inline float2   lerp_texcoords(const float2& a, const float2& b, float s) { return lerp(a, b, s); }
+inline float3   lerp_texcoords(const float3& a, const float3& b, float s) { return lerp(a, b, s); }
 inline uint32_t lerp_colors(const uint32_t& a, const uint32_t& b, float s) { float4 aa = truetofloat4(a); float4 bb = truetofloat4(b); float4 lerped = lerp(aa, bb, s); return float4totrue(lerped); }
 
 }}

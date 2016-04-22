@@ -1,6 +1,7 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
 #include <oMesh/mesh.h>
+#include <oCore/bit.h>
 #include <oMath/hlslx.h>
 #include <oMemory/memory.h>
 #include <oSurface/convert.h>
@@ -99,6 +100,14 @@ float4 calc_sphere(const float3* vertices, uint32_t vertex_stride, uint32_t num_
 	s.xyz() = (mx + mn) * 0.5f;
 	s.w = distance(mn, mx) * 0.5f;
 	return s;
+}
+
+uint8_t calc_log2scale(const float3& aabb_extents)
+{
+	float    max_extent   = max(aabb_extents);
+	uint32_t max_extent_u = (uint32_t)floor(max_extent + 0.5f);
+	uint32_t max_extent_2 = nextpow2(max_extent_u);
+	return (uint8_t)log2i(max_extent_2);
 }
 
 void calc_face_normals(float3* oRESTRICT face_normals, const uint32_t* oRESTRICT indices, uint32_t num_indices, const float3* oRESTRICT positions, uint32_t num_positions, bool ccw)
