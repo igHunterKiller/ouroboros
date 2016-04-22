@@ -18,13 +18,13 @@
 
 namespace ouro { namespace gfx {
 
-enum class signature
+enum class signature : uint8_t
 {
 	graphics,
 	count,
 };
 
-enum class pipeline_state
+enum class pipeline_state : uint8_t
 {
 	pos_only,
 	pos_only_points,
