@@ -61,9 +61,9 @@ template<> const char* as_string(const gfx::pipeline_state& state)
 
 namespace gfx {
 
-static const sampler_desc s_gfx_signature_samples[] = { basic::point_clamp, basic::point_wrap, basic::linear_clamp, basic::linear_wrap };
-static const uint32_t s_gfx_signature_cb_strides[] = { sizeof(frame_constants), sizeof(view_constants), sizeof(draw_constants), sizeof(shadow_constants), sizeof(misc_constants) };
-static const uint32_t s_gfx_signature_cb_max[] = { 1, 1, 64, 64, 2 };
+static const sampler_desc s_gfx_signature_samples   [] = { basic::point_clamp, basic::point_wrap, basic::linear_clamp, basic::linear_wrap };
+static const uint32_t     s_gfx_signature_cb_strides[] = { sizeof(frame_constants), sizeof(view_constants), sizeof(draw_constants), sizeof(shadow_constants), sizeof(misc_constants) };
+static const uint32_t     s_gfx_signature_cb_max    [] = { 1, 1, 64, 64, 2 };
 
 const root_signature_desc root_signatures[] = 
 {

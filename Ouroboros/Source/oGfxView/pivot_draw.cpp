@@ -35,16 +35,23 @@ void pivot_draw::initialize()
 	float3 pos(-6.0f, 1.0f, 0.0f);
 
 	int nhalf = n / 2;
+	int npivots = 0;
 	for (int y = 0, i = 0; y < 2; y++)
 	{
 		for (int x = 0; x < nhalf; x++, i++)
 		{
 			gfx::pivot_t piv(i, translate(float3(pos.x + x * 4.0f, pos.y - y * 4.0f, 0.0f)), float4(0.0f, 0.0f, 0.0f, 1.0f), float3(1.0f, 1.0f, 1.0f));
 			pivots_[i] = scene_.new_pivot(piv);
+			npivots++;
 		}
 	}
 
+	gfx::pivot_t piv(npivots, translate(float3(0.0f, 0.0f, 0.0f)), float4(0.0f, 0.0f, 0.0f, 1.0f), float3(1.0f, 1.0f, 1.0f));
+	pivots_[npivots++] = scene_.new_pivot(piv);
+
+
 	texture_ = load2d("test/textures/UVTest.png");
+	model_   = load_mesh("test/geometry/bunny.obj");
 }
 
 void pivot_draw::deinitialize()
@@ -111,7 +118,7 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		gfx::primitive_model::torus_outline,
 	};
 
-	for (size_t i = 0; i < npivots; i++)
+	for (size_t i = 0; i < (npivots-1); i++)
 	{
 		float3x3 orientation;
 		float3 position, extents;
@@ -130,20 +137,48 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		prim->texture = texture_.get()->view;
 
 		renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_prim, prim);
+	}
 
-#if 0
-		cl->set_pso(gfx::pipeline_state::lines_color);
-		model = renderer_.get_model_registry()->primitive(line_shapes[i]);
-		renderer.get_model_registry()->set_model(cl, model);
+	// draw hacked-in model
+	if (model_)
+	{
+		const auto model = model_.get();
 
-		// draw a model
+		const auto&    model_pivot = *pivots[npivots - 1];
+		const auto*    subset      = model->subsets();
+		const auto&    minfo       = model->info();
+		const uint32_t num_subsets = minfo.num_subsets;
+		const auto     subsets_end = subset + num_subsets;
+		auto           submit      = renderer.allocate<gfx::model_subset_submission_t>(num_subsets);
+
+		auto           world       = model_pivot.world();
+
+		// try to keep very diverse obj files to the same relative scale
+		world = scale(3.0f / minfo.bounding_sphere.w) * translate(-minfo.bounding_sphere.xyz()) * world;
+
+		while (subset < subsets_end)
 		{
-			auto subsets = model->subsets();
-			auto nsubsets = model->info().num_subsets;
-			for (uint16_t s = 0; s < nsubsets; s++)
-				cl->draw_indexed(subsets[s].num_indices);
+			auto num_indices      = (uint16_t)subset->num_indices;
+			auto num_vertices     = subset->num_vertices;
+			submit->world         = world;
+			submit->mat_hash      = 0;
+			submit->state         = gfx::pipeline_state::mesh_uv0_as_color;
+			submit->num_srvs      = 0;
+			submit->num_constants = 0;
+			submit->pada          = 0;
+			submit->start_index   = subset->start_index;
+			submit->num_indices   = num_indices;
+
+			submit->indices       = gpu::ibv(model->indices_offset(),   num_indices);
+			submit->vertices[0]   = gpu::vbv(model->vertices_offset(0), num_vertices, model->vertex_stride(0));
+			submit->vertices[1]   = gpu::vbv(model->vertices_offset(1), num_vertices, model->vertex_stride(1));
+			submit->vertices[2]   = gpu::vbv(model->vertices_offset(2), num_vertices, model->vertex_stride(2));
+
+			renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_subset, submit);
+
+			subset++;
+			submit++;
 		}
-#endif
 	}
 
 	// draw grid
@@ -159,7 +194,6 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 
 void pivot_draw::request_model_load(gfx::model_registry& registry, const uri_t& uri_ref)
 {
-	oTrace("request_model_load: %s", uri_ref.c_str());
-
+	oTrace("[pivot_draw] load model: %s", uri_ref.c_str());
 	model_ = registry.load(uri_ref, nullptr);
 }
