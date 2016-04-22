@@ -7,6 +7,7 @@
 #include <oMath/pov.h>
 #include <oGPU/gpu.h>
 #include <oGfx/film.h>
+#include <oGfx/gpu_signature.h>
 #include <oGfx/scene.h>
 #include <oGfx/model_registry.h>
 #include <oGfx/texture_registries.h>
@@ -17,6 +18,7 @@ namespace ouro { class window; namespace gfx {
 enum class fullscreen_mode
 {
 	normal,
+	points,
 	wireframe,
 	texcoord,
 	texcoordu,
@@ -50,11 +52,12 @@ enum class render_technique : uint8_t
 
 	linearize_depth, // param nullptr, submit only one
 
-	draw_lines, // param is lines_submission_t
-	draw_prim,  // param is primitive_submission_t
-	draw_axis,  // param is nullptr, 1 per frame
-	draw_gizmo, // param is gizmo::tessellation_info_t, 1 per frame
-	draw_grid,  // param is grid_submission_t
+	draw_lines,      // param is lines_submission_t
+	draw_prim,       // param is primitive_submission_t
+	draw_subset,     // param is model_subset_submission_t
+	draw_axis,       // param is nullptr, 1 per frame
+	draw_gizmo,      // param is gizmo::tessellation_info_t, 1 per frame
+	draw_grid,       // param is grid_submission_t
 
 	// 'end' techniques must be after others to sort correctly
 
@@ -82,6 +85,21 @@ struct primitive_submission_t
 	float4 color;
 	gpu::srv* texture;
 	primitive_model type;
+};
+
+struct model_subset_submission_t
+{
+	float4x4            world;
+	uint64_t            mat_hash;
+	gfx::pipeline_state state;
+	uint8_t             num_srvs;
+	uint8_t             num_constants;
+	uint8_t             pada;
+	uint32_t            padb;
+	uint32_t            start_index;
+	uint32_t            num_indices;
+	gpu::ibv            indices;
+	gpu::vbv            vertices[3];
 };
 
 struct grid_submission_t

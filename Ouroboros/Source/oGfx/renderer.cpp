@@ -25,6 +25,7 @@ template<> const char* as_string(const gfx::fullscreen_mode& mode)
 	static const char* s_names[] = 
 	{
 		"normal",
+		"points",
 		"wireframe",
 		"texcoord",
 		"texcoordu",
@@ -57,6 +58,7 @@ template<> const char* as_string(const gfx::render_technique& technique)
 		"linearize_depth",
 		"draw_lines",
 		"draw_prim",
+		"draw_subset",
 		"draw_axis",
 		"draw_gizmo",
 		"draw_grid",
@@ -174,22 +176,29 @@ void linearize_depth(technique_context_t& ctx)
 	cl.set_rtv(ctx.presentation_target, film.dsv(film_t::hyper_depth));
 }
 
-void draw_prim(technique_context_t& ctx)
+static pipeline_state get_fullscreen_pipline_state(technique_context_t& ctx, const pipeline_state& default_pso)
 {
-	auto& cl     = *ctx.gcl;
-	auto& models = *ctx.models;
-	auto& pov    = *ctx.pov;
-
 	pipeline_state pso;
 	switch (ctx.render_settings.mode)
 	{
 		default:
-		case fullscreen_mode::normal:    pso = pipeline_state::mesh_simple_texture; break;
+		case fullscreen_mode::normal:    pso = default_pso;                         break;
+		case fullscreen_mode::points:    pso = pipeline_state::pos_only_points;     break;
 		case fullscreen_mode::wireframe: pso = pipeline_state::pos_color_wire;      break;
 		case fullscreen_mode::texcoord:  pso = pipeline_state::mesh_uv0_as_color;   break;
 		case fullscreen_mode::texcoordu: pso = pipeline_state::mesh_u0_as_color;    break;
 		case fullscreen_mode::texcoordv: pso = pipeline_state::mesh_v0_as_color;    break;
 	}
+	
+	return pso;
+}
+
+void draw_prim(technique_context_t& ctx)
+{
+	auto& cl     = *ctx.gcl;
+	auto& models = *ctx.models;
+	auto& pov    = *ctx.pov;
+	auto pso     = get_fullscreen_pipline_state(ctx, pipeline_state::mesh_simple_texture);
 
 	cl.set_pso(pso);
 
@@ -228,6 +237,87 @@ void draw_prim(technique_context_t& ctx)
 				cl.draw_indexed(subsets[s].num_indices);
 		}
 	}
+}
+
+static void draw_subset(gpu::graphics_command_list& cl, const model_subset_submission_t& subset, const gfx::draw_constants* draw_constants, uint32_t num_instances)
+{
+	if (!num_instances)
+		return;
+	cl.set_cbv(oGFX_CBV_DRAW, draw_constants, num_instances * sizeof(gfx::draw_constants));
+	cl.set_indices(subset.indices);
+	cl.set_vertices(0, 3, subset.vertices);
+	cl.draw_indexed(subset.num_indices, num_instances, subset.start_index);
+}
+
+void draw_subset(technique_context_t& ctx)
+{
+	auto&       cl         = *ctx.gcl;
+	auto&       models     = *ctx.models;
+	auto&       pov        = *ctx.pov;
+	const float time       = 0.0f;
+	const auto& view       = pov.view();
+	const auto& projection = pov.projection();
+	const auto  view_proj  = view * projection;
+
+	// iterator/shared state: subsets are sorted by pso, then by material
+	auto* prev_subset      = (const model_subset_submission_t*)ctx.tasks->data;
+	auto  prev_pso         = get_fullscreen_pipline_state(ctx, prev_subset->state);
+	auto  prev_mat         = prev_subset->mat_hash;
+	auto* subset           = prev_subset;
+
+	gfx::draw_constants draws[64];
+	uint32_t num_instances = 0;
+
+	cl.set_pso(prev_pso);
+	// set prev materials
+	
+	ForEachTask
+	{
+		     subset = (const model_subset_submission_t*)task->data;
+		auto pso    = get_fullscreen_pipline_state(ctx, subset->state);
+		auto mat    = subset->mat_hash;
+
+		if (num_instances >= countof(draws) || pso != prev_pso || mat != prev_mat)
+		{
+			draw_subset(cl, *subset, draws, num_instances);
+			num_instances = 0;
+		}
+
+		// context rolling major state
+		if (pso != prev_pso)
+			cl.set_pso(pso);
+
+		// user pointers/non-context rolling
+		if (mat != prev_mat)
+		{
+			// set material cbs
+			// set material srvs
+		}
+
+		// set cbs
+		{
+			auto& draw         = draws[num_instances];
+			draw.set_transform(subset->world, view_proj);
+			draw.color         = 0;
+			draw.vertex_scale  = 1.0f;
+			draw.vertex_offset = ~0u;
+			draw.object_id     = 0;
+			draw.draw_id       = 0;
+			draw.time          = time;
+			draw.slice         = 0;
+			draw.flags         = 0;
+			draw.pada          = 0;
+		}
+
+		// increment instance
+		num_instances++;
+		prev_pso = pso;
+		prev_mat = mat;
+	}
+
+	// one last flush
+	if (num_instances)
+		draw_subset(cl, *subset, draws, num_instances);
 }
 
 void draw_axis(technique_context_t& ctx)
@@ -483,6 +573,7 @@ technique_t s_techniques[] =
 	linearize_depth,
 	draw_lines,
 	draw_prim,
+	draw_subset,
 	draw_axis,
 	draw_gizmo,
 	draw_grid,
@@ -559,6 +650,7 @@ void renderer_t::initialize(const renderer_init_t& init, window* win)
 		sign_device(dev_);
 
 		// init terrain primitives
+		if (0)
 		{
 			static uint16_t s_max_depth = 7;
 			uint32_t n = btt_initialize_vbv_ibvs("terrain patches", dev_, s_max_depth, nullptr, nullptr);
