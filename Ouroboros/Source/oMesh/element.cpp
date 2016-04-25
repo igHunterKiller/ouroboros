@@ -4,6 +4,16 @@
 
 namespace ouro { namespace mesh {
 
+layout_t layout(const element_t* elements, size_t num_elements)
+{
+	layout_t lo;
+	for (size_t i = 0; i < num_elements; i++)
+		lo[i] = elements[i];
+	for (size_t i = num_elements; i < lo.size(); i++)
+		lo[i] = celement_t();
+	return lo;
+}
+
 uint32_t element_offset(const element_t* elements, size_t num_elements, uint32_t element_index)
 {
 	uint32_t offset = 0;

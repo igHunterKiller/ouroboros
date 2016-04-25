@@ -57,6 +57,9 @@ template<size_t size> uint32_t layout_size(const element_t (&elements)[size], ui
 // convenience wrapper for a single object to encapsulate a vertex
 typedef std::array<element_t, max_num_elements> layout_t;
 
+layout_t                       layout(const element_t* elements, size_t num_elements);
+template<size_t size> layout_t layout(const element_t (&elements)[size]) { return layout(elements, size); }
+
 template<size_t size> uint32_t element_offset(const std::array<element_t, size>& elements, uint32_t element_index) { return element_offset(elements.data(), elements.size(), element_index); }
 template<size_t size> uint32_t layout_slots(const std::array<element_t, size>& elements) { return layout_slots(elements.data(), elements.size()); }
 template<size_t size> uint32_t layout_size(const std::array<element_t, size>& elements, uint32_t slot) { return layout_size(elements.data(), elements.size(), slot); }
