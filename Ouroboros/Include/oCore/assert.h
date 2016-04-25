@@ -33,7 +33,7 @@
 #endif
 
 #ifndef oHAS_oTRACEA
-	#define oHAS_oTRACEA oHAS_oASSERTA
+	#define oHAS_oTRACEA 1
 #endif
 
 #if oHAS_oTRACE == 1 && oHAS_oTRACEA != 1
