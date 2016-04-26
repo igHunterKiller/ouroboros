@@ -12,20 +12,6 @@
 
 namespace ouro { namespace mesh { namespace detail {
 
-template<typename T> void minmax_index(const T* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index)
-{
-	uint32_t min_index = UINT_MAX;
-	uint32_t max_index = 0;
-	for (uint32_t i = 0; i < num_indices; i++)
-	{
-		min_index = std::min(min_index, (uint32_t)indices[i]);
-		max_index = std::max(max_index, (uint32_t)indices[i]);
-	}
-	
-	*out_min_index = min_index;
-	*out_max_index = max_index;
-}
-
 template<typename T, typename IndexT> void remove_degenerates(const oHLSL3<T>* oRESTRICT positions, uint32_t num_positions, IndexT* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_new_num_indices)
 {
 	if ((num_indices % 3) != 0)

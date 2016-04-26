@@ -180,10 +180,6 @@ float4 calc_sphere(const float3* vertices, uint32_t vertex_stride, uint32_t num_
 
 uint8_t calc_log2scale(const float3& aabb_extents);
 
-// scan an index list for its lowest value
-void minmax_index(const uint16_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index);
-void minmax_index(const uint32_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index);
-
 // Calculate the face normals from the following inputs:
 // face_normals: output, array to fill with normals. This should be at least as
 //                large as the number of faces in the specified mesh (num_indices/3)

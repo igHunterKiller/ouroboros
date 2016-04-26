@@ -125,16 +125,6 @@ uint8_t calc_log2scale(const float3& aabb_extents)
 	return (uint8_t)log2i(max_extent_2);
 }
 
-void minmax_index(const uint16_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index)
-{
-	return detail::minmax_index(indices, num_indices, out_min_index, out_max_index);
-}
-
-void minmax_index(const uint32_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index)
-{
-	return detail::minmax_index(indices, num_indices, out_min_index, out_max_index);
-}
-
 void calc_face_normals(float3* oRESTRICT face_normals, const uint32_t* oRESTRICT indices, uint32_t num_indices, const float3* oRESTRICT positions, uint32_t num_positions, bool ccw)
 {
 	detail::calc_face_normals(face_normals, indices, num_indices, positions, num_positions, ccw);

@@ -2,6 +2,7 @@
 
 #include <oMemory/fnv1a.h>
 #include <oMesh/codec.h>
+#include <oMesh/face.h>
 #include <oMesh/obj.h>
 #include <oCore/bit.h>
 #include <oString/fixed_string.h>
@@ -77,7 +78,7 @@ model decode_obj(const path_t& path
 			if (split_groups)
 			{
 				uint32_t max_idx;
-				minmax_index(indices, nidx, &min_idx, &max_idx);
+				min_max_indices(indices, 0, nidx, nvtx, &min_idx, &max_idx);
 
 				// @tony: how to fix a triangle that is 65536 196608 786432?
 				// have to retriangulate/reproduce vertices within 64k of 
