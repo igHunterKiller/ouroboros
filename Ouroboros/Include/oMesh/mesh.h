@@ -27,8 +27,8 @@ struct subset_t
 	uint32_t start_index;     // offset into an index buffer where the indices for this subset starts
 	uint32_t num_indices;     // how many indices this runs for
 	uint32_t start_vertex;    // offset into a vertex buffer where this subset starts
-	uint16_t num_vertices;    // how many vertices this runs for. Because indices are always 16-bit, there's no reason to have more than 64k vertices per subset
-	uint16_t subset_flags;    // bitmaks of the subset flags above
+	uint16_t subset_flags;    // bitmask of the subset flags above
+	uint16_t unused;          // available for future usage
 	uint64_t material_id;     // hash/id for the material associated with this subset
 };
 static_assert(sizeof(subset_t) == 24, "size mismatch");
@@ -116,10 +116,14 @@ void transform_vectors(const float4x4& matrix, float3* oRESTRICT dst, uint32_t d
 
 inline uint32_t num_primitives(const info_t& info) { return num_primitives(info.primitive_type, info.num_indices, info.num_vertices); }
 
-void calc_aabb(const float3* vertices, uint32_t vertex_stride, uint32_t num_vertices, float3* out_min, float3* out_max);
+void calc_aabb(const float3* oRESTRICT vertices, uint32_t vertex_stride, uint32_t num_vertices, float3* oRESTRICT out_min, float3* oRESTRICT out_max);
 float4 calc_sphere(const float3* vertices, uint32_t vertex_stride, uint32_t num_vertices);
 
 uint8_t calc_log2scale(const float3& aabb_extents);
+
+// scan an index list for its lowest value
+void minmax_index(const uint16_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index);
+void minmax_index(const uint32_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index);
 
 // Calculate the face normals from the following inputs:
 // face_normals: output, array to fill with normals. This should be at least as

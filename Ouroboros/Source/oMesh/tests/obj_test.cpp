@@ -125,12 +125,12 @@ private:
 				g.group_name = sGroupNames[i];
 				g.material_name = "Body";
 
-				sSubsets[i].start_index = i * 2 * 3;
-				sSubsets[i].num_indices = 2 * 3;
+				sSubsets[i].start_index  = i * 2 * 3;
+				sSubsets[i].num_indices  = 2 * 3;
 				sSubsets[i].start_vertex = 0;
-				sSubsets[i].num_vertices = countof(sPositions);
 				sSubsets[i].subset_flags = 0;
-				sSubsets[i].material_id = i;
+				sSubsets[i].unused       = 0;
+				sSubsets[i].material_id  = i;
 				i++;
 			}
 

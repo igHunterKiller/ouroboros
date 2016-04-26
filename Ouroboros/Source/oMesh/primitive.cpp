@@ -204,8 +204,8 @@ static model primitive_model(const allocator& alloc, const allocator& tmp, const
 	subset.start_index  = 0;
 	subset.num_indices  = src.num_indices;
 	subset.start_vertex = 0;
-	subset.num_vertices = (uint16_t)src.num_vertices;
 	subset.subset_flags = 0;
+	subset.unused       = 0;
 	subset.material_id  = 0;
 
 	face_type type = src.type;

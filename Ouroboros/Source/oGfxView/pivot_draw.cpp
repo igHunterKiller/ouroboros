@@ -144,14 +144,15 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 	{
 		const auto model = model_.get();
 
-		const auto&    model_pivot = *pivots[npivots - 1];
-		const auto*    subset      = model->subsets();
-		const auto&    minfo       = model->info();
-		const uint32_t num_subsets = minfo.num_subsets;
-		const auto     subsets_end = subset + num_subsets;
-		auto           submit      = renderer.allocate<gfx::model_subset_submission_t>(num_subsets);
+		const auto&    model_pivot  = *pivots[npivots - 1];
+		const auto*    subset       = model->subsets();
+		const auto&    minfo        = model->info();
+		const uint32_t num_vertices = minfo.num_vertices;
+		const uint32_t num_subsets  = minfo.num_subsets;
+		const auto     subsets_end  = subset + num_subsets;
+		auto           submit       = renderer.allocate<gfx::model_subset_submission_t>(num_subsets);
 
-		auto           world       = model_pivot.world();
+		auto           world        = model_pivot.world();
 
 		// try to keep very diverse obj files to the same relative scale
 		world = scale(3.0f / minfo.bounding_sphere.w) * translate(-minfo.bounding_sphere.xyz()) * world;
@@ -159,7 +160,6 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		while (subset < subsets_end)
 		{
 			auto num_indices      = (uint16_t)subset->num_indices;
-			auto num_vertices     = subset->num_vertices;
 			submit->world         = world;
 			submit->mat_hash      = 0;
 			submit->state         = gfx::pipeline_state::mesh_uv0_as_color;

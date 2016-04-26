@@ -71,7 +71,7 @@ void transform_vectors(const float4x4& matrix, float3* oRESTRICT dst, uint32_t d
 	}
 }
 
-void calc_aabb(const float3* vertices, uint32_t vertex_stride, uint32_t num_vertices, float3* out_min, float3* out_max)
+void calc_aabb(const float3* oRESTRICT vertices, uint32_t vertex_stride, uint32_t num_vertices, float3* oRESTRICT out_min, float3* oRESTRICT out_max)
 {
 	float3 mn = FLT_MAX;
 	float3 mx = -FLT_MAX;
@@ -108,6 +108,16 @@ uint8_t calc_log2scale(const float3& aabb_extents)
 	uint32_t max_extent_u = (uint32_t)floor(max_extent + 0.5f);
 	uint32_t max_extent_2 = nextpow2(max_extent_u);
 	return (uint8_t)log2i(max_extent_2);
+}
+
+void minmax_index(const uint16_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index)
+{
+	return detail::minmax_index(indices, num_indices, out_min_index, out_max_index);
+}
+
+void minmax_index(const uint32_t* oRESTRICT indices, uint32_t num_indices, uint32_t* oRESTRICT out_min_index, uint32_t* oRESTRICT out_max_index)
+{
+	return detail::minmax_index(indices, num_indices, out_min_index, out_max_index);
 }
 
 void calc_face_normals(float3* oRESTRICT face_normals, const uint32_t* oRESTRICT indices, uint32_t num_indices, const float3* oRESTRICT positions, uint32_t num_positions, bool ccw)
