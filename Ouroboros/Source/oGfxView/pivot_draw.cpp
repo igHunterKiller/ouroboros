@@ -51,7 +51,7 @@ void pivot_draw::initialize()
 
 
 	texture_ = load2d("test/textures/UVTest.png");
-	model_   = load_mesh("test/geometry/bunny.obj");
+	model_   = load_mesh("test/geometry/cube.obj");
 }
 
 void pivot_draw::deinitialize()
@@ -136,7 +136,7 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		prim->type  = shapes[i];
 		prim->texture = texture_.get()->view;
 
-		renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_prim, prim);
+		//renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_prim, prim);
 	}
 
 	// draw hacked-in model
@@ -147,19 +147,19 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		const auto&    model_pivot  = *pivots[npivots - 1];
 		const auto*    subset       = model->subsets();
 		const auto&    minfo        = model->info();
-		const uint32_t num_vertices = minfo.num_vertices;
+		auto           num_vertices = minfo.num_vertices;
 		const uint32_t num_subsets  = minfo.num_subsets;
 		const auto     subsets_end  = subset + num_subsets;
 		auto           submit       = renderer.allocate<gfx::model_subset_submission_t>(num_subsets);
-
 		auto           world        = model_pivot.world();
 
 		// try to keep very diverse obj files to the same relative scale
-		world = scale(3.0f / minfo.bounding_sphere.w) * translate(-minfo.bounding_sphere.xyz()) * world;
+		world = scale(3.0f / minfo.bounding_sphere.w) * world;
+
 
 		while (subset < subsets_end)
 		{
-			auto num_indices      = (uint16_t)subset->num_indices;
+			auto num_indices      = subset->num_indices;
 			submit->world         = world;
 			submit->mat_hash      = 0;
 			submit->state         = gfx::pipeline_state::mesh_uv0_as_color;
@@ -171,8 +171,8 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 
 			submit->indices       = gpu::ibv(model->indices_offset(),   num_indices);
 			submit->vertices[0]   = gpu::vbv(model->vertices_offset(0), num_vertices, model->vertex_stride(0));
-			submit->vertices[1]   = gpu::vbv(model->vertices_offset(1), num_vertices, model->vertex_stride(1));
-			submit->vertices[2]   = gpu::vbv(model->vertices_offset(2), num_vertices, model->vertex_stride(2));
+			//submit->vertices[1]   = gpu::vbv(model->vertices_offset(1), num_vertices, model->vertex_stride(1));
+			//submit->vertices[2]   = gpu::vbv(model->vertices_offset(2), num_vertices, model->vertex_stride(2));
 
 			renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_subset, submit);
 
@@ -182,6 +182,7 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 	}
 
 	// draw grid
+	if (0)
 	{
 		auto grid = renderer.allocate<gfx::grid_submission_t>();
 		grid->total_width = 100.0f;

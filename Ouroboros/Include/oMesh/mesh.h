@@ -12,7 +12,7 @@
 namespace ouro { namespace mesh {
 
 // describes a part of a larger mesh that is associated with unique attributes/materials.
-// this is usually what maps to one draw call.
+// - usually maps to one draw call.
 struct subset_t
 {
 	enum flags : uint16_t
@@ -24,14 +24,70 @@ struct subset_t
 		face_ccw = 1<<4,
 	};
 
-	uint32_t start_index;     // offset into an index buffer where the indices for this subset starts
-	uint32_t num_indices;     // how many indices this runs for
-	uint32_t start_vertex;    // offset into a vertex buffer where this subset starts
-	uint16_t subset_flags;    // bitmask of the subset flags above
-	uint16_t unused;          // available for future usage
-	uint64_t material_id;     // hash/id for the material associated with this subset
+	uint32_t start_index;  // offset into an index buffer where the indices for this subset starts
+	uint32_t num_indices;  // how many indices this runs for
+	uint32_t start_vertex; // offset into a vertex buffer where this subset starts
+	uint16_t subset_flags; // bitmask of the subset flags above
+	uint16_t unused;       // available for future usage
+	uint64_t material_id;  // hash/id for the material associated with this subset
 };
 static_assert(sizeof(subset_t) == 24, "size mismatch");
+
+struct source_t
+{
+	// valid pointers have data of the specified type
+	// or nullptr if the source is not available.
+
+	source_t()
+		: indices32 (nullptr)
+		, indices16 (nullptr)
+		, positions (nullptr)
+		, texcoords2(nullptr)
+		, texcoords3(nullptr)
+		, normals   (nullptr)
+		, tangents3 (nullptr)
+		, tangents4 (nullptr)
+		, subsets   (nullptr)
+	{}
+
+	uint32_t* indices32;
+	uint16_t* indices16;
+	float3*   positions;
+	float2*   texcoords2;
+	float3*   texcoords3;
+	float3*   normals;
+	float3*   tangents3;
+	float4*   tangents4;
+	subset_t* subsets;
+};
+
+struct const_source_t
+{
+	// valid pointers have data of the specified type
+	// or nullptr if the source is not available.
+
+	const_source_t()
+		: indices32 (nullptr)
+		, indices16 (nullptr)
+		, positions (nullptr)
+		, texcoords2(nullptr)
+		, texcoords3(nullptr)
+		, normals   (nullptr)
+		, tangents3 (nullptr)
+		, tangents4 (nullptr)
+		, subsets   (nullptr)
+	{}
+
+	const uint32_t* indices32;
+	const uint16_t* indices16;
+	const float3*   positions;
+	const float2*   texcoords2;
+	const float3*   texcoords3;
+	const float3*   normals;
+	const float3*   tangents3;
+	const float4*   tangents4;
+	const subset_t* subsets;
+};
 
 // describes the run of subsets for a particular use case
 // meshes should be sorted by opaque, alpha, etc.
@@ -104,6 +160,9 @@ uint32_t copy_element(uint32_t dst_byte_offset, void* oRESTRICT dst, uint32_t ds
 
 // Uses copy_element to find a src for each dst and copies it in (or sets to zero).
 void copy_vertices(void* oRESTRICT* oRESTRICT dst, const layout_t& dst_elements, const void* oRESTRICT* oRESTRICT src, const layout_t& src_elements, uint32_t num_vertices);
+
+// returns a single subset covering [0, num_subsets) for all types
+std::array<lod_t, 5> default_lods(uint16_t num_subsets);
 
 // _____________________________________________________________________________
 // Transform

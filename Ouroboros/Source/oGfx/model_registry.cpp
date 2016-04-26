@@ -37,8 +37,8 @@ namespace gfx {
 
 void model_registry::initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc)
 {
-	vertex_layout_ = vertex_layout::pos_nrm_tan_uv0_col;
-	vertex_shader_ = vertex_shader::pos_nrm_tan_uv0_col;
+	vertex_layout_ = vertex_layout::pos_nrm_tan_uv0;
+	vertex_shader_ = vertex_shader::pos_nrm_tan_uv0;
 
 	auto vlayout = gfx::layout(vertex_layout_);
 

@@ -90,7 +90,7 @@ const pipeline_state_desc pipeline_states[] =
 	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoordv,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
 	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoord,              mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
 	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexture2d,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoord,              mesh::basic::meshf,   basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
+	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoord,              mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
 };
 match_array_e(pipeline_states, pipeline_state);
 

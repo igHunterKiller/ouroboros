@@ -91,6 +91,13 @@ namespace basic {
 		{ element_semantic::texcoord, 0, surface::format::r32g32b32_float, 0 },
 	};
 
+	static const element_t wavefront_obj[] = 
+	{
+		{ element_semantic::position, 0, surface::format::r32g32b32_float, 0 },
+		{ element_semantic::texcoord, 0, surface::format::r32g32b32_float, 1 },
+		{ element_semantic::normal,   0, surface::format::r32g32b32_float, 2 },
+	};
+
 	static const element_t meshf[] = 
 	{
 		{ element_semantic::position, 0, surface::format::r32g32b32_float,    0 },

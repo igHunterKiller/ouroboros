@@ -3,6 +3,7 @@
 #include "obj_test.h"
 #include <oCore/assert.h>
 #include <oCore/countof.h>
+#include <oString/string.h>
 
 namespace ouro { namespace tests {
 
@@ -14,42 +15,47 @@ public:
 		init_groups();
 	}
 
-	mesh::obj::info_t get_info() const override
+	mesh::info_t info() const override
 	{
-		mesh::obj::info_t i;
+		mesh::info_t i;
 
-		i.obj_path = "cube.obj";
-		i.mtl_path = "cube.mtl";
-		i.groups = sGroups;
-		i.subsets = sSubsets;
-		i.indices = sIndices;
-		i.positions = sPositions;
-		i.normals = sNormals;
-		i.texcoords = sTexcoords;
-
-		i.mesh_info.num_indices = countof(sIndices);
-		i.mesh_info.num_vertices = countof(sPositions);
-		i.mesh_info.num_subsets = countof(sSubsets);
-		i.mesh_info.log2scale = 0;
-		i.mesh_info.primitive_type = mesh::primitive_type::triangles;
-		i.mesh_info.face_type = mesh::face_type::unknown;
-		i.mesh_info.flags = 0;
-
-		i.mesh_info.bounding_sphere = float4(0.0f, 0.0f, 0.0f, length(float3(0.5f)));
-		i.mesh_info.extents = float3(0.5f);
-		i.mesh_info.avg_edge_length = 1.0f;
-		i.mesh_info.avg_texel_density = float2(1.0f, 1.0f);
-		i.mesh_info.layout[0] = mesh::celement_t(mesh::element_semantic::position, 0, surface::format::r32g32b32_float,    0);
-		i.mesh_info.layout[1] = mesh::celement_t(mesh::element_semantic::normal,   0, surface::format::r32g32b32_float,    1);
-		i.mesh_info.layout[2] = mesh::celement_t(mesh::element_semantic::tangent,  0, surface::format::r32g32b32a32_float, 2);
-		i.mesh_info.lods[0].opaque_color.start_subset = 0;
-		i.mesh_info.lods[0].opaque_color.num_subsets = i.mesh_info.num_subsets;
-		i.mesh_info.lods[0].opaque_shadow.start_subset = 0;
-		i.mesh_info.lods[0].opaque_shadow.num_subsets = i.mesh_info.num_subsets;
-		i.mesh_info.lods[0].collision.start_subset = 0;
-		i.mesh_info.lods[0].collision.num_subsets = i.mesh_info.num_subsets;
+		auto extents        = float3(0.5f);
+		i.num_indices       = countof(sIndices);
+		i.num_vertices      = countof(sPositions);
+		i.num_subsets       = countof(sSubsets);
+		i.num_slots         = (uint8_t)mesh::layout_slots(mesh::basic::wavefront_obj);
+		i.log2scale         = mesh::calc_log2scale(extents);
+		i.primitive_type    = mesh::primitive_type::triangles;
+		i.face_type         = mesh::face_type::front_ccw;
+		i.flags             = 0;
+		i.bounding_sphere   = float4(0.0f, 0.0f, 0.0f, length(extents));
+		i.extents           = extents;
+		i.avg_edge_length   = 1.0f;
+		i.lod_distances     = float4(0.0f);
+		i.avg_texel_density = float2(1.0f);
+		i.layout            = mesh::layout(mesh::basic::wavefront_obj);
+		i.lods              = mesh::default_lods(i.num_subsets);
 
 		return i;
+	}
+
+	mesh::const_source_t source() const override
+	{
+		mesh::const_source_t s;
+		s.indices32  = sIndices;
+		s.positions  = sPositions;
+		s.texcoords3 = sTexcoords;
+		s.normals    = sNormals;
+		s.subsets    = sSubsets;
+		return s;		
+	}
+
+	const char* obj_path() const override { return "cube.obj"; }
+	const char* mtl_path() const override { return "cube.mtl"; }
+
+	const mesh::obj::group_t* groups() const override
+	{
+		return sGroups;
 	}
 
 	const char* file_contents() const override
@@ -81,28 +87,28 @@ public:
 			"\n" \
 			"	usemtl Body\n" \
 			"	g Left\n" \
-			"	f 5/3/1 3/4/1 7/1/1\n" \
-			"	f 1/2/1 3/4/1 5/3/1\n" \
+			"	f 5/1/1 7/3/1 3/4/1\n" \
+			"	f 1/2/1 5/1/1 3/4/1\n" \
 			"\n" \
 			"	g Right\n" \
-			"	f 6/2/2 8/4/2 4/3/2\n" \
-			"	f 2/1/2 6/2/2 4/3/2\n" \
+			"	f 6/2/2 4/3/2 8/4/2\n" \
+			"	f 2/1/2 4/3/2 6/2/2\n" \
 			"\n" \
 			"	g Top\n" \
-			"	f 3/1/3 8/4/3 7/3/3\n" \
-			"	f 3/1/3 4/2/3 8/4/3\n" \
+			"	f 3/1/3 7/3/3 8/4/3\n" \
+			"	f 3/1/3 8/4/3 4/2/3\n" \
 			"\n" \
 			"	g Bottom\n" \
-			"	f 1/3/4 5/1/4 6/2/4\n" \
-			"	f 2/4/4 1/3/4 6/2/4\n" \
+			"	f 1/3/4 6/2/4 5/1/4\n" \
+			"	f 2/4/4 6/2/4 1/3/4\n" \
 			"\n" \
 			"	g Near\n" \
-			"	f 1/1/5 2/2/5 3/3/5\n" \
-			"	f 2/2/5 4/4/5 3/3/5\n" \
+			"	f 1/1/5 3/3/5 2/2/5\n" \
+			"	f 2/2/5 3/3/5 4/4/5\n" \
 			"\n" \
 			"	g Far\n" \
-			"	f 5/2/6 7/4/6 6/1/6\n" \
-			"	f 6/1/6 7/4/6 8/3/6\n";
+			"	f 5/2/6 6/1/6 7/4/6\n" \
+			"	f 6/1/6 8/3/6 7/4/6\n";
 	}
 
 private:
@@ -122,8 +128,8 @@ private:
 			int i = 0;
 			for (auto& g : sGroups)
 			{
-				g.group_name = sGroupNames[i];
-				g.material_name = "Body";
+				strlcpy(g.name, sGroupNames[i]);
+				strlcpy(g.material, "Body");
 
 				sSubsets[i].start_index  = i * 2 * 3;
 				sSubsets[i].num_indices  = 2 * 3;
@@ -141,96 +147,96 @@ private:
 
 const float3 obj_test_cube::sPositions[24] = 
 {
-	float3(-0.500000f, -0.500000f, 0.500000f),
-	float3(-0.500000f, 0.500000f, -0.500000f),
-	float3(-0.500000f, 0.500000f, 0.500000f),
-	float3(-0.500000f, -0.500000f, -0.500000f),
-	float3(0.500000f, -0.500000f, 0.500000f),
-	float3(0.500000f, 0.500000f, 0.500000f),
-	float3(0.500000f, 0.500000f, -0.500000f),
-	float3(0.500000f, -0.500000f, -0.500000f),
-	float3(-0.500000f, 0.500000f, -0.500000f),
-	float3(0.500000f, 0.500000f, 0.500000f),
-	float3(-0.500000f, 0.500000f, 0.500000f),
-	float3(0.500000f, 0.500000f, -0.500000f),
-	float3(-0.500000f, -0.500000f, -0.500000f),
-	float3(-0.500000f, -0.500000f, 0.500000f),
-	float3(0.500000f, -0.500000f, 0.500000f),
-	float3(0.500000f, -0.500000f, -0.500000f),
-	float3(-0.500000f, -0.500000f, -0.500000f),
-	float3(0.500000f, -0.500000f, -0.500000f),
-	float3(-0.500000f, 0.500000f, -0.500000f),
-	float3(0.500000f, 0.500000f, -0.500000f),
-	float3(-0.500000f, -0.500000f, 0.500000f),
-	float3(-0.500000f, 0.500000f, 0.500000f),
-	float3(0.500000f, -0.500000f, 0.500000f),
-	float3(0.500000f, 0.500000f, 0.500000f),
+	float3(-0.500000000f, -0.500000000f, 0.500000000f),
+	float3(-0.500000000f, 0.500000000f, 0.500000000f),
+	float3(-0.500000000f, 0.500000000f, -0.500000000f),
+	float3(-0.500000000f, -0.500000000f, -0.500000000f),
+	float3(0.500000000f, -0.500000000f, 0.500000000f),
+	float3(0.500000000f, 0.500000000f, -0.500000000f),
+	float3(0.500000000f, 0.500000000f, 0.500000000f),
+	float3(0.500000000f, -0.500000000f, -0.500000000f),
+	float3(-0.500000000f, 0.500000000f, -0.500000000f),
+	float3(-0.500000000f, 0.500000000f, 0.500000000f),
+	float3(0.500000000f, 0.500000000f, 0.500000000f),
+	float3(0.500000000f, 0.500000000f, -0.500000000f),
+	float3(-0.500000000f, -0.500000000f, -0.500000000f),
+	float3(0.500000000f, -0.500000000f, 0.500000000f),
+	float3(-0.500000000f, -0.500000000f, 0.500000000f),
+	float3(0.500000000f, -0.500000000f, -0.500000000f),
+	float3(-0.500000000f, -0.500000000f, -0.500000000f),
+	float3(-0.500000000f, 0.500000000f, -0.500000000f),
+	float3(0.500000000f, -0.500000000f, -0.500000000f),
+	float3(0.500000000f, 0.500000000f, -0.500000000f),
+	float3(-0.500000000f, -0.500000000f, 0.500000000f),
+	float3(0.500000000f, -0.500000000f, 0.500000000f),
+	float3(-0.500000000f, 0.500000000f, 0.500000000f),
+	float3(0.500000000f, 0.500000000f, 0.500000000f),
 };
 
 const float3 obj_test_cube::sTexcoords[24] = 
 {
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(1.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(1.000000f, 1.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
+	float3(0.000000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 1.00000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
 };
 
 const float3 obj_test_cube::sNormals[24] = 
 {
-	float3(-1.000000f, 0.000000f, 0.000000f),
-	float3(-1.000000f, 0.000000f, 0.000000f),
-	float3(-1.000000f, 0.000000f, 0.000000f),
-	float3(-1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(1.000000f, 0.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, 1.000000f, 0.000000f),
-	float3(0.000000f, -1.000000f, 0.000000f),
-	float3(0.000000f, -1.000000f, 0.000000f),
-	float3(0.000000f, -1.000000f, 0.000000f),
-	float3(0.000000f, -1.000000f, 0.000000f),
-	float3(0.000000f, 0.000000f, -1.000000f),
-	float3(0.000000f, 0.000000f, -1.000000f),
-	float3(0.000000f, 0.000000f, -1.000000f),
-	float3(0.000000f, 0.000000f, -1.000000f),
-	float3(0.000000f, 0.000000f, 1.000000f),
-	float3(0.000000f, 0.000000f, 1.000000f),
-	float3(0.000000f, 0.000000f, 1.000000f),
-	float3(0.000000f, 0.000000f, 1.000000f),
+	float3(-1.00000000f, 0.000000000f, 0.000000000f),
+	float3(-1.00000000f, 0.000000000f, 0.000000000f),
+	float3(-1.00000000f, 0.000000000f, 0.000000000f),
+	float3(-1.00000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(1.00000000f, 0.000000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, 1.00000000f, 0.000000000f),
+	float3(0.000000000f, -1.00000000f, 0.000000000f),
+	float3(0.000000000f, -1.00000000f, 0.000000000f),
+	float3(0.000000000f, -1.00000000f, 0.000000000f),
+	float3(0.000000000f, -1.00000000f, 0.000000000f),
+	float3(0.000000000f, 0.000000000f, -1.00000000f),
+	float3(0.000000000f, 0.000000000f, -1.00000000f),
+	float3(0.000000000f, 0.000000000f, -1.00000000f),
+	float3(0.000000000f, 0.000000000f, -1.00000000f),
+	float3(0.000000000f, 0.000000000f, 1.00000000f),
+	float3(0.000000000f, 0.000000000f, 1.00000000f),
+	float3(0.000000000f, 0.000000000f, 1.00000000f),
+	float3(0.000000000f, 0.000000000f, 1.00000000f),
 };
 
 const uint obj_test_cube::sIndices[36] =
 {
-	0,2,1,3,0,1,
-	4,6,5,7,6,4,
-	8,10,9,8,9,11,
-	12,14,13,15,14,12,
-	16,18,17,17,18,19,
-	20,22,21,22,23,21,
+	0,1,2,3,0,2,
+	4,5,6,7,5,4,
+	8,9,10,8,10,11,
+	12,13,14,15,13,12,
+	16,17,18,18,17,19,
+	20,21,22,21,23,22,
 };
 
 const char* obj_test_cube::sGroupNames[6] = 

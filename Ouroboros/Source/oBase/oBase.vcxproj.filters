@@ -90,9 +90,6 @@
     <ClInclude Include="..\..\Include\oBase\fixed_vector.h">
       <Filter>oBase\containers</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\oBase\unordered_map.h">
-      <Filter>oBase\containers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\oBase\all.h">
       <Filter>oBase</Filter>
     </ClInclude>

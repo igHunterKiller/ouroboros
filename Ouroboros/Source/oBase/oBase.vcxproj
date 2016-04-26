@@ -79,7 +79,6 @@
     <ClInclude Include="..\..\Include\oBase\sss.h" />
     <ClInclude Include="..\..\Include\oBase\type_info.h" />
     <ClInclude Include="..\..\Include\oBase\unit_test.h" />
-    <ClInclude Include="..\..\Include\oBase\unordered_map.h" />
     <ClInclude Include="..\..\Include\oBase\vcs.h" />
     <ClInclude Include="..\..\Include\oBase\vcs_git.h" />
     <ClInclude Include="..\..\Include\oBase\vcs_svn.h" />

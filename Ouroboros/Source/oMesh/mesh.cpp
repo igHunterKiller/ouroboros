@@ -48,6 +48,21 @@ void copy_vertices(void* oRESTRICT* oRESTRICT dst, const layout_t& dst_elements,
 	}
 }
 
+std::array<lod_t, 5> default_lods(uint16_t num_subsets)
+{
+	std::array<lod_t, 5> lods;
+	for (auto& lod : lods)
+	{
+		lod.opaque_color.start_subset  = 0;
+		lod.opaque_color.num_subsets   = num_subsets;
+		lod.opaque_shadow.start_subset = 0;
+		lod.opaque_shadow.num_subsets  = num_subsets;
+		lod.collision.start_subset     = 0;
+		lod.collision.num_subsets      = num_subsets;
+	}
+	return lods;
+}
+
 void transform_points(const float4x4& matrix, float3* oRESTRICT dst, uint32_t dst_stride, const float3* oRESTRICT src, uint32_t src_stride, uint32_t num_points)
 {
 	const float3* oRESTRICT end = byte_add(dst, dst_stride * num_points);

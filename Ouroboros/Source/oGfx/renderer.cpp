@@ -275,9 +275,32 @@ void draw_subset(technique_context_t& ctx)
 	{
 		     subset = (const model_subset_submission_t*)task->data;
 		auto pso    = get_fullscreen_pipline_state(ctx, subset->state);
+	
+		cl.set_pso(pso);
+		// set cbs
+		{
+			auto& draw         = draws[num_instances];
+			draw.set_transform(subset->world, view_proj);
+			draw.color         = 0;
+			draw.vertex_scale  = 1.0f;
+			draw.vertex_offset = ~0u;
+			draw.object_id     = 0;
+			draw.draw_id       = 0;
+			draw.time          = time;
+			draw.slice         = 0;
+			draw.flags         = 0;
+			draw.pada          = 0;
+		}
+
+		draw_subset(cl, *subset, draws, 1);
+
+
+#if 0
+
 		auto mat    = subset->mat_hash;
 
-		if (num_instances >= countof(draws) || pso != prev_pso || mat != prev_mat)
+		// HACK until a material system is installed
+		if (num_instances || num_instances >= countof(draws) || pso != prev_pso || mat != prev_mat)
 		{
 			draw_subset(cl, *subset, draws, num_instances);
 			num_instances = 0;
@@ -313,11 +336,16 @@ void draw_subset(technique_context_t& ctx)
 		num_instances++;
 		prev_pso = pso;
 		prev_mat = mat;
+
+#endif
 	}
 
+#if 0
 	// one last flush
 	if (num_instances)
 		draw_subset(cl, *subset, draws, num_instances);
+
+#endif
 }
 
 void draw_axis(technique_context_t& ctx)

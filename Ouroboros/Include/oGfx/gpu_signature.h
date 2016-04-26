@@ -40,12 +40,12 @@ enum class pipeline_state : uint8_t
 	mouse_depth,
 	linearize_depth,
 	
-	// pos_nrm_tan_uv0_col
-	mesh_u0_as_color,
-	mesh_v0_as_color,
-	mesh_uv0_as_color,
+	// pos_nrm_tan_uv0
+	mesh_u0_as_color,		 //
+	mesh_v0_as_color,    //
+	mesh_uv0_as_color,   //
 	mesh_simple_texture, // sample texture in slot0
-	mesh_wire, // wireframe with UVs as color
+	mesh_wire,           // wireframe with UVs as color
 	count,
 };
 
