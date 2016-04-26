@@ -123,7 +123,7 @@ size_t sbb_allocator::capacity() const
 void* sbb_allocator::allocate(size_t bytes, const char* label, const allocate_options& options)
 {
 	bytes = std::max(bytes, size_t(1));
-	size_t align = options.convert_alignment();
+	size_t align = options.alignment_bytes();
 	
 	void* p;
 

@@ -1314,10 +1314,7 @@ device::device(const device_init& init, window* win)
 	{
 		auto common_alignment = memory_alignment::align64k; // both gpu and cpu should share the same alignment
 
-		allocate_options opts;
-		opts.type(memory_type::cpu_writeback);
-		opts.category(0);
-		opts.alignment(common_alignment);
+		allocate_options opts(memory_type::cpu_writeback, common_alignment);
 
 		const uint32_t capacity_bytes = init.max_persistent_mesh_bytes;
 
@@ -1334,7 +1331,7 @@ device::device(const device_init& init, window* win)
 		desc.height = 1;
 		desc.depth_or_array_size = 1;
 		desc.mip_levels = 1;
-		desc.alignment = (uint16_t)opts.convert_alignment();
+		desc.alignment = (uint16_t)opts.alignment_bytes();
 		desc.sample_count = 1;
 		desc.sample_quality = 0;
 		desc.type = resource_type::buffer;

@@ -7,7 +7,7 @@ namespace ouro {
 
 void* default_allocate(size_t size, const char* label, const allocate_options& options)
 {
-	return _aligned_malloc(size, options.convert_alignment());
+	return _aligned_malloc(size, options.alignment_bytes());
 }
 
 void default_deallocate(void* pointer)

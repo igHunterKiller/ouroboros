@@ -103,7 +103,7 @@ void* tlsf_allocator::allocate(size_t bytes, const char* label, const allocate_o
 		bytes += sizeof(const char*);
 	#endif
 
-	size_t align = options.convert_alignment();
+	size_t align = options.alignment_bytes();
 	void* p = align == 16 ? tlsf_malloc(heap_, bytes) : tlsf_memalign(heap_, align, bytes);
 	if (p)
 	{

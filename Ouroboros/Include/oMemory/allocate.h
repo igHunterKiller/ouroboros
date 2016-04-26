@@ -31,8 +31,8 @@ enum class allocate_errc : uint32_t
 
 const std::error_category& allocate_category();
 
-/*constexpr*/ inline std::error_code make_error_code(allocate_errc err_code) { return std::error_code(static_cast<int>(err_code), allocate_category()); }
-/*constexpr*/ inline std::error_condition make_error_condition(allocate_errc err_code) { return std::error_condition(static_cast<int>(err_code), allocate_category()); }
+inline std::error_code make_error_code(allocate_errc err_code)           noexcept { return std::error_code(static_cast<int>(err_code), allocate_category()); }
+inline std::error_condition make_error_condition(allocate_errc err_code) noexcept { return std::error_condition(static_cast<int>(err_code), allocate_category()); }
 
 class allocate_error : public std::logic_error
 {
@@ -55,7 +55,7 @@ enum class memory_operation : uint8_t
 	count, 
 };
 
-enum class memory_alignment : uint8_t
+enum class memory_alignment : uint32_t
 {
 	align_default,
 	align2,
@@ -80,7 +80,7 @@ enum class memory_alignment : uint8_t
 	default_alignment = align16,
 };
 
-enum class memory_type : uint8_t
+enum class memory_type : uint32_t
 {
 	cpu_writeback,
 	cpu_writecombine,
@@ -96,25 +96,18 @@ enum class memory_type : uint8_t
 class allocate_options
 {
 public:
-	allocate_options() : options_(0) {}
-	allocate_options(uint32_t options) : options_(options) {}
-	allocate_options(const memory_alignment& a) { options_ = 0; alignment(a); }
-	operator uint32_t() const { return options_; }
+	allocate_options()                                                                    : options(0)       {}
+	allocate_options(uint32_t options)                                                    : options(options) {}
+	allocate_options(const memory_alignment& a)                                           : options(0)       { alignment = a; }
+	allocate_options(const memory_type& t, const memory_alignment& a)                     : options(0)       { type = t; alignment = a; }
+	allocate_options(const memory_type& t, const memory_alignment& a, uint32_t category_)                    { type = t; alignment = a; category = category_; }
+	operator uint32_t() const { return options; }
 
-  memory_type type() const { return (memory_type)type_; }
-  void type(const memory_type& t) { type_ = (uint32_t)t; }
-  
-  uint32_t category() const { return category_; }
-  void category(uint32_t category) { category_ = category; }
-
-  memory_alignment alignment() const { return (memory_alignment)alignment_; }
-  void alignment(const memory_alignment& a) { alignment_ = (uint32_t)a; }
-
-  size_t convert_alignment() const { return static_cast<size_t>(size_t(1) << (alignment_ ? alignment_ : (size_t)memory_alignment::align16)); }
+  size_t alignment_bytes() const { return static_cast<size_t>(size_t(1) << (alignment != memory_alignment::align_default ? (size_t)alignment : (size_t)memory_alignment::default_alignment)); }
 
 	template<typename T> T align(const T& x)
 	{
-		auto align1 = convert_alignment() - 1;
+		auto align1 = alignment_bytes() - 1;
 		return (T)(((size_t)x + align1) & ~align1);
 	}
 
@@ -126,15 +119,16 @@ public:
 private:
   union
   {
-	  uint32_t options_;
+	  uint32_t options;
 	  struct
 	  {
-		  uint32_t alignment_ : 6; // memory_alignment
-		  uint32_t type_ : 4;
-		  uint32_t category_ : 22; // passed through: can be used for user-markup
+		  memory_alignment alignment : 6; // memory_alignment
+		  memory_type      type      : 4;
+		  uint32_t         category  : 22; // passed through for user-markup
 	  };
   };
 };
+static_assert(sizeof(allocate_options) == sizeof(uint32_t), "allocate_options size mismatch");
 
 // _____________________________________________________________________________
 // Standard ways of tracking and reporting memory
