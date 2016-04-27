@@ -175,33 +175,33 @@ struct bit_size
 
 static const uint32_t max_num_subsurfaces = 4;
 
-inline bool is_texture(const format& f) { return (int)f <= (int)format::b4g4r4a4_unorm; }
-bool is_block_compressed(const format& f);                       // true if a block-compressed format
-bool is_typeless(const format& f);                               // true if a typeless fomrat
-bool is_depth(const format& f);                                  // true if typically used to write Z-buffer/depth information
-bool has_alpha(const format& f);                                 // true if has alpha - rgbx types do not have alpha
-bool is_unorm(const format& f);                                  // true if normalized between 0.0f and 1.0f
-bool is_srgb(const format& f);                                   // true if srgb format
-bool is_planar(const format& f);                                 // true if channels of a pixel are not interleaved
-bool is_yuv(const format& f);                                    // true if in YUV space
-format as_srgb(const format& f);                                 // returns the base type with the specified extension
-format as_depth(const format& f);                                // returns the base type with the specified extension
-format as_typeless(const format& f);                             // returns the base type with the specified extension
-format as_unorm(const format& f);                                // returns the base type with the specified extension
-format as_4chanx(const format& f);                               // adds a 4th component or replaces an alpha type with an x type
-format as_4chana(const format& f);                               // adds a 4th component or replaces an x type with an alpha type
-format as_3chan(const format& f);                                // removes a 4th component
-format as_texture(const format& f);                              // return the closest format that would return true from is_texture()
-format as_nv12(const format& f);                                 // given a surface format determine the NV12 format that comes closest to it
-bit_size channel_bits(const format& f);                          // returns number of bits per channel: either r,g,b,a or y,u,v,a
-uint32_t num_channels(const format& f);                          // returns the number of separate channels used for a pixel
-uint32_t num_subformats(const format& f);                        // returns the number of separate plane's for planar formats
-uint32_t subsample_bias(const format& f, uint32_t subsurface);   // returns the offset to be applied to the main surface's mip level when inferring the size of a subsurface (think of the UV size in many YUV formats).
-uint32_t element_size(const format& f, uint32_t subsurface = 0); // size in bytes of either the pixel or bc block. For 1-bit textures this returns 1 (byte)
-uint32_t bits(const format& f);                                  // returns number of bits for an element including X bits
-uint2 min_dimensions(const format& f);                           // typically 1,1 but block formats and yuv may differ
-format subformat(const format& f, uint32_t subsurface);          // returns the surface format of the nth subsurface (plane) or unknown for non-planar formats
-format from_fourcc(const fourcc_t& fcc);                         // converts a fourcc returned from to_fourcc to a format
-fourcc_t to_fourcc(const format& f);                             // get the typical fourcc code associated with the format
+inline bool is_texture         (const format& f) { return (int)f <= (int)format::b4g4r4a4_unorm; }
+bool        is_block_compressed(const format& f);                          // true if a block-compressed format
+bool        is_typeless        (const format& f);                          // true if a typeless fomrat
+bool        is_depth           (const format& f);                          // true if typically used to write Z-buffer/depth information
+bool        has_alpha          (const format& f);                          // true if has alpha - rgbx types do not have alpha
+bool        is_unorm           (const format& f);                          // true if normalized between 0.0f and 1.0f
+bool        is_srgb            (const format& f);                          // true if srgb format
+bool        is_planar          (const format& f);                          // true if channels of a pixel are not interleaved
+bool        is_yuv             (const format& f);                          // true if in YUV space
+format      as_srgb            (const format& f);                          // returns the base type with the specified extension
+format      as_depth           (const format& f);                          // returns the base type with the specified extension
+format      as_typeless        (const format& f);                          // returns the base type with the specified extension
+format      as_unorm           (const format& f);                          // returns the base type with the specified extension
+format      as_4chanx          (const format& f);                          // adds a 4th component or replaces an alpha type with an x type
+format      as_4chana          (const format& f);                          // adds a 4th component or replaces an x type with an alpha type
+format      as_3chan           (const format& f);                          // removes a 4th component
+format      as_texture         (const format& f);                          // return the closest format that would return true from is_texture()
+format      as_nv12            (const format& f);                          // given a surface format determine the NV12 format that comes closest to it
+bit_size    channel_bits       (const format& f);                          // returns number of bits per channel: either r,g,b,a or y,u,v,a
+uint32_t    num_channels       (const format& f);                          // returns the number of separate channels used for a pixel
+uint32_t    num_subformats     (const format& f);                          // returns the number of separate plane's for planar formats
+uint32_t    bits               (const format& f);                          // returns number of bits for an element including X bits
+uint2       min_dimensions     (const format& f);                          // typically 1,1 but block formats and yuv may differ
+uint32_t    subsample_bias     (const format& f, uint32_t subsurface);     // returns the offset to be applied to the main surface's mip level when inferring the size of a subsurface (think of the UV size in many YUV formats).
+uint32_t    element_size       (const format& f, uint32_t subsurface = 0); // size in bytes of either the pixel or bc block. For 1-bit textures this returns 1 (byte)
+format      subformat          (const format& f, uint32_t subsurface);     // returns the surface format of the nth subsurface (plane) or unknown for non-planar formats
+fourcc_t    to_fourcc          (const format& f);                          // get the typical fourcc code associated with the format
+format      from_fourcc        (const fourcc_t& fcc);                      // converts a fourcc returned from to_fourcc to a format
 
 }}
