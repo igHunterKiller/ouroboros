@@ -126,38 +126,6 @@ void model_registry::destroy_resource(void* entry)
   pool_.destroy(mdl);
 }
 
-void model_registry::set_model(gpu::graphics_command_list* cl, const mesh::model* mdl)
-{
-	auto& info = mdl->info();
-	
-	// Reconstruct ibv and bind it
-	{
-		gpu::ibv indices;
-		indices.offset = mdl->indices_offset();
-		indices.num_indices = info.num_indices;
-		indices.transient = 0;
-		indices.is_32bit = false;
-		
-		cl->set_indices(indices);
-	}
-
-	// Reconstruct vbvs and bind them
-	auto nslots = info.num_slots;
-	gpu::vbv vbvs[mesh::max_num_slots];
-	for (uint32_t slot = 0; slot < nslots; slot++)
-	{
-		auto stride = mdl->vertex_stride(slot);
-
-		auto& verts = vbvs[slot];
-		verts.offset = mdl->vertices_offset(slot);
-		verts.num_vertices = info.num_vertices;
-		verts.transient = 0;
-		verts.vertex_stride_bytes(mdl->vertex_stride(slot));
-	}
-
-	cl->set_vertices(0, nslots, vbvs);
-}
-
 void model_registry::insert_primitive(const primitive_model& prim, const mesh::model& model, const allocator& alloc, const allocator& io_alloc)
 {
 	auto omdl = mesh::encode(model, mesh::file_format::omdl, alloc, io_alloc);

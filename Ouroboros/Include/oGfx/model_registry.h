@@ -52,9 +52,6 @@ public:
 
 	mesh::model* primitive(const primitive_model& prim) const { return resolve_indexed((uint64_t)prim + 1); }
 
-	static void set_model(gpu::graphics_command_list* cl, const mesh::model* model);
-	static void set_model(gpu::graphics_command_list* cl, const handle& model) { set_model(cl, model.get()); }
-
 	gfx::vertex_layout vertex_layout() const { return vertex_layout_; }
 	gfx::vertex_shader vertex_shader() const { return vertex_shader_; }
 
