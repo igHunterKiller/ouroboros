@@ -128,6 +128,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\Include\oGPU\all.h" />
     <ClInclude Include="..\..\Include\oGPU\gpu.h" />
+    <ClInclude Include="..\..\Include\oGPU\gpu_semantics.h" />
     <ClInclude Include="d3d11_as_string.h" />
     <ClInclude Include="d3d_compile.h" />
     <ClInclude Include="d3d_include.h" />

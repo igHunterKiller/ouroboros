@@ -4,7 +4,6 @@
 
 #pragma once
 #include <oGfx/device_resource_registry.h>
-#include <oGfx/bytecode.h>
 #include <oMesh/model.h>
 
 namespace ouro { namespace gfx {
@@ -52,8 +51,7 @@ public:
 
 	mesh::model* primitive(const primitive_model& prim) const { return resolve_indexed((uint64_t)prim + 1); }
 
-	gfx::vertex_layout vertex_layout() const { return vertex_layout_; }
-	gfx::vertex_shader vertex_shader() const { return vertex_shader_; }
+	mesh::layout_t vertex_layout() const { return mesh::layout(mesh::basic::meshf); }
 
 private:
 	allocator alloc_;
@@ -63,9 +61,6 @@ private:
 
 	void insert_primitive(const primitive_model& prim, const mesh::model& model, const allocator& alloc, const allocator& io_alloc);
 	void insert_primitives(const allocator& alloc, const allocator& io_alloc);
-
-	gfx::vertex_layout vertex_layout_;
-	gfx::vertex_shader vertex_shader_;
 };
 
 typedef model_registry::handle model_t;

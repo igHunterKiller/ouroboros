@@ -17,12 +17,24 @@ namespace ouro { class window; namespace gfx {
 
 enum class fullscreen_mode
 {
-	normal,
+	lit,
 	points,
 	wireframe,
 	texcoord,
 	texcoordu,
 	texcoordv,
+	normalx,
+	normaly,
+	normalz,
+	normal,
+	tangentx,
+	tangenty,
+	tangentz,
+	tangent,
+	bittangentx,
+	bittangenty,
+	bittangentz,
+	bittangent,
 	count,
 };
 

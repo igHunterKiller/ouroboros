@@ -7,7 +7,6 @@
 #include <oMesh/primitive.h>
 #include <oMesh/codec.h>
 
-#include <oGfx/vertex_layouts.h>
 
 using namespace ouro;
 

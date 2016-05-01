@@ -2,7 +2,6 @@
 
 #include <oGfx/renderer.h>
 #include <oGfx/gpu_signature.h>
-#include <oGfx/vertex_layouts.h>
 
 #include <oMath/btt.h>
 #include <oMath/gizmo.h>
@@ -38,10 +37,10 @@ template<> const char* as_string(const gfx::fullscreen_mode& mode)
 		"tangenty",
 		"tangentz",
 		"tangent",
-		"bitangentx",
-		"bitangenty",
-		"bitangentz",
-		"bitangent",
+		"bittangentx",
+		"bittangenty",
+		"bittangentz",
+		"bittangent",
 	};
 	return as_string(mode, s_names);
 }
@@ -190,29 +189,19 @@ void linearize_depth(technique_context_t& ctx)
 
 static pipeline_state get_fullscreen_pipline_state(technique_context_t& ctx, const pipeline_state& default_pso)
 {
-	static const pipeline_state fullscreen_psos[] = 
+	pipeline_state pso;
+	switch (ctx.render_settings.mode)
 	{
-		default_pso,
-		pipeline_state::pos_only_points,
-		pipeline_state::pos_color_wire,
-		pipeline_state::mesh_uv0_as_color,
-		pipeline_state::mesh_u0_as_color,
-		pipeline_state::mesh_v0_as_color,
-		pipeline_state::mesh_normalx_as_color,
-		pipeline_state::mesh_normaly_as_color,
-		pipeline_state::mesh_normalz_as_color,
-		pipeline_state::mesh_normal_as_color,
-		pipeline_state::mesh_tangentx_as_color,
-		pipeline_state::mesh_tangenty_as_color,
-		pipeline_state::mesh_tangentz_as_color,
-		pipeline_state::mesh_tangent_as_color,
-		pipeline_state::mesh_bitangentx_as_color,
-		pipeline_state::mesh_bitangenty_as_color,
-		pipeline_state::mesh_bitangentz_as_color,
-		pipeline_state::mesh_bitangent_as_color,
-	};
-	match_array_e(fullscreen_psos, fullscreen_mode);
-	return fullscreen_psos[(int)ctx.render_settings.mode];
+		default:
+		case fullscreen_mode::normal:    pso = default_pso;                         break;
+		case fullscreen_mode::points:    pso = pipeline_state::pos_only_points;     break;
+		case fullscreen_mode::wireframe: pso = pipeline_state::pos_color_wire;      break;
+		case fullscreen_mode::texcoord:  pso = pipeline_state::mesh_uv0_as_color;   break;
+		case fullscreen_mode::texcoordu: pso = pipeline_state::mesh_u0_as_color;    break;
+		case fullscreen_mode::texcoordv: pso = pipeline_state::mesh_v0_as_color;    break;
+	}
+	
+	return pso;
 }
 
 static void set_model(gpu::graphics_command_list* cl, const mesh::model* mdl)
@@ -303,32 +292,6 @@ static void draw_subset(gpu::graphics_command_list& cl, const model_subset_submi
 	cl.draw_indexed(subset.num_indices, num_instances, subset.start_index);
 }
 
-#define FMT_FLOAT2 "%f %f"
-#define FMT_FLOAT3 "%f %f %f"
-#define FMT_FLOAT4 "%f %f %f %f"
-
-#define PRM_FLOAT2(v) (v).x, (v).y
-#define PRM_FLOAT3(v) (v).x, (v).y, (v).z
-#define PRM_FLOAT4(v) (v).x, (v).y, (v).z, (v).w
-
-const char* vtx_to_string(char* dst, size_t dst_size, const void* struct_)
-{
-	struct vtx
-	{
-		float3 pos;
-		float3 nrm;
-		float4 tan;
-		float2 tex;
-	};
-	const vtx& v = *(const vtx*)struct_;
-			
-	return 0 > snprintf(dst, dst_size, "{\n\t" FMT_FLOAT3 "\n\t" FMT_FLOAT3 "\n\t" FMT_FLOAT4 "\n\t" FMT_FLOAT2 "\n}\n",
-		PRM_FLOAT3(v.pos),
-		PRM_FLOAT3(v.nrm),
-		PRM_FLOAT4(v.tan),
-		PRM_FLOAT2(v.tex)) ? nullptr : dst;
-}
-
 void draw_subset(technique_context_t& ctx)
 {
 	auto&       cl         = *ctx.gcl;
@@ -350,11 +313,6 @@ void draw_subset(technique_context_t& ctx)
 
 	cl.set_pso(prev_pso);
 	// set prev materials
-
-	if ((const void*)subset == (const void*)0x1234)
-	{
-		cl.device()->trace_structs(subset->vertices[0].offset, subset->vertices[0].vertex_stride_bytes(), subset->vertices[0].num_vertices, vtx_to_string);
-	}
 	
 	ForEachTask
 	{
@@ -464,7 +422,7 @@ void draw_axis(technique_context_t& ctx)
 	primitive::mesh_t cone_mesh(cone, mem);
 	primitive::cone_tessellate(&cone_mesh, cone.type, kConeFacet);
 
-	auto verts = cl.new_transient_vertices<gfx::VTXpos_col>(6 + 3 * nverts);
+	auto verts = cl.new_transient_vertices<gfx::VTXpc>(6 + 3 * nverts);
 	if (!verts)
 		return;
 
@@ -498,7 +456,7 @@ void draw_axis(technique_context_t& ctx)
 	auto lines_view = cl.commit_transient_vertices();
 	auto faces_view = lines_view;
 	faces_view.num_vertices -= 6;
-	faces_view.offset       += 6 * sizeof(VTXpos_col);
+	faces_view.offset       += 6 * sizeof(VTXpc);
 
 	draw_constants draw(kIdentity4x4, pov.view(), pov.projection());
 	cl.set_cbv(oGFX_CBV_DRAW, &draw, sizeof(draw));
@@ -531,7 +489,7 @@ void draw_lines(technique_context_t& ctx)
 		auto nverts    = nlines * 2;
 		auto lines_end = lines + nlines;
 
-		auto verts = cl.new_transient_vertices<VTXpos_col>(nverts);
+		auto verts = cl.new_transient_vertices<VTXpc>(nverts);
 
 		if (verts)
 		{
@@ -642,7 +600,7 @@ void draw_grid(technique_context_t& ctx)
 		auto nlines     = nwidth * 2;
 		auto nverts     = nlines * 2;
 
-		auto v = cl.new_transient_vertices<VTXpos_col>(nverts);
+		auto v = cl.new_transient_vertices<VTXpc>(nverts);
 
 		if (v)
 		{

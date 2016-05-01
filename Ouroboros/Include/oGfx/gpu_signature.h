@@ -6,13 +6,12 @@
 #ifndef oGfx_gpu_signature_h
 #define oGfx_gpu_signature_h
 
+#include <oMath/hlsl.h>
+#include <oGfx/gpu_signature_interpolants.h>
 #include <oGfx/gpu_signature_slots.h>
-#include <oGfx/vertex_layouts.h>
+#include <oGfx/gpu_signature_vertices.h>
 
-#ifdef oHLSL
-
-#else
-#include <oCore/color.h>
+#ifndef oHLSL
 #include <oMath/matrix.h>
 #include <oGPU/gpu.h>
 
@@ -40,18 +39,26 @@ enum class pipeline_state : uint8_t
 	mouse_depth,
 	linearize_depth,
 	
-	// pos_nrm_tan_uv0
-	mesh_u0_as_color,		 //
-	mesh_v0_as_color,    //
-	mesh_uv0_as_color,   //
-	mesh_simple_texture, // sample texture in slot0
-	mesh_wire,           // wireframe with UVs as color
+	// mesh::basic::meshf
+	mesh_bitangentx_as_color, //
+	mesh_bitangenty_as_color, //
+	mesh_bitangentz_as_color, //
+	mesh_bitangent_as_color,  //
+	mesh_tangentx_as_color,   //
+	mesh_tangenty_as_color,   //
+	mesh_tangentz_as_color,   //
+	mesh_tangent_as_color,    //
+	mesh_normalx_as_color,    //
+	mesh_normaly_as_color,    //
+	mesh_normalz_as_color,    //
+	mesh_normal_as_color,     //
+	mesh_u0_as_color,         //
+	mesh_v0_as_color,         //
+	mesh_uv0_as_color,        //
+	mesh_simple_texture,      // sample texture in slot0
+	mesh_wire,                // wireframe with UVs as color
 	count,
 };
-
-// placeholders
-struct frame_constants  { float rand; };
-struct shadow_constants { float4x4 matrix; };
 
 // Creates root signature objects and pipeline state objects that can
 // then be set by enum.

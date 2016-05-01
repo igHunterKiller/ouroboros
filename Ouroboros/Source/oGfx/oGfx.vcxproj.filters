@@ -36,9 +36,6 @@
     <ClCompile Include="oGfxShaders.cpp">
       <Filter>Source\Needs Code Review</Filter>
     </ClCompile>
-    <ClCompile Include="bytecode.cpp">
-      <Filter>Source\Needs Code Review</Filter>
-    </ClCompile>
     <ClCompile Include="camera.cpp">
       <Filter>Source\Needs Code Review</Filter>
     </ClCompile>
@@ -75,9 +72,6 @@
     <ClCompile Include="gpu_signature.cpp">
       <Filter>Source\Shader Definitions</Filter>
     </ClCompile>
-    <ClCompile Include="vertex_layouts.cpp">
-      <Filter>Source\Shader Definitions</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\oGfx\oGfxHLSL.h">
@@ -92,9 +86,6 @@
     <ClInclude Include="..\..\Include\oGfx\oGfxShaders.h">
       <Filter>oGfx\Needs Code Review</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\oGfx\bytecode.h">
-      <Filter>oGfx\Needs Code Review</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\oGfx\camera.h">
       <Filter>oGfx\Needs Code Review</Filter>
     </ClInclude>
@@ -106,9 +97,6 @@
     </ClInclude>
     <ClInclude Include="..\..\Include\oGfx\shader_registries.h">
       <Filter>oGfx\Needs Code Review</Filter>
-    </ClInclude>
-    <ClInclude Include="bytecode_util.h">
-      <Filter>Source\Needs Code Review</Filter>
     </ClInclude>
     <ClInclude Include="gpu_fixed_state.h">
       <Filter>Source\Needs Code Review</Filter>
@@ -152,13 +140,16 @@
     <ClInclude Include="..\..\Include\oGfx\prim_constants.h">
       <Filter>oGfx\Shader Definitions</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Include\oGfx\vertex_layouts.h">
-      <Filter>oGfx\Shader Definitions</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Include\oGfx\gpu_signature.h">
       <Filter>oGfx\Shader Definitions</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Include\oGfx\gpu_signature_slots.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\gpu_signature_vertices.h">
+      <Filter>oGfx\Shader Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Include\oGfx\gpu_signature_interpolants.h">
       <Filter>oGfx\Shader Definitions</Filter>
     </ClInclude>
   </ItemGroup>
@@ -166,15 +157,9 @@
     <CustomBuild Include="oGfxShaders.hlsl">
       <Filter>Source\Shader Definitions</Filter>
     </CustomBuild>
-    <CustomBuild Include="vertex_layouts_sig.hlsl">
-      <Filter>Source\Shader Definitions</Filter>
-    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <None Include="oGfxShaders.txt">
-      <Filter>Source\Shader Definitions</Filter>
-    </None>
-    <None Include="vertex_layouts_sig.txt">
       <Filter>Source\Shader Definitions</Filter>
     </None>
   </ItemGroup>

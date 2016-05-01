@@ -39,25 +39,40 @@
 // _____________________________________________________________________________
 // convert a normalized float [0,1] to various lower bit representations
 
-#define oQUANTIZE_CONCAT2(a,b) a##b
-#define oQUANTIZE_CONCAT(a,b) oQUANTIZE_CONCAT2(a,b)
-#define oQUANTIZE_MINUS1(a) ((1<<(a))-1)
-#define oQUANTIZE_TO_NX(bits) oQUANTIZE_CONCAT(f32ton,bits)
-#define oQUANTIZE_TO_F32(bits) oQUANTIZE_CONCAT(oQUANTIZE_CONCAT(n,bits),tof32)
+#define oQUANTIZE_CONCAT2(a,b)      a##b
+#define oQUANTIZE_CONCAT(a,b)       oQUANTIZE_CONCAT2(a,b)
+#define oQUANTIZE_MINUS1(a)         ((1<<(a))-1)
+#define oQUANTIZE_TO_NX(bits)       oQUANTIZE_CONCAT(f32ton,bits)
+#define oQUANTIZE_TO_SX(bits)       oQUANTIZE_CONCAT(f32tos,bits)
+#define oQUANTIZE_TO_F32N(bits)     oQUANTIZE_CONCAT(oQUANTIZE_CONCAT(n,bits),tof32)
+#define oQUANTIZE_TO_F32S(bits)     oQUANTIZE_CONCAT(oQUANTIZE_CONCAT(s,bits),tof32)
+#define oQUANTIZE_OVER_MINUS1(n,bits) ((n)/oQUANTIZE_MINUS1(bits))
 
 #define oQUANTIZE_F32_TO_NX(bits) \
-	inline uint   oQUANTIZE_TO_NX (bits)    (float   a)  { return (uint)(a * float(oQUANTIZE_MINUS1(bits)) + 0.5f); } \
-	inline uint2  oQUANTIZE_TO_NX (bits)(oIN(float2, a)) { return uint2(oQUANTIZE_TO_NX(bits)(a.x), oQUANTIZE_TO_NX(bits)(a.y)); } \
-	inline uint3  oQUANTIZE_TO_NX (bits)(oIN(float3, a)) { return uint3(oQUANTIZE_TO_NX(bits)(a.x), oQUANTIZE_TO_NX(bits)(a.y), oQUANTIZE_TO_NX(bits)(a.z)); } \
-	inline uint4  oQUANTIZE_TO_NX (bits)(oIN(float4, a)) { return uint4(oQUANTIZE_TO_NX(bits)(a.x), oQUANTIZE_TO_NX(bits)(a.y), oQUANTIZE_TO_NX(bits)(a.z), oQUANTIZE_TO_NX(bits)(a.w)); } \
-	inline float  oQUANTIZE_TO_F32(bits)    (uint    a)  { return (float)((a & oQUANTIZE_MINUS1(bits)) / float(oQUANTIZE_MINUS1(bits))); } \
-	inline float2 oQUANTIZE_TO_F32(bits)(oIN(uint2,  a)) { return float2(oQUANTIZE_TO_F32(bits)(a.x), oQUANTIZE_TO_F32(bits)(a.y)); } \
-	inline float3 oQUANTIZE_TO_F32(bits)(oIN(uint3,  a)) { return float3(oQUANTIZE_TO_F32(bits)(a.x), oQUANTIZE_TO_F32(bits)(a.y), oQUANTIZE_TO_F32(bits)(a.z)); } \
-	inline float4 oQUANTIZE_TO_F32(bits)(oIN(uint4,  a)) { return float4(oQUANTIZE_TO_F32(bits)(a.x), oQUANTIZE_TO_F32(bits)(a.y), oQUANTIZE_TO_F32(bits)(a.z), oQUANTIZE_TO_F32(bits)(a.w)); }
+	inline uint   oQUANTIZE_TO_NX  (bits)    (float   a)  { return uint(a * float(oQUANTIZE_MINUS1(bits)) + 0.5f); } \
+	inline uint2  oQUANTIZE_TO_NX  (bits)(oIN(float2, a)) { return uint2(oQUANTIZE_TO_NX(bits)(a.x), oQUANTIZE_TO_NX(bits)(a.y)); } \
+	inline uint3  oQUANTIZE_TO_NX  (bits)(oIN(float3, a)) { return uint3(oQUANTIZE_TO_NX(bits)(a.x), oQUANTIZE_TO_NX(bits)(a.y), oQUANTIZE_TO_NX(bits)(a.z)); } \
+	inline uint4  oQUANTIZE_TO_NX  (bits)(oIN(float4, a)) { return uint4(oQUANTIZE_TO_NX(bits)(a.x), oQUANTIZE_TO_NX(bits)(a.y), oQUANTIZE_TO_NX(bits)(a.z), oQUANTIZE_TO_NX(bits)(a.w)); } \
+	inline float  oQUANTIZE_TO_F32N(bits)    (uint    a)  { return (float)((a & oQUANTIZE_MINUS1(bits)) / float(oQUANTIZE_MINUS1(bits))); } \
+	inline float2 oQUANTIZE_TO_F32N(bits)(oIN(uint2,  a)) { return float2(oQUANTIZE_TO_F32N(bits)(a.x), oQUANTIZE_TO_F32N(bits)(a.y)); } \
+	inline float3 oQUANTIZE_TO_F32N(bits)(oIN(uint3,  a)) { return float3(oQUANTIZE_TO_F32N(bits)(a.x), oQUANTIZE_TO_F32N(bits)(a.y), oQUANTIZE_TO_F32N(bits)(a.z)); } \
+	inline float4 oQUANTIZE_TO_F32N(bits)(oIN(uint4,  a)) { return float4(oQUANTIZE_TO_F32N(bits)(a.x), oQUANTIZE_TO_F32N(bits)(a.y), oQUANTIZE_TO_F32N(bits)(a.z), oQUANTIZE_TO_F32N(bits)(a.w)); }
 
-// i.e. f32ton8 & n8tof32 etc.
+#define oQUANTIZE_F32_TO_SX(bits) \
+	inline uint   oQUANTIZE_TO_SX  (bits)    (float   a)  { return uint((((a) * oQUANTIZE_OVER_MINUS1(0.5f,bits)) + oQUANTIZE_OVER_MINUS1(0.5f,bits)) + 0.5f); } \
+	inline uint2  oQUANTIZE_TO_SX  (bits)(oIN(float2, a)) { return uint2(oQUANTIZE_TO_SX(bits)(a.x), oQUANTIZE_TO_SX(bits)(a.y)); } \
+	inline uint3  oQUANTIZE_TO_SX  (bits)(oIN(float3, a)) { return uint3(oQUANTIZE_TO_SX(bits)(a.x), oQUANTIZE_TO_SX(bits)(a.y), oQUANTIZE_TO_SX(bits)(a.z)); } \
+	inline uint4  oQUANTIZE_TO_SX  (bits)(oIN(float4, a)) { return uint4(oQUANTIZE_TO_SX(bits)(a.x), oQUANTIZE_TO_SX(bits)(a.y), oQUANTIZE_TO_SX(bits)(a.z), oQUANTIZE_TO_SX(bits)(a.w)); } \
+	inline float  oQUANTIZE_TO_F32S(bits)    (uint    a)  { return (float)((a & oQUANTIZE_MINUS1(bits)) * oQUANTIZE_OVER_MINUS1(2.0f,bits)) - 1.0f; } \
+	inline float2 oQUANTIZE_TO_F32S(bits)(oIN(uint2,  a)) { return float2(oQUANTIZE_TO_F32S(bits)(a.x), oQUANTIZE_TO_F32S(bits)(a.y)); } \
+	inline float3 oQUANTIZE_TO_F32S(bits)(oIN(uint3,  a)) { return float3(oQUANTIZE_TO_F32S(bits)(a.x), oQUANTIZE_TO_F32S(bits)(a.y), oQUANTIZE_TO_F32S(bits)(a.z)); } \
+	inline float4 oQUANTIZE_TO_F32S(bits)(oIN(uint4,  a)) { return float4(oQUANTIZE_TO_F32S(bits)(a.x), oQUANTIZE_TO_F32S(bits)(a.y), oQUANTIZE_TO_F32S(bits)(a.z), oQUANTIZE_TO_F32S(bits)(a.w)); }
+
 oQUANTIZE_F32_TO_NX(1) oQUANTIZE_F32_TO_NX(2)  oQUANTIZE_F32_TO_NX(3)  oQUANTIZE_F32_TO_NX(4)  oQUANTIZE_F32_TO_NX(5)  oQUANTIZE_F32_TO_NX(6)  oQUANTIZE_F32_TO_NX(7)  oQUANTIZE_F32_TO_NX(8) 
 oQUANTIZE_F32_TO_NX(9) oQUANTIZE_F32_TO_NX(10) oQUANTIZE_F32_TO_NX(11) oQUANTIZE_F32_TO_NX(12) oQUANTIZE_F32_TO_NX(13) oQUANTIZE_F32_TO_NX(14) oQUANTIZE_F32_TO_NX(15) oQUANTIZE_F32_TO_NX(16)
+
+oQUANTIZE_F32_TO_SX(1) oQUANTIZE_F32_TO_SX(2)  oQUANTIZE_F32_TO_SX(3)  oQUANTIZE_F32_TO_SX(4)  oQUANTIZE_F32_TO_SX(5)  oQUANTIZE_F32_TO_SX(6)  oQUANTIZE_F32_TO_SX(7)  oQUANTIZE_F32_TO_SX(8) 
+oQUANTIZE_F32_TO_SX(9) oQUANTIZE_F32_TO_SX(10) oQUANTIZE_F32_TO_SX(11) oQUANTIZE_F32_TO_SX(12) oQUANTIZE_F32_TO_SX(13) oQUANTIZE_F32_TO_SX(14) oQUANTIZE_F32_TO_SX(15) oQUANTIZE_F32_TO_SX(16)
 
 // _____________________________________________________________________________
 // convert a normalized float [0,1] to a signed normalized float [-1,1]
@@ -70,6 +85,26 @@ inline float  sf32tonf32    (float   a)  { return a * 0.5f + 0.5f; }
 inline float2 sf32tonf32(oIN(float2, a)) { return a * 0.5f + 0.5f; }
 inline float3 sf32tonf32(oIN(float3, a)) { return a * 0.5f + 0.5f; }
 inline float4 sf32tonf32(oIN(float4, a)) { return a * 0.5f + 0.5f; }
+
+// _____________________________________________________________________________
+// tuple formats: shared
+
+// Name    Layout       Element
+// high15  a1r5g6b5     unorm
+// high16  r5g6b5			  unorm
+// true    a8r8g8b8     unorm aka bgra, D3DCOLOR
+// udec3   r10g10b10a2	unorm
+// pk3     r11g11b10    ufloat
+
+inline uint   float4tohigh15(oIN(float4, a))    { return uint16_t((f32ton1(a.w)<<15) | (f32ton5(a.x)<<10) | (f32ton5(a.y)<<5) | f32ton5(a.z)); }
+inline float4 high15tofloat4(oIN(uint, high15)) { return float4(n5tof32((high15>>10) & 0x1f), n5tof32((high15>>5) & 0x1f), n5tof32(high15 & 0x1f), n1tof32(high15>>15)); }
+inline uint   float3tohigh16(oIN(float3, a))    { return uint16_t((f32ton5(a.x)<<11) | (f32ton6(a.y)<<5) | f32ton5(a.z)); }
+inline float3 high16tofloat3(oIN(uint, high16)) { return float3(n5tof32((high16>>11) & 0x1f), n6tof32((high16>>5) & 0x3f), n5tof32(high16 & 0x1f)); }
+inline uint   float4totrue  (oIN(float4, a))    { return (f32ton8(a.w)<<24) | (f32ton8(a.x)<<16) | (f32ton8(a.y)<<8) | f32ton8(a.z); }
+inline float4 truetofloat4  (oIN(uint, argb))   { return float4(n8tof32((argb>>16) & 0xff), n8tof32((argb>>8) & 0xff), n8tof32(argb & 0xff), n8tof32(argb>>24)); }
+inline uint   float4toudec3 (oIN(float4, a))    { return uint(f32tos10(a.x)<<22) | (f32tos10(a.y)<<12) | (f32tos10(a.z)<<2) | f32tos2(a.w); }
+inline float4 udec3tofloat4 (oIN(uint, udec3))  { return float4(s10tof32(udec3>>22), s10tof32((udec3>>12) & 0x3ff), s10tof32((udec3>>2) & 0x3ff), s10tof32(udec3 & 0x3)); }
+
 
 // _____________________________________________________________________________
 #ifndef oHLSL
@@ -105,26 +140,14 @@ inline uint16_t uf10mantissa(uint16_t x) { return x & 0x003f; }
 inline uint16_t uf10(uint32_t exponent, uint32_t mantissa) { return static_cast<uint16_t>(exponent << 5 | mantissa); }
 
 // _____________________________________________________________________________
-// Tuple formats
+// Tuple format: cpu-only
 
 // Name    Layout       Element
-// high15  a1r5g6b5     unorm
-// high16  r5g6b5			  unorm
-// true    a8r8g8b8     unorm aka bgra, D3DCOLOR
-// udec3   r10g10b10a2	unorm
 // pk3     r11g11b10    ufloat
 
-inline uint16_t float4tohigh15(const float4& a) { return uint16_t((f32ton1(a.w)<<15) | (f32ton5(a.x)<<10) | (f32ton5(a.y)<<5) | f32ton5(a.z)); }
-inline float4   high15tofloat4(uint16_t argb)   { return float4(n5tof32((argb>>10) & 0x1f), n5tof32((argb>>5) & 0x1f), n5tof32(argb & 0x1f), n1tof32(argb>>15)); }
-inline uint16_t float3tohigh16(const float3& a) { return uint16_t((f32ton5(a.x)<<11) | (f32ton6(a.y)<<5) | f32ton5(a.z)); }
-inline float3   high16tofloat3(uint16_t rgb)    { return float3(n5tof32((rgb>>11) & 0x1f), n6tof32((rgb>>5) & 0x3f), n5tof32(rgb & 0x1f)); }
-inline uint32_t float4totrue  (const float4& a) { return (f32ton8(a.w)<<24) | (f32ton8(a.x)<<16) | (f32ton8(a.y)<<8) | f32ton8(a.z); }
-inline float4   truetofloat4  (uint32_t argb)   { return float4(n8tof32((argb>>16) & 0xff), n8tof32((argb>>8) & 0xff), n8tof32(argb & 0xff), n8tof32(argb>>24)); }
-inline uint32_t float4toudec3 (const float4& a) { return uint32_t(f32ton10(a.x)<<22) | (f32ton10(a.y)<<12) | (f32ton10(a.z)<<2) | f32ton2(a.w); }
-inline float4   udec3tofloat4 (uint32_t rgba)   { return float4(n10tof32(rgba>>22), n10tof32((rgba>>12) & 0x3ff), n10tof32((rgba>>2) & 0x3ff), n10tof32(rgba & 0x3)); }
-inline bool     pk3compatible (const float3& a) { return a.x >= 0.0f && a.x <= UF11_MAXf && a.y >= 0.0f && a.y <= UF11_MAXf && a.z >= 0.0f && a.z <= UF10_MAXf; }
-inline uint32_t float3topk3   (const float3& a) { return uint32_t((f32touf10(a.z)<<22) | (f32touf11(a.y)<<11) | f32touf11(a.x)); }
-inline float3   pk3tofloat3   (uint32_t rgb)    { return float3(uf11tof32(rgb & 0x7ff), uf11tof32((rgb>>11) & 0x7ff), uf10tof32((rgb>>22) & 0x3ff)); }
+inline bool   pk3compatible (oIN(float3, a))  { return a.x >= 0.0f && a.x <= UF11_MAXf && a.y >= 0.0f && a.y <= UF11_MAXf && a.z >= 0.0f && a.z <= UF10_MAXf; }
+inline uint   float3topk3   (oIN(float3, a))  { return uint((f32touf10(a.z)<<22) | (f32touf11(a.y)<<11) | f32touf11(a.x)); }
+inline float3 pk3tofloat3   (uint pk3)        { return float3(uf11tof32(pk3 & 0x7ff), uf11tof32((pk3>>11) & 0x7ff), uf10tof32((pk3>>22) & 0x3ff)); }
 
 }
 

@@ -48,8 +48,28 @@ if not "%1"=="" (
 	goto args_loop
 )
 
-:: Read each entry point from the input file and compile it
+:: For each entry point: compile it
 for /f %%i in (!entry_list!) do call:CompileShader %%i "!extra_fxc_args!"
+
+:: For each entry point: create a master include header
+call:GetBaseName "!entry_list!" entry_list_basename
+set master_header="!output_dir!!entry_list_basename!.h"
+if exist "!master_header!" del /f /q !master_header!
+for /f %%i in (!entry_list!) do echo #include ^<%%i.h^> >> !master_header!
+
+:: For each entry point: create a string array version
+:: set tab=  
+:: echo. >> !master_header!
+:: echo const char* s_!entry_list_basename!_names[] = >> !master_header!
+:: echo { >> !master_header!
+:: for /f %%i in (!entry_list!) do echo %tab%"%%i", >> !master_header!
+:: echo }; >> !master_header!
+
+goto end
+
+:GetBaseName
+:: %1 input path, %2 is output basename
+set %2=%~n1
 goto end
 
 :CompileShader
@@ -76,6 +96,7 @@ if "!entry_prefix!"=="P" set entry_prefix=p
 if "!entry_prefix!"=="C" set entry_prefix=c
 set shader_model=!entry_prefix!s_5_0
 
+if exist "!output_path!" del /f /q !output_path!
 !fxc_exe! /D oHLSL !extra_args! /nologo /O3 /T !shader_model! /E !entry_point! /Vn !entry_point! /Fh "!output_path!" "!input_path!"
 
 endlocal

@@ -5,8 +5,7 @@
 #include <oCore/assert.h>
 #include <oCore/countof.h>
 
-#include <VSpos_col.h>
-#include <PSvertex_color.h>
+#include <oGfxShaders.h>
 
 using namespace ouro::gpu;
 
@@ -29,7 +28,7 @@ pipeline_state_desc get_pipeline_state_desc(const pipeline_state& state)
 	static const pipeline_state_desc s_state[] = 
 	{
 		pipeline_state_desc(),
-		pipeline_state_desc(VSpos_col, PSvertex_color, mesh::basic::pos_col, basic::opaque, basic::two_sided, basic::depth_test_and_write, primitive_type::line),
+		pipeline_state_desc(VSpc, PSpc_color, mesh::basic::pos_col, basic::opaque, basic::two_sided, basic::depth_test_and_write, primitive_type::line),
 	};
 	match_array_e(s_state, pipeline_state);
 	oCheck(state >= pipeline_state::unknown && state < pipeline_state::count, std::errc::invalid_argument, "invalid state %d", (int)state);

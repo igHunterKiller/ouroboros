@@ -31,7 +31,7 @@ struct test_constants
 
 	inline void set(const float4x4& _world, const float4x4& _view, const float4x4& _projection, uint32_t _argb)
 	{
-		set(_world, _view, _projection, ouro::truetofloat4(_argb));
+		set(_world, _view, _projection, truetofloat4(_argb));
 	}
 
 	inline void set_default()

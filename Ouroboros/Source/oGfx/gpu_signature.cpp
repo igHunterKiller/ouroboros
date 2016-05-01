@@ -3,21 +3,7 @@
 #include <oCore/countof.h>
 #include <oGfx/gpu_signature.h>
 #include <oCore/stringize.h>
-
-#include <VSpos.h>
-#include <VSpos_col.h>
-#include <VSpos_uv0.h>
-#include <VSpos_nrm_tan_uv0.h>
-#include <PSmouse_depth.h>
-#include <PSlinearize_depth.h>
-#include <PSconstant_color.h>
-#include <PSvertex_color.h>
-#include <PSvertex_color_stipple.h>
-#include <PStexcoordu.h>
-#include <PStexcoordv.h>
-#include <PStexcoord.h>
-#include <PStexture2d.h>
-#include <PSwhite.h>
+#include <oGfxShaders.h>
 
 using namespace ouro::gpu;
 
@@ -52,6 +38,18 @@ template<> const char* as_string(const gfx::pipeline_state& state)
 		"mesh_u0_as_color",
 		"mesh_v0_as_color",
 		"mesh_uv0_as_color",
+		"mesh_normalx_as_color",
+		"mesh_normaly_as_color",
+		"mesh_normalz_as_color",
+		"mesh_normal_as_color",
+		"mesh_tangentx_as_color",
+		"mesh_tangenty_as_color",
+		"mesh_tangentz_as_color",
+		"mesh_tangent_as_color",
+		"mesh_bitangentx_as_color",
+		"mesh_bitangenty_as_color",
+		"mesh_bitangentz_as_color",
+		"mesh_bitangent_as_color",
 		"mesh_simple_texture",
 		"mesh_wire",
 	};
@@ -73,24 +71,36 @@ match_array_e(root_signatures, signature);
 
 const pipeline_state_desc pipeline_states[] = 
 {
-	pipeline_state_desc(VSpos,                   basic::PSwhite,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos,                   basic::PSwhite,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::point   ),
-	pipeline_state_desc(VSpos,                   basic::PSwhite,          mesh::basic::pos,     basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos,                   PSconstant_color,        mesh::basic::pos,     basic::translucent, basic::front_face, basic::depth_test,           primitive_type::triangle),
-	pipeline_state_desc(VSpos,                   PSconstant_color,        mesh::basic::pos,     basic::translucent, basic::front_wire, basic::depth_test,           primitive_type::triangle),
-	pipeline_state_desc(VSpos_col,               PSvertex_color,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_col,               PSvertex_color_stipple,  mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
-	pipeline_state_desc(VSpos_col,               PSvertex_color,          mesh::basic::pos_col, basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_col,               PSconstant_color,        mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::line    ),
-	pipeline_state_desc(VSpos_col,               PSvertex_color,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::line    ),
-	pipeline_state_desc(VSpos_col,               PSvertex_color_stipple,  mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::line    ),
-	pipeline_state_desc(basic::VSfullscreen_tri, PSmouse_depth,           mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
-	pipeline_state_desc(basic::VSfullscreen_tri, PSlinearize_depth,       mesh::basic::pos,     basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
-	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoordu,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoordv,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoord,              mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexture2d,             mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
-	pipeline_state_desc(VSpos_nrm_tan_uv0,       PStexcoord,              mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* pos_only                   */ pipeline_state_desc(VSp,                     basic::PSwhite,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* pos_only_points            */ pipeline_state_desc(VSp,                     basic::PSwhite,          mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::point   ),
+	/* pos_only_wire              */ pipeline_state_desc(VSp,                     basic::PSwhite,          mesh::basic::pos,     basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
+	/* pos_color                  */ pipeline_state_desc(VSp,                     PSconstant_color,        mesh::basic::pos,     basic::translucent, basic::front_face, basic::depth_test,           primitive_type::triangle),
+	/* pos_color_wire             */ pipeline_state_desc(VSp,                     PSconstant_color,        mesh::basic::pos,     basic::translucent, basic::front_wire, basic::depth_test,           primitive_type::triangle),
+	/* pos_vertex_color           */ pipeline_state_desc(VSpc,                    PSpc_color,              mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* pos_vertex_color_stipple   */ pipeline_state_desc(VSpc,                    PSdepth_stippled,        mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
+	/* pos_vertex_color_wire      */ pipeline_state_desc(VSpc,                    PSpc_color,              mesh::basic::pos_col, basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
+	/* lines_color                */ pipeline_state_desc(VSpc,                    PSconstant_color,        mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::line    ),
+	/* lines_vertex_color         */ pipeline_state_desc(VSpc,                    PSpc_color,              mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::line    ),
+	/* lines_vertex_color_stipple */ pipeline_state_desc(VSpc,                    PSdepth_stippled,        mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::line    ),
+	/* mouse_depth                */ pipeline_state_desc(basic::VSfullscreen_tri, PSmouse_depth,           mesh::basic::pos_col, basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
+	/* linearize_depth            */ pipeline_state_desc(basic::VSfullscreen_tri, PSlinearize_depth,       mesh::basic::pos,     basic::opaque,      basic::front_face, basic::no_depth_stencil,     primitive_type::triangle),
+	/* mesh_bitangentx_as_color   */ pipeline_state_desc(VSpntu,                  PSpbtnu_bitangentx,      mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_bitangenty_as_color   */ pipeline_state_desc(VSpntu,                  PSpbtnu_bitangenty,      mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_bitangentz_as_color   */ pipeline_state_desc(VSpntu,                  PSpbtnu_bitangentz,      mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_bitangent_as_color    */ pipeline_state_desc(VSpntu,                  PSpbtnu_bitangent,       mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_tangentx_as_color     */ pipeline_state_desc(VSpntu,                  PSpbtnu_tangentx,        mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_tangenty_as_color     */ pipeline_state_desc(VSpntu,                  PSpbtnu_tangenty,        mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_tangentz_as_color     */ pipeline_state_desc(VSpntu,                  PSpbtnu_tangentz,        mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_tangent_as_color      */ pipeline_state_desc(VSpntu,                  PSpbtnu_tangent,         mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_normalx_as_color      */ pipeline_state_desc(VSpntu,                  PSpbtnu_normalx,         mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_normaly_as_color      */ pipeline_state_desc(VSpntu,                  PSpbtnu_normaly,         mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_normalz_as_color      */ pipeline_state_desc(VSpntu,                  PSpbtnu_normalz,         mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_normal_as_color       */ pipeline_state_desc(VSpntu,                  PSpbtnu_normal,          mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_u0_as_color           */ pipeline_state_desc(VSpntu,                  PSpbtnu_texcoord0_u,     mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_v0_as_color           */ pipeline_state_desc(VSpntu,                  PSpbtnu_texcoord0_v,     mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_uv0_as_color          */ pipeline_state_desc(VSpntu,                  PSpbtnu_texcoord0,       mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_simple_texture        */ pipeline_state_desc(VSpntu,                  PSpbtnu_texture2d,       mesh::basic::meshf,   basic::opaque,      basic::front_face, basic::depth_test_and_write, primitive_type::triangle),
+	/* mesh_wire                  */ pipeline_state_desc(VSpntu,                  PSpbtnu_texcoord0,       mesh::basic::meshf,   basic::opaque,      basic::front_wire, basic::depth_test_and_write, primitive_type::triangle),
 };
 match_array_e(pipeline_states, pipeline_state);
 

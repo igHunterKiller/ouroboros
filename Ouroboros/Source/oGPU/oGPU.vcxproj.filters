@@ -48,6 +48,9 @@
     <ClInclude Include="d3d_util.h">
       <Filter>Source\D3D11</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Include\oGPU\gpu_semantics.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Headers">

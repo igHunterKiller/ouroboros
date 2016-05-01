@@ -140,8 +140,8 @@ void gfx_view::create_menus(const window::create_event& evt)
 	menu::append_enum_items(window_state::count, menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, evt.shape.state);
 	erh_.add               (                     menus_[ui::menu::view_state], ui::menu_item::view_state_first, ui::menu_item::view_state_last, [=](int state) { app_win_->show((window_state)state); });
 
-	menu::append_enum_items(gfx::fullscreen_mode::count, menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, (int)gfx::fullscreen_mode::normal);
-	erh_.add               (                         menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, [=](int state) { g_render_settings.mode = (gfx::fullscreen_mode)state; });
+	menu::append_enum_items(gfx::fullscreen_mode::count, menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, (int)gfx::fullscreen_mode::lit);
+	erh_.add               (                             menus_[ui::menu::view_render_state], ui::menu_item::view_render_state_first, ui::menu_item::view_render_state_last, [=](int state) { g_render_settings.mode = (gfx::fullscreen_mode)state; });
 
 	menu::append_item(menus_[ui::menu::view], ui::menu_item::view_default, "&Default View");
 	

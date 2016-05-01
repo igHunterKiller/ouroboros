@@ -37,10 +37,7 @@ namespace gfx {
 
 void model_registry::initialize(gpu::device* dev, uint32_t budget_bytes, const allocator& alloc, const allocator& io_alloc)
 {
-	vertex_layout_ = vertex_layout::pos_nrm_tan_uv0;
-	vertex_shader_ = vertex_shader::pos_nrm_tan_uv0;
-
-	auto vlayout = gfx::layout(vertex_layout_);
+	auto vlayout = vertex_layout();
 
 	// if there's a static primitives registry, this might be able to turn into an initialize_with_builtin
 	mesh::model placeholder = mesh::box(io_alloc, io_alloc, face_type, vlayout.data(), vlayout.size(), float3(-1.0f), float3(1.0f), (uint32_t)color::default_gray);
@@ -76,7 +73,7 @@ void* model_registry::create_resource(const uri_t& uri_ref, blob& compiled)
 
 	auto mdl = pool_.create();
 
-	auto vlayout = gfx::layout(vertex_layout_);
+	auto vlayout = vertex_layout();
 
 	// todo: figure out a way that this can allocate right out of the cpu-accessible buffer... or hope for D3D12
 	*mdl = mesh::decode(uri_ref.path(), compiled, vlayout, subsets_allocator, temp_allocator, temp_allocator);
@@ -134,7 +131,7 @@ void model_registry::insert_primitive(const primitive_model& prim, const mesh::m
 
 void model_registry::insert_primitives(const allocator& alloc, const allocator& io_alloc)
 {
-	auto vlayout = gfx::layout(vertex_layout_);
+	auto vlayout = vertex_layout();
 	const auto& outline_layout = mesh::basic::pos_col;
 	static const uint16_t kFacet = 20;
 	static const float kExtent = 1.0f;

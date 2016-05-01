@@ -1,10 +1,34 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oGfx/gpu_signature_slots.h>
-#include <oGfx/vertex_layouts.h>
+#include <oGfx/gpu_signature.h>
 
 #define oGFX_SAMPLER_SLOT(x) register(s##x)
 #define oGFX_SRV_SLOT(x) register(t##x)
+
+// _____________________________________________________________________________
+// Misc utils
+
+float3 normal_to_color(in float3 normalized_vector)
+{
+	return normalized_vector * 0.5 + 0.5;
+}
+
+// Handedness is stored in w component of tangent_and_facing. This should be 
+// called out of the vertex shader and the out values passed through to the 
+// pixel shader. For world-space pass the world matrix. For view space pass the 
+// WorldView matrix. Read more: http://www.terathon.com/code/tangent.html.
+inline void transform_btn(oIN(float4x4, tx)
+	, oIN(float3, normal)
+	, oIN(float4, tangent_and_facing)
+	, oOUT(float3, out_bitangent)
+	, oOUT(float3, out_tangent)
+	, oOUT(float3, out_normal))
+{
+	float3x3 r = (float3x3)tx;
+	out_normal = mul(r, normal);
+	out_tangent = mul(r, tangent_and_facing.xyz);
+	out_bitangent = cross(out_normal, out_tangent) * tangent_and_facing.w;
+}
 
 // _____________________________________________________________________________
 // oGPU signature resources
@@ -24,135 +48,34 @@ SamplerState AnisoWrap    : oGFX_SAMPLER_SLOT(oGFX_SAMPLER_ANISO_WRAP);
 // _____________________________________________________________________________
 // Vertex Shaders
 
-#define VS_START(type) INTcommon VS##type(uint instance : SV_InstanceID, VTX##type In) { INTcommon Out = (INTcommon)0; Out.LSposition = In.position; Out.WSposition = gfx_ls2ws(instance, In.position); Out.SSposition = gfx_ls2ss(instance, In.position);
-#define VS_END return Out; }
-#define VS_BTN transform_btn(instance, In.normal, In.tangent, Out.WSnormal, Out.WStangent, Out.WSbitangent);
-
-// Handedness is stored in w component of tangent_and_facing. This should be 
-// called out of the vertex shader and the out values passed through to the 
-// pixel shader. For world-space pass the world matrix. For view space pass the 
-// WorldView matrix. Read more: http://www.terathon.com/code/tangent.html.
-inline void transform_btn(oIN(float4x4, tx)
-	, oIN(float3, normal)
-	, oIN(float4, tangent_and_facing)
-	, oOUT(float3, out_bitangent)
-	, oOUT(float3, out_tangent)
-	, oOUT(float3, out_normal))
+INTp VSp(VTXp In, uint instance : SV_InstanceID)
 {
-	float3x3 r = (float3x3)tx;
-	out_normal = mul(r, normal);
-	out_tangent = mul(r, tangent_and_facing.xyz);
-	out_bitangent = cross(out_normal, out_tangent) * tangent_and_facing.w;
-}
-
-VS_START(pos)
-VS_END
-
-VS_START(pos_nrm_tan)
-	VS_BTN
-VS_END
-
-VS_START(pos_uv0)
-	Out.texcoord0 = float3(In.texcoord0, 0.0f);
-VS_END
-
-VS_START(pos_uvw)
-	Out.texcoord0 = In.texcoord0;
-	return Out;
-VS_END
-
-VS_START(pos_col)
-	Out.color = In.color0;
-VS_END
-
-VS_START(pos_uv0_col)
-	Out.texcoord0 = float3(In.texcoord0, 0.0f);
-	Out.color = In.color0;
-VS_END
-
-VS_START(pos_nrm_tan_uv0)
-	VS_BTN
-	Out.texcoord0 = float3(In.texcoord0, 0.0f);
-VS_END
-
-VS_START(pos_nrm_tan_uvw)
-	VS_BTN
-	Out.texcoord0 = In.texcoord0;
-VS_END
-
-VS_START(pos_nrm_tan_col)
-	VS_BTN
-	Out.color = In.color0;
-VS_END
-
-VS_START(pos_nrm_tan_uv0_uv1)
-	VS_BTN
-	Out.texcoord0 = float3(In.texcoord0, 0.0f);
-	Out.texcoord1 = In.texcoord1;
-VS_END
-
-VS_START(pos_nrm_tan_uv0_col)
-	VS_BTN
-	Out.texcoord0 = float3(In.texcoord0, 0.0f);
-	Out.color = In.color0;
-VS_END
-
-VS_START(pos_nrm_tan_uvw_col)
-	VS_BTN
-	Out.texcoord0 = In.texcoord0;
-	Out.color = In.color0;
-VS_END
-
-VS_START(pos_nrm_tan_uv0_uv1_col)
-	VS_BTN
-	Out.texcoord0 = float3(In.texcoord0, 0.0f);
-	Out.texcoord1 = In.texcoord1;
-	Out.color = In.color0;
-VS_END
-
-INTpos VSpos_passthru(uint instance : SV_InstanceID, VTXpos In)
-{
-	INTpos Out = (INTpos)0;
-	Out.SSposition = float4(In.position, 1);
-	return Out;
-}
-
-INTpos_col VSpos_col_passthru(uint instance : SV_InstanceID, VTXpos_col In)
-{
-	INTpos_col Out = (INTpos_col)0;
-	Out.SSposition = float4(In.position, 1);
-	Out.color = In.color0;
-	return Out;
-}
-
-INTpos_col VSpos_col_prim(uint instance : SV_InstanceID, VTXpos_col In)
-{
-	INTpos_col Out = (INTpos_col)0;
+	INTp Out = (INTp)0;
 	Out.SSposition = gfx_ls2ss(instance, In.position);
-	Out.color = In.color0;
 	return Out;
 }
 
-INTpos_uv0 VSfullscreen_tri(uint id : SV_VertexID)
+INTpc VSpc(VTXpc In, uint instance : SV_InstanceID)
 {
-	INTpos_uv0 Out = (INTpos_uv0)0;
-	Out.texcoord0 = float2((id << 1) & 2, id & 2); 
-	Out.SSposition = float4(Out.texcoord0 * float2(2, -2) + float2(-1, 1), 0, 1);
-	return Out;
-}
-
-INTcommon VSpos_as_uvw(uint instance : SV_InstanceID, VTXpos_uvw In)
-{
-	INTcommon Out = (INTcommon)0;
-	Out.LSposition = In.position;
-	Out.WSposition = gfx_ls2ws(instance, In.position);
+	INTpc Out = (INTpc)0;
 	Out.SSposition = gfx_ls2ss(instance, In.position);
-	Out.texcoord0 = In.position;
+	Out.color = In.color;
+	return Out;
+}
+
+INTpbtnu VSpntu(VTXpntu In, uint instance : SV_InstanceID)
+{
+	INTpbtnu Out = (INTpbtnu)0;
+	Out.SSposition = gfx_ls2ss(instance, In.position);
+	//Out.WSposition = gfx_ls2ws(instance, In.position);
+	float3 test;
+	transform_btn(instance, In.normal, In.tangent, Out.WSnormal, Out.WStangent, test);
+	Out.texcoord0 = In.texcoord0;
 	return Out;
 }
 
 // _____________________________________________________________________________
-// Solid Color Pixel Shaders
+// Pixel Shaders: Solid Color
 
 // Solid Colors
 float4 PSblack()   : SV_Target { return float4(0.0,0.0,0.0,1); }
@@ -166,38 +89,46 @@ float4 PSmagenta() : SV_Target { return float4(1.0,0.0,1.0,1); }
 float4 PScyan()    : SV_Target { return float4(0.0,1.0,1.0,1); }
 
 // _____________________________________________________________________________
-// Simple Interpolants Pixel Shaders
+// Pixel Shaders: Interpolants
+																																																																																								   
+float4 PSpbtnu_bitangentx (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(color.x, 0, 0, 1);              }
+float4 PSpbtnu_bitangenty (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(0, color.y, 0, 1);              }
+float4 PSpbtnu_bitangentz (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(0, 0, color.z, 1);              }
+float4 PSpbtnu_bitangent  (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(color,         1);              }
+float4 PSpbtnu_tangentx   (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(color.x, 0, 0, 1);              }
+float4 PSpbtnu_tangenty   (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(0, color.y, 0, 1);              }
+float4 PSpbtnu_tangentz   (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(0, 0, color.z, 1);              }
+float4 PSpbtnu_tangent    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(color,         1);              }
+float4 PSpbtnu_normalx    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(color.x, 0, 0, 1);              }
+float4 PSpbtnu_normaly    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(0, color.y, 0, 1);              }
+float4 PSpbtnu_normalz    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(0, 0, color.z, 1);              }
+float4 PSpbtnu_normal     (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(color,         1);              }
+float4 PSpbtnu_texcoord0_u(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target {                                                 return float4(frac(In.texcoord0.x), 0, 0, 1); }
+float4 PSpbtnu_texcoord0_v(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target {                                                 return float4(0, frac(In.texcoord0.y), 0, 1); }
+float4 PSpbtnu_texcoord0  (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target {                                                 return float4(frac(In.texcoord0.xy),   0, 1); }
+float4 PSpc_color         (INTpc    In, uint instance : SV_InstanceID) : SV_Target {                                                 return In.color;                              }
 
-Texture1D Simple1D : register(t0);
-Texture1DArray Simple1DArray : register(t0);
-Texture2D Simple2D : register(t0);
-Texture2DArray Simple2DArray : register(t0);
-Texture3D Simple3D : register(t0);
-TextureCube SimpleCube : register(t0);
+// _____________________________________________________________________________
+// Pixel Shader: Simple Texture
+
+Texture1D        Simple1D        : register(t0);
+Texture1DArray   Simple1DArray   : register(t0);
+Texture2D        Simple2D        : register(t0);
+Texture2DArray   Simple2DArray   : register(t0);
+Texture3D        Simple3D        : register(t0);
+TextureCube      SimpleCube      : register(t0);
 TextureCubeArray SimpleCubeArray : register(t0);
 
-float4 PStexture1d(INTcommon In) : SV_Target { return Simple1D.Sample(LinearWrap, In.texcoord0.x); }
-float4 PStexture1d_array(INTcommon In) : SV_Target { return Simple1DArray.Sample(LinearWrap, In.texcoord0.x); }
-float4 PStexture2d(INTcommon In) : SV_Target { return Simple2D.Sample(LinearWrap, In.texcoord0.xy); }
-float4 PStexture2d_array(uint instance : SV_InstanceID, INTcommon In) : SV_Target { return Simple2DArray.Sample(LinearWrap, float3(In.texcoord0.xy, oGfxGetSlice(instance))); }
-float4 PStexture3d(INTcommon In) : SV_Target { return Simple3D.Sample(LinearWrap, In.texcoord0); }
-float4 PStexture_cube(INTcommon In) : SV_Target { return SimpleCube.Sample(LinearWrap, In.texcoord0); }
-float4 PStexture_cube_array(uint instance : SV_InstanceID, INTcommon In) : SV_Target { return SimpleCubeArray.Sample(LinearWrap, float4(In.texcoord0, oGfxGetSlice(instance))); }
-float4 PSconstant_color(INTcommon In) : SV_Target { return oGfxGetColor(In.instance); }
-float4 PSvertex_color(INTcommon In) : SV_Target { return In.color; }
-float4 PSvertex_color_prim(INTpos_col In) : SV_Target { return In.color; }
-float4 PStexcoordu(INTcommon In) : SV_Target { return float4(frac(In.texcoord0.x), 0, 0, 1); }
-float4 PStexcoordv(INTcommon In) : SV_Target { return float4(0, frac(In.texcoord0.y), 0, 1); }
-float4 PStexcoord(INTcommon In) : SV_Target { return float4(frac(In.texcoord0.xy), 0, 1); }
-float4 PStexcoord3u(INTcommon In) : SV_Target { return float4(frac(In.texcoord0.x), 0, 0, 1); }
-float4 PStexcoord3v(INTcommon In) : SV_Target { return float4(0, frac(In.texcoord0.y), 0, 1); }
-float4 PStexcoord3w(INTcommon In) : SV_Target { return float4(0, 0, frac(In.texcoord0.z), 1); }
-float4 PStexcoord3(INTcommon In) : SV_Target { return float4(frac(In.texcoord0), 1); }
+float4 PSpbtnu_texture1d      (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple1D.Sample(LinearWrap, In.texcoord0.x); }
+float4 PSpbtnu_texture1d_array(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple1DArray.Sample(LinearWrap, In.texcoord0.x); }
+float4 PSpbtnu_texture2d      (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple2D.Sample(LinearWrap, In.texcoord0.xy); }
+float4 PSpbtnu_texture2d_array(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple2DArray.Sample(LinearWrap, float3(In.texcoord0.xy, oGfxGetSlice(instance))); }
+float4 PSconstant_color       (             uint instance : SV_InstanceID) : SV_Target { return oGfxGetColor(instance); }
 
 // _____________________________________________________________________________
 // Misc
 
-float PSmouse_depth(float4 SSposition : SV_Position, float2 texcoord0 : TEXCOORD0) : SV_Target
+float PSmouse_depth(float4 SSposition : SV_Position) : SV_Target
 {
 	const float2 mouse_texcoords = oGfx_misc_constants.a.xy;
 	const float hyper_depth      = t_depth.Sample(PointClamp, mouse_texcoords).x;
@@ -213,31 +144,31 @@ float PSlinearize_depth(float4 SSposition : SV_Position) : SV_Target
 	return gfx_linearize_depth(hyper_depth);
 }
 
-float4 PSvertex_color_stipple(INTcommon In) : SV_Target
+float4 PSdepth_stippled(float4 SSposition : SV_Position, float4 color : COLOR) : SV_Target
 {
 	// if the geometry would be occluded, draw a stipple pattern
 	// (thus turn depth test off for this since it will be done
 	// here and special rendering is done if it fails
 
-	const int3  screen_position       = (int3)In.SSposition.xyz;
-  const float fragment_linear_depth = In.SSposition.w;
+	const int3  screen_position       = (int3)SSposition.xyz;
+  const float fragment_linear_depth = SSposition.w;
  	const float scene_linear_depth    = t_depth.Load(int3(screen_position.x, screen_position.y, 0)).x;
 	const bool  occluded              = fragment_linear_depth > scene_linear_depth;
 
   if (occluded && ((screen_position.x ^ screen_position.y) & 2))
     discard;
 
-	return In.color;
+	return color;
 }
 
 // _____________________________________________________________________________
 // Geometry Shaders
 
 // expands a vertex position into a line represent a vector
-void oGSexpand_vector(float3 WSposition, float3 WSvector, float4 color, inout LineStream<INTpos_col> out_line)
+void oGSexpand_vector(float3 WSposition, float3 WSvector, float4 color, inout LineStream<INTpc> out_line)
 {
 	static const float3 kVectorScale = 0.025;
-	INTpos_col Out = (INTpos_col)0;
+	INTpc Out = (INTpc)0;
 	Out.color = color;
 	Out.SSposition = gfx_ws2ss(WSposition);
 	out_line.Append(Out);
@@ -246,13 +177,13 @@ void oGSexpand_vector(float3 WSposition, float3 WSvector, float4 color, inout Li
 }
 
 [maxvertexcount(2)]
-void GSvertex_normals(point INTcommon In[1], inout LineStream<INTpos_col> out_line)
+void GSvertex_normals(point INTpbtnu In[1], inout LineStream<INTpc> out_line)
 {
 	oGSexpand_vector(In[0].WSposition, In[0].WSnormal, float4(0,1,0,1), out_line);
 }
 
 [maxvertexcount(2)]
-void GSvertex_tangents(point INTcommon In[1], inout LineStream<INTpos_col> out_line)
+void GSvertex_tangents(point INTpbtnu In[1], inout LineStream<INTpc> out_line)
 {
 	oGSexpand_vector(In[0].WSposition, In[0].WStangent.xyz, float4(1,0,0,1), out_line);
 }

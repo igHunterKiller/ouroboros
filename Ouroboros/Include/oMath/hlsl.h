@@ -872,6 +872,7 @@ template<typename T> struct RWByteAddressBuffer : ByteAddressBuffer<T>
 #define oHLSL_CONSTANT_BUFFER(slot)
 #define oHLSL_RESOURCE_BUFFER(slot)
 #define oHLSL_UNORDERED_BUFFER(slot)
+#define oHLSL_COLOR uint32_t // aka bgra, D3D_COLOR
 
 // _____________________________________________________________________________
 // ouro::equal support
@@ -922,6 +923,7 @@ template<> inline bool equal_eps(const oHLSL4x4<double>& a, const oHLSL4x4<doubl
 #define oHLSL_CONSTANT_BUFFER(slot) register(c##slot)
 #define oHLSL_RESOURCE_BUFFER(slot) register(t##slot)
 #define oHLSL_UNORDERED_BUFFER(slot) register(u##slot)
+#define oHLSL_COLOR float4
 
 #endif
 #endif
