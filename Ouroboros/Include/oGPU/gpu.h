@@ -446,6 +446,7 @@ struct vbv
 	inline uint32_t vertex_stride_bytes() const { return ((vertex_stride_uints_minus_1 + 1) & ((1<<5)-1)) * sizeof(uint32_t); }
 };
 
+class device;
 class graphics_command_list : public device_child
 {
 public:
@@ -457,6 +458,8 @@ public:
 	void set_marker(const char* marker);
 	void push_marker(const char* marker);
 	void pop_marker();
+
+	device* device();
 
 	// Query
 	void begin_timer(timer* t);
@@ -518,7 +521,7 @@ public:
 	void update(resource* r, uint32_t subresource, const copy_box* box, const void* src, uint32_t src_row_pitch, uint32_t src_depth_pitch);
 	
 	void copy(resource* dest, resource* src);
-	void copy_texture_region(resource* dest, uint32_t dest_subresource, uint32_t dest_x, uint32_t dest_y, uint32_t dest_z, resource* src, uint32_t src_subresource, const copy_box* src_box = nullptr);
+	void copy_region(resource* dest, uint32_t dest_subresource, uint32_t dest_x, uint32_t dest_y, uint32_t dest_z, resource* src, uint32_t src_subresource, const copy_box* src_box = nullptr);
 	void copy_structure_count(resource* dest, uint32_t dest_offset_uints, uav* src);
 
 	void generate_mips(srv* view);
@@ -612,6 +615,9 @@ public:
 	vbv new_vbv(const char* name, uint32_t vertex_stride, uint32_t num_vertices, const void* vertex_data);
 	void del_vbv(const vbv& view);
 
+	typedef const char* (*to_string_fn)(char* dst, size_t dst_size, const void* struct_);
+	void trace_structs(uint32_t offset, uint32_t struct_stride, uint32_t num_structs, to_string_fn to_string);
+
 	// if an ibv or vbv's contents needs to be read, use this base in conjunction with the view's offset
 	// to access the data.
 	const void* readable_mesh_base() const { return persistent_mesh_alloc_.base(); }
@@ -640,6 +646,7 @@ public:
 
 private:
 	allocator alloc_;
+	allocator temp_alloc_;
 	window* win_;
 	void* dev_;
 	ref<graphics_command_list> imm_;

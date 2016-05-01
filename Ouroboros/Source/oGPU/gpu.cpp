@@ -1239,6 +1239,7 @@ stats_desc stats_query::get_stats(bool blocking)
 
 device::device(const device_init& init, window* win)
 	: alloc_(default_allocator)
+	, temp_alloc_(default_allocator)
 	, win_(win)
 	, dev_(nullptr)
 	, imm_(nullptr)
@@ -1705,15 +1706,19 @@ void device::del_rso(rso* o)
 
 ref<pso> device::new_pso(const char* name, const pipeline_state_desc& desc)
 {
+	// Challenge: These Creates can hash to the same object - common since 
+	// psos share much of the same state. So how to name these uniquely?
+	// probably can't.
+
 	auto d3d = (ID3D11Device*)dev_;
 	auto o = (pso_d3d11*)default_allocate(sizeof(pso_d3d11), "pso_d3d11");
 	memset(o, 0, sizeof(pso_d3d11));
 
-	if (desc.vs_bytecode) { oV(d3d->CreateVertexShader  (desc.vs_bytecode, bytecode_size(desc.vs_bytecode), nullptr, &o->vs)); debug_name(o->vs, name); }
-	if (desc.hs_bytecode) { oV(d3d->CreateHullShader    (desc.hs_bytecode, bytecode_size(desc.hs_bytecode), nullptr, &o->hs)); debug_name(o->hs, name); }
-	if (desc.ds_bytecode) { oV(d3d->CreateDomainShader  (desc.ds_bytecode, bytecode_size(desc.ds_bytecode), nullptr, &o->ds)); debug_name(o->ds, name); }
-	if (desc.gs_bytecode) { oV(d3d->CreateGeometryShader(desc.gs_bytecode, bytecode_size(desc.gs_bytecode), nullptr, &o->gs)); debug_name(o->gs, name); }
-	if (desc.ps_bytecode) { oV(d3d->CreatePixelShader   (desc.ps_bytecode, bytecode_size(desc.ps_bytecode), nullptr, &o->ps)); debug_name(o->ps, name); }
+	if (desc.vs_bytecode) { oV(d3d->CreateVertexShader  (desc.vs_bytecode, bytecode_size(desc.vs_bytecode), nullptr, &o->vs)); debug_name(o->vs, "pso.vs"); }
+	if (desc.hs_bytecode) { oV(d3d->CreateHullShader    (desc.hs_bytecode, bytecode_size(desc.hs_bytecode), nullptr, &o->hs)); debug_name(o->hs, "pso.hs"); }
+	if (desc.ds_bytecode) { oV(d3d->CreateDomainShader  (desc.ds_bytecode, bytecode_size(desc.ds_bytecode), nullptr, &o->ds)); debug_name(o->ds, "pso.ds"); }
+	if (desc.gs_bytecode) { oV(d3d->CreateGeometryShader(desc.gs_bytecode, bytecode_size(desc.gs_bytecode), nullptr, &o->gs)); debug_name(o->gs, "pso.gs"); }
+	if (desc.ps_bytecode) { oV(d3d->CreatePixelShader   (desc.ps_bytecode, bytecode_size(desc.ps_bytecode), nullptr, &o->ps)); debug_name(o->ps, "pso.ps"); }
 
 	if (desc.input_elements && desc.vs_bytecode)
 	{
@@ -1728,21 +1733,21 @@ ref<pso> device::new_pso(const char* name, const pipeline_state_desc& desc)
 			element_descs[n++] = from_input_element_desc(e);
 		}
 		oV(d3d->CreateInputLayout(element_descs, n, desc.vs_bytecode, bytecode_size(desc.vs_bytecode), &o->ia));
-		debug_name(o->ia, name);
+		debug_name(o->ia, "pso.ia");
 	}
 
 	{
 		auto rs_desc = from_rasterizer_desc(desc.rasterizer_state);
 		oV(d3d->CreateRasterizerState(&rs_desc, &o->rasterizer_state));
-		debug_name(o->rasterizer_state, name);
+		debug_name(o->rasterizer_state, "pso.rs");
 
 		auto bs_desc = from_blend_desc(desc.blend_state);
 		oV(d3d->CreateBlendState(&bs_desc, &o->blend_state));
-		debug_name(o->blend_state, name);
+		debug_name(o->blend_state, "pso.bs");
 
 		auto ds_desc = from_depth_stencil_desc(desc.depth_stencil_state);
 		oV(d3d->CreateDepthStencilState(&ds_desc, &o->depth_stencil_state));
-		debug_name(o->depth_stencil_state, name);
+		debug_name(o->depth_stencil_state, "pso.dss");
 	}
 
 	o->sample_mask = basic::default_sample_mask;//desc.sample_mask;
@@ -1767,6 +1772,7 @@ void device::new_pso(const char* name, const pipeline_state_desc& desc, uint32_t
 	oGPU_CHECK(pso_index < init_.max_psos, "pso_index larger than the max %u specified at device init time", init_.max_psos);
 	oGPU_CHECK(!psos_[pso_index], "pso %s already created at index %u", psos_[pso_index]->name(tmp), pso_index);
 	psos_[pso_index] = new_pso(name, desc);
+	oTrace("[GPU] PSO%03d = %s", pso_index, name);
 	release();
 }
 
@@ -2137,6 +2143,37 @@ void device::del_vbv(const vbv& view)
 	}
 }
 
+void device::trace_structs(uint32_t offset, uint32_t struct_stride, uint32_t num_structs, to_string_fn to_string)
+{
+	uint32_t bytes = struct_stride * num_structs;
+	auto cpu_copy = temp_alloc_.scoped_allocate(bytes, "trace_region cpu_copy", memory_alignment::align16);
+	ref<resource> temp = new_rb("trace_structs temp", struct_stride, num_structs);
+
+	copy_box box;
+	box.left = offset;
+	box.top = 0;
+	box.front = 0;
+	box.right = box.left + bytes;
+	box.bottom = 1;
+	box.back = 1;
+
+	flush();
+	imm_->copy_region(temp, 0, 0, 0, 0, persistent_mesh_buffer_, 0, &box);
+
+	if (!temp->copy_to(cpu_copy))
+		oTrace("vbv readback failed");
+
+	char buf[1024];
+	auto cur = (const char*)cpu_copy;
+	for (uint32_t i = 0; i < num_structs; i++)
+	{
+		if (!to_string(buf, countof(buf), cur))
+			strlcpy(buf, "<parse-fail>");
+		oTrace("%u %s", i, buf);
+		cur += struct_stride;
+	}
+}
+
 ref<timer> device::new_timer(const char* name)
 {
 	auto d3d = (ID3D11Device*)dev_;
@@ -2462,6 +2499,11 @@ void graphics_command_list::pop_marker()
 {
 	auto uda = ((graphics_command_list_d3d11*)this)->uda;
 	uda->EndEvent();
+}
+
+device* graphics_command_list::device()
+{
+	return ((graphics_command_list_d3d11*)this)->dev;
 }
 
 void graphics_command_list::begin_timer(timer* t)
@@ -2919,7 +2961,7 @@ void graphics_command_list::copy(resource* dest, resource* src)
 	dc->CopyResource((ID3D11Resource*)dest, (ID3D11Resource*)src);
 }
 
-void graphics_command_list::copy_texture_region(resource* dest, uint32_t dest_subresource, uint32_t dest_x, uint32_t dest_y, uint32_t dest_z, resource* src, uint32_t src_subresource, const copy_box* src_box)
+void graphics_command_list::copy_region(resource* dest, uint32_t dest_subresource, uint32_t dest_x, uint32_t dest_y, uint32_t dest_z, resource* src, uint32_t src_subresource, const copy_box* src_box)
 {
 	auto dc = ((graphics_command_list_d3d11*)this)->dc;
 	dc->CopySubresourceRegion((ID3D11Resource*)dest, dest_subresource, dest_x, dest_y, dest_z, (ID3D11Resource*)src, src_subresource, (const D3D11_BOX*)src_box);
