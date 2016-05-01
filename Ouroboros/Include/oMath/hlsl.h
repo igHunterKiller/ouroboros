@@ -42,6 +42,22 @@
 #endif
 
 // _____________________________________________________________________________
+// Printf helpers
+
+#define FMT_FLOAT2   "%f %f"
+#define FMT_FLOAT3   "%f %f %f"
+#define FMT_FLOAT4   "%f %f %f %f"
+#define FMT_FLOAT3X3 "%f %f %f|%f %f %f|%f %f %f"
+#define FMT_FLOAT4X4 "%f %f %f %f|%f %f %f %f|%f %f %f %f|%f %f %f %f"
+
+#define PRM_FLOAT2(v) (v).x, (v).y
+#define PRM_FLOAT3(v) (v).x, (v).y, (v).z
+#define PRM_FLOAT4(v) (v).x, (v).y, (v).z, (v).w
+
+#define PRM_FLOAT3X3(m) PRM_FLOAT3((m)[0]), PRM_FLOAT3((m)[1]), PRM_FLOAT3((m)[2])
+#define PRM_FLOAT4X4(m) PRM_FLOAT4((m)[0]), PRM_FLOAT4((m)[1]), PRM_FLOAT4((m)[2]), PRM_FLOAT4((m)[3])
+
+// _____________________________________________________________________________
 // Assignment macros used to define tuples
 
 #define oHLSL_ASSIGN(r, p, op) inline const r& operator op##=(const p& a) { *this = *this op a; return *this; }
