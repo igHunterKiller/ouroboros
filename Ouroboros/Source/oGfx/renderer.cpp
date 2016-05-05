@@ -29,18 +29,18 @@ template<> const char* as_string(const gfx::fullscreen_mode& mode)
 		"texcoord",
 		"texcoordu",
 		"texcoordv",
-		"normalx",
-		"normaly",
-		"normalz",
-		"normal",
-		"tangentx",
-		"tangenty",
-		"tangentz",
-		"tangent",
 		"bittangentx",
 		"bittangenty",
 		"bittangentz",
 		"bittangent",
+		"tangentx",
+		"tangenty",
+		"tangentz",
+		"tangent",
+		"normalx",
+		"normaly",
+		"normalz",
+		"normal",
 	};
 	return as_string(mode, s_names);
 }
@@ -193,13 +193,27 @@ static pipeline_state get_fullscreen_pipline_state(technique_context_t& ctx, con
 	switch (ctx.render_settings.mode)
 	{
 		default:
-		case fullscreen_mode::normal:    pso = default_pso;                         break;
-		case fullscreen_mode::points:    pso = pipeline_state::pos_only_points;     break;
-		case fullscreen_mode::wireframe: pso = pipeline_state::pos_color_wire;      break;
-		case fullscreen_mode::texcoord:  pso = pipeline_state::mesh_uv0_as_color;   break;
-		case fullscreen_mode::texcoordu: pso = pipeline_state::mesh_u0_as_color;    break;
-		case fullscreen_mode::texcoordv: pso = pipeline_state::mesh_v0_as_color;    break;
+		case fullscreen_mode::lit:         pso = default_pso;                              break;
+		case fullscreen_mode::points:      pso = pipeline_state::pos_only_points;          break;
+		case fullscreen_mode::wireframe:   pso = pipeline_state::mesh_wire;                break;
+		case fullscreen_mode::texcoord:    pso = pipeline_state::mesh_uv0_as_color;        break;
+		case fullscreen_mode::texcoordu:   pso = pipeline_state::mesh_u0_as_color;         break;
+		case fullscreen_mode::texcoordv:   pso = pipeline_state::mesh_v0_as_color;         break;
+		case fullscreen_mode::bittangentx: pso = pipeline_state::mesh_bitangentx_as_color; break;
+		case fullscreen_mode::bittangenty: pso = pipeline_state::mesh_bitangenty_as_color; break;
+		case fullscreen_mode::bittangentz: pso = pipeline_state::mesh_bitangentz_as_color; break;
+		case fullscreen_mode::bittangent:	 pso = pipeline_state::mesh_bitangent_as_color;  break;
+		case fullscreen_mode::tangentx:		 pso = pipeline_state::mesh_tangentx_as_color;   break;
+		case fullscreen_mode::tangenty:		 pso = pipeline_state::mesh_tangenty_as_color;   break;
+		case fullscreen_mode::tangentz:		 pso = pipeline_state::mesh_tangentz_as_color;   break;
+		case fullscreen_mode::tangent:		 pso = pipeline_state::mesh_tangent_as_color;    break;
+		case fullscreen_mode::normalx:		 pso = pipeline_state::mesh_normalx_as_color;    break;
+		case fullscreen_mode::normaly:		 pso = pipeline_state::mesh_normaly_as_color;    break;
+		case fullscreen_mode::normalz:		 pso = pipeline_state::mesh_normalz_as_color;    break;
+		case fullscreen_mode::normal:			 pso = pipeline_state::mesh_normal_as_color;     break;
 	}
+
+	oTrace("%s", as_string(ctx.render_settings.mode));
 	
 	return pso;
 }

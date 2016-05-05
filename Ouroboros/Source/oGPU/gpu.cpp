@@ -804,6 +804,7 @@ struct pso_d3d11
 	uint32_t node_mask;
 	uint32_t flags;
 	device* dev;
+	char debug_name[64];
 };
 
 struct cso_d3d11
@@ -1762,6 +1763,7 @@ ref<pso> device::new_pso(const char* name, const pipeline_state_desc& desc)
 	o->flags = desc.flags;
 	o->dev = this;
 	o->refcount = 1;
+	strlcpy(o->debug_name, name);
 	reference();
 	return ref<pso>((pso*)o, false);
 }
@@ -2766,6 +2768,8 @@ void graphics_command_list::set_pso(pso* o)
 	pso_d3d11* oo = o ? (pso_d3d11*)o : &sNullPSO;
 	if (oo != gcl->current_pso)
 	{
+		oTrace("set_pso(%s)", oo->debug_name);
+
 		auto dc = gcl->dc;
 		dc->VSSetShader(oo->vs, nullptr, 0);
 		dc->HSSetShader(oo->hs, nullptr, 0);

@@ -67,10 +67,12 @@ INTpbtnu VSpntu(VTXpntu In, uint instance : SV_InstanceID)
 {
 	INTpbtnu Out = (INTpbtnu)0;
 	Out.SSposition = gfx_ls2ss(instance, In.position);
-	//Out.WSposition = gfx_ls2ws(instance, In.position);
+	Out.WSposition = gfx_ls2ws(instance, In.position);
 	float3 test;
 	transform_btn(instance, In.normal, In.tangent, Out.WSnormal, Out.WStangent, test);
+	Out.WSnormal  = normal_to_color(Out.WSposition);//In.texcoord0;
 	Out.texcoord0 = In.texcoord0;
+	Out.instance  = instance;
 	return Out;
 }
 
@@ -91,22 +93,22 @@ float4 PScyan()    : SV_Target { return float4(0.0,1.0,1.0,1); }
 // _____________________________________________________________________________
 // Pixel Shaders: Interpolants
 																																																																																								   
-float4 PSpbtnu_bitangentx (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(color.x, 0, 0, 1);              }
-float4 PSpbtnu_bitangenty (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(0, color.y, 0, 1);              }
-float4 PSpbtnu_bitangentz (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(0, 0, color.z, 1);              }
-float4 PSpbtnu_bitangent  (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(color,         1);              }
-float4 PSpbtnu_tangentx   (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(color.x, 0, 0, 1);              }
-float4 PSpbtnu_tangenty   (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(0, color.y, 0, 1);              }
-float4 PSpbtnu_tangentz   (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(0, 0, color.z, 1);              }
-float4 PSpbtnu_tangent    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(color,         1);              }
-float4 PSpbtnu_normalx    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(color.x, 0, 0, 1);              }
-float4 PSpbtnu_normaly    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(0, color.y, 0, 1);              }
-float4 PSpbtnu_normalz    (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(0, 0, color.z, 1);              }
-float4 PSpbtnu_normal     (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(color,         1);              }
-float4 PSpbtnu_texcoord0_u(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target {                                                 return float4(frac(In.texcoord0.x), 0, 0, 1); }
-float4 PSpbtnu_texcoord0_v(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target {                                                 return float4(0, frac(In.texcoord0.y), 0, 1); }
-float4 PSpbtnu_texcoord0  (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target {                                                 return float4(frac(In.texcoord0.xy),   0, 1); }
-float4 PSpc_color         (INTpc    In, uint instance : SV_InstanceID) : SV_Target {                                                 return In.color;                              }
+float4 PSpbtnu_bitangentx (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(color.x, 0, 0, 1);              }
+float4 PSpbtnu_bitangenty (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(0, color.y, 0, 1);              }
+float4 PSpbtnu_bitangentz (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(0, 0, color.z, 1);              }
+float4 PSpbtnu_bitangent  (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSbitangent); return float4(color,         1);              }
+float4 PSpbtnu_tangentx   (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(color.x, 0, 0, 1);              }
+float4 PSpbtnu_tangenty   (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(0, color.y, 0, 1);              }
+float4 PSpbtnu_tangentz   (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(0, 0, color.z, 1);              }
+float4 PSpbtnu_tangent    (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WStangent  ); return float4(color,         1);              }
+float4 PSpbtnu_normalx    (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(color.x, 0, 0, 1);              }
+float4 PSpbtnu_normaly    (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(0, color.y, 0, 1);              }
+float4 PSpbtnu_normalz    (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(0, 0, color.z, 1);              }
+float4 PSpbtnu_normal     (INTpbtnu In) : SV_Target { float3 color = normal_to_color(In.WSnormal   ); return float4(color,         1);              }
+float4 PSpbtnu_texcoord0_u(INTpbtnu In) : SV_Target {                                                 return float4(frac(In.texcoord0.x), 0, 0, 1); }
+float4 PSpbtnu_texcoord0_v(INTpbtnu In) : SV_Target {                                                 return float4(0, frac(In.texcoord0.y), 0, 1); }
+float4 PSpbtnu_texcoord0  (INTpbtnu In) : SV_Target {                                                 return float4(frac(In.texcoord0.xy),   0, 1); }
+float4 PSpc_color         (INTpc    In) : SV_Target {                                                 return In.color;                              }
 
 // _____________________________________________________________________________
 // Pixel Shader: Simple Texture
@@ -119,11 +121,11 @@ Texture3D        Simple3D        : register(t0);
 TextureCube      SimpleCube      : register(t0);
 TextureCubeArray SimpleCubeArray : register(t0);
 
-float4 PSpbtnu_texture1d      (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple1D.Sample(LinearWrap, In.texcoord0.x); }
-float4 PSpbtnu_texture1d_array(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple1DArray.Sample(LinearWrap, In.texcoord0.x); }
-float4 PSpbtnu_texture2d      (INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple2D.Sample(LinearWrap, In.texcoord0.xy); }
-float4 PSpbtnu_texture2d_array(INTpbtnu In, uint instance : SV_InstanceID) : SV_Target { return Simple2DArray.Sample(LinearWrap, float3(In.texcoord0.xy, oGfxGetSlice(instance))); }
-float4 PSconstant_color       (             uint instance : SV_InstanceID) : SV_Target { return oGfxGetColor(instance); }
+float4 PSpbtnu_texture1d      (INTpbtnu In)                   : SV_Target { return Simple1D.Sample(LinearWrap, In.texcoord0.x); }
+float4 PSpbtnu_texture1d_array(INTpbtnu In)                   : SV_Target { return Simple1DArray.Sample(LinearWrap, In.texcoord0.x); }
+float4 PSpbtnu_texture2d      (INTpbtnu In)                   : SV_Target { return Simple2D.Sample(LinearWrap, In.texcoord0.xy); }
+float4 PSpbtnu_texture2d_array(INTpbtnu In)                   : SV_Target { return Simple2DArray.Sample(LinearWrap, float3(In.texcoord0.xy, oGfxGetSlice(0/*In.instance*/))); }
+float4 PSconstant_color       (uint instance : SV_InstanceID) : SV_Target { return oGfxGetColor(instance); }
 
 // _____________________________________________________________________________
 // Misc
