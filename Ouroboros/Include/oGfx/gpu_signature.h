@@ -40,6 +40,9 @@ enum class pipeline_state : uint8_t
 	linearize_depth,
 	
 	// mesh::basic::meshf
+	mesh_u0_as_color,         //
+	mesh_v0_as_color,         //
+	mesh_uv0_as_color,        //
 	mesh_bitangentx_as_color, //
 	mesh_bitangenty_as_color, //
 	mesh_bitangentz_as_color, //
@@ -52,9 +55,6 @@ enum class pipeline_state : uint8_t
 	mesh_normaly_as_color,    //
 	mesh_normalz_as_color,    //
 	mesh_normal_as_color,     //
-	mesh_u0_as_color,         //
-	mesh_v0_as_color,         //
-	mesh_uv0_as_color,        //
 	mesh_simple_texture,      // sample texture in slot0
 	mesh_wire,                // wireframe with UVs as color
 	count,

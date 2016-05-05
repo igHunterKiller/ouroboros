@@ -41,15 +41,32 @@ model decode_obj(const path_t& path
 
 	obj obj(init, path.c_str(), buffer, size);
 
-	const auto nidx       = obj.num_indices();
-	const auto nvtx       = obj.num_vertices();
-	const auto ngrp       = obj.num_groups();
-	const auto indices    = obj.indices();
-	const auto positions  = obj.positions();
-	const auto texcoords  = obj.texcoords();
-	const auto normals    = obj.normals();
-	const auto groups     = obj.groups();
-	const auto ccw        = obj.ccw_faces();
+	const auto    nidx        = obj.num_indices();
+	const auto    nvtx        = obj.num_vertices();
+	const auto    ngrp        = obj.num_groups();
+	const auto    indices     = obj.indices();
+	const float3* positions   = obj.positions();
+	const float3* texcoords   = obj.texcoords();
+	const float3* normals     = obj.normals();
+	const auto    groups      = obj.groups();
+	const auto    ccw         = obj.ccw_faces();
+	const float4* tangents    = nullptr;
+
+	std::vector<float3, ouro_std_allocator<float3>> calculated_normals(ouro_std_allocator<float3>(temp_alloc, "calculated normals"));
+	if (!normals && indices && positions)
+	{
+		calculated_normals.resize(nvtx);
+		normals = calculated_normals.data();
+		calc_vertex_normals(calculated_normals.data(), indices, nidx, positions, nvtx, obj.ccw_faces());
+	}
+
+	std::vector<float4, ouro_std_allocator<float4>> calculated_tangents(ouro_std_allocator<float4>(temp_alloc, "calculated tangents"));
+	if (!tangents && indices && positions && normals && texcoords)
+	{
+		calculated_tangents.resize(nvtx);
+		tangents = calculated_tangents.data();
+		calc_vertex_tangents(calculated_tangents.data(), indices, nidx, positions, normals, texcoords, nvtx);
+	}
 
 	// define subsets
 	// keep this before info because there may be a time where more subsets
@@ -132,16 +149,17 @@ model decode_obj(const path_t& path
 	copy_indices(mdl.indices(), indices, nidx);
 
 	// set up vertex copy
-	const void*    obj_slots[3] = { positions, texcoords, normals };
+	const void*    obj_slots[4] = { positions, texcoords, normals, tangents };
 	const uint32_t dst_nslots   = info.num_slots;
 	void**         dst_slots    = (void**)alloca(dst_nslots * sizeof(void*));
 	for (uint32_t slot = 0; slot < dst_nslots; slot++)
 		dst_slots[slot] = mdl.vertices(slot);
 
 	// swizzle into the proper format
-	layout_t obj_layout = mesh::layout(mesh::basic::wavefront_obj);
+	layout_t src_layout = mesh::layout(mesh::basic::wavefront_obj);
+	src_layout[3] = { element_semantic::tangent,  0, surface::format::r32g32b32a32_float, 3 };
 
-	copy_vertices(dst_slots, info.layout, obj_slots, obj_layout, nvtx);
+	copy_vertices(dst_slots, info.layout, obj_slots, src_layout, nvtx);
 
 	return mdl;
 }
