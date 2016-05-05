@@ -24,6 +24,7 @@
     <ClCompile Include="gpu_fixed_state.cpp" />
     <ClCompile Include="gpu_pipeline_state.cpp" />
     <ClCompile Include="gpu_signature.cpp" />
+    <ClCompile Include="gpu_signature_vertices.cpp" />
     <ClCompile Include="model_registry.cpp" />
     <ClCompile Include="oGfxShaders.cpp" />
     <ClCompile Include="pch.cpp">

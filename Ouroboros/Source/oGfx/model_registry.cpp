@@ -7,6 +7,8 @@
 #include <oCore/color.h>
 #include <oCore/stringize.h>
 
+#include <oGfx/gpu_signature_vertices.h>
+
 namespace ouro { 
 
 template<> const char* as_string(const gfx::primitive_model& m)
@@ -93,6 +95,9 @@ void* model_registry::create_resource(const uri_t& uri_ref, blob& compiled)
 	}
 
 	mdl->rebase(dev_->readable_mesh_base(), noop_deallocate, indices.offset, vertices_offsets);
+
+	if (stristr(uri_ref.path(), "cube"))
+		dev_->trace_structs(vertices_offsets[0], sizeof(gfx::VTXpntu), mdl->info().num_vertices, gfx::to_string_VTXpntu);
 
 	return mdl;
 }

@@ -615,7 +615,7 @@ public:
 	vbv new_vbv(const char* name, uint32_t vertex_stride, uint32_t num_vertices, const void* vertex_data);
 	void del_vbv(const vbv& view);
 
-	typedef const char* (*to_string_fn)(char* dst, size_t dst_size, const void* struct_);
+	typedef size_t (*to_string_fn)(char* dst, size_t dst_size, const void* struct_);
 	void trace_structs(uint32_t offset, uint32_t struct_stride, uint32_t num_structs, to_string_fn to_string);
 
 	// if an ibv or vbv's contents needs to be read, use this base in conjunction with the view's offset

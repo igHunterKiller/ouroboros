@@ -2169,8 +2169,7 @@ void device::trace_structs(uint32_t offset, uint32_t struct_stride, uint32_t num
 	auto cur = (const char*)cpu_copy;
 	for (uint32_t i = 0; i < num_structs; i++)
 	{
-		if (!to_string(buf, countof(buf), cur))
-			strlcpy(buf, "<parse-fail>");
+		to_string(buf, countof(buf), cur);
 		oTrace("%u %s", i, buf);
 		cur += struct_stride;
 	}
@@ -2768,8 +2767,6 @@ void graphics_command_list::set_pso(pso* o)
 	pso_d3d11* oo = o ? (pso_d3d11*)o : &sNullPSO;
 	if (oo != gcl->current_pso)
 	{
-		oTrace("set_pso(%s)", oo->debug_name);
-
 		auto dc = gcl->dc;
 		dc->VSSetShader(oo->vs, nullptr, 0);
 		dc->HSSetShader(oo->hs, nullptr, 0);

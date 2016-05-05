@@ -72,6 +72,9 @@
     <ClCompile Include="gpu_signature.cpp">
       <Filter>Source\Shader Definitions</Filter>
     </ClCompile>
+    <ClCompile Include="gpu_signature_vertices.cpp">
+      <Filter>Source\Shader Definitions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Include\oGfx\oGfxHLSL.h">

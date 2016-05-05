@@ -13,6 +13,7 @@
 #include <oGPU/gpu_semantics.h>
 
 #ifndef oHLSL
+#include <oCore/stringize.h>
 namespace ouro { namespace gfx {
 #endif
 
@@ -60,6 +61,14 @@ struct VTXmesh
 };
 
 #ifndef oHLSL
+
+size_t to_string_VTXp      (char* dst, size_t dst_size, const void* vtx);
+size_t to_string_VTXpnt    (char* dst, size_t dst_size, const void* vtx);
+size_t to_string_VTXpc     (char* dst, size_t dst_size, const void* vtx);
+size_t to_string_VTXpntu   (char* dst, size_t dst_size, const void* vtx);
+size_t to_string_VTXpu     (char* dst, size_t dst_size, const void* vtx);
+size_t to_string_VTXpc     (char* dst, size_t dst_size, const void* vtx);
+
 }}
 #endif
 #endif

@@ -38,6 +38,7 @@
 
 // _____________________________________________________________________________
 // convert a normalized float [0,1] to various lower bit representations
+// i.e. n8tof32 s8tof32
 
 #define oQUANTIZE_CONCAT2(a,b)      a##b
 #define oQUANTIZE_CONCAT(a,b)       oQUANTIZE_CONCAT2(a,b)

@@ -213,8 +213,6 @@ static pipeline_state get_fullscreen_pipline_state(technique_context_t& ctx, con
 		case fullscreen_mode::normal:			 pso = pipeline_state::mesh_normal_as_color;     break;
 	}
 
-	oTrace("%s", as_string(ctx.render_settings.mode));
-	
 	return pso;
 }
 
