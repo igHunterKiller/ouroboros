@@ -51,7 +51,6 @@ INTpbtnu VSpntu(VTXpntu In, uint instance : SV_InstanceID)
 	INTpbtnu Out = (INTpbtnu)0;
 	Out.SSposition = gfx_ls2ss(instance, In.position);
 	Out.WSposition = gfx_ls2ws(instance, In.position);
-	float3 test;
 	gfx_transform_btn(instance, In.normal, In.tangent, Out.WSbitangent, Out.WStangent, Out.WSnormal);
 	Out.texcoord0 = In.texcoord0;
 	Out.instance  = instance;
