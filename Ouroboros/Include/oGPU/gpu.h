@@ -622,6 +622,9 @@ public:
 	// to access the data.
 	const void* readable_mesh_base() const { return persistent_mesh_alloc_.base(); }
 
+	template<typename VTX_T>
+	const VTX_T* readable_mesh(vbv& vbv) const { return vbv.transient ? nullptr : (VTX_T*)((char*)readable_mesh_base() + vbv.offset); }
+
 	ref<rtv> new_rtv(resource* r, const rtv_desc& desc);
 	ref<dsv> new_dsv(resource* r, const dsv_desc& desc);
 	ref<uav> new_uav(resource* r, const uav_desc& desc);

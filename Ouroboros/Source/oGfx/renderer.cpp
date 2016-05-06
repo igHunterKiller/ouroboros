@@ -73,6 +73,8 @@ template<> const char* as_string(const gfx::render_technique& technique)
 		"draw_axis",
 		"draw_gizmo",
 		"draw_grid",
+		"debug_draw_normals",
+		"debug_draw_tangents",
 		"view_end",
 		"pass_end",
 	};
@@ -294,14 +296,14 @@ void draw_prim(technique_context_t& ctx)
 	}
 }
 
-static void draw_subset(gpu::graphics_command_list& cl, const model_subset_submission_t& subset, const gfx::draw_constants* draw_constants, uint32_t num_instances)
+static void draw_geometry(gpu::graphics_command_list& cl, const geometry_view_t& geometry, const gfx::draw_constants* draw_constants, uint32_t num_instances)
 {
 	if (!num_instances)
 		return;
 	cl.set_cbv(oGFX_CBV_DRAW, draw_constants, num_instances * sizeof(gfx::draw_constants));
-	cl.set_indices(subset.indices);
-	cl.set_vertices(0, 3, subset.vertices);
-	cl.draw_indexed(subset.num_indices, num_instances, subset.start_index);
+	cl.set_indices(geometry.indices);
+	cl.set_vertices(0, countof(geometry.vertices), geometry.vertices);
+	cl.draw_indexed(geometry.num_indices, num_instances, geometry.start_index);
 }
 
 void draw_subset(technique_context_t& ctx)
@@ -347,7 +349,7 @@ void draw_subset(technique_context_t& ctx)
 			draw.pada          = 0;
 		}
 
-		draw_subset(cl, *subset, draws, 1);
+		draw_geometry(cl, subset->geometry, draws, 1);
 
 
 #if 0
@@ -649,6 +651,104 @@ void draw_grid(technique_context_t& ctx)
 	}
 }
 
+void debug_draw_normals(technique_context_t& ctx)
+{
+	auto& cl  = *ctx.gcl;
+	auto& pov = *ctx.pov;
+	auto& dev = *cl.device();
+
+	cl.set_pso(gfx::pipeline_state::lines_vertex_color);
+
+	ForEachTask
+	{
+		auto  sub          = (debug_model_normals_submission_t*)task->data;
+		auto& world        = sub->world;
+		auto  model_vbv    = sub->vertices;
+		auto  start_vertex = sub->start_vertex;
+		auto  argb         = sub->argb;
+		auto  scale        = sub->scale;
+		auto  model_vertex = dev.readable_mesh<VTXpntu>(model_vbv) + start_vertex;
+		auto  nlines       = sub->num_vertices;
+		auto  nverts       = nlines * 2;
+
+		oAssert(model_vbv.vertex_stride_bytes() == sizeof(VTXpntu), "invalid vertex buffer view");
+
+		auto v = cl.new_transient_vertices<VTXpc>(nverts);
+		if (!v)
+			continue;
+
+		gfx::draw_constants draw(world, pov.view(), pov.projection());
+		cl.set_cbv(oGFX_CBV_DRAW, &draw, sizeof(draw));
+
+		auto v_end = v + nverts;
+		while (v < v_end)
+		{
+			v->position = model_vertex->position;
+			v->color    = argb;
+			v++;
+			v->position = model_vertex->position + model_vertex->normal * scale;
+			v->color    = argb;
+			v++;
+			model_vertex++;
+		}
+
+		auto view = cl.commit_transient_vertices();
+		
+		cl.set_vertices(0, 1, &view);
+		cl.draw(nverts);
+	}
+}
+
+void debug_draw_tangents(technique_context_t& ctx)
+{
+	auto& cl  = *ctx.gcl;
+	auto& pov = *ctx.pov;
+	auto& dev = *cl.device();
+
+	cl.set_pso(gfx::pipeline_state::lines_vertex_color);
+
+	ForEachTask
+	{
+		auto  sub          = (debug_model_tangents_submission_t*)task->data;
+		auto& world        = sub->world;
+		auto  model_vbv    = sub->vertices;
+		auto  start_vertex = sub->start_vertex;
+		auto  pos_argb     = sub->pos_argb;
+		auto  neg_argb     = sub->neg_argb;
+		auto  scale        = sub->scale;
+		auto  model_vertex = dev.readable_mesh<VTXpntu>(model_vbv) + start_vertex;
+		auto  nlines       = sub->num_vertices;
+		auto  nverts       = nlines * 2;
+
+		oAssert(model_vbv.vertex_stride_bytes() == sizeof(VTXpntu), "invalid vertex buffer view");
+
+		auto v = cl.new_transient_vertices<VTXpc>(nverts);
+		if (!v)
+			continue;
+
+		gfx::draw_constants draw(world, pov.view(), pov.projection());
+		cl.set_cbv(oGFX_CBV_DRAW, &draw, sizeof(draw));
+
+		auto v_end = v + nverts;
+		while (v < v_end)
+		{
+			uint32_t color = model_vertex->tangent.w < 0.0f ? neg_argb : pos_argb;
+			v->position    = model_vertex->position;
+			v->color       = color;
+			v++;
+			v->position    = model_vertex->position + model_vertex->tangent.xyz() * scale;
+			v->color       = color;
+			v++;
+			model_vertex++;
+		}
+
+		auto view = cl.commit_transient_vertices();
+		
+		cl.set_vertices(0, 1, &view);
+		cl.draw(nverts);
+	}
+}
+
 technique_t s_techniques[] = 
 {
 	pass_begin,
@@ -660,6 +760,8 @@ technique_t s_techniques[] =
 	draw_axis,
 	draw_gizmo,
 	draw_grid,
+	debug_draw_normals,
+	debug_draw_tangents,
 	view_end,
 	pass_end,
 };

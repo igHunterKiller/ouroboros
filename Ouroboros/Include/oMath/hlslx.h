@@ -251,6 +251,24 @@ inline oAxis dominant_axis(oIN(float3, x))
 	return (max_ <= mag.x) ? oAXIS_X : ((max_ <= mag.y) ? oAXIS_Y : oAXIS_Z);
 }
 
+// Handedness is stored in w component of tangent_and_facing. This should be 
+// called out of the vertex shader and the out values passed through to the 
+// pixel shader. For world-space pass the world matrix. For view space pass the 
+// world_view matrix. Read more: http://www.terathon.com/code/tangent.html.
+inline void transform_btn(
+	  oIN(float4x4, tx)
+	, oIN(float3, normal)
+	, oIN(float4, tangent_and_facing)
+	, oOUT(float3, out_bitangent)
+	, oOUT(float3, out_tangent)
+	, oOUT(float3, out_normal))
+{
+	float3x3 r = (float3x3)tx;
+	out_normal = mul(r, normal);
+	out_tangent = mul(r, tangent_and_facing.xyz);
+	out_bitangent = cross(out_normal, out_tangent) * tangent_and_facing.w;
+}
+
 // _____________________________________________________________________________
 
 #ifndef oHLSL

@@ -6,6 +6,7 @@
 #include <oGPU/gpu.h>
 #include <oMesh/primitive.h>
 #include <oMesh/codec.h>
+#include <oCore/color.h>
 
 
 using namespace ouro;
@@ -151,10 +152,13 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 		const auto     subsets_end  = subset + num_subsets;
 		auto           submit       = renderer.allocate<gfx::model_subset_submission_t>(num_subsets);
 		auto           world        = model_pivot.world();
+		auto           idx_offset   = model->indices_offset();
+		auto           vbv0         = gpu::vbv(model->vertices_offset(0), num_vertices, model->vertex_stride(0));
+		auto           vbv1         = gpu::vbv(model->vertices_offset(1), num_vertices, model->vertex_stride(1));
+		auto           vbv2         = gpu::vbv(model->vertices_offset(2), num_vertices, model->vertex_stride(2));
 
 		// try to keep very diverse obj files to the same relative scale
 		world = scale(3.0f / minfo.bounding_sphere.w) * world;
-
 
 		while (subset < subsets_end)
 		{
@@ -165,18 +169,49 @@ void pivot_draw::submit_scene(gfx::renderer_t& renderer)
 			submit->num_srvs      = 0;
 			submit->num_constants = 0;
 			submit->pada          = 0;
-			submit->start_index   = subset->start_index;
-			submit->num_indices   = num_indices;
-
-			submit->indices       = gpu::ibv(model->indices_offset(),   num_indices);
-			submit->vertices[0]   = gpu::vbv(model->vertices_offset(0), num_vertices, model->vertex_stride(0));
-			//submit->vertices[1]   = gpu::vbv(model->vertices_offset(1), num_vertices, model->vertex_stride(1));
-			//submit->vertices[2]   = gpu::vbv(model->vertices_offset(2), num_vertices, model->vertex_stride(2));
+			auto& geo             = submit->geometry;
+			geo.start_index       = subset->start_index;
+			geo.num_indices       = num_indices;
+			geo.indices           = gpu::ibv(idx_offset, num_indices);
+			geo.vertices[0]       = vbv0;
+			//geo.vertices[1]     = vbv1;
+			//geo.vertices[2]     = vbv2;
 
 			renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::draw_subset, submit);
 
 			subset++;
 			submit++;
+		}
+
+		// Draw its normals
+		if (0)
+		{
+			auto sub = renderer.allocate<gfx::debug_model_normals_submission_t>();
+		
+			sub->world        = world;
+			sub->vertices     = vbv0;
+			sub->start_vertex = 0;
+			sub->num_vertices = num_vertices;
+			sub->argb         = color::cornflower_blue;
+			sub->scale        = 1.0f;
+
+			renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::debug_draw_normals, sub);
+		}
+
+		// Draw its tangents
+		if (0)
+		{
+			auto sub = renderer.allocate<gfx::debug_model_tangents_submission_t>();
+		
+			sub->world        = world;
+			sub->vertices     = vbv0;
+			sub->start_vertex = 0;
+			sub->num_vertices = num_vertices;
+			sub->pos_argb     = color::lime;
+			sub->neg_argb     = color::green;
+			sub->scale        = 1.0f;
+
+			renderer.submit(0, gfx::render_pass::geometry, gfx::render_technique::debug_draw_tangents, sub);
 		}
 	}
 

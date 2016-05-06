@@ -13,23 +13,6 @@ float3 normal_to_color(in float3 normalized_vector)
 	return normalized_vector * 0.5 + 0.5;
 }
 
-// Handedness is stored in w component of tangent_and_facing. This should be 
-// called out of the vertex shader and the out values passed through to the 
-// pixel shader. For world-space pass the world matrix. For view space pass the 
-// WorldView matrix. Read more: http://www.terathon.com/code/tangent.html.
-inline void transform_btn(oIN(float4x4, tx)
-	, oIN(float3, normal)
-	, oIN(float4, tangent_and_facing)
-	, oOUT(float3, out_bitangent)
-	, oOUT(float3, out_tangent)
-	, oOUT(float3, out_normal))
-{
-	float3x3 r = (float3x3)tx;
-	out_normal = mul(r, normal);
-	out_tangent = mul(r, tangent_and_facing.xyz);
-	out_bitangent = cross(out_normal, out_tangent) * tangent_and_facing.w;
-}
-
 // _____________________________________________________________________________
 // oGPU signature resources
 
@@ -69,8 +52,7 @@ INTpbtnu VSpntu(VTXpntu In, uint instance : SV_InstanceID)
 	Out.SSposition = gfx_ls2ss(instance, In.position);
 	Out.WSposition = gfx_ls2ws(instance, In.position);
 	float3 test;
-	transform_btn(instance, In.normal, In.tangent, Out.WSnormal, Out.WStangent, test);
-	Out.WSnormal  = normal_to_color(Out.WSposition);//In.texcoord0;
+	gfx_transform_btn(instance, In.normal, In.tangent, Out.WSbitangent, Out.WStangent, Out.WSnormal);
 	Out.texcoord0 = In.texcoord0;
 	Out.instance  = instance;
 	return Out;
@@ -124,8 +106,8 @@ TextureCubeArray SimpleCubeArray : register(t0);
 float4 PSpbtnu_texture1d      (INTpbtnu In)                   : SV_Target { return Simple1D.Sample(LinearWrap, In.texcoord0.x); }
 float4 PSpbtnu_texture1d_array(INTpbtnu In)                   : SV_Target { return Simple1DArray.Sample(LinearWrap, In.texcoord0.x); }
 float4 PSpbtnu_texture2d      (INTpbtnu In)                   : SV_Target { return Simple2D.Sample(LinearWrap, In.texcoord0.xy); }
-float4 PSpbtnu_texture2d_array(INTpbtnu In)                   : SV_Target { return Simple2DArray.Sample(LinearWrap, float3(In.texcoord0.xy, oGfxGetSlice(0/*In.instance*/))); }
-float4 PSconstant_color       (uint instance : SV_InstanceID) : SV_Target { return oGfxGetColor(instance); }
+float4 PSpbtnu_texture2d_array(INTpbtnu In)                   : SV_Target { return Simple2DArray.Sample(LinearWrap, float3(In.texcoord0.xy, gfx_get_slice(0/*In.instance*/))); }
+float4 PSconstant_color       (uint instance : SV_InstanceID) : SV_Target { return gfx_get_color(instance); }
 
 // _____________________________________________________________________________
 // Misc

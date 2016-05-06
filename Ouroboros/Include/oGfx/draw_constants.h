@@ -97,32 +97,37 @@ static_assert((sizeof(draw_constants) & 0xf) == 0, "sizeof(draw_constants) must 
 		return mul(gfx_draw_constants[instance_id].world, float4(LSposition, 1)).xyz;
 	}
 
-	float3 oGfxRotateLStoWS(uint instance_id, float3 LSvector)
+	void gfx_transform_btn(uint instance_id, float3 normal, float4 tangent_and_facing, out float3 out_bitangent, out float3 out_tangent, out float3 out_normal)
 	{
-		return mul((float3x3)gfx_draw_constants[instance_id].world, LSvector);
-	}
-	
-	void oGfxRotateBasisLStoWS(uint instance_id, float3 LSnormal, float4 LStangent, out float3 out_WSnormal, out float3 out_WStangent, out float3 out_WSbitangent)
-	{
-		oTransformTangentBasisVectors(gfx_draw_constants[instance_id].world, LSnormal, LStangent, out_WSnormal, out_WStangent, out_WSbitangent);
+		transform_btn(gfx_draw_constants[instance_id].world, normal, tangent_and_facing, out_bitangent, out_tangent, out_normal);
 	}
 
-	uint oGfxGetObjectID(uint instance_id)
-	{
-		return gfx_draw_constants[instance_id].object_id;
-	}
+	//float3 oGfxRotateLStoWS(uint instance_id, float3 LSvector)
+	//{
+	//	return mul((float3x3)gfx_draw_constants[instance_id].world, LSvector);
+	//}
+	//
+	//void oGfxRotateBasisLStoWS(uint instance_id, float3 LSnormal, float4 LStangent, out float3 out_WSnormal, out float3 out_WStangent, out float3 out_WSbitangent)
+	//{
+	//	oTransformTangentBasisVectors(gfx_draw_constants[instance_id].world, LSnormal, LStangent, out_WSnormal, out_WStangent, out_WSbitangent);
+	//}
 
-	uint oGfxGetDrawID(uint instance_id)
-	{
-		return gfx_draw_constants[instance_id].draw_id;
-	}
+	//uint oGfxGetObjectID(uint instance_id)
+	//{
+	//	return gfx_draw_constants[instance_id].object_id;
+	//}
 
-	uint oGfxGetSlice(uint instance_id)
+	//uint oGfxGetDrawID(uint instance_id)
+	//{
+	//	return gfx_draw_constants[instance_id].draw_id;
+	//}
+
+	uint gfx_get_slice(uint instance_id)
 	{
 		return gfx_draw_constants[instance_id].slice;
 	}
 
-	float4 oGfxGetColor(uint instance_id)
+	float4 gfx_get_color(uint instance_id)
 	{
 		return gfx_draw_constants[instance_id].color;
 	}

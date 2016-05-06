@@ -71,6 +71,9 @@ enum class render_technique : uint8_t
 	draw_gizmo,      // param is gizmo::tessellation_info_t, 1 per frame
 	draw_grid,       // param is grid_submission_t
 
+	debug_draw_normals,  // param is debug_model_normal_submission_t
+	debug_draw_tangents, // param is ?
+
 	// 'end' techniques must be after others to sort correctly
 
 	view_end,   // param nullptr, submit only one
@@ -78,11 +81,40 @@ enum class render_technique : uint8_t
 	count,
 };
 
+struct geometry_view_t
+{
+	gpu::ibv indices;
+	gpu::vbv vertices[3]; // [0] PNT, [1] UV0, [2] Optional color or NULL
+	uint32_t start_index;
+	uint32_t num_indices;
+};
+
 struct render_line_t
 {
 	float3 p0;
 	float3 p1;
 	uint32_t argb;
+};
+
+struct debug_model_normals_submission_t
+{
+	float4x4 world;
+	gpu::vbv vertices;
+	uint32_t start_vertex;
+	uint32_t num_vertices;
+	uint32_t argb;
+	float    scale;
+};
+
+struct debug_model_tangents_submission_t
+{
+	float4x4 world;
+	gpu::vbv vertices;
+	uint32_t start_vertex;
+	uint32_t num_vertices;
+	uint32_t pos_argb;
+	uint32_t neg_argb;
+	float    scale;
 };
 
 struct lines_submission_t
@@ -108,10 +140,7 @@ struct model_subset_submission_t
 	uint8_t             num_constants;
 	uint8_t             pada;
 	uint32_t            padb;
-	uint32_t            start_index;
-	uint32_t            num_indices;
-	gpu::ibv            indices;
-	gpu::vbv            vertices[3];
+	geometry_view_t     geometry;
 };
 
 struct grid_submission_t
