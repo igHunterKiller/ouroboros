@@ -116,8 +116,8 @@ private:
 	// alignment is required so that pointers to node_type's are at least 8-bytes.
 	// This allows tagged_pointer to use the bottom 3-bits for its tag.
 	
-	oALIGNAS(oCACHE_LINE_SIZE) pointer_type head;
-	oALIGNAS(oCACHE_LINE_SIZE) pointer_type tail;
+	alignas(oCACHE_LINE_SIZE) pointer_type head;
+	alignas(oCACHE_LINE_SIZE) pointer_type tail;
 	concurrent_object_pool<node_type> pool;
 	allocator alloc;
 

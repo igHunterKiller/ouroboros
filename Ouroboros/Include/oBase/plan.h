@@ -121,7 +121,7 @@ private:
 // This setup minimizes contention on atomics associated with allocate for data
 // and tasklist backing.
 
-class oALIGNAS(oCACHE_LINE_SIZE) master_tasklist
+class alignas(oCACHE_LINE_SIZE) master_tasklist
 {
 public:
 	static uint32_t calc_size(uint32_t tasklist_capacity);
@@ -166,7 +166,7 @@ private:
 // The plan orders tasks by their priority and phase from a master_tasklist and 
 // then can execute it phase-by-phase.
 
-class oALIGNAS(oCACHE_LINE_SIZE) plan
+class alignas(oCACHE_LINE_SIZE) plan
 {
 public:
 	static const uint32_t default_alignment = oDEFAULT_MEMORY_ALIGNMENT;

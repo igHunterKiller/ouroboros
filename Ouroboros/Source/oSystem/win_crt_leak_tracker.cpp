@@ -13,7 +13,7 @@ static bool& thread_local_tracking_enabled()
 {
 	// has to be a pointer so for multi-module support (all instances of this from
 	// a DLL perspective must point to the same bool value)
-	oTHREAD_LOCAL static bool* enabled = nullptr;
+	thread_local static bool* enabled = nullptr;
 	if (!enabled)
 	{
 		process_heap::find_or_allocate(

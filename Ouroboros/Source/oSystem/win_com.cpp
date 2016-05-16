@@ -29,7 +29,7 @@ private:
 			
 void ensure_initialized()
 {
-	static oTHREAD_LOCAL context* s_instance = nullptr;
+	static thread_local context* s_instance = nullptr;
 	if (!s_instance)
 	{
 		process_heap::find_or_allocate(

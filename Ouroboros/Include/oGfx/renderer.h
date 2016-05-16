@@ -223,13 +223,13 @@ private:
 	bool submission_overflow_;
 
 	// threadlocal support for submit().
-	static oTHREAD_LOCAL uint32_t local_tasklist_frame_id_;
-	static oTHREAD_LOCAL void*    local_tasklist_;
+	static thread_local uint32_t local_tasklist_frame_id_;
+	static thread_local void*    local_tasklist_;
 
 	// threadlocal support for allocate().
-	static oTHREAD_LOCAL uint32_t local_heap_frame_id_;
-	static oTHREAD_LOCAL void* local_heap_;
-	static oTHREAD_LOCAL void* local_heap_end_;
+	static thread_local uint32_t local_heap_frame_id_;
+	static thread_local void* local_heap_;
+	static thread_local void* local_heap_end_;
 
 // _____________________________________________________________________________
 // Terrain

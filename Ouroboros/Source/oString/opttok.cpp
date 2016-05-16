@@ -13,12 +13,12 @@ static inline bool islongopt(const char* arg) { return *arg == '-' && *(arg+1) =
 
 char opttok(const char** out_value, int argc, const char* argv[], const option* options, size_t num_options)
 {
-	oTHREAD_LOCAL static const char**s_local_argv = 0;
-	oTHREAD_LOCAL static int s_local_argc = 0;
-	oTHREAD_LOCAL static const option* s_local_options = 0;
-	oTHREAD_LOCAL static size_t s_num_options = 0;
+	thread_local static const char**s_local_argv = 0;
+	thread_local static int s_local_argc = 0;
+	thread_local static const option* s_local_options = 0;
+	thread_local static size_t s_num_options = 0;
 
-	oTHREAD_LOCAL static int i = 0;
+	thread_local static int i = 0;
 
 	*out_value = "";
 

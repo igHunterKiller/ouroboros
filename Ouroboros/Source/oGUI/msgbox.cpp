@@ -380,9 +380,9 @@ msg_result assert_dialog(msg_type _Type, const char* _Caption, const char* _Stri
 
 namespace WFNWCV
 {
-	static oTHREAD_LOCAL HWND hParent = nullptr;
-	static oTHREAD_LOCAL WNDPROC OrigWndProc = nullptr;
-	static oTHREAD_LOCAL HHOOK Hook = nullptr;
+	static thread_local HWND hParent = nullptr;
+	static thread_local WNDPROC OrigWndProc = nullptr;
+	static thread_local HHOOK Hook = nullptr;
 
 	LRESULT CALLBACK WndProc(HWND _hWnd, UINT _uMsg, WPARAM _wParam, LPARAM _lParam)
 	{

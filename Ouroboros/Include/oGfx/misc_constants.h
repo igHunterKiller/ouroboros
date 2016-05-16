@@ -14,10 +14,10 @@
 #include <oMath/hlsl.h>
 namespace ouro { namespace gfx {
 #else
-#define oALIGNAS(x)
+#define alignas(x)
 #endif
 
-struct oALIGNAS(16) misc_constants
+struct alignas(16) misc_constants
 {
 	float4 a;
 	float4 b;

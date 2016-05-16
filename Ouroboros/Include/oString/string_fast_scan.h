@@ -14,7 +14,6 @@
 // capabilities.
 
 #pragma once
-#include <oArch/compiler.h> // oALIGNAS
 
 // Returns true if c is any kind of whitespace
 /// inline bool is_whitespace(int c)
@@ -52,9 +51,9 @@
 #define oDEFINE_WHITESPACE_FUNCTION(_Name, _Criteria) inline void _Name(const char** out_str) { while (**out_str && _Criteria(**out_str)) ++*out_str; }
 #define oDEFINE_WHITESPACE_PARSING() \
 	namespace { \
-		oALIGNAS(16) static const unsigned char is_whitespace__[256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, oZ16, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, oZ16, oZ16_12 }; \
-		oALIGNAS(16) static const unsigned char is_line_whitespace__[256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, oZ16, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, oZ16, oZ16_12 }; \
-		oALIGNAS(16) static const unsigned char is_newline__[256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, oZ16, oZ16, oZ16, oZ16_12 }; \
+		alignas(16) static const unsigned char is_whitespace__[256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, oZ16, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, oZ16, oZ16_12 }; \
+		alignas(16) static const unsigned char is_line_whitespace__[256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, oZ16, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, oZ16, oZ16_12 }; \
+		alignas(16) static const unsigned char is_newline__[256] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, oZ16, oZ16, oZ16, oZ16_12 }; \
 	} namespace ouro { \
 		inline bool is_whitespace(int c) { return !!is_whitespace__[c]; } \
 		inline bool is_line_whitespace(int c) { return !!is_line_whitespace__[c]; } \

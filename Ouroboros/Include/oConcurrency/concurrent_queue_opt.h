@@ -21,7 +21,7 @@
 namespace ouro {
 
 template<typename T>
-struct oALIGNAS(oTAGGED_POINTER_ALIGNMENT) concurrent_queue_opt_node
+struct alignas(oTAGGED_POINTER_ALIGNMENT) concurrent_queue_opt_node
 {
   typedef T value_type;
   typedef tagged_pointer<concurrent_queue_opt_node<value_type>> pointer_type;
@@ -90,8 +90,8 @@ public:
 
 private:
 
-	oALIGNAS(oCACHE_LINE_SIZE) pointer_type head;
-	oALIGNAS(oCACHE_LINE_SIZE) pointer_type tail;
+	alignas(oCACHE_LINE_SIZE) pointer_type head;
+	alignas(oCACHE_LINE_SIZE) pointer_type tail;
 	concurrent_object_pool<node_type> pool;
 	allocator alloc;
 

@@ -9,7 +9,7 @@
 #include <vector>
 
 // this is set at the start of encode and/or decode to pass through to memory hooks 
-static oTHREAD_LOCAL const ouro::allocator* tl_alloc;
+static thread_local const ouro::allocator* tl_alloc;
 
 struct read_state
 {

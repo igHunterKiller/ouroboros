@@ -59,7 +59,7 @@ public:
 
 private:
 
-	oALIGNAS(oCACHE_LINE_SIZE) tagged_pointer<T> head;
+	alignas(oCACHE_LINE_SIZE) tagged_pointer<T> head;
 
 	concurrent_stack(const concurrent_stack&); /* = delete; */
 	const concurrent_stack& operator=(const concurrent_stack&); /* = delete; */

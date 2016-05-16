@@ -672,7 +672,7 @@ private:
 
 	// Begin Transient Management
 	
-	oALIGNAS(oCACHE_LINE_SIZE) std::atomic<uint32_t> transient_ring_start_;
+	alignas(oCACHE_LINE_SIZE) std::atomic<uint32_t> transient_ring_start_;
 	uint32_t transient_ring_end_;
 	uint32_t transient_fence_index_;
 

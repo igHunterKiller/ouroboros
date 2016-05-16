@@ -26,9 +26,6 @@
 #if _MSC_VER == oVS2012_VER || _MSC_VER == oVS2013_VER
 
   // C++11 support
-  #define oALIGNAS(x)   __declspec(align(x))
-  #define oALIGNOF(x)   __alignof(x)
-  #define oTHREAD_LOCAL __declspec(thread)
   #define oHAS_CBEGIN   0
 
   // low-level optimization support
@@ -45,9 +42,6 @@
 #elif _MSC_VER == oVS2015_VER
 
   // C++11 support
-  #define oALIGNAS(x)   alignas(x)
-  #define oALIGNOF(x)   alignof(x)
-  #define oTHREAD_LOCAL thread_local
   #define oHAS_CBEGIN   0
 
   // low-level optimization support

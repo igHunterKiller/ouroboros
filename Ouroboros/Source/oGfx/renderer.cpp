@@ -83,11 +83,11 @@ template<> const char* as_string(const gfx::render_technique& technique)
 
 	namespace gfx {
 
-oTHREAD_LOCAL uint32_t renderer_t::local_tasklist_frame_id_;
-oTHREAD_LOCAL void*    renderer_t::local_tasklist_;
-oTHREAD_LOCAL uint32_t renderer_t::local_heap_frame_id_;
-oTHREAD_LOCAL void*    renderer_t::local_heap_;
-oTHREAD_LOCAL void*    renderer_t::local_heap_end_;
+thread_local uint32_t renderer_t::local_tasklist_frame_id_;
+thread_local void*    renderer_t::local_tasklist_;
+thread_local uint32_t renderer_t::local_heap_frame_id_;
+thread_local void*    renderer_t::local_heap_;
+thread_local void*    renderer_t::local_heap_end_;
 
 static const uint16_t pass_shift      = 56;
 static const uint16_t technique_shift = 48;
