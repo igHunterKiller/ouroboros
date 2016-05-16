@@ -32,9 +32,6 @@
   #define oRESTRICT     __restrict
   #define oFORCEINLINE  __forceinline
 
-	#define oHAS_EXP2     0
-	#define oHAS_LOG2     0
-
   // disable warnings that don't seem to be squelched in project settings
   #pragma warning(disable:4481) // nonstandard extension used: override specifier 'override'
 
@@ -47,9 +44,6 @@
   // low-level optimization support
   #define oRESTRICT     __restrict
   #define oFORCEINLINE  __forceinline
-
-	#define oHAS_EXP2     1
-	#define oHAS_LOG2     1
 
 // _____________________________________________________________________________
 #else

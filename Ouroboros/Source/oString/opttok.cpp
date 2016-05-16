@@ -2,7 +2,6 @@
 
 #include <oString/opttok.h>
 #include <oString/string.h>
-#include <oArch/compiler.h>
 #include <oCore/snprintf.h>
 #include <algorithm>
 

@@ -13,7 +13,6 @@
 
 #pragma once
 
-#include <oArch/compiler.h>
 #include <oArch/intrin.h>
 #include <assert.h>
 #include <float.h>
@@ -39,6 +38,14 @@
 
 #ifndef oHLSL_OURO_EQUAL_SUPPORT
 	#define oHLSL_OURO_EQUAL_SUPPORT 1
+#endif
+
+#if defined(_MSC_VER) && _MSC_VER < 1900 // VS2015 supports exp2 and log2
+	#define oHLSL_HAS_EXP2 0
+	#define oHLSL_HAS_LOG2 0
+#else
+	#define oHLSL_HAS_EXP2 1
+	#define oHLSL_HAS_LOG2 1
 #endif
 
 // _____________________________________________________________________________
@@ -581,11 +588,11 @@ template<typename T> oHLSL3<T> modf(const oHLSL3<T>& x, oHLSL3<T>& ip)  noexcept
 template<typename T> oHLSL4<T> modf(const oHLSL4<T>& x, oHLSL4<T>& ip)  noexcept { return oHLSL4<T>(modf(x.x, ip.x), modf(x.y, ip.y), modf(x.z, ip.z), modf(x.w, ip.w)); }
 template<typename T> T         rsqrt(T x)                                        { return T(1) / sqrt(x); }
 template<typename T> T         rcp(const T& value)                               { return T(1) / value; }
-#if oHAS_EXP2 == 0
+#if oHLSL_HAS_EXP2 == 0
 inline               float     exp2(float a)                                     { return powf(2.0f, a); }
 inline               double    exp2(double a)                                    { return pow(2.0, a); }
 #endif
-#if oHAS_LOG2 == 0
+#if oHLSL_HAS_LOG2 == 0
 inline               double    log2(double a)                                    { static const double sCONV = 1.0/log(2.0); return log(a) * sCONV; }
 inline               float     log2(float val)
 {

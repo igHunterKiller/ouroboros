@@ -10,7 +10,6 @@
 #define oGfx_misc_constants_h
 
 #ifndef oHLSL
-#include <oArch/compiler.h>
 #include <oMath/hlsl.h>
 namespace ouro { namespace gfx {
 #else
