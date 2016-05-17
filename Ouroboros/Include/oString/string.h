@@ -3,7 +3,7 @@
 // string manipulation functions that really should be in the C/C++ standard
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oCore/restrict.h>
 #include <oCore/snprintf.h>
 #include <cstdarg>
 #include <cstdint>

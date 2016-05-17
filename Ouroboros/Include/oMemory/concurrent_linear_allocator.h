@@ -4,7 +4,7 @@
 // quick to allocate
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oArch/arch.h>
 #include <oCore/byte.h>
 #include <atomic>
 #include <cstdint>

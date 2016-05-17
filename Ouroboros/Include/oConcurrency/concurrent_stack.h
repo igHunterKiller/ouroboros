@@ -4,7 +4,7 @@
 // management is done by the class itself.
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oArch/arch.h>
 #include <oCore/assert.h>
 #include <oConcurrency/tagged_pointer.h>
 #include <atomic>

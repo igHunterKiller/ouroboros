@@ -97,7 +97,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "oArch", "oArch", "{6391A2D6-6A31-471D-A7E4-F14D38A58614}"
 	ProjectSection(SolutionItems) = preProject
 		Ouroboros\Include\oArch\arch.h = Ouroboros\Include\oArch\arch.h
-		Ouroboros\Include\oArch\compiler.h = Ouroboros\Include\oArch\compiler.h
 		Ouroboros\Include\oArch\dependencies.h = Ouroboros\Include\oArch\dependencies.h
 		Ouroboros\Include\oArch\intrin.h = Ouroboros\Include\oArch\intrin.h
 	EndProjectSection
@@ -139,8 +138,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Language Extensions", "Lang
 		Ouroboros\Include\oCore\atomic_type_traits.h = Ouroboros\Include\oCore\atomic_type_traits.h
 		Ouroboros\Include\oCore\countof.h = Ouroboros\Include\oCore\countof.h
 		Ouroboros\Include\oCore\finally.h = Ouroboros\Include\oCore\finally.h
+		Ouroboros\Include\oCore\restrict.h = Ouroboros\Include\oCore\restrict.h
 		Ouroboros\Include\oCore\snprintf.h = Ouroboros\Include\oCore\snprintf.h
-		Ouroboros\Include\oCore\std_cbegin.h = Ouroboros\Include\oCore\std_cbegin.h
 		Ouroboros\Include\oCore\std_make_unique.h = Ouroboros\Include\oCore\std_make_unique.h
 		Ouroboros\Include\oCore\stringf.h = Ouroboros\Include\oCore\stringf.h
 	EndProjectSection

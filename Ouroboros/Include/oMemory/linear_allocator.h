@@ -3,7 +3,7 @@
 // O(1) linear allocator: cannot free but is extremely quick to allocate
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oArch/arch.h>
 #include <oCore/byte.h>
 #include <cstdint>
 

@@ -7,7 +7,7 @@
 // retire to notify that allocated memory is no longer in use.
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oArch/arch.h>
 #include <oCore/byte.h>
 #include <atomic>
 #include <cstdint>

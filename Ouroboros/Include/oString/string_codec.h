@@ -3,7 +3,7 @@
 // string encode/decode functions
 
 #pragma once
-#include <oArch/compiler.h>
+//#include <oArch/arch.h>
 
 #define oRESERVED_URI_CHARS "!*'();:@&=+$,?#[]/"
 #define oRESERVED_URI_CHARS_WITH_SPACE oRESERVED_URI_CHARS " "

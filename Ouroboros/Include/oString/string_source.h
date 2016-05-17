@@ -4,7 +4,7 @@
 // and similar language source code.
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oCore/restrict.h>
 
 namespace ouro {
 

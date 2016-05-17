@@ -4,7 +4,7 @@
 // lines, indices and triangles.
 
 #pragma once
-#include <oArch/compiler.h>
+//#include <oArch/arch.h>
 
 namespace ouro { namespace mesh {
 

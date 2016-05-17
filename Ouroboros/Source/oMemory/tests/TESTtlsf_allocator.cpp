@@ -2,7 +2,7 @@
 
 #include <oBase/unit_test.h>
 
-#include <oArch/arch.h>
+//#include <oArch/arch.h>
 #include <oCore/timer.h>
 #include <oMath/hlsl.h>
 #include <oMemory/tlsf_allocator.h>

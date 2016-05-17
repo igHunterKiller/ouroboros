@@ -3,7 +3,7 @@
 // standard interface for any compression algorithm
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oCore/restrict.h>
 #include <cstdint>
 
 namespace ouro {

@@ -3,7 +3,7 @@
 // efficient bit manipulation using intrinsics where possible
 
 #pragma once
-#include <oArch/arch.h>
+//#include <oArch/arch.h>
 #include <oArch/intrin.h>
 #include <cstdint>
 

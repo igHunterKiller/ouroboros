@@ -1,6 +1,6 @@
 // Copyright (c) 2016 Antony Arciuolo. See License.txt regarding use.
 
-#include <oArch/compiler.h>
+#include <oCore/restrict.h>
 #include <cstring>
 
 namespace ouro {

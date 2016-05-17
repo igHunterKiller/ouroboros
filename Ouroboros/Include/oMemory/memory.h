@@ -3,7 +3,7 @@
 // common advanced memory operations
 
 #pragma once
-#include <oArch/compiler.h>
+#include <oCore/restrict.h>
 #include <memory.h>
 #include <cstdint>
 
