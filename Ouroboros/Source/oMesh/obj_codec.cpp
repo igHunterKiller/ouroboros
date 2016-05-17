@@ -46,26 +46,36 @@ model decode_obj(const path_t& path
 	const auto    ngrp        = obj.num_groups();
 	const auto    indices     = obj.indices();
 	const float3* positions   = obj.positions();
-	const float3* texcoords   = obj.texcoords();
-	const float3* normals     = obj.normals();
+	      float3* texcoords   = obj.texcoords();
+	      float3* normals     = obj.normals();
 	const auto    groups      = obj.groups();
 	const auto    ccw         = obj.ccw_faces();
 	const float4* tangents    = nullptr;
 
-	std::vector<float3, ouro_std_allocator<float3>> calculated_normals(ouro_std_allocator<float3>(temp_alloc, "calculated normals"));
-	if (!normals && indices && positions)
+	// do a quick scan if the whole file needs normals (typical case)
+	uint32_t ntexcoords       = 0;
+	uint32_t nnormals         = 0;
+	for (uint32_t i = 0; i < ngrp; i++)
 	{
-		calculated_normals.resize(nvtx);
-		normals = calculated_normals.data();
-		calc_vertex_normals(calculated_normals.data(), indices, nidx, positions, nvtx, obj.ccw_faces());
+		const auto& group = groups[i];
+		ntexcoords       += (int)group.has_texcoords & 0x1;
+		nnormals         += (int)group.has_normals   & 0x1;
 	}
 
-	std::vector<float4, ouro_std_allocator<float4>> calculated_tangents(ouro_std_allocator<float4>(temp_alloc, "calculated tangents"));
-	if (!tangents && indices && positions && normals && texcoords)
+	if (indices && positions)
 	{
-		calculated_tangents.resize(nvtx);
-		tangents = calculated_tangents.data();
-		calc_vertex_tangents(calculated_tangents.data(), indices, nidx, positions, normals, texcoords, nvtx);
+		if (normals && nnormals != ngrp)
+			calc_vertex_normals(normals, indices, nidx, positions, nvtx, obj.ccw_faces(), nnormals == 0);
+
+		if (texcoords && ntexcoords != ngrp)
+		{
+		#if 0
+			double solve_time = 0.0;
+			calc_texcoords(obj.aabb_min(), obj.aabb_max(), indices, nidx, positions, texcoords, nvtx, &solve_time);
+		#else
+			oTrace("[obj] requires texcoords: %s", path.c_str());
+		#endif
+		}
 	}
 
 	// define subsets
