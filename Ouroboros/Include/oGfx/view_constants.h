@@ -19,13 +19,13 @@
 #include <oMath/pov.h>
 namespace ouro { namespace gfx {
 #else
-#define alignas(x)
 #ifndef oGFX_DECLARE_VIEW_CONSTANTS
 #error oGFX_DECLARE_VIEW_CONSTANTS(name) must be defined, i.e. define oGFX_DECLARE_VIEW_CONSTANTS(name) cbuffer cbuffer_view : register(b0) { view_constants name; }
 #endif
+#define alignas(x)
 #endif
 
-struct alignas(16) mview_constants
+struct alignas(16) view_constants
 {
 #ifndef oHLSL
 	view_constants() { set(kIdentity4x4, kIdentity4x4, 0, 0, 0); }
