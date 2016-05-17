@@ -42,6 +42,8 @@ public:
 		char     material[name_max_len];
 		uint32_t start_index;
 		uint32_t num_indices;
+		bool     has_normals;
+		bool     has_texcoords;
 	};
 
 	obj();
@@ -49,21 +51,26 @@ public:
 	obj(const init_t& init, const char* oRESTRICT path, const void* oRESTRICT data, size_t data_size) : obj(init) { parse(path, data, data_size); }
 
 	void            parse(const char* oRESTRICT path, const void* oRESTRICT data, size_t data_size);                      // replaces contents with a newly parsed version of the specified obj file
-	const char*     obj_path()     const { return obj_path_;                                        }
-	const char*     mtl_path()     const { return mtl_path_;                                        }
-	uint32_t        num_indices()  const { return static_cast<uint32_t>(indices_  .size());         }
-	uint32_t        num_vertices() const { return static_cast<uint32_t>(positions_.size());         }
-	uint32_t        num_groups()   const { return static_cast<uint32_t>(groups_.size());            }
-	const uint32_t* indices()      const { return indices_.data();                                  }
-	const float3*   positions()    const { return positions_.empty() ? nullptr : positions_.data(); }
-	const float3*   texcoords()    const { return texcoords_.empty() ? nullptr : texcoords_.data(); }
-	const float3*   normals()      const { return normals_.empty()   ? nullptr : normals_  .data(); }
-	const group_t*  groups()       const { return groups_.empty()    ? nullptr : groups_   .data(); }
-	float3          aabb_min()     const { return aabb_min_;                                        }
-	float3          aabb_max()     const { return aabb_max_;                                        }
-	const init_t&   init()         const { return init_;                                            }
-	bool            ccw_faces()    const { return init_.option == load_option::ccw_right || init_.option == load_option::ccw_left; }
-	bool            right_handed() const { return init_.option == load_option::ccw_right || init_.option == load_option::cw_right; }
+	const char*     obj_path()            const { return obj_path_;                                        }
+	const char*     mtl_path()            const { return mtl_path_;                                        }
+	uint32_t        num_indices()         const { return static_cast<uint32_t>(indices_  .size());         }
+	uint32_t        num_vertices()        const { return static_cast<uint32_t>(positions_.size());         }
+	uint32_t        num_groups()          const { return static_cast<uint32_t>(groups_.size());            }
+	const uint32_t* indices()             const { return indices_.data();                                  }
+	const float3*   positions()           const { return positions_.empty() ? nullptr : positions_.data(); }
+	const float3*   texcoords()           const { return texcoords_.empty() ? nullptr : texcoords_.data(); }
+	const float3*   normals()             const { return normals_.empty()   ? nullptr : normals_  .data(); }
+	const group_t*  groups()              const { return groups_.empty()    ? nullptr : groups_   .data(); }
+	float3          aabb_min()            const { return aabb_min_;                                        }
+	float3          aabb_max()            const { return aabb_max_;                                        }
+	const init_t&   init()                const { return init_;                                            }
+	bool            ccw_faces()           const { return init_.option == load_option::ccw_right || init_.option == load_option::ccw_left; }
+	bool            right_handed()        const { return init_.option == load_option::ccw_right || init_.option == load_option::cw_right; }
+
+	// Editable versions. Missing components per vertex will be filled with zero to preserve vertex indexing, 
+	// so missing values can be written in-place.
+	float3*         texcoords()                 { return texcoords_.empty() ? nullptr : texcoords_.data(); }
+	float3*         normals()                   { return normals_.empty()   ? nullptr : normals_  .data(); }
 
 private:
 	struct index_t

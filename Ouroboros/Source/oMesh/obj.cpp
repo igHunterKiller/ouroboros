@@ -122,7 +122,7 @@ uint32_t obj::push_vertex(const index_t& ptn, index_map& map, const float3_vecto
 	if (ptn.pos >= (uint32_t)psrc.size())
 		throw std::invalid_argument("invalid position index");
 
-	int32_t index;
+	uint32_t index;
 	auto it = map.find(ptn);
 	if (it != map.end())
 		index = it->second;
@@ -184,15 +184,17 @@ void obj::parse(const char* oRESTRICT path, const void* oRESTRICT data, size_t d
 
 	// scope tracking
 	group_t     group;
-	            group.material[0]  = '\0';
-	            group.start_index  = 0;
-	            group.num_indices  = 0;
+	            group.material[0]   = '\0';
+	            group.start_index   = 0;
+	            group.num_indices   = 0;
+							group.has_normals   = false;
+							group.has_texcoords = false;
 	            strlcpy(group.name, "default");
-	uint32_t    num_groups         = 0;
+	uint32_t    num_groups          = 0;
 
 	// read head
-	const char* cur                = (const char*)data;
-	const char* end                = cur + data_size;
+	const char* cur                 = (const char*)data;
+	const char* end                 = cur + data_size;
 
 	while (cur < end)
 	{
@@ -216,11 +218,13 @@ void obj::parse(const char* oRESTRICT path, const void* oRESTRICT data, size_t d
 						atof3(&cur, &vec);
 						if (flip_handedness) vec.y = 1.0f - vec.y;
 						tex.push_back(vec);
+						group.has_texcoords = true;
 						break;
 					case 'n':
 						atof3(&cur, &vec);
 						if (flip_handedness) vec.z = -vec.z;
 						nrm.push_back(vec);
+						group.has_normals = true;
 						break;
 					default:
 						throw std::invalid_argument("invalid vertex token");
